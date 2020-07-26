@@ -33,7 +33,7 @@ author: "Matthew DeGarmo"
 title: "{ matthewjdegarmo }"
 description: "Blog and website of Matthew DeGarmo, blogging mainly about PowerShell. Opinions expressed are mine."
 keywords: "degarmo, matthew, powershell, windows, tech"
-favicon: "/img/favicon.ico"
+favicon: "/img/posh_favicon.ico"
 
 ################
 # Header layout #
