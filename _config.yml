@@ -108,7 +108,7 @@ icon-192p: "/img/web-app/icon-192p.png"
 
 enable-gesture-navigation: True
 
-post-preview-words: 96
+post-preview-words: 50
 
 paginate: 10
 
@@ -190,9 +190,9 @@ err-404-img: "/img/labtocat.png"
 # GPG on Keybase #
 ##################
 
-#keybase-username: johnsmith
-#keybase-in-social: True
-#keybase-in-footer: True
+keybase-username: johnsmith
+keybase-in-social: True
+keybase-in-footer: True
 
 ################################################################################
 
