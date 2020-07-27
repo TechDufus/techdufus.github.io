@@ -135,10 +135,19 @@ syntax-highlight: True
 ############
 
 events:
-  - image: "/img/timeline/spidertocat.png"
+  - image: "/img/timeline/PowerShell_Core_6.0_icon.png"
     date: "January 2016"
     description: "Started coding / learning PowerShell!"
-  - image: "/img/timeline/baracktocat.jpg"
+  - image: "/img/timeline/SecurityPlus_White.png"
+    date: "February 2016"
+    description: Became CompTIA Security+ CE Certified.
+  - image: "/img/timeline/icon-bachelor.png"
+    date: "May 2016"
+    description: "Graduated with a Bachelors in Computer Information Systems: Networking"
+  - image: "/img/timeline/isc2_cissp2.png"
+    date: "March 2020"
+    description: "Became CISSP Certified."
+  - image: "/img/timeline/posh_firl_closeup.jpg"
     date: "June 2020"
     description: "Created Website!"
 
