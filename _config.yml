@@ -42,7 +42,7 @@ favicon: "/img/posh_favicon.ico"
 black-favicon: "/img/black-lab-glass.ico"
 logo: "/img/author.png" # leave blank if you don't want a logo
 
-background-img: "../img/posh_girl-bg.png"
+background-img: "/img/posh_girl-bg.png"
 #background-img: "../img/intro-bg.jpg"
 
 ##############################
@@ -55,10 +55,12 @@ loop: True
 loop-count: False # Set False for infinite loop, or set any number for finite loop.
 type-speed: 10
 start-delay: 200
-delete-delay: 5000
+delete-delay: 4000
 lines: # You can add HTML Tags in the Text
-  - text: "The lower you fall, the higher you'll fly."
-  - text: "Where’s your will to be weird?"
+  - text: "How can you ever have time if you never take time?"
+  - text: "What color is a mirror?"
+  - text: "Do penguins have knees?"
+  - text: "What the fluff?"
 
 # me-img: "/img/jetpacktocat.png"
 
