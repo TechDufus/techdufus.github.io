@@ -39,7 +39,7 @@ favicon: "/img/posh_favicon.ico"
 # Header layout #
 ################
 
-black-favicon: "/img/posh_favicon.ico"
+black-favicon: "/img/favicon-32x32.ico"
 logo:  # leave blank if you don't want a logo
 
 background-img: "/img/posh_girl-bg_blur.jpg"
