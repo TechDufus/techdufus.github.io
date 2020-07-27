@@ -1,14 +1,15 @@
 ---
 layout: post
 section-type: post
-title: Welcome to { Personal } Jekyll Theme!
+title: Welcome to my blog!
 category: tech
 tags: [ 'tutorial' ]
 ---
 
-Click the view more posts link bellow, to see the currently available post-tutorials to help you get your { Personal } website up and running quicker!
+# Well, here it is... My first Blog post ever ever... Ever! 
 
-Note that every time you update the site configuration (\_config.yml), you will need
-to cancel the serving (*Ctr + C*) and serve the website again.
+I've been pretty hesitant as to whether I thought it was worth the time and effort to post anything out on the interwebs, but here I am going for it. 
 
-Any contributions, feedback or issues to the <a href="https://github.com/PanosSakkos/personal-jekyll-theme" target="\_blank">repo</a> are more than welcome!
+I just had a son, my wife just finished her Masters degree, and I... am trying to blog. My plan is to post content about PowerShell, the things that I've learned so far, and the rest as I continue to learn and improve. If there are any non-powershell posts don't be suprised, that's just the initial plan. THere are many more things I'm wanting to learn like C#, Docker, Salt, Ansible, Terraform, and the list could go on and on and on and on and on and on and on and on and on an<*OKAY ENOUGH OF THAT*!> :)
+
+I want to keep this first post brief and just say hello! Feel free to check me out on Github, where I will start posting some of the PowerShell work I've done, Twitter, LinkedIn, or any other site I'm on! Please don't be afraid to say hello!
