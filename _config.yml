@@ -146,10 +146,10 @@ events:
     description: "Graduated with a Bachelors in Computer Information Systems: Networking"
   - image: "/img/timeline/isc2_cissp2.png"
     date: "March 2020"
-    description: "Became [CISSP](https://www.youracclaim.com/badges/013a3e80-685a-4f38-b382-081ca49610a7){:target="_blank"} Certified."
+    description: Became [CISSP](https://www.youracclaim.com/badges/013a3e80-685a-4f38-b382-081ca49610a7){:target="_blank"} Certified.
   - image: "/img/timeline/posh_girl_closeup.jpg"
     date: "June 2020"
-    description: "Created my Website and Blog!"
+    description: "Created Website and Blog!"
 
 # First image of the Timeline
 
