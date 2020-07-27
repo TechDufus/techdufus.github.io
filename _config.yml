@@ -139,7 +139,7 @@ events:
     date: "January 2016"
     description: "Started coding / learning PowerShell!"
   - image: "/img/timeline/baracktocat.jpg"
-    date: "June 2020 - Today"
+    date: "June 2020"
     description: "Created Website!"
 
 # First image of the Timeline
