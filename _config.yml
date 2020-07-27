@@ -57,10 +57,13 @@ type-speed: 12
 start-delay: 200
 delete-delay: 3000
 lines: # You can add HTML Tags in the Text
-  - text: "How can you ever have time if you never take time?"
-  - text: "What color is a mirror?"
-  - text: "Do penguins have knees?"
-  - text: "What the fluff?"
+  - text: "Who has time? But then if we do not ever take time, how can we ever have time? -The Merovingian"
+  - text: "Give them quality. That's the best kind of advertising. -Milton Hershey"
+  - text: "The value of an idea lies in the using of it. -Thomas Edison"
+  - text: "A person who never made a mistake never tried anything new. -Albert Einstein"
+  - text: "The way to get started is to quit talking and begin doing. -Walt Disney"
+  - text: "In my defense, I was left unsupervised. -Lee St. John"
+
 
 # me-img: "/img/jetpacktocat.png"
 
