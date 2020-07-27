@@ -42,7 +42,7 @@ favicon: "/img/posh_favicon.ico"
 black-favicon: "/img/black-lab-glass.ico"
 logo: "/img/author.png" # leave blank if you don't want a logo
 
-background-img: "/img/posh_girl-bg_blur.png"
+background-img: "/img/posh_girl-bg_blur.jpg"
 #background-img: "../img/intro-bg.jpg"
 
 ##############################
