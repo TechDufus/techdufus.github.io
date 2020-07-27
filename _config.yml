@@ -55,7 +55,7 @@ loop: True
 loop-count: False # Set False for infinite loop, or set any number for finite loop.
 type-speed: 10
 start-delay: 200
-delete-delay: 3000
+delete-delay: 2200
 lines: # You can add HTML Tags in the Text
   - text: "Who has time? But then if we do not ever take time, how can we ever have time? -The Merovingian"
   - text: "Give them quality. That's the best kind of advertising. -Milton Hershey"
