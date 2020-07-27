@@ -165,7 +165,7 @@ pgp: False
 
 # if the author_blurb is not set, then this feature is skipped
 author_blurb: "Matthew DeGarmo is an awesome person. He is a life-long learner and nerd. A Husband, and a father of 1, he likes long walks on the beach, and eating ice cream in his spare time."
-author_blurb_image: "https://github.com/matthewjdegarmo.png?size=500"
+author_blurb_image: 
 
 ##################
 # Social Buttons #
