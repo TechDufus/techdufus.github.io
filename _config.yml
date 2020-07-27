@@ -140,7 +140,7 @@ events:
     description: "Started coding / learning PowerShell!"
   - image: "/img/timeline/CompTIA_Security_2Bce.png"
     date: "February 2016"
-    description: Became CompTIA Security+ CE Certified.
+    description: Became [CompTIA Security+ CE](https://www.youracclaim.com/badges/013a3e80-685a-4f38-b382-081ca49610a7) Certified.
   - image: "/img/timeline/icon-bachelor.png"
     date: "May 2016"
     description: "Graduated with a Bachelors in Computer Information Systems: Networking"
