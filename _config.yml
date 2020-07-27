@@ -136,7 +136,7 @@ syntax-highlight: True
 
 events:
   - image: "/img/timeline/spidertocat.png"
-    date: "January 2016 - Today"
+    date: "January 2016"
     description: "Started coding / learning PowerShell!"
   - image: "/img/timeline/baracktocat.jpg"
     date: "June 2020 - Today"
