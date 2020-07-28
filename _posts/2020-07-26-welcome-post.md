@@ -3,7 +3,7 @@ layout: post
 section-type: post
 title: Welcome to my blog!
 category: tech
-tags: [ 'welcome','firstpost','iblognow' ]
+tags: [ 'welcome','firstpost','iblognow','tutorial' ]
 ---
 
 # Well, here it is... My first Blog post ever ever... Ever! 
