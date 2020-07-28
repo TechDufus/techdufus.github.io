@@ -3,7 +3,7 @@
 
 # NB! Set your site's url, otherwise stuff will break :)
 
-url: "https://matthewjdegarmo.github.io"
+url: "https://matthewjdegarmo.com"
 
 # If you're hosting your site at a Project repository on GitHub pages
 # (https://yourusername.github.io/repository-name)
@@ -12,7 +12,7 @@ url: "https://matthewjdegarmo.github.io"
 #
 # NB! Without this *nothing* will work, because it's used in every path :)
 
-baseurl: "/matthewjdegarmo.github.io"
+baseurl: "/"
 
 # Google tracking id
 
@@ -40,7 +40,8 @@ favicon: "/img/posh_favicon.ico"
 ################
 
 black-favicon: "/img/pwsh/favicon-32x32.png"
-logo: "/img/pwsh/posh_girl_closeup.png" # leave blank if you don't want a logo
+#logo:  # leave blank if you don't want a logo
+logo: "matthewjdegarmo.github.io/img/pwsh/posh_girl_closeup.png" # leave blank if you don't want a logo
 
 background-img: "/img/posh_girl-bg_blur.jpg"
 #background-img: "../img/intro-bg.jpg"
