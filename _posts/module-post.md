@@ -16,5 +16,6 @@ Okay, let's get down to business. A PowerShell module is simply a collection of 
 
 ## Module Bare Necessities
 
-A module is a PowerShell file with the *.psm1* extension that contains your functions, as well as a file with the *.psd1* extension that contains metadata about your module. The *.psm1* file is your Module, and the *psd1* file is called a Manifest. Technically you can get away with *not* having a Manifest file, but it's clunky and remember, we are *professionals* so we want to have a Manifest.
+A module is a PowerShell file with the *.psm1* extension that contains your functions, as well as a file with the *.psd1* extension that contains metadata about your module. The *.psm1* file is your Module, and the *psd1* file is called a Manifest. Technically you can get away with *not* having a Manifest file, but it's clunky and remember, we are *professionals* so we want to have a Manifest!
 
+Say I've written 6 functions that all have to do with ActiveDirectory tasks and would like to create a module out of them to share with my teammates, it will go something like this.
