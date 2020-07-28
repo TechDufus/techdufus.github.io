@@ -44,12 +44,52 @@ Even though the non-exported functions are not brought out of the module to be u
 
 ![](/img/posts/myadutils_privatefunctionreference_screenshot.jpg)
 
-Notice how `FirstADUtilsFunction` is able to call `HelperFunction`, but we are not able to call it from our session. Technically we can export all modules like this: `Export-ModuleMember -Function *`, but then we do not get any control over which functions stay 'private' and which ones we specifically want to export.
+Notice how `FirstADUtilsFunction` is able to call `HelperFunction`, but we are not able to call it from our session. Technically we can export all of the functions in our modules like this: `Export-ModuleMember -Function *`, but then we do not get any control over which functions stay 'private' and which ones we specifically want to export.
 
 ---
 
-## Congratulations!! You just created and imported your own module!
+## **Congratulations!! You just created and imported your own module!**
 
 ![](/img/posts/butwaittheresmore.jpg)
 
-Remember that Manifest (**.psd1**) file we talked about earlier? Here's where we gird up our loins and become professional.
+Remember that Manifest (**.psd1**) file we talked about earlier? Here's where we **gird up our loins** and become professional.
+
+There is a very easy way to create a module manifest file, and it only needs a couple of pieces of information to work. This shows how to use the cmdlet `New-ModuleManifest` to create this manifest file for you.
+
+```powershell
+PS C:\temp> New-ModuleManifest -Path .\MyADUtils.psd1 `
+                               -Author "Your name here" `
+                               -RootModule 'MyADUtils.psm1'
+                               -Description "Functions for assisting with ActiveDirectory stuffs."
+                               -ModuleVersion "1.0.0"
+                               -FunctionsToExport "FirstADUtilsFunction",`
+                                                  "SecondADUtilsFunction",`
+                                                  "ThirdADUtilsFunction"
+```
+
+This will create a module manifest for you with the provided information. Notice instead of just listing what functions to export, we are able to provide a description, author name, and even a module version! This is the metadata on your module that makes you a professional module builder. Go ahead and crack open this Manifest file to see all of the other types of data and values that can be provided with your module. At first, seeing all of the metadata you can provide may be overwhelming, but as you improve, you will be grateful that PowerShell has these values built-in to the manifest for you to use!
+
+My goal is to build a module that can justifiably use every value in the manifest. for example: Now that I am able to post my code on Github publically, I can now include the `-ProjectURI` property. And as you create modules that are more complex, you will be able to use more and more of these.
+
+## Let's wrap this all up and but a bow on it!
+
+There's one more thing we need to do to wrap all of this up in a bow. Both the module and the manifest need to be in a folder that is named after the module.
+
+You can look in your `$env:PSMODULEPATH` variable to see all of the folder locations that you can place this module folder into, but in my example, it sill sit in C:\Temp like this.
+
+```
+C:\Temp
+└───MyADUtils
+    └──MyADUtils.psm1
+    └──MyADUtils.psd1
+```
+
+Hopefully this sheds some light on the who, what, where, when, why's of modules, and show you they are simpler than you think once you get the hang of it.
+
+If you have any questions, please feel free to reach out to me.
+
+In [How to organize your powershell functions into a module - Part 2](), we will be looking at a better module architecture that will help with managing your code as your module grows.
+
+Until next time, here is a picture of my dog, Pupper. Marvel at his majesty and grandeur.
+
+![](/img/posts/pupper.jpg)
