@@ -16,4 +16,4 @@ I want to keep this first post brief and just say hello! Feel free to check me o
 
 Until next time, please enjoy this sunset.
 
-![]('/matthewjdegarmo.com/img/posts/beautiful_sunset.jpg')
+![](/img/posts/beautiful_sunset.jpg)
