@@ -88,7 +88,7 @@ My goal is to build a module that can justifiably use every value in the manifes
 
 There's one more thing we need to do to wrap all of this up in a bow. Both the module and the manifest need to be in a folder that is named after the module.
 
-You can look in your `$env:PSMODULEPATH` variable to see all of the folder locations that you can place this module folder into, but in my example, it sill sit in C:\Temp like this.
+You can look in your `$env:PSMODULEPATH` variable to see all of the folder locations that you can place this module folder into, but in my example, it will sit in C:\Temp like this.
 
 ```
 C:\Temp
