@@ -6,7 +6,7 @@ category: tech
 tags: [ 'welcome','firstpost','iblognow','tutorial' ]
 ---
 
-# Well, here it is... My first Blog post ever ever... Ever! 
+Well, here it is... My first Blog post ever ever... Ever! 
 
 I've been pretty hesitant as to whether I thought it was worth the time and effort to post anything out on the interwebs, but here I am going for it. 
 
