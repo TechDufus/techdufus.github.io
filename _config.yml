@@ -40,8 +40,8 @@ favicon: "/img/posh_favicon.ico"
 ################
 
 black-favicon: "/img/pwsh/favicon-32x32.png"
-logo:  # leave blank if you don't want a logo
-#logo: "/img/pwsh/posh_girl_closeup.png" # leave blank if you don't want a logo
+#logo:  # leave blank if you don't want a logo
+logo: "../img/pwsh/posh_girl_closeup.png" # leave blank if you don't want a logo
 
 background-img: "/img/posh_girl-bg_blur.jpg"
 #background-img: "../img/intro-bg.jpg"
