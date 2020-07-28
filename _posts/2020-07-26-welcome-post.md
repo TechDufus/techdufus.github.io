@@ -2,7 +2,7 @@
 layout: post
 section-type: post
 title: Welcome to my blog!
-category: [ 'personal', 'powershell' ]
+category: personal
 tags: [ 'welcome' ]
 ---
 
