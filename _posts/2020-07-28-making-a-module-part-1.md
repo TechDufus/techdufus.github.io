@@ -84,7 +84,7 @@ This will create a module manifest for you with the provided information. Notice
 
 My goal is to build a module that can justifiably use every value in the manifest. For example: Now that I am able to post my code on Github publicly, I can now include the `-ProjectURI` property and link it to my Github repository. And as you create modules that are more complex, you will be able to use more and more of these metadata.
 
-## Let's wrap this all up and but a bow on it!
+## Let's wrap this all up and put a bow on it!
 
 There's one more thing we need to do to wrap all of this up in a bow. Both the module and the manifest need to be in a folder that is named after the module.
 
