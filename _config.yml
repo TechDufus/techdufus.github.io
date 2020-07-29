@@ -102,12 +102,12 @@ web-app-mode: True
 
 # Icons for Web App mode
 
-icon-36p: "/img/web-app/icon-36p.png"
-icon-48p: "/img/web-app/icon-48p.png"
-icon-72p: "/img/web-app/icon-72p.png"
-icon-96p: "/img/web-app/icon-96p.png"
-icon-144p: "/img/web-app/icon-144p.png"
-icon-192p: "/img/web-app/icon-192p.png"
+icon-36p: "/img/web-app/posh_girl_36p.png"
+icon-48p: "/img/web-app/posh_girl_48p.png"
+icon-72p: "/img/web-app/posh_girl_72p.png"
+icon-96p: "/img/web-app/posh_girl_96p.png"
+icon-144p: "/img/web-app/posh_girl_144p.png"
+icon-192p: "/img/web-app/posh_girl_192p.png"
 
 ########
 # Blog #
