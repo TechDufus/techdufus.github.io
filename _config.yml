@@ -147,7 +147,7 @@ events:
     description: Became [CompTIA Security+ CE](https://www.youracclaim.com/badges/9d9de611-b326-4f2c-9716-e274ef446eb2){:target="_blank"} Certified.
   - image: "/img/timeline/icon-bachelor.png"
     date: "May 2016"
-    description: "Graduated with a Bachelors in Computer Information Systems: Networking"
+    description: "Graduated with a Bachelor's in Computer Information Systems: Networking"
   - image: "/img/timeline/isc2_cissp2.png"
     date: "March 2020"
     description: Became [CISSP](https://www.youracclaim.com/badges/013a3e80-685a-4f38-b382-081ca49610a7){:target="_blank"} Certified.
@@ -178,7 +178,7 @@ pgp: False
 
 # if the author_blurb is not set, then this feature is skipped
 author_blurb: "Matthew DeGarmo is an awesome person. He is a life-long learner and nerd. A husband, and a father of 1, he likes long walks on the beach, and eating ice cream in his spare time."
-author_blurb_image: "/img/MugShot-150x150.png"
+author_blurb_image: "/img/author_matthewjdegarmo.png"
 
 ##################
 # Social Buttons #
