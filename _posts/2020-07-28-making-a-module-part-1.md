@@ -22,36 +22,36 @@ Say I've written 6 functions that all have to do with ActiveDirectory tasks, and
 
 You will want to gather all of the function definitions and paste them into your **ModuleName.psm1** file. The file name must be your desired module name. In this example I will use the module name **MyADUtils**. So, let's get our functions pasted into our **MyADUtils.psm1** file like this.
 
-![](/img/posts/myadutils_functions_screenshot.jpg)\
+![](/img/posts/myadutils_functions_screenshot.jpg)
 **Figure 1 - Function definitions**
 
 Now that we have our functions assembled, we need to tell the module to export these functions. When you do an `Import-Module ModuleName`, you only import the functions that the module is told to export. For example, I can export the first-third functions of MyADUtils, and even though there are more functions defined in the **MyADUtils.psm1** module, I won't be able to use them since they were not specifically exported.
 
 Here is how we export the functions that we want to use. At the bottom of the module, we want to use the `Export-ModuleMember` cmdlet and specify which `-Function` we want to export.
 
-![](/img/posts/myadutils_exportmodulemember_screenshot.jpg)\
+![](/img/posts/myadutils_exportmodulemember_screenshot.jpg)
 **Figure 2 - Exporting Module Functions**
 
 Notice how we can list multiple functions together, separated by commas. We can clean this up by adding a backtick to the end of each line (except the last line) and placing the next function on the next line, like this.
 
-![](/img/posts/myadutils_exportmodulememberbacktick_screenshot.jpg)\
+![](/img/posts/myadutils_exportmodulememberbacktick_screenshot.jpg)
 **Figure 3 - Cleaner Export of Module Functions**
 
 Then we save the file and can now import this module manually like this: `Import-Module path\to\module\MyADUtils.psm1`
 
-![](/img/posts/myadutils_importmodule_screenshot.jpg)\
+![](/img/posts/myadutils_importmodule_screenshot.jpg)
 **Figure 4 - Importing the Module**
 
 Notice after we import, we can use the functions that are exported successfully! Also, we are **not** able to use the functions in the module that aren't exported, like `FourthADUtilsFunction`.
 
 Even though the non-exported functions are not exported to be used in your current PowerShell session, they can however reference each other within the module itself. Let's say you write a function, and it's only purpose is to assist another function within your module, but you don't necessarily want the user to be able to use that function. We can do something like this.
 
-![](/img/posts/myadutils_usingprivatefunction_screenshot.png)\
+![](/img/posts/myadutils_usingprivatefunction_screenshot.png)
 **Figure 5 - Using a Private Function**
 
 Notice we are referencing the `HelperFunction` from inside of `FirstADUtilsFunction`
 
-![](/img/posts/myadutils_privatefunctionreference_screenshot.jpg)\
+![](/img/posts/myadutils_privatefunctionreference_screenshot.jpg)
 **Figure 6 - Public vs Private Function**
 
 Now, notice how `FirstADUtilsFunction` is able to call `HelperFunction`, but we are not able to call it from our session. 
@@ -62,7 +62,7 @@ Technically we can export all of the functions in our modules like this: `Export
 
 ## **Congratulations!! You just created and imported your own module!**
 
-![](/img/posts/butwaittheresmore.jpg)\
+![](/img/posts/butwaittheresmore.jpg)
 **Figure 7 - Buy one get one free**
 
 Remember that Manifest (**.psd1**) file we talked about earlier? Here's where we **gird up our loins** and become professionals.
@@ -84,7 +84,7 @@ This will create a module manifest for you with the provided information. Notice
 
 My goal is to build a module that can justifiably use every value in the manifest. For example: Now that I am able to post my code on Github publicly, I can now include the `-ProjectURI` property and link it to my Github repository. And as you create modules that are more complex, you will be able to use more and more of these metadata.
 
-## Let's wrap this all up and put a bow on it!
+## Let's wrap this all up and but a bow on it!
 
 There's one more thing we need to do to wrap all of this up in a bow. Both the module and the manifest need to be in a folder that is named after the module.
 
