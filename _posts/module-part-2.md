@@ -20,4 +20,14 @@ So, let us begin.
 
 This module structure relies on **dot-sourcing** other powershell **.ps1** files. Instead of placing all of our functions into a large single **.psm1** file, we will be creating a separate **.ps1** file for each function that we create, with the function definition inside.
 
-Dot-Sourcing is a technique that allows you to bring the content of a file into the sessions where it is dot-sourced. When you dot-source a file, it is as if you crack open that file, and copy/paste it into your powershell session.
+Dot-Sourcing is a technique that allows you to bring the content of a file into the session where it is dot-sourced. When you dot-source a file, it is as if you crack open that file, and copy/paste it into your powershell session. This is called dot-sourcing due to how it is actually implemented, you literally put a dot (period) before the path to the file you are waiting to "copy/paste" into your session.
+
+![]()
+**Figure ? - Dot-Sourcing a function from a file
+
+As you can see, the function is defined within the **.ps1** file, and after we dot-source that file, we are able to use that function. This technique will be the core of how we import our module. Let's take a look at the full module structure, and we can tackle these concepts piece by piece.
+
+![]()
+**Figure ? - Module File & Folder Structure
+
+As you can see, we have our same **MyADUtils.psd1** and **MyADUtils.psm1** files together, as well as some folders, and even more 'metadata' in the form of a License and a changelog to track your changes.
