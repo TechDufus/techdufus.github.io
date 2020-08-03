@@ -62,3 +62,48 @@ As you can see, we have our same **MyADUtils.psd1** and **MyADUtils.psm1** files
 
 Again, This is a topic for another blog post, but I also include an **ArgCompleter** folder within my Functions folder. This is where I can define custom **Tab-Completion** for my functions and parameters.
 
+## OKAY NO MORE RABBIT HOLES
+
+Let's discuss how our functions and files will fit into this new architecture. if we reference **Figure 1**, we can see that inside of the file is the function definition. So to continue with our **MyADUtils** example, we will make three files, and place them into the \Functions\Public folder like so.
+
+![](/img/posts/module_publicfunctions_screenshot.jpg)
+**Figure 5 - Public Function Files**
+
+Once we have these files, we will place their respective functions inside each file.
+
+![](/img/posts/module_publicfunctions_definitions.jpg)
+**Figure 6 - Public Function Definitions**
+
+In **Figure 6**, I have each of the files open, and have put the function definition inside and saved each file. Now when we dot-source these files, we will be able to use the functions within each.
+
+But how are we going to dot-source these functions exactly? Certainly not manually? This is where the **.psm1** module file comes in. Since we are defining the module functions in their own files, we will use the module file to do the dot-sourcing for us. That will look something like this...
+
+Inside of the **MyADUtils.psm1** file...
+```powershell
+$PublicFunctionsFiles = [System.IO.Path]::Combine($PSScriptRoot,"Functions","Public","*.ps1")
+Get-ChildItem -Path $PublicFunctionsFiles -Exclude *.tests.ps1, *profile.ps1 | ForEach-Object {
+    try {
+        . $_.FullName
+    } catch {
+        Write-Warning "$($_.Exception.Message)"
+    }
+}
+```
+
+There are several things going on here, but at the core, we are getting all files inside of our Functions\Public folder using `Get-ChildItem` and dot-sourcing each of them using a `ForEach-Object` loop. The reason I create the module path using `$PublicFunctionsFiles` is so that no matter what Operating System is using this module, it will work. Since Windows uses the backslash '\' and the rest of the world uses a forwardslash '/' in paths, using this method will automatically create a path no matter what OS we are on, using the correct slashes.
+
+Once we have this in place, we will be able to run `Import-Module` for this module, and the **.psm1** file will dot-source all of our public functions for us!
+
+![](/img/posts/module_privatefunction_notdefined.jpg)
+**Figure 7 - Importing a Dot-Sourcing Module**
+
+Horray! We are successfully able to Import and use our functions! Instead of having to crack open the **.psm1** file and find where the function is defined to make any changes, we can simply locate the public **.ps1** file and make our changes there. For only three functions, this is a bit overkill, but imaging we have 60 different functions, each in their own files, some are public, some are private, others are pester tests, class definitions, format files, etc. You can see how having a structure like this makes it so easy to have a bird's eye view of what is going on, and when you need to change, or add anything, you know exactly where to go.
+
+BUT, notice the error in **Figure 7** when we call `FirstADUtilsFunction`, There is no function `HelperFunction` defined. Let's take care of this by creating a Private file for this function.
+
+
+
+
+
+
+

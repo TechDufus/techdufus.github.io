@@ -72,9 +72,9 @@ There is a very easy way to create a module manifest file, and it only needs a c
 ```powershell
 New-ModuleManifest -Path .\MyADUtils.psd1 `
                    -Author "Your name here" `
-                   -RootModule 'MyADUtils.psm1'
-                   -Description "Functions for assisting with ActiveDirectory stuffs."
-                   -ModuleVersion "1.0.0"
+                   -RootModule 'MyADUtils.psm1' `
+                   -Description "Functions for assisting with ActiveDirectory stuffs." `
+                   -ModuleVersion "1.0.0" `
                    -FunctionsToExport "FirstADUtilsFunction",`
                                       "SecondADUtilsFunction",`
                                       "ThirdADUtilsFunction"
