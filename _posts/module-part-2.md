@@ -30,18 +30,18 @@ This module structure relies on **dot-sourcing** other powershell **.ps1** files
 
 Dot-Sourcing is a technique that allows you to bring the content of a file into the session where it is dot-sourced. When you dot-source a file, it is as if you crack open that file, and copy/paste it into your powershell session. This is called dot-sourcing due to how it is actually implemented, you literally put a dot (period) before the path to the file you are waiting to "copy/paste" into your session.
 
-![]()
+![](/img/posts/dotsourcing_screenshot.jpg) ![](/img/posts/dotsourcing_example.jpg)
 
-**Figure ? - Dot-Sourcing a function from a file
+**Figure 1-2 - Dot-Sourcing a Function from a File**
 
-As you can see, the function is defined within the **.ps1** file, and after we dot-source that file, we are able to use that function. This technique will be the core of how we import our module. Let's take a look at the full module structure, and we can tackle these concepts piece by piece.
+As you can see, the function and variable is defined within the **.ps1** file, and after we dot-source that file, we are able to use that function and the variable that was defined. This technique will be the core of how we import our module. Let's take a look at the full module structure, and we can tackle these concepts piece by piece.
 
 
 ## Public vs Private Folder Structure
 
 ![](/img/posts/module_advancedstructure_toplevel.jpg) ![](/img/posts/module_advancedstructure_functions.jpg)
 
-**Figure 2-3 - Module File & Folder Structure
+**Figure 3-4 - Module File & Folder Structure**
 
 ```powershell
 └───MyADUtils
