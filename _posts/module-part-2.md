@@ -31,16 +31,35 @@ This module structure relies on **dot-sourcing** other powershell **.ps1** files
 Dot-Sourcing is a technique that allows you to bring the content of a file into the session where it is dot-sourced. When you dot-source a file, it is as if you crack open that file, and copy/paste it into your powershell session. This is called dot-sourcing due to how it is actually implemented, you literally put a dot (period) before the path to the file you are waiting to "copy/paste" into your session.
 
 ![]()
+
 **Figure ? - Dot-Sourcing a function from a file
 
 As you can see, the function is defined within the **.ps1** file, and after we dot-source that file, we are able to use that function. This technique will be the core of how we import our module. Let's take a look at the full module structure, and we can tackle these concepts piece by piece.
 
 
-## Public vs Private FOlder Structure
+## Public vs Private Folder Structure
 
-![]()
-**Figure ? - Module File & Folder Structure
+![](/img/posts/module_advancedstructure_toplevel.jpg) ![](/img/posts/module_advancedstructure_functions.jpg)
 
-As you can see, we have our same **MyADUtils.psd1** and **MyADUtils.psm1** files together, as well as some folders, and even more 'metadata' in the form of a License and a changelog to track your changes. Since there are many other types of tools, objects, and resources that we can package up with our module, I like having a Functions folder, where we will be keeping our functions, both Public ones that we will export, and Private ones which are our **helper** functions.
+**Figure 2-3 - Module File & Folder Structure
+
+```powershell
+└───MyADUtils
+    │   changelog.md
+    │   LICENSE
+    │   MyADUtils.psd1
+    │   MyADUtils.psm1
+    │
+    └───Tests
+    └───Functions
+        ├───ArgCompleter
+        ├───Private
+        └───Public
+```
+
+
+As you can see, we have our same **MyADUtils.psd1** and **MyADUtils.psm1** files together, as well as some folders, and even more 'metadata' in the form of a License and a changelog to track your changes. Since there are many other types of tools, objects, tests, and resources that we can package up with our module, I like having a Functions folder, where we will be keeping our functions, both Public ones that we will export, and Private ones which are our **helper** functions.
+
+This is a topic for another blog post, but I also include an ArgCompleter folder within my Functions folder. This is where I can define custom **Tab-Completion** for my functions and parameters.
 
 
