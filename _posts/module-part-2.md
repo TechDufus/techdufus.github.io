@@ -8,7 +8,7 @@ tags: [ 'module' ]
 
 ## In this post, we will be diving into a more advanced way of creating and structuring our PowerShell modules.
 
-If you haven't yet, please head over and check out my [How to organize your powershell functions into a module - Part 1](https://matthewjdegarmo.com/powershell/2020/07/28/how-to-organize-your-powershell-functions-into-a-module-part-1.html) post where we look into the bare necessities of creating a PowerShell module.
+If you haven't yet, please head over and check out my [How to organize your powershell functions into a module - Part 1](https://matthewjdegarmo.com/powershell/2020/07/28/how-to-organize-your-powershell-functions-into-a-module-part-1.html) post where we look into the bare necessities of creating a PowerShell module. The example module, public functions, and private functions used in this post will be the example **MyADUtils** module we used in the Part 1 post.
 
 Before we get into the details, I want to make this statement; There is no "best" way to create a module...
 
@@ -58,8 +58,7 @@ As you can see, the function and variable is defined within the **.ps1** file, a
 ```
 
 
-As you can see, we have our same **MyADUtils.psd1** and **MyADUtils.psm1** files together, as well as some folders, and even more 'metadata' in the form of a License and a changelog to track your changes. Since there are many other types of tools, objects, tests, and resources that we can package up with our module, I like having a Functions folder, where we will be keeping our functions, both Public ones that we will export, and Private ones which are our **helper** functions.
+As you can see, we have our same **MyADUtils.psd1** and **MyADUtils.psm1** files together, as well as some folders, and even more 'metadata' in the form of a License and a changelog to track your changes. Since there are many other types of tools, objects, tests, and resources that we can package up with our module, I like having a **Functions** folder, where we will be keeping our functions, both Public ones that we will export, and Private ones which are our **helper** functions. I also like having a **Tests** folder where I keep my Pester tests, but Pester is a topic for another blog post.
 
-This is a topic for another blog post, but I also include an ArgCompleter folder within my Functions folder. This is where I can define custom **Tab-Completion** for my functions and parameters.
-
+Again, This is a topic for another blog post, but I also include an **ArgCompleter** folder within my Functions folder. This is where I can define custom **Tab-Completion** for my functions and parameters.
 
