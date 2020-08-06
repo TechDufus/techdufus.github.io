@@ -6,7 +6,7 @@
 
 You can see it in action [here](https://matthewjdegarmo.github.io)!
 
-<img src="https://github.com/matthewjdegarmo/matthewjdegarmo.github.io/img/site-mobile.mov.gif" height="480">
+<img src="/img/site-mobile.mov.gif" height="480">
 
 
 ## How to run locally
