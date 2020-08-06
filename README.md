@@ -1,4 +1,4 @@
-# { Personal } Jekyll Theme
+# { matthewjdegarmo } 
 ![Build Status](https://travis-ci.org/le4ker/personal-jekyll-theme.svg?branch=master)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg?link=https://github.com/matthewjdegarmo/matthewjdegarmo.github.io/LICENSE)
 
