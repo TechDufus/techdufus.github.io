@@ -21,18 +21,18 @@ We will discuss:
 
 ## What is the difference between a function and a script?
 
-If you've ever created a PowerShell script before, you know that a script is simple PowerShell code that is stored inside of a file with the extension **.ps1**. A function is a way for us to take some of your code that you feel would be useful to to reuse and give it a name. Whenever we call that name, it will call the code that we have stored behind that name. 
+If you've ever created a PowerShell script before, you know that a script is simply PowerShell code that is stored inside of a file with the extension **.ps1**. A function is a way for us to take some of your code that we feel would be useful to to reuse and give it a name. Whenever we call that name, it will call the code that we have stored behind that name. 
 
-But how is that any different than just re-calling the script that we've made? Well, the difference between a script and a function os that a function is meant to be flexible, meaning the code it runs can be used for multiple different scenarios. It is when you provide the function with specific information (by using parameters) will the function be able to perform tasks that the non-flexible script wouldn't be able to do.
+But how is that any different than just re-calling the script that we've made? Well, the difference between a script and a function is that a function is meant to be flexible, meaning the code it runs can be used for multiple different scenarios. It is when you provide the function with specific information (by using parameters) will the function be able to perform tasks that the non-flexible script wouldn't be able to do.
 
 ## How to create a function
 
-In my example, I created a function called `New-Folder` to help me create folders more quickly. The basic PowerShell command for this is this.
+In my example, I created a function called `New-Folder` to help me create folders more quickly. Here is the basic PowerShell command for this.
 ```powershell
 New-Item -Name "FolderName" -Path "path\to\folder\" -ItemType Directory
 ```
 
-As you can see, every time I want to create a folder, I have to give the Name, Path, and the item type for PowerShell to create. Well... I'm a lazy guy, so I want to wrap this code in a function. Let's create a function called `New-Folder`. You can do this directly from within a PowerShell console, or fire up your favorite code editor (#VSCodeForTheWin!) and then simply copy/paste into a PowerShell session from there.
+As you can see, every time I want to create a folder, I have to give the **Name**, **Path**, and the **ItemType** for PowerShell to create. Well... I'm a lazy guy, so I want to wrap this code in a function. Let's create a function called `New-Folder`. You can do this directly from within a PowerShell console, or fire up your favorite code editor (#VSCodeForTheWin!) and then simply copy/paste into a PowerShell session from there.
 
 I will be defining this code from VSCode, and to test, I'll copy/paste it into a console. To define a function, you just type `function` before the name you want to give it, like this.
 
@@ -58,7 +58,7 @@ Let's copy/paste this function into a PowerShell console and then call it!
 
 **Figure 1 - Calling our function**
 
-As you can see, this function `New-Folder` did exactly what it was supposed to do. It substituted our call of `New-Folder for the code that is defined within.
+As you can see, this function `New-Folder` did exactly what it was supposed to do. It substituted our call of `New-Folder` for the code that is defined within.
 
 Great! We are done!... Or are we? What's the issue with leaving this function the way it is?
 
@@ -96,7 +96,7 @@ function New-Folder {
 }
 ```
 
-Now this function will create a new folder dynamically based on what value we supply the function with! Our code is a generic 'make a folder' code, but adding a parameter helps us re-use this code no matter what folder we need to create!
+Now this function will create a new folder dynamically based on what value we supply the function with! Our code is a generic 'make a folder' command, but adding a parameter helps us re-use this code no matter what folder we need to create!
 
 We are not quite done yet. We are going to get fancy and add some metadata to our parameter. For example, what if someone tries to call `New-Folder` without supplying a `-FolderName` value? We want to make this a **Mandatory** parameter, meaning it always needs to have a value specified. We do that like this.
 
@@ -119,3 +119,28 @@ Not if you try to call `New-Folder` as-is, you will be prompted to enter a value
 
 If you enter a value the function will use it, if you just press enter without specifying the value you will get an error since the function now knows **not** to proceede without that value.
 
+Since this is the only parameter defined, we can ommit listing the parameter `-FolderName` and just provide it's value. PowerShell assumes we are providing a value for this one parameter, but just to be sure, let's add another piece of metadata to our parameter like this.
+
+```powershell
+function New-Folder {
+    param (
+        [Parameter(Mandatory,Position=0)]
+        $FolderName
+    )
+    New-Item -Name "FolderName" -ItemType Directory
+}
+```
+
+We can add multiple pieces of information to the `[Parameter()]` section as long as we seperate them with commas. I've added `Position=0` which tells PowerShell, "If the parameter is not named, assume the first value is for this parameter".
+
+Whether we add `Position=0` or not, we can use the following command.
+
+```powershell
+New-Folder SomeOtherName
+```
+
+## Pro's to making your function an **Advanced Function**
+
+Congratulations! You now have a working function, that takes input to help customize how it is used! You rock. But we can go one step further and turn our function into an **Advanced Function**. An advanced function can utilize many built-in parameters that PowerShell automatically adds to your function, such as Debug, ErrorAction, ErrorVariable, InformationAction, InformationVariable, OutVariable, OutBuffer, PipelineVariable, Verbose, WarningAction, and WarningVariable.
+
+The one we will be using is the `-Verbose` parameter provided in the Advanced Function.
