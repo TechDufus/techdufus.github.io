@@ -55,5 +55,67 @@ If we leave out the `-Path` option, PowerShell assumes we want to create this it
 Let's copy/paste this function into a PowerShell console and then call it!
 
 ![](/img/posts/functions_new-folder_basic1.png)
+
 **Figure 1 - Calling our function**
+
+As you can see, this function `New-Folder` did exactly what it was supposed to do. It substituted our call of `New-Folder for the code that is defined within.
+
+Great! We are done!... Or are we? What's the issue with leaving this function the way it is?
+
+Answer: It will create a folder called `FolderName` every time. Wouldn't it be nice if we wanted this function to make a folder, but we specify the folder name we want it to create when we call it? That is where we will benefit from adding a parameter!
+
+## How to create parameters for your function
+
+We want to be able to manipulate how this function operates by supplying information that the function knows how to receive and use. Inside of the function, we can define how many parameters we want the function to be able to recieve, their names, and a whole host of other information depending on your needs.
+
+Here is how we will create a parameter for this function.
+
+```powershell
+function New-Folder {
+    param (
+        $FolderName
+    )
+    New-Item -Name "FolderName" -ItemType Directory
+}
+```
+
+At the beginning of the function, we add a `param()` section, and inside we name the variable that will store the value we supply. You will notice that the name of the variable will correspond to how we reference the parameter.
+
+```powershell
+New-Folder -FolderName DifferentFolderName
+```
+
+If we run this, you'll notice that it still tries to create a folder called `FolderName`, but why? Well, we need to substitute the hard-coded value of `FolderName` in the function with our new parameter, like this.
+
+```powershell
+function New-Folder {
+    param (
+        $FolderName
+    )
+    New-Item -Name $FolderName -ItemType Directory
+}
+```
+
+Now this function will create a new folder dynamically based on what value we supply the function with! Our code is a generic 'make a folder' code, but adding a parameter helps us re-use this code no matter what folder we need to create!
+
+We are not quite done yet. We are going to get fancy and add some metadata to our parameter. For example, what if someone tries to call `New-Folder` without supplying a `-FolderName` value? We want to make this a **Mandatory** parameter, meaning it always needs to have a value specified. We do that like this.
+
+```powershell
+function New-Folder {
+    param (
+        [Parameter(Mandatory)]
+        $FolderName
+    )
+    New-Item -Name "FolderName" -ItemType Directory
+}
+```
+
+Before the variable name, we add a section `[Parameter()]`, and inside of the parenthasis we add our features, in this case we add the word **Mandatory** to tell this function that you must always provide a value for this parameter.
+
+Not if you try to call `New-Folder` as-is, you will be prompted to enter a value.
+
+![](/img/posts/functions_new-folder_mandatoryparameter.png)
+**Figure 2 - Mandatory Parameter**
+
+If you enter a value the function will use it, if you just press enter without specifying the value you will get an error since the function now knows **not** to proceede without that value.
 
