@@ -1,15 +1,15 @@
 ---
 layout: post
 section-type: post
-title: The basics of creating PowerShell Functions
+title: PowerShell Functions: The basics of creating PowerShell Functions
 category: powershell
 tags: [ 'function' ]
 ---
 # If you've read my previous posts ([Module Creation - Part 1](https://matthewjdegarmo.com/powershell/2020/07/28/how-to-organize-your-powershell-functions-into-a-module-part-1.html), [Module Creation - Part 2](https://matthewjdegarmo.com/powershell/2020/08/03/how-to-organize-your-powershell-functions-into-a-module-part-2.html)), then you know how to organize functions to create your own PowerShell module, but how do we go about making our own functions in the first place?
 
-That is what I want to discuss in this post. We will go into some of the basics of function creation, as well as some other basics of parameter creation, and even making your function an **Advanced Function**, which are things that took me a good while to wrap my head around, so I think the earlier you are exposed to them in your PowerShell journey the better!
+That is what I want to discuss in this post. We will go into some of the basics of creating functions, as well as some other basics of parameter creation, and even making your function an **Advanced Function**, which are things that took me a good while to wrap my head around, so I think the earlier you are exposed to them in your PowerShell journey the better!
 
-It goes without saying that these concepts can be as complex or as simple as you need them to be, depending on what your needs are. I will be sharing what my most common techniques, and you can continue to learn from there!
+It goes without saying that these concepts can be as complex or as simple as you want them to be, depending on what your needs are. I will be sharing some of my most common techniques, and you can continue to learn from there!
 
 I would like to demonstrate how a function can be useful by using my `New-Folder` command that I wrote for my [AdminToolkit](https://github.com/matthewjdegarmo/AdminToolkit/blob/master/Functions/Public/New-Folder.ps1) module.
 
@@ -17,11 +17,11 @@ We will discuss:
 + The difference between a function and a script.
 + How to create a function.
 + How to create parameters for your function.
-+ Pro's to making your function an **Advanced Function**.
++ Pro's of making your function an **Advanced Function**.
 
 ## What is the difference between a function and a script?
 
-If you've ever created a PowerShell script before, you know that a script is simply PowerShell code that is stored inside of a file with the extension **.ps1**. A function is a way for us to take some of your code that we feel would be useful to to reuse and give it a name. Whenever we call that name, it will call the code that we have stored behind that name. 
+If you've ever created a PowerShell script before, you know that a script is simply PowerShell code that is stored inside of a file with the extension **.ps1**. A function is a way for us to take some of your code that we feel would be useful to reuse and give it a name. Whenever we call that name, it will call the code that we have stored behind that name. 
 
 But how is that any different than just re-calling the script that we've made? Well, the difference between a script and a function is that a function is meant to be flexible, meaning the code it runs can be used for multiple different scenarios. It is when you provide the function with specific information (by using parameters) will the function be able to perform tasks that the non-flexible script wouldn't be able to do.
 
@@ -62,13 +62,13 @@ As you can see, this function `New-Folder` did exactly what it was supposed to d
 
 Great! We are done!... Or are we? What's the issue with leaving this function the way it is?
 
-Answer: It will create a folder called `FolderName` every time. Wouldn't it be nice if we wanted this function to make a folder, but we specify the folder name we want it to create when we call it? That is where we will benefit from adding a parameter!
+Answer: It will create a folder called `FolderName` every time. Wouldn't it be nice if we could have this function make a folder, but we specify the folder name we want it to create when we call it? That is where we will benefit from adding a parameter!
 
 ## How to create parameters for your function
 
-We want to be able to manipulate how this function operates by supplying information that the function knows how to receive and use. Inside of the function, we can define how many parameters we want the function to be able to recieve, their names, and a whole host of other information depending on your needs.
+We want to be able to manipulate how this function operates by supplying information that it knows how to receive and use. Inside of the function, we can define how many parameters we want the function to be able to recieve, their names, and a whole host of other information depending on your needs.
 
-Here is how we will create a parameter for this function.
+Here is how we create a parameter for this function.
 
 ```powershell
 function New-Folder {
@@ -110,14 +110,15 @@ function New-Folder {
 }
 ```
 
-Before the variable name, we add a section `[Parameter()]`, and inside of the parenthasis we add our features, in this case we add the word **Mandatory** to tell this function that you must always provide a value for this parameter.
+Before the variable name, we add a section `[Parameter()]`, and inside of the parentheses we add our features. In this case we add the word **Mandatory** to tell this function that you must always provide a value for this parameter.
 
-Not if you try to call `New-Folder` as-is, you will be prompted to enter a value.
+Now if you try to call `New-Folder` as-is, you will be prompted to enter a value.
 
 ![](/img/posts/functions_new-folder_mandatoryparameter.png)
+
 **Figure 2 - Mandatory Parameter**
 
-If you enter a value the function will use it, if you just press enter without specifying the value you will get an error since the function now knows **not** to proceede without that value.
+If you enter a value the function will use it, if you just press enter without specifying the value you will get an error since the function now knows **not** to proceed without that value.
 
 Since this is the only parameter defined, we can ommit listing the parameter `-FolderName` and just provide it's value. PowerShell assumes we are providing a value for this one parameter, but just to be sure, let's add another piece of metadata to our parameter like this.
 
@@ -159,11 +160,15 @@ function New-Folder {
 }
 ```
 
-I added a little flava-flave by adding an `If` statement using `Test-Path`. `Test-Path` does exactly what it sounds, it tests to see if a file or folder exists and simply returns True or False. If it returns true, it will write the `Write-Verbose` message (assuming that you specified `-Verbose` when calling the function.)
+I added a little flava-flave by adding an `If` statement using `Test-Path`. `Test-Path` does exactly as it sounds, it tests to see if a file or folder exists and simply returns True or False. If it returns true, it will write the `Write-Verbose` message (assuming that you specified `-Verbose` when calling the function.)
+
+```powershell
+New-Folder YouRock -Verbose
+```
 
 This is a very simplified example, but hopefully you can see the value of using an Advanced Function just for the `Write-Verbose` messages. Your function will work and show the proper output normally, and can be as detailed as you want when using `-Verbose`.
 
-Well, hopefully you now have a good handle on how to take your beautiful PowerShell code that you've written and turn it into a function, or functions! There are many more aspects to functions, but like I said they only need to be as complex as you need them to be. Feel free to explore some of the functions in either my [HelpDesk](https://github.com/matthewjdegarmo/HelpDesk.git) module or my [AdminToolkit](https://github.com/matthewjdegarmo/AdminToolkit.git) module on GitHub. If you like what you see, these are also published to the PowerShell Gallery for you to easily install! (Shameless plug).
+Well, hopefully you now have a good handle on how to take your beautiful PowerShell code that you've written and turn it into a function, or functions! There are many more aspects to functions, like Begin Process and End blocks, accepting pipeline input, etc. but like I said they only need to be as complex as you need them to be. Feel free to explore some of the functions in either my [HelpDesk](https://github.com/matthewjdegarmo/HelpDesk.git) module or my [AdminToolkit](https://github.com/matthewjdegarmo/AdminToolkit.git) module on GitHub. If you like what you see, these are also published to the PowerShell Gallery for you to easily install! (Shameless plug).
 
 Well, that's all I have for this one. Until next time, here is a picture of some of my code ducks that live on my desk. They are the reason I know any PowerShell at all!
 
