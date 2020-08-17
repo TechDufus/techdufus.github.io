@@ -163,3 +163,8 @@ I added a little flava-flave by adding an `If` statement using `Test-Path`. `Tes
 
 This is a very simplified example, but hopefully you can see the value of using an Advanced Function just for the `Write-Verbose` messages. Your function will work and show the proper output normally, and can be as detailed as you want when using `-Verbose`.
 
+Well, hopefully you now have a good handle on how to take your beautiful PowerShell code that you've written and turn it into a function, or functions! There are many more aspects to functions, but like I said they only need to be as complex as you need them to be. Feel free to explore some of the functions in either my [HelpDesk](https://github.com/matthewjdegarmo/HelpDesk.git) module or my [AdminToolkit](https://github.com/matthewjdegarmo/AdminToolkit.git) module on GitHub. If you like what you see, these are also published to the PowerShell Gallery for you to easily install! (Shameless plug).
+
+Well, that's all I have for this one. Until next time, here is a picture of some of my code ducks that live on my desk. They are the reason I know any PowerShell at all!
+
+![](/img/posts/functions_codeducks.png)
