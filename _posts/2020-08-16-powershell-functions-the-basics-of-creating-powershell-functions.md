@@ -145,7 +145,20 @@ New-Folder SomeOtherName
 
 Congratulations! You now have a working function, that takes input to help customize how it is used! You rock. But we can go one step further and turn our function into an **Advanced Function**. An advanced function can utilize many built-in parameters that PowerShell automatically adds to your function, such as Debug, ErrorAction, ErrorVariable, InformationAction, InformationVariable, OutVariable, OutBuffer, PipelineVariable, Verbose, WarningAction, and WarningVariable.
 
-The one we will be using is the `-Verbose` parameter provided in the Advanced Function. When you call a function that supports the `-Verbose`, all `Write-Verbose` messages within the function are displayed when you call the function. This really helps when something may not be working properly and you want to see more information from the function that doesn't normally display. Let's add the following messages.
+To turn our function into an advanced function, we simply need to add the section `[CmdletBinding()]` at the very top of the function.
+
+```powershell
+function New-Folder {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory,Position=0)]
+        $FolderName
+    )
+    New-Item -Name $FolderName -ItemType Directory
+}
+```
+
+The advanced parameter that we will be using is the `-Verbose` parameter provided in the Advanced Function. When you call a function that supports the `-Verbose`, all `Write-Verbose` messages within the function are displayed when you call the function. This really helps when something may not be working properly and you want to see more information from the function that doesn't normally display. Let's add the following messages.
 
 ```powershell
 function New-Folder {
