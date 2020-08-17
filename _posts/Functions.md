@@ -106,7 +106,7 @@ function New-Folder {
         [Parameter(Mandatory)]
         $FolderName
     )
-    New-Item -Name "FolderName" -ItemType Directory
+    New-Item -Name $FolderName -ItemType Directory
 }
 ```
 
@@ -127,7 +127,7 @@ function New-Folder {
         [Parameter(Mandatory,Position=0)]
         $FolderName
     )
-    New-Item -Name "FolderName" -ItemType Directory
+    New-Item -Name $FolderName -ItemType Directory
 }
 ```
 
@@ -143,4 +143,23 @@ New-Folder SomeOtherName
 
 Congratulations! You now have a working function, that takes input to help customize how it is used! You rock. But we can go one step further and turn our function into an **Advanced Function**. An advanced function can utilize many built-in parameters that PowerShell automatically adds to your function, such as Debug, ErrorAction, ErrorVariable, InformationAction, InformationVariable, OutVariable, OutBuffer, PipelineVariable, Verbose, WarningAction, and WarningVariable.
 
-The one we will be using is the `-Verbose` parameter provided in the Advanced Function.
+The one we will be using is the `-Verbose` parameter provided in the Advanced Function. When you call a function that supports the `-Verbose`, all `Write-Verbose` messages within the function are displayed when you call the function. This really helps when something may not be working properly and you want to see more information from the function that doesn't normally display. Let's add the following messages.
+
+```powershell
+function New-Folder {
+    param (
+        [Parameter(Mandatory,Position=0)]
+        $FolderName
+    )
+    Write-Verbose "Attempting to create folder: $FolderName"
+    New-Item -Name $FolderName -ItemType Directory
+    if (Test-Path $FolderName) {
+        Write-Verbose "Successfully created folder: $FolderName"
+    }
+}
+```
+
+I added a little flava-flave by adding an `If` statement using `Test-Path`. `Test-Path` does exactly what it sounds, it tests to see if a file or folder exists and simply returns True or False. If it returns true, it will write the `Write-Verbose` message (assuming that you specified `-Verbose` when calling the function.)
+
+This is a very simplified example, but hopefully you can see the value of using an Advanced Function just for the `Write-Verbose` messages. Your function will work and show the proper output normally, and can be as detailed as you want when using `-Verbose`.
+
