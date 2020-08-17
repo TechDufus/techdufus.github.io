@@ -1,7 +1,7 @@
 ---
 layout: post
 section-type: post
-title: PowerShell Functions: The basics of creating PowerShell Functions
+title: PowerShell Functions: The Basics of Creating PowerShell Functions
 category: powershell
 tags: [ 'function' ]
 ---
