@@ -162,6 +162,7 @@ The advanced parameter that we will be using is the `-Verbose` parameter provide
 
 ```powershell
 function New-Folder {
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory,Position=0)]
         $FolderName
