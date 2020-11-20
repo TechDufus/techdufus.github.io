@@ -154,7 +154,7 @@ events:
   - image: "/img/timeline/posh_girl_closeup.jpg"
     date: "June 2020"
     description: "Created Website and Blog!"
-  - image: "https://github.com/"
+  - image: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
     date: "November 2020"
     description: "First merged PR on [PowerShell/PowerShell](https://github.com/PowerShell/PowerShell/pull/14113)"
 
