@@ -183,9 +183,9 @@ Function Get-MyAdminCredential() {
 Notice I just slapped an `If` statement around the `Get-Credential` section, and I used the `Import-Clixml` to convert the stored XML content back into a PowerShell object, [PSCredential].
 
 
-## The fruits of our labor - Implimentation
+## The fruits of our labor - Implementation 
 
-Let's say that our function that we are too lazy to **run as** admin for was unlocking an AD account. We can write a public function in our module called `Unlock-Account` that will automatically handle using our Admin credentials.
+Let's say that our function that we are too lazy to **run as** admin was unlocking an AD account. We can write a public function in our module called `Unlock-Account` that will automatically handle using our Admin credentials.
 
 ```powershell
 Function Unlock-Account() {
