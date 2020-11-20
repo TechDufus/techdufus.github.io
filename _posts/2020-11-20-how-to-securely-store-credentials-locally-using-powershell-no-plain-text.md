@@ -1,7 +1,7 @@
 ---
 layout: post
 section-type: post
-title: 'How to store credentials locally using PowerShell. NO PLAIN TEXT.'
+title: 'How to securely store credentials locally using PowerShell. NO PLAIN TEXT.'
 category: powershell
 tags: [ 'function' ]
 ---
