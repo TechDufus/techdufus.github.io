@@ -1,0 +1,14 @@
+# HawkScan 0.8.16
+# matthewjdegarmo.com Application specific config
+# Completed: 1603370095977
+
+app:
+  host: https://matthewjdegarmo.com
+  antiCsrfParam: ""
+  api: ""
+  appDataType: unknown
+  riskLevel: MEDIUM
+  contactEmail: ""
+  applicationId: 9e966c7e-043a-4d14-96cd-8d717c7e4c9e
+  env: Production
+  graphQL: false
