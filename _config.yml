@@ -188,6 +188,8 @@ author_blurb_image: "/img/author_matthewjdegarmo.png"
 ##################
 
 social:
+  - title: "twitch"
+    url: "https://twitch.tv/matthewjdegarmo"
   - title: "facebook"
     url: "https://www.facebook.com/matthewjdegarmo"
   - title: "twitter"
