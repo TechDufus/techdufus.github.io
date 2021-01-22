@@ -157,7 +157,7 @@ events:
   - image: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
     date: "November 2020"
     description: "First merged PR on [PowerShell/PowerShell](https://github.com/PowerShell/PowerShell/pull/14113)"
-  - image: "https://cdn.icon-icons.com/icons2/2407/PNG/512/twitch_icon_146123.png"
+  - image: "/img/timeline/twitch_icon_146123.png"
     date: "January 2021"
     description: "Started Live-Streaming PowerShell on [Twitch](https://twitch.tv/matthewjdegarmo)"
 
