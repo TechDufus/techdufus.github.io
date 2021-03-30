@@ -3,7 +3,7 @@ layout: post
 section-type: post
 title: 'Use PowerShell to Detect Running OS'
 category: powershell
-tags: [ 'function' ]
+tags: [ 'powershell' ]
 ---
 
 # When developing new PowerShell tools in this day and age, with everything becoming increasingly cross-platform, it's important to keep cross-platform development in mind.
