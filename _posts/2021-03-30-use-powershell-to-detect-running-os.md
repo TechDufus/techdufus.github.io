@@ -8,14 +8,14 @@ tags: [ 'function' ]
 
 # When developing new PowerShell tools in this day and age, with everything becoming increasingly cross-platform, it's important to keep cross-platform development in mind.
 
-I recently found myself falling into coding against a Windows system, without taking into account that someone on Linux could easily run my code if only I would account for it.
+I recently found myself specifically coding against a Windows system, without taking into account that someone on Linux could easily run my code if only I would account for it.
 
-I'd like to quickly share an easy way to detect the running OS, and possibly make tweaks in your code depending on what is running your cmdlets.
+I'd like to quickly share an easy way to detect the running OS, and possibly make tweaks in your code depending on what OS is running your cmdlets.
 
 With the release of PowerShell Core (v6.0), PowerShell comes with new environment variables:
 - `$IsLinux`
 - `$IsMac`
-- `IsWindows`
+- `$IsWindows`
 
 Depending on what OS is running, **only** that variable will be set to **True** or `$true`.
 
