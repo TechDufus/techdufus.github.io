@@ -18,7 +18,7 @@ y { color: Yellow}
 - <y>[-] Info Message.</y>
 - <o>[!] Warning Message.</o>
 - <g>[+] Success Message.</g>
-- <r>\[X] Error Message.</r>
+- <r>[X] Error Message.</r>
 
 I wanted this function to provide colorized output even when running commands in a remote PowerShell session. The issue is that this function lives on my machine and not the remote machine.
 
