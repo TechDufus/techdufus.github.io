@@ -46,17 +46,21 @@ Function Invoke-LoadFunctionRemotely() {
 
     Process {
         $FunctionName | Foreach-Object {
-            $Function = Get-Command -Name $_ -ErrorAction SilentlyContinue
-            If ($Function) {
-                $Definition = @"
-                    Function $_() {
-                        $($Function.Definition)
-                    }
+            try {
+                $Function = Get-Command -Name $_
+                If ($Function) {
+                    $Definition = @"
+                        $($Function.CommandType) $_() {
+                            $($Function.Definition)
+                        }
 "@
-                Invoke-Command -Session $Session -ScriptBlock {
-                    Param($LoadMe)
-                    . ([ScriptBlock]::Create($LoadMe))
-                } -ArgumentList $Definition
+                    Invoke-Command -Session $Session -ScriptBlock {
+                        Param($LoadMe)
+                        . ([ScriptBlock]::Create($LoadMe))
+                    } -ArgumentList $Definition
+                }
+            } catch [CommandNotFoundException] {
+                Throw $_
             }
         }
     }
