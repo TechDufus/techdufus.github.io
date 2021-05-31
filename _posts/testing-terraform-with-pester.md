@@ -27,7 +27,7 @@ For example, If you want to use Terraform to manage infrastructure in Azure, you
 
 ANYWAY, recently I've been using terraform to create entire Azure environments, including all of the networking, VPN connections to our on-prem datacenters, and all of this for each of our environments, (dev, test, prod, etc.)
 
-With all of this infrastructure  living inside of config files, we can easily get them into source control, like `git`. If I make a infrastructure change in terraform that ultimately breaks something, I can easily revert to the previous working configuration using `git`.
+With all of this infrastructure  living inside of config files, we can easily get them into source control, like `git`. If I make an infrastructure change in terraform that ultimately breaks something, I can easily revert to the previous working configuration using `git`.
 
 ## Why should we test our Infrastructure?
 
