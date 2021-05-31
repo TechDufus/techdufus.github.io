@@ -452,4 +452,4 @@ These are some simple tests that confirm some of the values that terraform produ
 
 Here's my output of these tests.
 
-![](/img/posts/terraform_pester_tests.png)
+![](/img/posts/terraform_passed_pester_tests.png)
