@@ -448,7 +448,7 @@ Describe ... {
 
 ### Running the Tests
 
-These are some simple tests that confirm some of the values that terraform produces based on what our configuration tells terraform to create. We can run `Invoke-Pester Path\to\demo.tests.ps1 -Output Detailed` to confirm that our tests and code are all correct. These tests should all pass. If not, feel free to troubleshoot. After all, that's the whole point of the tests, if something fails, there's either something wrong with the test or something wrong with the code.
+These are some simple tests that confirm some of the values that terraform produces based on what our configuration tells terraform to create. We can run `Invoke-Pester Path\to\terraform.tests.ps1 -Output Detailed` to confirm that our tests and code are all correct. These tests should all pass. If not, feel free to troubleshoot. After all, that's the whole point of the tests, if something fails, there's either something wrong with the test or something wrong with the code.
 
 Here's my output of these tests.
 
