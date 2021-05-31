@@ -61,6 +61,7 @@ The following code will go into your `main.ft` file. I will make some references
 
 We first need to tell terraform what providers are required, and then define what version of that provider we want to use.
 
+**main.tf**
 ```terraform:main.tf
 terraform {
     required_providers {
@@ -86,6 +87,7 @@ provider "azurerm" {
 
 Next, let's add to this `main.tf` file to add the configuration for our resource group. For this example, I will be creating a new resource group.
 
+**main.tf**
 ```terraform:main.tf
 resource "azurerm_resource_group" "rg" {
     name     = var.resource_group_name
@@ -99,6 +101,7 @@ Here, we are telling terraform (from our variables) what the name and region we 
 
 Now let's define an IP range for the virtual network that our resources will use. This may be overkill for a single VM, but if we wanted to add more VMs, we've already carved out our desired IP range for this here. :)
 
+**main.tf**
 ```terraform:main.tf
 resource "azurerm_virtual_network" "vnet" {
   name                = "vnet-testing-terraform"
@@ -112,6 +115,7 @@ resource "azurerm_virtual_network" "vnet" {
 
 This subnet will be a smaller IP range that lives on the Virtual Network we just defined.
 
+**main.tf**
 ```terraform:main.tf
 resource "azurerm_subnet" "vms_subnet" {
   name                 = var.subnet.vms.subnet_name
@@ -125,6 +129,7 @@ resource "azurerm_subnet" "vms_subnet" {
 
 Here we have a bit more configuration to provide.
 
+**main.tf**
 ```terraform:main.tf
 resource "azurerm_virtual_machine" "vm" {
   name                  = var.vm1_name
@@ -164,6 +169,7 @@ resource "azurerm_virtual_machine" "vm" {
 
 The IP for this NIC will live on the subnet range we just created.
 
+**main.tf**
 ```terraform:main.tf
 resource "azurerm_network_interface" "vm_nic" {
   name                = "${var.vm1_name}_nic"
@@ -183,6 +189,7 @@ resource "azurerm_network_interface" "vm_nic" {
 
 Now let's define our variables for this `main.tf` configuration.
 
+**variables.tf**
 ```terraform:variables.tf
 variable "region" {
     type        = string
@@ -233,6 +240,7 @@ variable "admin_password" {
 
 Lastly, we need a file that terraform automatically imports with variable values. it can be named anything but must end with `.auto.tfvars`
 
+**demo.auto.tfvars**
 ```terraform:demo.auto.tfvars
 region                = "centralus"
 admin_username        = "Administrator"
@@ -263,6 +271,7 @@ Now that we have our basic resources defined, it's time to finally jump into Pes
 
 Let's create a test file in the same directory called `terraform.tests.ps1` which will be our Pester tests file.
 
+**terraform.tests.ps1**
 ```powershell:terraform.tests.ps1
 Describe 'Terraform Blog Demo Tests' {
     BeforeAll -ErrorAction Stop {
@@ -297,6 +306,7 @@ The essential part of this `BeforeAll` section is `$Plan = terraform show -json 
 
 Let's add the following code inside the `Unit` context.
 
+**terraform.tests.ps1**
 ```powershell:terraform.tests.ps1
 Describe ... {
     BeforeAll {
@@ -327,6 +337,7 @@ This section lets us target the exact objects in the `$Plan.resource_changes` ob
 
 We will create new `It` test blocks for each test we want to perform. Let's add a few basic tests.
 
+**terraform.tests.ps1**
 ```powershell:terraform.tests.ps1
 Describe ... {
     BeforeAll {
