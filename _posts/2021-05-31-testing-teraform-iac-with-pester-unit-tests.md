@@ -1,7 +1,7 @@
 ---
 layout: post
 section-type: post
-title: Testing Terraform IaC with Pester
+title: Testing Terraform IaC with Pester - Unit Tests
 category: ['powershell', 'pester', 'terraform' ]
 tags: [ 'devops', 'tutorial' ]
 ---
