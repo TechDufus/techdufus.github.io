@@ -465,4 +465,10 @@ Here's my output of these tests.
 
 ![](/img/posts/terraform_passed_pester_tests.png)
 
+## In Summary
 
+Terraform, or any IaC for that matter is a fantastic tool to add to your tech stack. I realized this post was getting a bit long with all of the tests, so I decided to end this post here, having covered some basic concepts about Unit testing and will continue in a 2nd post that will cover Integration testing.
+
+Integration tests differ from Unit tests in that, Unit tests test the code itself, but Integration tests actually apply the code, and test the real-world result. In the next post, we will actually have terraform create this infrastructure in Azure, and will continue to leverage Pester to confirm that terraform correctly created what we said it should. Additionally, if you have some front-end / back-end infrastructure, you can have Pester test all kinds of connection types, ports, etc. Not only can you test that the VM is there, we can confirm that our networking is all in place, that different resources can properly talk to each other, and what ever else you need to test in your environment.
+
+Until next time, thanks for checking out my content! If you have any feedback, or just want to let me know you liked or disliked something I wrote, PLEASE reach out! 😊
