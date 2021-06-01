@@ -6,7 +6,7 @@ category: 'powershell'
 tags: [ 'devops', 'tutorial' ]
 ---
 
-# Welcome back! Today I wanted to jot down a new concept I was exposed to recently, testing your terraform infrastructure-as-code using Pester.
+# Welcome back! Today I wanted to talk about a new concept I was exposed to recently, testing your terraform infrastructure-as-code using Pester.
 
 I'm always reminded how excited I am to be in the technology space, because the things there are to learn are pretty awesome.
 
