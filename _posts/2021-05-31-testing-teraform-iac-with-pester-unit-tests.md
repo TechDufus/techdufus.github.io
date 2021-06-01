@@ -327,13 +327,13 @@ Describe ... {
         BeforeAll {
             $ResourceGroupAddress  = 'azurerm_resource_group.rg'
             $VirtualNetworkAddress = 'azurerm_virtual_network.vnet'
-            $VmsSubnetAddress         = 'azurerm_subnet.vms_subnet'
+            $VmsSubnetAddress      = 'azurerm_subnet.vms_subnet'
             $VirtualMachineAddress = 'azurerm_virtual_machine.vm'
             $VmNicAddress          = 'azurerm_network_interface.vm_nic'
 
             $ResourceGroupPlan  = ($Plan.resource_changes | Where-Object { $_.address -eq $ResourceGroupAddress })[0]
             $VirtualNetworkPlan = ($Plan.resource_changes | Where-Object { $_.address -eq $VirtualNetworkAddress })[0]
-            $VmsSubnetPlan         = ($Plan.resource_changes | Where-Object { $_.address -eq $VmsSubnetAddress})[0]
+            $VmsSubnetPlan      = ($Plan.resource_changes | Where-Object { $_.address -eq $VmsSubnetAddress})[0]
             $VirtualMachinePlan = ($Plan.resource_changes | Where-Object { $_.address -eq $VirtualMachineAddress})[0]
             $VmNicPlan          = ($Plan.resource_changes | Where-Object { $_.address -eq $VmNicAddress})[0]
         }
