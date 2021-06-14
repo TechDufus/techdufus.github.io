@@ -36,6 +36,12 @@ Write some PowerShell. 😊
 
 I've created a PowerShell function and published it in my [AdminToolkit](https://github.com/matthewjdegarmo/AdminToolkit) module called [Merge-CIDRIpRanges](https://github.com/matthewjdegarmo/AdminToolkit/blob/master/Functions/Public/Merge-CIDRIpRanges.ps1).
 
+To install this module:
+
+```powershell
+Install-Module AdminToolkit
+```
+
 This function is meant to resolve these errors from Azure when trying to add many CIDR Ip Addresses, but there are duplicates. On top of that, removing these manually could take... well.. who knows how long, since you have no idea how many there are? You are doomed to `Ctrl + F` and delete the entries until the errors stop, that's it.
 
 Simply provide your CIDR IP list to my function and poof, you will get a filtered, conflict-free list that Azure will love.
@@ -55,4 +61,6 @@ $IPs -Join ',' | Set-Clipboard
 
 This will combine the list of ranges into a single string, separated by commas, and then copy it to you clipboard, ready to `Ctrl + V`.
 
-## 
+## That's all for this one
+
+Thanks for tuning in, and I hope you find use in this solution!
