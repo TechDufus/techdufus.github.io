@@ -44,7 +44,7 @@ To install this module:
 Install-Module AdminToolkit
 ```
 
-This function is meant to resolve these errors from Azure when trying to add many CIDR Ip Addresses, but there are duplicates. On top of that, removing these manually could take... well.. who knows how long, since you have no idea how many there are? You are doomed to `Ctrl + F` and delete the entries until the errors stop, that's it.
+This function is meant to resolve these errors from Azure when trying to add many CIDR Ip Addresses, but there are duplicates. On top of that, removing these manually could take... well.. who knows how long, since you have no idea how many conflicts there are? You are doomed to `Ctrl + F` and delete the entries until the errors stop, that's it.
 
 Simply provide your CIDR IP list to my function and poof, you will get a filtered, conflict-free list that Azure will love.
 
