@@ -63,6 +63,48 @@ $IPs -Join ',' | Set-Clipboard
 
 This will combine the list of ranges into a single string, separated by commas, and then copy it to you clipboard, ready to `Ctrl + V`.
 
+### How is this filtering
+
+At a high level, when a conflict is detected, the winning range is the largest subnet.
+
+Here is a quick example.
+Given the following set of CIDR IPs:
+
+```text
+3.128.0.0/15
+15.230.39.190/31
+15.230.39.142/31
+3.128.56.128/26
+3.128.56.192/26
+3.128.56.64/26
+3.128.93.0/24
+3.17.136.0/23
+3.21.86.0/23
+52.15.127.128/26
+52.15.247.208/29
+```
+
+Would resolve down to..
+
+```text
+3.128.0.0/15
+15.230.39.190/31
+15.230.39.142/31
+3.17.136.0/23
+3.21.86.0/23
+52.15.127.128/26
+52.15.247.208/29
+```
+
+The following are all ranges that live inside of the `3.128.0.0/15` subnet, so they are all removed, and `3.128.0.0/15` is kept.
+
+```text
+3.128.93.0/24
+3.128.56.64/26
+3.128.56.128/26
+3.128.56.192/26
+```
+
 ## That's all for this one
 
 Thanks for tuning in, and I hope you find use in this solution!
