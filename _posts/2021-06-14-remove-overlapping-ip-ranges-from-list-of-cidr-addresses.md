@@ -24,6 +24,8 @@ This will give you ALL of AWS's public-facing Infrastructure IP CIDR Ranges.
 
 The issue is this, when pasting in the values, separated by commas, Azure doesn't like when there are overlapping entries.
 
+"The subnet [X] overlaps the subnet [Y]"
+
 ![](/img/posts/azure_cidr_overlap_error.png)
 
 But, this isn't even my fault! I got these IPs from AWS! Doesn't matter, Azure has no auto-filter for these duplicates / overlaps, and AWS provides them anyway.
