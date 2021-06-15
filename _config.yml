@@ -160,6 +160,9 @@ events:
   - image: "/img/timeline/twitch_icon_146123.png"
     date: "January 2021"
     description: "Started Live-Streaming PowerShell on [Twitch](https://twitch.tv/matthewjdegarmo)"
+  - image: "/img/timeline/colorful_discord_icon.png"
+    date: "April 2021"
+    description: "Became a moderator for a PowerShell Discord Community."
 
 # First image of the Timeline
 
