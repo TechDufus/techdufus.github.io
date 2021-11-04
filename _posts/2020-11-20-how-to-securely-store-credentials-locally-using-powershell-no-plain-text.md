@@ -95,7 +95,7 @@ This is a problem that has many solutions. I picked a location that I knew would
 
 `C:\Users\Public`
 
-I picked this because I was too lazy to write to profile locations. Like I said there are many places these files can be stored; Each profile, APPDATA, etc... In the `C:\Users\Public` folder, I'll have my function check for, and create a folder called `Creds`, (how creative...) I'll also define the path to the XML file we will be creating.
+I picked this because I was too lazy to write to profile locations. Like I said there are many places these files can be stored; Each profile, APPDATA, etc... (`Join-Path $env:USERPROFILE 'Creds'` would do the trick) In the `C:\Users\Public` folder, I'll have my function check for, and create a folder called `Creds`, (how creative...) I'll also define the path to the XML file we will be creating.
 
 Let's add that code now.
 
