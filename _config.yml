@@ -163,7 +163,7 @@ events:
   - image: "/img/timeline/colorful_discord_icon.png"
     date: "April 2021"
     description: "Became a Moderator for a [PowerShell Discord Community](https://discord.gg/Z4PZCWKBGN)."
-  - image: "https://cdn1.dotesports.com/wp-content/uploads/2019/10/10160433/1st-twitch.jpg"
+  - image: "/img/timeline/affiliate.png"
     date: "November 2021"
     description: "Gained Twitch Affiliate status."
 
