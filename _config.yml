@@ -163,6 +163,9 @@ events:
   - image: "/img/timeline/colorful_discord_icon.png"
     date: "April 2021"
     description: "Became a Moderator for a [PowerShell Discord Community](https://discord.gg/Z4PZCWKBGN)."
+  - image: "https://cdn-images-1.medium.com/max/1600/1*4nvGrRWTF5XrQPkjA_V_dA.gif"
+    date: "November 2021"
+    description: "Gained Twitch Affiliate status."
 
 # First image of the Timeline
 
