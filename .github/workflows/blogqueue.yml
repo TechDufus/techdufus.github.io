@@ -11,10 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        env: 
-          GH_USER: ${{ secrets.GH_USER }}
-          GH_EMAIL: ${{ secrets.GH_EMAIL }}
       - uses: matthewjdegarmo/blogqueue@main
         with:
           queue_path: ./.blogqueue
           destination_path: ./_posts/
+          committer_username: ${{ secrets.GH_USER }}
+          committer_email: ${{ secrets.GH_EMAIL }}
