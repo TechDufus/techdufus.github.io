@@ -29,7 +29,7 @@ Get-ChildItem | Where-Object {$_.LastWriteTime -lt $Threshold} | Remove-Item -Fo
 
 ## Comparing Dates
 
-Notice above, how I'm able to compare two different datetime objects as if they were just numbers. The more `FUTURE` date is `GREATER THAN` a date in the past. `TODAY` -gt `YESTERDAY` as a basic example.
+Notice above, how I'm able to compare two different datetime objects as if they were just numbers. The more `FUTURE` date is `GREATER THAN` a date in the past. (`TODAY` -gt `YESTERDAY`) or (`YESTERDAY` -lt `TODAY`) as a basic example.
 
 We can quick test this. All of the following will return True:
 
