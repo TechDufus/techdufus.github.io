@@ -8,7 +8,7 @@ These methods are very useful for adding or subtracting days, months, or years f
 
 ## Method Examples
 
-```
+```ps
 $Now = Get-Date
 $Yesterday = $Now.AddDays(-1)
 $LastYear = $Now.AddYears(-1)
