@@ -224,9 +224,9 @@ err-404-img: "/img/labtocat.png"
 # GPG on Keybase #
 ##################
 
-keybase-username: 
-keybase-in-social: False
-keybase-in-footer: False
+keybase-username: matthewjdegarmo
+keybase-in-social: True
+keybase-in-footer: True
 
 ################################################################################
 
