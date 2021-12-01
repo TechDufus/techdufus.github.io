@@ -1,3 +1,10 @@
+---
+layout: post
+section-type: post
+title: Playing With Dates in PowerShell
+category: powershell
+tags:
+---
 # [DateTime] Objects
 
 I wanted to share a little bit about date objects with PowerShell, and some cool things you can do with them.
