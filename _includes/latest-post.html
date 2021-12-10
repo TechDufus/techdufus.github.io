@@ -21,9 +21,9 @@
         <section class="text-justify">
           {{ post.content | strip_html | markdownify | truncatewords: site.post-preview-words }}
         </section>
-
-        <h4><a href="{{site.baseurl}}/blog/">Archive</a></h4>
-
+        <p>
+          <h4><a href="{{site.baseurl}}/blog/">Archive</a></h4>
+        </p>
       </div>
     </div>
 </section>
