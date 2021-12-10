@@ -10,7 +10,7 @@ tags: [ 'powershell' ]
 
 I wanted to share a little bit about date objects with PowerShell, and some cool things you can do with them.
 
-`Get-Date` returns a datetime object that comes with some very cool methods. If you want to see all of the methods available, you can run `Get-Date | Get-Member`. A few that I would like to highlight are `.AddDays()`, `.AddMonths()`, and `.AddYears()`.
+`Get-Date` returns a datetime object that comes with some very cool methods. If you want to see all of the methods available, you can run `Get-Date \| Get-Member`. A few that I would like to highlight are `.AddDays()`, `.AddMonths()`, and `.AddYears()`.
 
 These methods are very useful for adding or subtracting days, months, or years from a date, to create a full datetime object at a specific time.
 
