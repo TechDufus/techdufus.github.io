@@ -115,7 +115,7 @@ icon-192p: "/img/web-app/posh_girl_192p.png"
 
 enable-gesture-navigation: True
 
-post-preview-words: 50
+post-preview-words: 60
 
 paginate: 10
 
