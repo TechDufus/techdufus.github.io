@@ -16,7 +16,7 @@ These methods are very useful for adding or subtracting days, months, or years f
 
 ## Method Examples
 
-```ps
+```powershell
 $Now = Get-Date
 $Yesterday = $Now.AddDays(-1)
 $LastYear = $Now.AddYears(-1)
@@ -28,7 +28,7 @@ $4MonthsAgo = $Now.AddMonths(-4)
 
 In the above example, we see several ways of altering a datetime object. This is useful for creating specific date thresholds. For example, if you needed to delete all files in a directory that haven't been touched for 7 months, after 04:00 AM on that day, that might look something like this.
 
-```ps
+```powershell
 # Notice here how I'm editing specific values that Get-Date returns.
 # Unless otherwise specified, Get-Date is the CURRENT everything, unless I manually overwrite a value.
 $Threshold = (Get-Date -Hour 4 -Minute 0 -Second 0).AddMonths(-7)
@@ -41,7 +41,7 @@ Notice above, how I'm able to compare two different datetime objects as if they 
 
 We can quick test this. All of the following will return True:
 
-```ps
+```powershell
 (Get-Date).AddDays(-1) -lt (Get-Date) # Yesterday is less than today
 (Get-Date).AddDays(1) -gt (Get-Date) # Tomorrow is greater than today
 (Get-Date).AddDays(1) -gt (Get-Date).AddDays(-1) # Tomorrow is greater than yesterday
@@ -55,13 +55,13 @@ To make this easier to read, you would probably assign these date values to a va
 
 If you need to visually represent a date, you can change how it's displayed. For example, if you wanted to display the date as `01/01/2021`, you could do this:
 
-```ps
+```powershell
 Get-Date -Format "MM/dd/yyyy"
 ```
 
 There are also many preset formats that you can call without having to create the format yourself. For example, if you want the date in a 24-hour format you can do this:
 
-```ps
+```powershell
 Get-Date -UFormat '%R'
 
 17:45
