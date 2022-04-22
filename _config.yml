@@ -79,14 +79,14 @@ lines: # You can add HTML Tags in the Text
 # To use github profile pic uncomment the following line and replace 'user_name'
 # with your github user name.
 
-me-img: "https://github.com/matthewjdegarmo.png?size=500"
+# me-img: "https://github.com/matthewjdegarmo.png?size=500"
 
 # To use gravatar profile pic uncomment the following line and replace 'email_hash'
 # with your gravatar profile email hash.
 # You can create the email hash by using an online tool like 'http://www.md5hashgenerator.com/'
 # just enter your email and it will generate the hash.
 
-# me-img: "https://www.gravatar.com/avatar/email_hash?s=500"
+me-img: "https://www.gravatar.com/avatar/0bbf5d7c13901bd5a2f4e2a6d53e0476?s=500"
 
 ##############################
 # Color the browser elements #
