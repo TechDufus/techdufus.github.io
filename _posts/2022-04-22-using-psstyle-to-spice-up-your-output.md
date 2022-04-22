@@ -7,11 +7,11 @@ tags: [ 'powershell' ]
 ---
 
 # Creating fancy PowerShell output has never been easier with PowerShell v7.2.
-With PowerShell v7.2, an automatic variable called ` $PSStyle` has been added to the PowerShell environment. This variable is a collection of styles that can be applied to the output of PowerShell commands. Accompanied by a feature called PSAnsiRendering, this allows us to easily inject colors, styles, and other formatting into our output.
+With PowerShell v7.2, an automatic variable called `$PSStyle` has been added to the PowerShell environment. This variable is a collection of styles that can be applied to the output of PowerShell commands. Accompanied by a feature called PSAnsiRendering, this allows us to easily inject colors, styles, and other formatting into our output.
 
-After looking into this a bit, I found a simple and easy to understand implimentation of ` $PSStyle` to help create cool output.
+After looking into this a bit, I found a simple and easy to understand implimentation of `$PSStyle` to help create cool output.
 
-This post will not be a deep dive into the ` $PSStyle` object, but instead will simply show off how I was able to use it to create a nice looking output without a lot of clutter in my code.
+This post will not be a deep dive into the `$PSStyle` object, but instead will simply show off how I was able to use it to create a nice looking output without a lot of clutter in my code.
 
 Take the following example, without using PSStyle:
 
