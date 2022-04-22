@@ -76,11 +76,11 @@ Notice above, how some of the symbols leverage the color variables we defined ab
 
 For example, this is the ` $ARROW` symbol by itself:
 
-▶
+![](/img/posts/psstyle_arrow_plain.png)
 
 But if we want to show the ` $ARROW` symbol in Cyan, we would simply wrap the `([char]9654)` in the ` $CYAN` variable.
 
-<span style="color:CYAN">▶</span>
+![](/img/posts/psstyle_arrow_cyan.png)
 
 I like to have my output messages written in CYAN, so I want to start with a CYAN arrow.
 
