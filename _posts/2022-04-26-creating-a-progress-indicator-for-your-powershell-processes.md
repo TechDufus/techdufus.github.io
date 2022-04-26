@@ -164,7 +164,7 @@ Note, the ``Write-Host "`b`b${WARNING}"`` line in the `Finally {}` block is able
 
 I hope everything up to this point has made sense so far. But I wanted bring up a situation I ran into recently with this spinner and offer my solution.
 
-The problem: What if the `Until ()` condition takes a long time to evaluate?
+`The problem:` What if the `Until ()` condition takes a long time to evaluate?
 
 In the above examples, we are simply running a `Test-Path` check, and then the spinner starts over again. Because of how quickly this check runs, our brains don't really notice the delay between each rotation. But what if our check took 1 second to generate a result for? Our spinner would look more like this...
 
