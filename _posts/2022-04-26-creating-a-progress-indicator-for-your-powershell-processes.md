@@ -54,7 +54,7 @@ Function Write-Spinner() {
 }
 ```
 
-This function will write out the `SPINNER` variable, one character at a time, and then wait 65 milliseconds before writing the next character. notice the `` `b`b `` syntax. This is used to write these symbols 'in place' on the console. This is essnetially typing a `backspace` and then typing the symbol. Instead of displaying the characters side by side (as shown in **Figure 2**), we are displaying them in a 'spiral' pattern.
+This function will write out the `SPINNER` variable, one character at a time, waiting 65 milliseconds after each character. Notice the `` `b`b `` syntax. This is used to write these symbols 'in place' on the console. This is essnetially typing a `backspace` and then typing the symbol. Instead of displaying the characters side by side (as shown in **Figure 2**), we are displaying them in a 'spiral' pattern.
 
 ![](/img/posts/spinner_chars.png)
 **Figure 2 - Spinner Characters**
@@ -100,7 +100,7 @@ Write-Host "`b`b${CHECK_MARK}"
 Write-Host "${ARROW} ${GREEN}Thank you for creating the file!${RESET}"
 ```
 
-I'm doing a fancy thing here. I'm using the `Do` loop to keep the script running until the file is created. I'm using the `Write-Spinner` function to display the spinner, and then I'm using the `Test-Path` function to check if the file exists. If it does, then the loop will exit, and the `Write-Host` will display the check mark. I like to use the `Write-Host` function to display the check mark, because it will make the output look a little cleaner, and not leave whatever the last progress indicator spinner symbol was.
+I'm doing a fancy thing here. I'm using the `Do` loop to keep the script running until the file is created. I'm using the `Write-Spinner` function to display the spinner, and then I'm using the `Test-Path` function to check if the file exists. If it does, then the loop will exit, and the `Write-Host` will display the check mark. I like to use the `Write-Host` function to display the check mark, because it will make the output look a little cleaner, and not leave the leftover spinner symbol in the console.
 
 The above code would look like this, spinning until the file exists.
 
