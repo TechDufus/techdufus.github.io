@@ -78,7 +78,7 @@ For example, this is the `$ARROW` symbol by itself:
 
 ![](/img/posts/psstyle_arrow_plain.png)
 
-But if we want to show the `$ARROW` symbol in Cyan, we would simply wrap the `([char]9654)` in the ` $CYAN` variable.
+But if we want to show the `$ARROW` symbol in Cyan, we would simply wrap the `([char]9654)` in the `$CYAN` variable.
 
 ![](/img/posts/psstyle_arrow_cyan.png)
 
