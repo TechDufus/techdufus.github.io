@@ -1,9 +1,9 @@
 # HawkScan 0.9.4
-# matthewjdegarmo.com Application specific config
+# TechDufus.com Application specific config
 # Completed: 1603370095977
 
 app:
-  host: https://matthewjdegarmo.com
+  host: https://TechDufus.com
   antiCsrfParam: ""
   api: ""
   appDataType: unknown

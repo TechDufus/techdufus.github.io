@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: matthewjdegarmo/blogqueue@main
+      - uses: techdufus/blogqueue@main
         with:
           queue_path: ./.blogqueue
           destination_path: ./_posts/

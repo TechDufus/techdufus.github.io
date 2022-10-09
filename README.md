@@ -1,17 +1,17 @@
-# { matthewjdegarmo } 
+# { TechDufus } 
 ![Build Status](https://travis-ci.org/le4ker/personal-jekyll-theme.svg?branch=master)
-![license](https://img.shields.io/badge/license-MIT-blue.svg?link=https://github.com/matthewjdegarmo/matthewjdegarmo.github.io/LICENSE)
+![license](https://img.shields.io/badge/license-MIT-blue.svg?link=https://github.com/TechDufus/TechDufus.github.io/LICENSE)
 
-{ matthewjdegarmo } is my responsive Jekyll themed Blog / Portfolio, about me :wink:
+{ TechDufus } is my responsive Jekyll themed Blog / Portfolio, about me :wink:
 
-You can see it in action [here](https://matthewjdegarmo.github.io)!
+You can see it in action [here](https://TechDufus.github.io)!
 
 <img src="/img/site-mobile.mov.gif" height="480">
 
 
 ## How to run locally
 
-First, you need to install jekyll and the dependencies of { matthewjdegarmo } by running:
+First, you need to install jekyll and the dependencies of { TechDufus } by running:
 
 ```shell
 ./scripts/install
