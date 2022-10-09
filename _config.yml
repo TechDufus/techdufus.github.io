@@ -167,6 +167,9 @@ events:
   - image: "/img/timeline/1st-twitch.jpg"
     date: "November 2021"
     description: "Became [Twitch Affiliate](https://www.twitch.tv/products/techdufus)."
+  - image: "/img/timeline/runonflux.png"
+    date: "July 2022"
+    description: "Joined the [RunOnFlux](https://runonflux.io) Team."
 
 # First image of the Timeline
 
