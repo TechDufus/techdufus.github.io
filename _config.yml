@@ -220,9 +220,9 @@ err-404-img: "/img/labtocat.png"
 # GPG on Keybase #
 ##################
 
-keybase-username: TechDufus
-keybase-in-social: True
-keybase-in-footer: True
+# keybase-username: TechDufus
+keybase-in-social: False
+keybase-in-footer: False
 
 ################################################################################
 
