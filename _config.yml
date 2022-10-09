@@ -31,8 +31,8 @@ force-https: True
 lang: "en"
 author: "TechDufus"
 title: "{ TechDufus }"
-description: "Blog and website of Matthew DeGarmo, blogging mainly about PowerShell. Opinions expressed are mine."
-keywords: "degarmo, matthew, powershell, windows, tech"
+description: "Blog and website of THE TechDufus, blogging mainly about PowerShell. Opinions expressed are mine."
+keywords: "techdufus, powershell, windows, tech"
 favicon: "/img/posh_favicon.ico"
 
 ################
