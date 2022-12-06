@@ -3,7 +3,7 @@ layout: post
 section-type: post
 title: Using $PSStyle to Spice up your Output
 category: powershell
-tags: [ 'powershell' ]
+tags: [ 'devops' ]
 ---
 
 # Creating fancy PowerShell output has never been easier with PowerShell v7.2.

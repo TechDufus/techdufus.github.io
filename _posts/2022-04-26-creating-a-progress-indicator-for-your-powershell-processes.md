@@ -3,7 +3,7 @@ layout: post
 section-type: post
 title: Creating a Progress Indicator for your PowerShell Processes
 category: powershell
-tags: [ 'powershell' ]
+tags: [ 'devops' ]
 ---
 
 # Have you ever wondered if your script is still running, or did it just freeze?

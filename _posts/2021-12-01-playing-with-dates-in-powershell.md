@@ -3,7 +3,7 @@ layout: post
 section-type: post
 title: 'Playing With Dates in PowerShell'
 category: powershell
-tags: [ 'powershell' ]
+tags: [ 'devops' ]
 ---
 
 # \[DateTime\] Objects
