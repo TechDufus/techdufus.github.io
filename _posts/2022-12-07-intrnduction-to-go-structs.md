@@ -8,7 +8,7 @@ tags: [ 'devops' ]
 
 # Introduction to Golang Structs
 
-Golang structs are a powerful tool for organizing data in Go. They allow you to create custom data types that can be used to store and manipulate data in an efficient and organized way. In this blog post, we'll take a look at the basics of Golang structs and how they can be used to make your code more efficient and organized. 
+Golang structs are a powerful tool for organizing data in Golang. They allow you to create custom data types that can be used to store and manipulate data in an efficient and organized way. In this blog post, we'll take a look at the basics of Golang structs and how they can be used to make your code more efficient and organized. 
 
 ## What is a Struct? 
 
