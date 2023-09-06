@@ -31,7 +31,7 @@ force-https: True
 lang: "en"
 author: "TechDufus"
 title: "{ TechDufus }"
-description: "Blog and website of THE TechDufus, blogging mainly about PowerShell. Opinions expressed are mine."
+description: "Blog and website of THE TechDufus, blogging anything I want. Opinions expressed are mine."
 keywords: "techdufus, powershell, windows, tech"
 favicon: "/img/posh_favicon.ico"
 
@@ -170,6 +170,9 @@ events:
   - image: "/img/timeline/runonflux.png"
     date: "July 2022"
     description: "Joined the [RunOnFlux](https://runonflux.io) Team."
+  - image: "/img/timeline/life-coaching.png"
+    date: "September 2023"
+    description: "Started Life Coaching."
 
 # First image of the Timeline
 
