@@ -1,7 +1,7 @@
 ---
 layout: post
 section-type: post
-title: "I Make Excuses: Eating Well"
+title: I Make Excuses | Eating Well
 category: personal
 tags: [ 'life' ]
 ---
