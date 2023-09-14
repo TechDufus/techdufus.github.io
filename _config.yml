@@ -131,7 +131,7 @@ pinterest-share: True
 pocket-share: True
 vkontakte-share: True
 
-disqus-shortname: "theTechDufus"
+# disqus-shortname: "theTechDufus"
 
 syntax-highlight: True
 
