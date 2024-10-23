@@ -22,7 +22,7 @@ google-tracking-id: "UA-187900687-1"
 # If you are not hosted on Github Pages, and your host doesn't support https
 # then you should disable it
 
-force-https: True
+force-https: true
 
 #############
 # HTML Head #
@@ -51,10 +51,10 @@ background-img: "/img/background.jpg"
 # Dynamic Text on the Header #
 ##############################
 
-dynamic-typing: True
-shuffle: True # Shuffle the lines.
-loop: True
-loop-count: False # Set False for infinite loop, or set any number for finite loop.
+dynamic-typing: true
+shuffle: true # Shuffle the lines.
+loop: true
+loop-count: false # Set False for infinite loop, or set any number for finite loop.
 type-speed: 10
 start-delay: 200
 delete-delay: 2200
@@ -99,7 +99,7 @@ apple-status-bar-style: "black"
 # Web app mode #
 ################
 
-web-app-mode: True
+web-app-mode: true
 
 # Icons for Web App mode
 
@@ -114,26 +114,26 @@ icon-192p: "/img/web-app/posh_girl_192p.png"
 # Blog #
 ########
 
-enable-gesture-navigation: True
+enable-gesture-navigation: true
 
 post-preview-words: 60
 
 paginate: 10
 
-email-share: True
-fb-share: True
-twitter-share: True
-linkedin-share: True
-reddit-share: True
-google-plus-share: True
-tumblr-share: True
-pinterest-share: True
-pocket-share: True
-vkontakte-share: True
+email-share: true
+fb-share: true
+twitter-share: true
+linkedin-share: true
+reddit-share: true
+google-plus-share: true
+tumblr-share: true
+pinterest-share: true
+pocket-share: true
+vkontakte-share: true
 
 disqus-shortname: "matthewjdegarmo"
 
-syntax-highlight: True
+syntax-highlight: true
 
 ############
 # Timeline #
@@ -189,7 +189,7 @@ email:  # Leaving blank.
 
 
 # Set a url pointing to your publish PGP Public Key here, and it will appear in the Contact section
-pgp: False
+pgp: false
 
 ################
 # Author Blurb #
@@ -209,11 +209,11 @@ author_blurb_image: "/img/author_techdufus.png"
 social:
   - title: "twitch"
     url: "https://twitch.tv/TechDufus"
-  - title: "X"
+  - title: "twitter-square"
     url: "https://x.com/TechDufus"
   - title: "github"
     url: "https://github.com/TechDufus"
-  - title: "linktree"
+  - title: "tree"
     url: "https://linktr.ee/TechDufus"
   - title: "reddit"
     url: "https://www.reddit.com/user/TechDufus"
@@ -233,8 +233,8 @@ err-404-img: "/img/labtocat.png"
 ##################
 
 # keybase-username: TechDufus
-keybase-in-social: False
-keybase-in-footer: False
+keybase-in-social: false
+keybase-in-footer: false
 
 ################################################################################
 
