@@ -44,7 +44,7 @@ black-favicon: "/img/pwsh/favicon-32x32.png"
 # logo: "TechDufus.github.io/img/pwsh/posh_girl_closeup.png" # leave blank if you don't want a logo
 logo:
 
-background-img: "/img/posh_girl-bg_blur.jpg"
+background-img: "/img/background.jpg"
 #background-img: "../img/intro-bg.jpg"
 
 ##############################
@@ -170,9 +170,12 @@ events:
   - image: "/img/timeline/runonflux.png"
     date: "July 2022"
     description: "Joined the [RunOnFlux](https://runonflux.io) Team."
-  - image: "/img/timeline/life-coaching.png"
-    date: "September 2023"
-    description: "Started Life Coaching."
+  - image: "/img/timeline/raft-logo.png"
+    date: "September 2024"
+    description: "Became a [Rafter!](https://teamraft.com)"
+  # - image: "/img/timeline/life-coaching.png"
+  #   date: "September 2023"
+  #   description: "Started Life Coaching."
 
 # First image of the Timeline
 
@@ -196,8 +199,8 @@ pgp: False
 # This works best when your author blurb image has a transparent background, or matches your site background color.
 
 # if the author_blurb is not set, then this feature is skipped
-author_blurb: "The Dufus is an awesome person. He is a daily learner and nerd. A husband, and a father of 2, he likes long walks on the beach, and eating ice cream in his spare time."
-author_blurb_image: "/img/author_L.png"
+author_blurb: "The Dufus is an awesome person. He is a daily learner and nerd. A husband, and a father of 4, he likes long walks on the beach, and eating ice cream in his spare time."
+author_blurb_image: "/img/author_techdufus.png"
 
 ##################
 # Social Buttons #
@@ -206,10 +209,12 @@ author_blurb_image: "/img/author_L.png"
 social:
   - title: "twitch"
     url: "https://twitch.tv/TechDufus"
-  - title: "twitter"
-    url: "https://twitter.com/TechDufus"
+  - title: "X"
+    url: "https://x.com/TechDufus"
   - title: "github"
     url: "https://github.com/TechDufus"
+  - title: "linktree"
+    url: "https://linktr.ee/TechDufus"
   - title: "reddit"
     url: "https://www.reddit.com/user/TechDufus"
   - title: "coffee"
