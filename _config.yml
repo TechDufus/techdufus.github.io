@@ -33,7 +33,7 @@ author: "TechDufus"
 title: "{ TechDufus }"
 description: "Blog and website of THE TechDufus, blogging anything I want. Opinions expressed are mine."
 keywords: "techdufus, powershell, windows, tech"
-favicon: "/img/posh_favicon.ico"
+favicon: "/img/favicon.png"
 
 ################
 # Header layout #
