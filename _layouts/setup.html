@@ -18,18 +18,17 @@
         {{ page.content | markdownify }}
 
         <div>
-          {% for post in paginator.posts %}
-            {% include post-list.html%}
+          <!-- for file in setup/  -->
+          {% for file in paginator.setup %}
+            {{ file.content | markdownify }}
           {% endfor %}
         </div>
-
-        {% include pagination.html %}
 
         </div>
       </div>
     </section>
 
-    {% include footer.html %}
+    <!-- {% include footer.html %} -->
 
     {% include js.html %}
 
