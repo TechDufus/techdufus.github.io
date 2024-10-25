@@ -19,7 +19,7 @@
 
         <div>
           <!-- for file in setup/  -->
-          {% for file in paginator.setup %}
+          {% for file in site.collections.setup %}
             {{ file.content | markdownify }}
           {% endfor %}
         </div>

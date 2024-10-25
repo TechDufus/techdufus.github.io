@@ -242,6 +242,9 @@ keybase-in-footer: false
 
 # Sections shown in the index page
 
+collections:
+  - 'setup'
+
 pages_list:
   About: 'about'
   Blog: 'latest-post'
