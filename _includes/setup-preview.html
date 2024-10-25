@@ -1,0 +1,22 @@
+
+<!-- Setup Preview Start -->
+
+<section id="{{ page.section-type }}" class="container content-section text-center">
+    <div class="row">
+      <div class="col-md-10 col-md-offset-1">
+
+        {{ page.content | markdownify }}
+
+        {% assign setup_post = site.posts.first %}
+        <h4> Want to see my gear? </h4>
+
+        <section class="text-justify">
+          {{ post.content | strip_html | markdownify | truncatewords: site.post-preview-words }}
+        </section>
+        <h4><a href="{{site.baseurl}}/setup/">View My Setup</a></h4>
+      </div>
+    </div>
+</section>
+
+<!-- Setup Preview End -->
+

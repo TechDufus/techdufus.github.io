@@ -245,6 +245,7 @@ keybase-in-footer: false
 pages_list:
   About: 'about'
   Blog: 'latest-post'
+  Setup: 'setup-preview'
   Timeline: 'timeline'
   Contact: 'contact'
 
