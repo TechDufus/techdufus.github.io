@@ -18,7 +18,7 @@
         {{ page.content | markdownify }}
 
         <div>
-          <!-- for file in setup/  -->
+          <!-- for file in setup  -->
           {% for file in site.collections.setup %}
             {{ file.content | markdownify }}
           {% endfor %}
@@ -28,7 +28,6 @@
       </div>
     </section>
 
-    <!-- {% include footer.html %} -->
 
     {% include js.html %}
 
