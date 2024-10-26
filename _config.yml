@@ -245,6 +245,7 @@ keybase-in-footer: false
 collections:
   setup:
     output: true
+    include: true
 
 pages_list:
   About: 'about'
