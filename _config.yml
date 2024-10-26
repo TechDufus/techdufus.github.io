@@ -243,7 +243,8 @@ keybase-in-footer: false
 # Sections shown in the index page
 
 collections:
-  - 'setup'
+  setup:
+    output: true
 
 pages_list:
   About: 'about'
