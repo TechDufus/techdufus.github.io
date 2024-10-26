@@ -20,9 +20,7 @@
         <div>
           <!-- for file in setup  -->
           {% for file in site.setup %}
-            {% if file.include == true %}
-              {{ file.content | markdownify }}
-            {$ endif %}
+            {{ file.content | markdownify }}
           {% endfor %}
         </div>
 

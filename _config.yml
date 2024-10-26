@@ -245,7 +245,10 @@ keybase-in-footer: false
 collections:
   setup:
     output: true
-    include: true
+    order:
+      - Gear.md
+      - Software.md
+      - Homelab.md
 
 pages_list:
   About: 'about'
