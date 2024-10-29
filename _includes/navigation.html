@@ -45,6 +45,12 @@
               {% else %}
                 <a href="{{site.baseurl}}/blog/"> {{p[0]}} </a>
               {% endif %}
+            {% elsif p[1] == "setup-preview" %}
+              {% if page.url == "/setup/index.html" | prepend: {{site.baseurl}} %}
+                <a class="page-scroll" href="#page"> {{p[0]}} </a>
+              {% else %}
+                <a href="{{site.baseurl}}/setup/"> {{p[0]}} </a>
+              {% endif %}
             {% else %}
                 <a href="{{site.baseurl}}/#{{ p[1] }}"> {{p[0]}} </a>
             {% endif %}
