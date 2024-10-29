@@ -6,9 +6,9 @@
 
 I have 3 monitors currently, But I am actually only using the [CRG9](https://www.samsung.com/us/computing/monitors/gaming/49-crg9-dual-qhd-curved-qled-gaming-monitor-lc49rg90ssnxza/) at the moment. This helps me stay more focussed. Though it is annoying never being able to share my whole screen on meetings since it's so huge, I am forced to switch between sharing individual apps.
 
-- [Samsung 49" 120hz CRG9](https://www.samsung.com/us/computing/monitors/gaming/49-crg9-dual-qhd-curved-qled-gaming-monitor-lc49rg90ssnxza/) 5120x1440p
-- VioTek 27" Curved 1920x1080p
-- [HP P224 21.5" 60hz](https://support.hp.com/us-en/product/product-specs/hp-p224-21.5-inch-monitor/26575345) 1920x1080p
+- [Samsung 49" 120hz CRG9](https://www.samsung.com/us/computing/monitors/gaming/49-crg9-dual-qhd-curved-qled-gaming-monitor-lc49rg90ssnxza/) [5120x1440p]
+- VioTek 27" Curved [1920x1080p]
+- [HP P224 21.5" 60hz](https://support.hp.com/us-en/product/product-specs/hp-p224-21.5-inch-monitor/26575345) [1920x1080p]
 
 I've always wanted to try a single 4k or 5k display with a normal aspect ratio (not super-ultrawide), but being on MacOS and having my current window manager (Hammerspoon/GridLayout) I am really settling into this [CRG9](https://www.samsung.com/us/computing/monitors/gaming/49-crg9-dual-qhd-curved-qled-gaming-monitor-lc49rg90ssnxza/)
 
