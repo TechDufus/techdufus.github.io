@@ -23,6 +23,17 @@ ZSA comes with their [ORYX](https://configure.zsa.io/home) layout editor, which 
 
 There is a lot about my keyboard config that lends itself to my workflow tooling like [hammerspoon/gridlayout] for my window manager (f13 and f16 keys).
 
+Originally I wanted to buy the [Kenesis Advantage360 Professional](https://kinesis-ergo.com/shop/adv360pro/) but it was sold out at the time and I didn't want to wait, so I went with the Moonlander. I'm VERY happy with the Moonlander, but if I needed to buy another keyboard I'd be torn between the two, Unless ZSA comes out with a MRK II that fixes some of my issues with the Moonlander, then it'd be a no-brainer for me.
+
+Than brings me to....
+
+#### Keyboard Issues
+
+I do have some issues with the Moonlander as it is.
+
+1. Portability. Why am I required to use an alan wrench in order to loosen / collapse the thumb clusters in order to store the keyboard in it's travel case?
+2. I wish the Moonlander was able to tent more with the stock configuration. I know this is probably a hard problem to solve, but 3D printing your own custom tent kit is just not an option for everyone. I think there's a place where you can buy a nice metal tent kit, but it seems bulky and doesn't lent itself to my first issue above in regards to being portable.
+
 ### Mouse {#hardware-mouse}
 
 I use the [Logitech MX Master3]() and have for about 3 years now. Every now and then the horizontal scroll doesn't seem to want to work right, but with my workflow becoming more and more mouse-independent, I could probably use any mouse since I rarely reach for it.
