@@ -8,6 +8,7 @@ Keyboard: ZSA MoonLander MRK I
 
 Mouse: Logitech MX Master3
 
+```
                                                                                        Office Hardware
 
                                                                                                                                              HDMI
@@ -46,5 +47,4 @@ Mouse: Logitech MX Master3
                               ┌───────────────────────────────┐
                               │      Logitech Litra Beam      │
                               └───────────────────────────────┘
-
-
+```
