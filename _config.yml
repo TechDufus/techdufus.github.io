@@ -39,7 +39,8 @@ favicon: "/img/favicon.png"
 # Header layout #
 ################
 
-black-favicon: "/img/pwsh/favicon-32x32.png"
+# black-favicon: "/img/pwsh/favicon-32x32.png"
+black-favicon: "/img/favicon.png"
 #logo:  # leave blank if you don't want a logo
 # logo: "TechDufus.github.io/img/pwsh/posh_girl_closeup.png" # leave blank if you don't want a logo
 logo:
