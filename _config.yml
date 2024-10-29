@@ -31,9 +31,9 @@ force-https: true
 lang: "en"
 author: "TechDufus"
 title: "{ TechDufus }"
-description: "Blog and website of THE TechDufus, blogging anything I want. Opinions expressed are mine."
-keywords: "techdufus, powershell, windows, tech"
-favicon: "/img/favicon.png"
+description: "Blog and website of THE TechDufus™, blogging anything I want. Opinions expressed are mine."
+keywords: "techdufus, powershell, windows, tech, linux, neovim, hardware, nerd."
+favicon: "/img/favicon32x32.png"
 
 ################
 # Header layout #
@@ -43,7 +43,6 @@ favicon: "/img/favicon.png"
 black-favicon: "/img/favicon32x32.png"
 #logo:  # leave blank if you don't want a logo
 # logo: "TechDufus.github.io/img/pwsh/posh_girl_closeup.png" # leave blank if you don't want a logo
-logo: "/img/favicon32x32.png"
 
 background-img: "/img/background.jpg"
 #background-img: "../img/intro-bg.jpg"
