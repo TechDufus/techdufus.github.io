@@ -1,10 +1,3 @@
-graph {
-  border: 1px solid black;
-  fill: oldlace;
-  background: goldenrod;
-  label: Office Hardware;
-  }
-edge { label-color: green; color: blue; }
 
 [ZSA Moonlander MRK I Keyboard] -- USBC/USB3 --> [USB Switch]
 [Logitech C925 Webcam] -- USB3 --> [USB Switch]
