@@ -246,7 +246,7 @@ collections:
   setup:
     output: true
     order:
-      - Gear.md
+      - Hardware.md
       - Software.md
       - Homelab.md
 
