@@ -200,7 +200,7 @@ pgp: false
 
 # if the author_blurb is not set, then this feature is skipped
 author_blurb: "The Dufus is an awesome person. He is a daily learner and nerd. A husband, and a father of 4, he likes long walks on the beach, and eating ice cream in his spare time."
-author_blurb_image: "/img/author_techdufus.png"
+author_blurb_image: "/img/author_techdufus.jpg"
 
 ##################
 # Social Buttons #
