@@ -4,11 +4,13 @@
 
 ## Monitors {#hardware-monitors}
 
-- [Dell 49" 120hz CRG9](https://www.samsung.com/us/computing/monitors/gaming/49-crg9-dual-qhd-curved-qled-gaming-monitor-lc49rg90ssnxza/)
-- VioTek 27" Curved
-- [HP P224 21.5" 60hz](https://support.hp.com/us-en/product/product-specs/hp-p224-21.5-inch-monitor/26575345)
+I have 3 monitors currently, But I am actually only using the [CRG9](https://www.samsung.com/us/computing/monitors/gaming/49-crg9-dual-qhd-curved-qled-gaming-monitor-lc49rg90ssnxza/) at the moment. This helps me stay more focussed. Though it is annoying never being able to share my whole screen on meetings since it's so huge, I am forced to switch between sharing individual apps.
 
-I have 3 monitors currently, But I am actually only using the CRG9 at the moment. This helps me stay more focussed. Though it is annoying never being able to share my whole screen on meetings since it's so huge, I am forced to switch between sharing individual apps.
+- [Samsung 49" 120hz CRG9](https://www.samsung.com/us/computing/monitors/gaming/49-crg9-dual-qhd-curved-qled-gaming-monitor-lc49rg90ssnxza/) 5120x1440p
+- VioTek 27" Curved 1920x1080p
+- [HP P224 21.5" 60hz](https://support.hp.com/us-en/product/product-specs/hp-p224-21.5-inch-monitor/26575345) 1920x1080p
+
+I've always wanted to try a single 4k or 5k display with a normal aspect ratio (not super-ultrawide), but being on MacOS and having my current window manager (Hammerspoon/GridLayout) I am really settling into this [CRG9](https://www.samsung.com/us/computing/monitors/gaming/49-crg9-dual-qhd-curved-qled-gaming-monitor-lc49rg90ssnxza/)
 
 
 ## Peripherals {#hardware-peripherals}
@@ -27,6 +29,15 @@ I use the [Logitech MX Master3]() and have for about 3 years now. Every now and 
 
 ### Webcam {#hardware-webcam}
 
+I currently have 2 webcams. One is my main one, and the other I have that I used to play with extra OBS scenes / angles for streaming.
+
+- [Logitech C925E Business](https://www.logitech.com/en-us/products/webcams/c925e-business-webcam.960-001075.html)
+- [Logitech C922 Pro](https://www.logitech.com/en-us/products/webcams/c922-pro-stream-webcam.html)
+
+Both of these cameras are okay. I would only consider upgrading if I wanted something that was 1080p 60hz or better.
+
 ### Speakers {#hardware-speakers}
+
+I have used the [Creative T100 Speakers]() for a few years now and they have some pretty stellar sound. No complaints here.
 
 
