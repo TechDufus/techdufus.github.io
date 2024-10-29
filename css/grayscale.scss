@@ -263,7 +263,13 @@ a {
         border: 1px solid $font-color;
     }
     /* Added in { Personal } */
-    ul,
+    ul {
+        text-align: left;
+        margin: 0 0 25px;
+        font-size: 18px;
+        line-height: 1.5;
+        list-style-position: inside;
+    }
     ol {
         text-align: left;
         margin: 0 0 25px;
