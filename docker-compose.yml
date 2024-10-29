@@ -5,7 +5,8 @@ services:
     image: jekyll/jekyll
     ports:
       - "4000:4000"
-    command: jekyll serve --watch --host "0.0.0.0" --config _config.yml,_config.dev.yml
+    command: |
+      bundle add webrick
+      jekyll serve --watch --host "0.0.0.0" --config _config.yml,_config.dev.yml
     volumes:
       - .:/srv/jekyll
-
