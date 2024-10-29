@@ -4,9 +4,9 @@
 
 ## Monitors {#hardware-monitors}
 
-- [Dell 49" 120hz CRG9](https://www.samsung.com/us/computing/monitors/gaming/49-crg9-dual-qhd-curved-qled-gaming-monitor-lc49rg90ssnxza/)
-- VioTek 27" Curved
-- [HP P224 21.5" 60hz](https://support.hp.com/us-en/product/product-specs/hp-p224-21.5-inch-monitor/26575345)
+↦ [Dell 49" 120hz CRG9](https://www.samsung.com/us/computing/monitors/gaming/49-crg9-dual-qhd-curved-qled-gaming-monitor-lc49rg90ssnxza/)
+↦ VioTek 27" Curved
+↦ [HP P224 21.5" 60hz](https://support.hp.com/us-en/product/product-specs/hp-p224-21.5-inch-monitor/26575345)
 
 I have 3 monitors currently, But I am actually only using the CRG9 at the moment. This helps me stay more focussed. Though it is annoying never being able to share my whole screen on meetings since it's so huge, I am forced to switch between sharing individual apps.
 
