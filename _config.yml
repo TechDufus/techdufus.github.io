@@ -40,10 +40,10 @@ favicon: "/img/favicon.png"
 ################
 
 # black-favicon: "/img/pwsh/favicon-32x32.png"
-black-favicon: "/img/favicon.png"
+black-favicon: "/img/favicon32x32.png"
 #logo:  # leave blank if you don't want a logo
 # logo: "TechDufus.github.io/img/pwsh/posh_girl_closeup.png" # leave blank if you don't want a logo
-logo:
+logo: "/img/favicon32x32.png"
 
 background-img: "/img/background.jpg"
 #background-img: "../img/intro-bg.jpg"
