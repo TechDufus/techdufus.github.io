@@ -15,6 +15,10 @@ I've always wanted to try a single 4k or 5k display with a normal aspect ratio (
 
 ## Peripherals {#hardware-peripherals}
 
+### Microphone {#hardware-microphone}
+
+I just received the [Rode NT-USB+ Microphone] and I sure love it. I used to use the Blue Yeti Pro, but after a few years it lost it's luster, and for good reason.
+
 ### Keyboard {#hardware-keyboard}
 
 I currently rock the [ZSA Moonlander MRK I](https://www.zsa.io/moonlander) and LOVE it. I use a custom [DVORAK](https://en.wikipedia.org/wiki/Dvorak_keyboard_layout) keyboard layout.
