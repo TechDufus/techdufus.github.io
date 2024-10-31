@@ -17,7 +17,11 @@ I've always wanted to try a single 4k or 5k display with a normal aspect ratio (
 
 ### Microphone {#hardware-microphone}
 
-I just received the [Rode NT-USB+ Microphone] and I sure love it. I used to use the Blue Yeti Pro, but after a few years it lost it's luster, and for good reason.
+I just received the [Rode NT-USB+ Microphone](https://rode.com/en-us/microphones/usb/nt-usb-plus) and I sure love it. I used to use the [Logitech Yeti X](https://www.logitechg.com/en-us/products/streaming-gear/yeti-x-professional-microphone.988-000105.html), but after a few years it lost it's luster, and for good reason.
+
+The [Logitech Yeti X](https://www.logitechg.com/en-us/products/streaming-gear/yeti-x-professional-microphone.988-000105.html) requires the [Logitech G HUB](https://www.logitechg.com/en-us/innovation/g-hub.html) program running for anything magical to happen. All digital processing is done via the G HUB application. On top of this, there is no settings sync between computers, which means I've always had to install G HUB on each computer, tweak EVERY LITTLE SETTING to hopefully get things to match between computers. It was just a hastle...
+
+With the [Rode NT-USB+ Microphone](https://rode.com/en-us/microphones/usb/nt-usb-plus), ALL processing happens within the mic. That means I have all my mic settings and functions no matter what device I plug it into, and does not require a running program on the computer either.
 
 ### Keyboard {#hardware-keyboard}
 
@@ -53,6 +57,6 @@ Both of these cameras are okay. I would only consider upgrading if I wanted some
 
 ### Speakers {#hardware-speakers}
 
-I have used the [Creative T100 Speakers]() for a few years now and they have some pretty stellar sound. No complaints here.
+I have used the [Creative T100 Speakers](https://us.creative.com/p/speakers/creative-t100) for a few years now and they have some pretty stellar sound. No complaints here.
 
 
