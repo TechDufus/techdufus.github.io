@@ -65,6 +65,7 @@ lines: # You can add HTML Tags in the Text
   - text: "A person who never made a mistake never tried anything new. -Albert Einstein"
   - text: "The way to get started is to quit talking and begin doing. -Walt Disney"
   - text: "In my defense, I was left unsupervised. -Lee St. John"
+  - text: "I use Neovimᵇᵗʷ -TechDufus"
 
 
 # me-img: "/img/jetpacktocat.png"
