@@ -208,14 +208,16 @@ author_blurb_image: "/img/author_techdufus.jpg"
 ##################
 
 social:
-  - title: "twitch"
-    url: "https://twitch.tv/TechDufus"
   - title: "twitter-square"
     url: "https://x.com/TechDufus"
+  - title: "twitch"
+    url: "https://twitch.tv/TechDufus"
   - title: "github"
     url: "https://github.com/TechDufus"
   - title: "tree"
     url: "https://linktr.ee/TechDufus"
+  - title: "discord"
+    url: "https://discord.gg/5M4hjfyRBj"
   - title: "reddit"
     url: "https://www.reddit.com/user/TechDufus"
   - title: "coffee"
