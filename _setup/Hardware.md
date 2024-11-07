@@ -24,6 +24,7 @@ Sherlock is what I call my personal Desktop PC. It's a custom-built PC running d
 | Power Supply | [Cooler Master V850 SFX Gold Full Modular, 850W, 80+ Gold](https://a.co/d/7YxFnKy) |
 | Custom Cables | [Etsy CoolerMaster PSU Cables - White](https://www.etsy.com/listing/678008798/coolermaster-full-modular-psu-cables) |
 
+---
 
 ### M3 MacBook Pro - Nov 2023 {#hardware-m3macbook}
 
