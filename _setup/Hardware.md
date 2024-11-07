@@ -29,7 +29,7 @@ Sherlock is what I call my personal Desktop PC. It's a custom-built PC running d
 
 This is the [M3 MacBook Pro (14-inch, M3, Nov 2023)](https://support.apple.com/en-us/117735).
 
-### Intel MacBook Pro - Mid 2015
+### Intel MacBook Pro - Mid 2015 {#hardware-intelmacbook}
 
 This is the [Intel MacBook Pro (Retina, 15-inch, Mid 2015)](https://support.apple.com/en-us/111955).
 
