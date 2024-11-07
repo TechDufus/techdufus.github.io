@@ -2,6 +2,36 @@
 ---
 # Hardware
 
+## Computers
+
+### Sherlock
+
+Sherlock is what I call my personal Desktop PC. It's a custom-built PC running dual-boot Windows 11 / some flavor of linux.
+
+![](/img/setup/setup-sherlock-desktop.jpg)
+
+| Component | Item |
+| -- | -- |
+| CPU | [AMD Ryzen 9 5950X 16-core, 32-Thread](https://a.co/d/4pwKHpI) |
+| GPU | [AORUS GeForce RTX™ 3080 MASTER 10G (rev. 3.0)](https://www.gigabyte.com/Graphics-Card/GV-N3080AORUS-M-10GD-rev-30#kf) |
+| RAM | [G.SKILL Trident Z Neo 16GB x4 (64GB Total)](https://a.co/d/iHfLS4z) |
+| Motherboard | [ASUS ROG Crosshair VIII Dark Hero AMD AM4 X570S Zen 3](https://a.co/d/hjINQ4h) |
+| CPU Cooler | [ASUS ROG Ryujin 240 RGB AIO Liquic CPU Cooler 240mm Radiator](https://a.co/d/fmJkpsk) |
+| Case | [Lian-Li Case O11D Mini -W Mid-Tower White ATX/Micro-ATX/Mini-ITX](https://a.co/d/fEGMYYr) |
+| Case Fans | [Lian Li UNI Fan SL 120 White](https://a.co/d/5ZA5JIP) |
+| Hard Drive | Primary: [Samsung 980 PRO SSD 1TB PCIe 4.0 NVMe Gen 4](https://a.co/d/6b3r6GJ) |
+| Hard Drive | Secondary: [Samsung 980 PRO SSD 500GB PCIe 4.0 NVMe Gen 4](https://a.co/d/6b3r6GJ) |
+| Power Supply | [Cooler Master V850 SFX Gold Full Modular, 850W, 80+ Gold](https://a.co/d/7YxFnKy) |
+| Custom Cables | [Etsy CoolerMaster PSU Cables - White](https://www.etsy.com/listing/678008798/coolermaster-full-modular-psu-cables) |
+
+### M3 MacBook Pro - Nov 2023 {#hardware-m3macbook}
+
+This is the [M3 MacBook Pro (14-inch, M3, Nov 2023)](https://support.apple.com/en-us/117735).
+
+### Intel MacBook Pro - Mid 2015
+
+This is the [Intel MacBook Pro (Retina, 15-inch, Mid 2015)](https://support.apple.com/en-us/111955).
+
 ## Monitors {#hardware-monitors}
 
 I have 3 monitors currently, But I am actually only using the [CRG9](https://www.samsung.com/us/computing/monitors/gaming/49-crg9-dual-qhd-curved-qled-gaming-monitor-lc49rg90ssnxza/) at the moment. This helps me stay more focussed. Though it is annoying never being able to share my whole screen on meetings since it's so huge, I am forced to switch between sharing individual apps.
@@ -58,5 +88,11 @@ Both of these cameras are okay. I would only consider upgrading if I wanted some
 ### Speakers {#hardware-speakers}
 
 I have used the [Creative T100 Speakers](https://us.creative.com/p/speakers/creative-t100) for a few years now and they have some pretty stellar sound. No complaints here.
+
+### Headphones {#hardware-headphones}
+
+I use the [Sony WH-1000XM5](https://electronics.sony.com/audio/headphones/headband/p/wh1000xm5-b)'s. I'm a big fan of noise cancelling headphones since my office is pretty noisy. The room next-door is our HVAC, I have a portable A/C unit, [walking pad](https://www.urevo.com/products/spacewalk-3s-treadmill), air purifier, and children all make a lot of noise which necessitates noise-cancelling vs. open-ear style headphones.
+
+My last pair that I used for YEARS was the [Bose QuietComfort 35 II](https://global.bose.com/content/consumer_electronics/b2c_catalog/worldwide/websites/en_ae/product/qc35_ii.html) headphones which were great, but just getting old and worn.
 
 
