@@ -4,7 +4,7 @@
 
 ## Computers
 
-### Sherlock
+### Sherlock {#hardware-sherlock}
 
 Sherlock is what I call my personal Desktop PC. It's a custom-built PC running dual-boot Windows 11 / some flavor of linux.
 
