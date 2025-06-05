@@ -1,3 +1,17 @@
+# Jekyll build files
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# Bundler
+.bundle/
+vendor/
+
+# System files
 .vscode
 .DS_Store
 **/.DS_store
+
+# Development files
+Gemfile.lock

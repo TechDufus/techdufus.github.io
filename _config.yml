@@ -14,9 +14,9 @@ url: "https://TechDufus.com"
 
 baseurl: "/"
 
-# Google tracking id
-
-google-tracking-id: "UA-187900687-1"
+# Google Analytics 4 tracking id (GA4)
+# Note: Replace with your actual GA4 measurement ID when migrating
+google-tracking-id: "G-XXXXXXXXXX"
 
 # Forces https everywhere in your website, except when you serve it locally
 # If you are not hosted on Github Pages, and your host doesn't support https
@@ -126,7 +126,7 @@ fb-share: true
 twitter-share: true
 linkedin-share: true
 reddit-share: true
-google-plus-share: true
+google-plus-share: false
 tumblr-share: true
 pinterest-share: true
 pocket-share: true

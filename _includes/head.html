@@ -6,11 +6,40 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="{{site.description}}">
+  <meta name="description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{site.description}}{% endif %}">
   <meta name="author" content="{{site.author}}">
   <meta name="keywords" content="{{site.keywords}}">
-  <link rel="canonical" href="{{page.url | replace:'index.html','' | prepend: site.baseurl}}">
+  <link rel="canonical" href="{{site.url}}{{site.baseurl}}{{page.url | replace:'index.html',''}}">
+  
+  <!-- Enhanced SEO meta tags -->
+  <meta property="og:title" content="{{site.title}}{% if page.title %} | {{page.title}}{% endif %}">
+  <meta property="og:description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{site.description}}{% endif %}">
+  <meta property="og:url" content="{{site.url}}{{site.baseurl}}{{page.url}}">
+  <meta property="og:type" content="{% if page.layout == 'post' %}article{% else %}website{% endif %}">
+  <meta property="og:image" content="{{site.url}}{{site.baseurl}}/img/background.jpg">
+  <meta property="og:site_name" content="{{site.title}}">
+  
+  <!-- Twitter Card meta tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@TechDufus">
+  <meta name="twitter:title" content="{{site.title}}{% if page.title %} | {{page.title}}{% endif %}">
+  <meta name="twitter:description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{site.description}}{% endif %}">
+  <meta name="twitter:image" content="{{site.url}}{{site.baseurl}}/img/background.jpg">
   <title>{{site.title}}{% if page.title %} | {{page.title}}{% endif %}</title>
+
+  <!-- Security Headers -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://code.jquery.com https://maxcdn.bootstrapcdn.com https://cdnjs.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: http:; connect-src 'self' https://www.google-analytics.com;">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+  <!-- Performance optimizations -->
+  <link rel="dns-prefetch" href="//fonts.googleapis.com">
+  <link rel="dns-prefetch" href="//code.jquery.com">
+  <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+  <link rel="preload" href="//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" as="style">
+  <link rel="preload" href="//fonts.googleapis.com/css?family=Montserrat:400,700" as="style">
 
   <!-- Bootstrap Core CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
