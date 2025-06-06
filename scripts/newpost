@@ -1,13 +1,52 @@
-#!/usr/bin/env ruby
+#!/bin/bash
 
-require 'date'
+# Create a new blog post with proper frontmatter
+# Usage: ./scripts/newpost "Your Post Title"
 
-POSTS_DIR = '_posts/'
+set -e
 
-post = ARGV[0]
+POSTS_DIR="_posts"
+POST_TITLE="$1"
 
-File.open(POSTS_DIR + Date.today.strftime("%Y-%m-%d-") + post + '.md', 'w') {|f| f.write(
-  "---\nlayout: post\nsection-type: post\ntitle: Title\ncategory: Category\ntags: [ 'tag1', 'tag2' ]\n---")
-}
+# Check if title was provided
+if [ -z "$POST_TITLE" ]; then
+    echo "Error: Please provide a post title"
+    echo "Usage: ./scripts/newpost \"Your Post Title\""
+    exit 1
+fi
 
-puts('[+] Created ' + post + ' post')
+# Create posts directory if it doesn't exist
+mkdir -p "$POSTS_DIR"
+
+# Get current date in YYYY-MM-DD format
+DATE=$(date +%Y-%m-%d)
+
+# Convert title to filename-friendly format (lowercase, spaces to hyphens)
+FILENAME=$(echo "$POST_TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+
+# Full file path
+FILEPATH="$POSTS_DIR/$DATE-$FILENAME.md"
+
+# Check if file already exists
+if [ -f "$FILEPATH" ]; then
+    echo "Error: Post file already exists: $FILEPATH"
+    exit 1
+fi
+
+# Create the post file with frontmatter template
+cat > "$FILEPATH" << EOF
+---
+layout: post
+section-type: post
+title: "$POST_TITLE"
+category: tech
+tags: [ 'blog' ]
+---
+
+Write your post content here...
+
+EOF
+
+echo "[+] Created new post: $FILEPATH"
+echo "[+] Title: $POST_TITLE"
+echo "[+] Edit the file to add your content, update category, and tags!"

@@ -1,0 +1,101 @@
+<!-- Blog All Layout Start -->
+
+<!DOCTYPE html>
+<html lang="{{ site.lang }}">
+
+  {% include head.html %}
+
+  <body>
+
+    {% include navigation.html %}
+
+    <section id="page" class="container content-section">
+
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1 col-xs-12">
+
+        <!-- Terminal Blog Archive - All Posts -->
+        <div class="blog-terminal">
+          <div class="terminal-header">
+            <div class="terminal-controls">
+              <span class="control close"></span>
+              <span class="control minimize"></span>
+              <span class="control maximize"></span>
+            </div>
+            <div class="terminal-title">~/blog/all-posts</div>
+            <div class="terminal-toggle">
+              <a href="{{site.baseurl}}/blog/" class="view-toggle-link" title="Switch to page-by-page view">
+                <i class="fa fa-th-large"></i>
+                <span>Page View</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="terminal-content">
+            
+            <div class="blog-header">
+              <div class="blog-info">
+                <h1 class="blog-title">
+                  <i class="fa fa-list"></i>
+                  All Blog Posts
+                </h1>
+                <div class="blog-description">
+                  <p>Complete archive of all {{ site.posts.size }} blog posts, no pagination</p>
+                </div>
+              </div>
+              
+              <div class="blog-stats">
+                <div class="stat">
+                  <i class="fa fa-file-text"></i>
+                  <span class="stat-number">{{ site.posts.size }}</span>
+                  <span class="stat-label">Total Posts</span>
+                </div>
+                <div class="stat">
+                  <i class="fa fa-calendar"></i>
+                  <span class="stat-number">{{ site.posts.first.date | date: "%Y" }}</span>
+                  <span class="stat-label">Latest</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="terminal-prompt">
+              <span class="user">techdufus@blog</span><span class="separator">:</span><span class="path">~/all-posts</span><span class="prompt">$</span> ls -la --sort=time
+            </div>
+            
+            <div class="blog-entries">
+              {% for post in site.posts %}
+                {% include post-list.html %}
+              {% endfor %}
+            </div>
+            
+            <div class="terminal-summary">
+              <div class="summary-line">
+                <span class="user">techdufus@blog</span><span class="separator">:</span><span class="path">~/all-posts</span><span class="prompt">$</span> wc -l *.md
+              </div>
+              <div class="file-count">
+                {{ site.posts.size }} blog posts found (complete archive)
+              </div>
+              <div class="navigation-links">
+                <a href="{{site.baseurl}}/blog/" class="nav-link">
+                  <i class="fa fa-th-large"></i> Switch to Page View
+                </a>
+                <a href="{{site.baseurl}}/#blog" class="nav-link">
+                  <i class="fa fa-home"></i> Blog Home
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        </div>
+      </div>
+    </section>
+
+    {% include footer.html %}
+
+    {% include js.html %}
+
+  </body>
+</html>
+
+<!-- Blog All Layout End -->

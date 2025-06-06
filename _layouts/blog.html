@@ -10,19 +10,53 @@
 
     {% include navigation.html %}
 
-    <section id="page" class="container content-section text-center">
+    <section id="page" class="container content-section">
 
       <div class="row">
-        <div class="col-md-10 col-md-offset-1 col-xs-10 col-xs-offset-1">
+        <div class="col-md-10 col-md-offset-1 col-xs-12">
 
-        {% include swipe-instructions.html %}
-
-        {{ page.content | markdownify }}
-
-        <div>
-          {% for post in paginator.posts %}
-            {% include post-list.html%}
-          {% endfor %}
+        <!-- Terminal Blog Archive -->
+        <div class="blog-terminal">
+          <div class="terminal-header">
+            <div class="terminal-controls">
+              <span class="control close"></span>
+              <span class="control minimize"></span>
+              <span class="control maximize"></span>
+            </div>
+            <div class="terminal-title">~/blog/archive</div>
+            <div class="terminal-toggle">
+              <a href="{{site.baseurl}}/blog/all.html" class="view-toggle-link" title="Show all posts on one page">
+                <i class="fa fa-list"></i>
+                <span>Show All</span>
+              </a>
+            </div>
+          </div>
+          
+          <div class="terminal-content">
+            <div class="terminal-prompt">
+              <span class="user">techdufus@blog</span><span class="separator">:</span><span class="path">~/archive</span><span class="prompt">$</span> ls -la --sort=time
+            </div>
+            
+            <div class="blog-entries">
+              {% for post in paginator.posts %}
+                {% include post-list.html %}
+              {% endfor %}
+            </div>
+            
+            <div class="terminal-summary">
+              <div class="summary-line">
+                <span class="user">techdufus@blog</span><span class="separator">:</span><span class="path">~/archive</span><span class="prompt">$</span> wc -l *.md
+              </div>
+              <div class="file-count">
+                {{ paginator.posts | size }} blog posts found
+              </div>
+              {% if paginator.total_pages > 1 %}
+              <div class="pagination-info">
+                Page {{ paginator.page }} of {{ paginator.total_pages }}
+              </div>
+              {% endif %}
+            </div>
+          </div>
         </div>
 
         {% include pagination.html %}

@@ -10,49 +10,113 @@
 
     {% include navigation.html %}
 
-    <section id="post" class="container content-section text-center">
+    <section id="post" class="container content-section">
       <div class="row">
         <div class="col-md-10 col-md-offset-1">
 
-          {% include swipe-instructions.html %}
+          <!-- Post Header Card -->
+          <article class="post-container">
+            <header class="post-header-card">
+              <div class="post-meta">
+                <div class="post-date">
+                  <i class="fa fa-calendar"></i>
+                  {{ page.date | date: "%B %d, %Y" }}
+                </div>
+                <div class="post-category">
+                  <a href="{{site.baseurl}}/categories/{{page.category | downcase}}.html" class="category-badge">
+                    <i class="fa fa-folder"></i>
+                    {{ page.category }}
+                  </a>
+                </div>
+              </div>
+              
+              <h1 class="post-title">{{ page.title }}</h1>
+              
+              {% if page.tags and page.tags.size > 0 %}
+              <div class="post-tags">
+                {% for tag in page.tags %}
+                  <a href="{{site.baseurl}}/tags/{{tag | downcase}}.html" class="tag-badge">
+                    #{{ tag }}
+                  </a>
+                {% endfor %}
+              </div>
+              {% endif %}
+              
+              <div class="post-reading-time">
+                <i class="fa fa-clock-o"></i>
+                {{ page.content | strip_html | number_of_words | divided_by: 200 | plus: 1 }} min read
+              </div>
+            </header>
 
-          <h1><strong>{{ page.title }}</strong></h1>
-          <h4>
-            <strong>{{ page.date | date_to_string }}</strong>
-            <small>
-              . category:
-              <a class="category" href="{{site.baseurl}}/categories/{{page.category | downcase}}.html">
-                {{ page.category }}
-              </a>.
-              <a href="{{site.baseurl}}{{page.url }}#disqus_thread">Comments</a>
-              <br />
-              {% for tag in page.tags %}
-                <a class="tag" href="{{site.baseurl}}/tags/{{tag | downcase}}.html">#{{ tag }}</a>
-              {% endfor %}
-            </small>
-          </h4>
+            <!-- Post Content Card -->
+            <main class="post-content-card">
+              <div class="post-content">
+                {{ page.content | markdownify }}
+              </div>
+            </main>
 
-          <section class="text-justify">
-            {{ page.content | markdownify }}
-          </section>
+            <!-- Post Actions Card -->
+            <section class="post-actions-card">
+              <div class="share-section">
+                <h3><i class="fa fa-share-alt"></i> Share this post</h3>
+                {% include share.html %}
+              </div>
+              
+              <div class="comments-section">
+                {% if jekyll.environment == "production" %}
+                  <h3><i class="fa fa-comments"></i> Comments</h3>
+                  {% include comments.html %}
+                {% else %}
+                  <div class="comments-placeholder">
+                    <i class="fa fa-comments"></i>
+                    <span>Comments are enabled in production</span>
+                  </div>
+                {% endif %}
+              </div>
+            </section>
 
-          {% include share.html %}
-
-          {% if jekyll.environment == "production" %}
-            {% include comments.html %}
-          {% endif %}
-
-
-          <hr />
-
-          {% if site.author_blurb %}
-          <div class="author row">
-            <img class="col-xs-4 col-sm-3 col-md-2" src="{{site.baseurl}}{{site.author_blurb_image}}" alt="Me" />
-            <p class="col-xs-8 col-sm-9 col-md-10">
-              {{ site.author_blurb }}
-            </p>
-          </div>
-          {% endif%}
+            <!-- Author Card -->
+            {% if page.guest_author %}
+            <!-- Guest Author -->
+            <aside class="author-card">
+              <div class="author-avatar">
+                <img src="{{ page.guest_author.image }}" alt="{{ page.guest_author.name }} Avatar" />
+              </div>
+              <div class="author-info">
+                <h3>About {{ page.guest_author.name }}</h3>
+                <div class="author-title">{{ page.guest_author.title }}</div>
+                <p>{{ page.guest_author.bio }}</p>
+                {% if page.guest_author.social %}
+                <div class="author-social">
+                  {% for social in page.guest_author.social %}
+                    <a href="{{ social.url }}" target="_blank" rel="noopener" class="social-link" title="{{ social.platform }}">
+                      <i class="{{ social.icon }}"></i>
+                    </a>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </aside>
+            {% elsif site.author_blurb %}
+            <!-- Site Author -->
+            <aside class="author-card">
+              <div class="author-avatar">
+                <img src="{{site.baseurl}}{{site.author_blurb_image}}" alt="Author Avatar" />
+              </div>
+              <div class="author-info">
+                <h3>About {{ site.author }}</h3>
+                <p>{{ site.author_blurb }}</p>
+                <div class="author-social">
+                  {% for social in site.social %}
+                    <a href="{{ social.url }}" target="_blank" rel="noopener" class="social-link">
+                      <i class="{{ social.title }}"></i>
+                    </a>
+                  {% endfor %}
+                </div>
+              </div>
+            </aside>
+            {% endif %}
+          </article>
         </div>
       </div>
     </section>

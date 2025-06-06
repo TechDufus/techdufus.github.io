@@ -1,24 +1,58 @@
 
 <!-- Pagination Links Start -->
 
-<div class="pagination">
+<div class="pagination-container">
+  <div class="pagination-cards">
+    
+    <!-- View All Posts Button -->
+    <div class="pagination-card view-all">
+      <a href="{{site.baseurl}}/blog/all.html" class="pagination-link">
+        <div class="card-content">
+          <i class="fa fa-list"></i>
+          <span class="link-text">Show All Posts</span>
+          <small class="link-subtitle">View all {{ site.posts.size }} at once</small>
+        </div>
+      </a>
+    </div>
+    
+    <!-- Newer Posts -->
+    {% if paginator.previous_page %}
+    <div class="pagination-card newer">
+      <a href="{{site.baseurl}}{{paginator.previous_page_path}}" class="pagination-link">
+        <div class="card-content">
+          <i class="fa fa-chevron-left"></i>
+          <span class="link-text">Newer Posts</span>
+          <small class="link-subtitle">Page {{ paginator.previous_page | default: 1 }}</small>
+        </div>
+      </a>
+    </div>
+    {% endif %}
 
-  <h4>
+    <!-- Current Page Info -->
+    <div class="pagination-card current">
+      <div class="current-page">
+        <div class="card-content">
+          <i class="fa fa-bookmark"></i>
+          <span class="link-text">Page {{ paginator.page }}</span>
+          <small class="link-subtitle">of {{ paginator.total_pages }}</small>
+        </div>
+      </div>
+    </div>
 
-  {% if paginator.previous_page %}
-    <a href="{{site.baseurl}}{{paginator.previous_page_path}}" class="previous">Newer Posts</a>
-  {% endif %}
+    <!-- Older Posts -->
+    {% if paginator.next_page %}
+    <div class="pagination-card older">
+      <a href="{{site.baseurl}}{{paginator.next_page_path}}" class="pagination-link">
+        <div class="card-content">
+          <i class="fa fa-chevron-right"></i>
+          <span class="link-text">Older Posts</span>
+          <small class="link-subtitle">Page {{ paginator.next_page }}</small>
+        </div>
+      </a>
+    </div>
+    {% endif %}
 
-  {% if paginator.previous_page and paginator.next_page %}
-    |
-  {% endif %}
-
-  {% if paginator.next_page %}
-    <a href="{{site.baseurl}}{{paginator.next_page_path}}" class="next">Older Posts</a>
-  {% endif %}
-
-  </h4>
-
+  </div>
 </div>
 
 <!-- Pagination Links End -->

@@ -31,7 +31,7 @@ force-https: true
 lang: "en"
 author: "TechDufus"
 title: "{ TechDufus }"
-description: "Blog and website of THE TechDufus™, blogging anything I want. Opinions expressed are mine."
+description: "DevOps Engineer sharing insights on Kubernetes, Docker, PowerShell, and modern infrastructure. Building scalable solutions and sharing the journey."
 keywords: "techdufus, powershell, windows, tech, linux, neovim, hardware, nerd."
 favicon: "/img/favicon32x32.png"
 
@@ -44,7 +44,7 @@ black-favicon: "/img/favicon32x32.png"
 #logo:  # leave blank if you don't want a logo
 # logo: "TechDufus.github.io/img/pwsh/posh_girl_closeup.png" # leave blank if you don't want a logo
 
-background-img: "/img/background.jpg"
+#background-img: "/img/background.jpg"
 #background-img: "../img/intro-bg.jpg"
 
 ##############################
@@ -173,7 +173,7 @@ events:
     description: "Joined the [RunOnFlux](https://runonflux.io) Team."
   - image: "/img/timeline/raft-logo.png"
     date: "September 2024"
-    description: "Became a [Rafter!](https://teamraft.com)"
+    description: "Joined [Raft](https://teamraft.com) as a DevOps Engineer, entering the defense contracting space to support mission-critical infrastructure and national security initiatives."
   # - image: "/img/timeline/life-coaching.png"
   #   date: "September 2023"
   #   description: "Started Life Coaching."
@@ -201,7 +201,7 @@ pgp: false
 
 # if the author_blurb is not set, then this feature is skipped
 author_blurb: "The Dufus is an awesome person. He is a daily learner and nerd. A husband, and a father of 4, he likes long walks on the beach, and eating ice cream in his spare time."
-author_blurb_image: "/img/author_techdufus.jpg"
+author_blurb_image: "https://www.gravatar.com/avatar/0bbf5d7c13901bd5a2f4e2a6d53e0476?s=500"
 
 ##################
 # Social Buttons #
@@ -210,8 +210,12 @@ author_blurb_image: "/img/author_techdufus.jpg"
 social:
   - title: "fa-brands fa-x-twitter"
     url: "https://x.com/TechDufus"
+  - title: "fa-brands fa-youtube"
+    url: "https://www.youtube.com/@techdufus"
   - title: "fa-brands fa-twitch"
     url: "https://twitch.tv/TechDufus"
+  - title: "fa-brands fa-linkedin"
+    url: "https://linkedin.com/in/techdufus"
   - title: "fa-brands fa-github"
     url: "https://github.com/TechDufus"
   - title: "fa-solid fa-tree"
@@ -258,7 +262,7 @@ pages_list:
   Blog: 'latest-post'
   Setup: 'setup-preview'
   Timeline: 'timeline'
-  Contact: 'contact'
+  Contact: 'contact-page'
 
 # Exclusion list from the generated _site
 

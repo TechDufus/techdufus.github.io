@@ -1,28 +1,90 @@
-#!/usr/bin/env ruby
+#!/bin/bash
 
-require 'yaml'
+# Generate tag pages for all tags used in blog posts
+# Usage: ./scripts/generate-tags
 
-POSTS_DIR = '_posts/'
-TAGS_DIR = 'tags/'
+set -e
 
-Dir.foreach(POSTS_DIR) do |post|
+POSTS_DIR="_posts"
+TAGS_DIR="tags"
 
-  next if post == '.' or post == '..' or post == '.DS_Store'
-  postYaml = YAML.load_file(POSTS_DIR + post)
-  unless (postYaml['tags'] == nil)
-    postYaml['tags'].each{|tag|
+# Check if posts directory exists
+if [ ! -d "$POSTS_DIR" ]; then
+    echo "Error: Posts directory '$POSTS_DIR' not found"
+    exit 1
+fi
 
-      tag.downcase!
+# Create tags directory if it doesn't exist
+mkdir -p "$TAGS_DIR"
 
-      unless File.exist?(TAGS_DIR + tag + '.html')
+# Function to extract tags from frontmatter
+extract_tags() {
+    local file="$1"
+    # Extract YAML frontmatter and get tags line, then clean it up
+    awk '/^---$/{flag++} flag==1 && /^tags:/{
+        gsub(/^tags: *\[ */, ""); 
+        gsub(/ *\] *$/, ""); 
+        gsub(/["'"'"']/, ""); 
+        gsub(/, */, "\n"); 
+        print; 
+        exit
+    }' "$file"
+}
 
-        puts('[+] Generating #' + tag + ' page')
+# Function to convert to lowercase
+to_lowercase() {
+    echo "$1" | tr '[:upper:]' '[:lower:]'
+}
 
-        File.open(TAGS_DIR + tag + '.html', 'w') {|f| f.write(
-        "---\nlayout: tag\nsection-type: tag\ntitle: " + tag + "\n---\n## Tag")}
+echo "Scanning posts for tags..."
 
-      end
-    }
-  end
+# Keep track of processed tags to avoid duplicates
+declare -A processed_tags
 
-end
+# Process each markdown file in posts directory
+for post_file in "$POSTS_DIR"/*.md; do
+    # Skip if no markdown files exist
+    [ ! -f "$post_file" ] && continue
+    
+    # Extract tags from post
+    tags_line=$(extract_tags "$post_file")
+    
+    # Skip if no tags found
+    [ -z "$tags_line" ] && continue
+    
+    # Process each tag (tags are separated by newlines now)
+    while IFS= read -r tag; do
+        # Skip empty lines
+        [ -z "$tag" ] && continue
+        
+        # Trim whitespace and convert to lowercase
+        tag=$(echo "$tag" | sed 's/^[ \t]*//;s/[ \t]*$//')
+        tag_lower=$(to_lowercase "$tag")
+        
+        # Skip if we've already processed this tag
+        [ "${processed_tags[$tag_lower]}" = "1" ] && continue
+        
+        # Mark as processed
+        processed_tags[$tag_lower]=1
+        
+        # Tag page file path
+        tag_file="$TAGS_DIR/$tag_lower.html"
+        
+        # Create tag page if it doesn't exist
+        if [ ! -f "$tag_file" ]; then
+            echo "[+] Generating #$tag_lower page"
+            
+            cat > "$tag_file" << EOF
+---
+layout: tag
+section-type: tag
+title: $tag_lower
+---
+## Tag
+EOF
+        fi
+    done <<< "$tags_line"
+done
+
+echo "Tag page generation complete!"
+echo "Generated files are in: $TAGS_DIR/"

@@ -1,26 +1,67 @@
-#!/usr/bin/env ruby
+#!/bin/bash
 
-require 'yaml'
+# Generate category pages for all categories used in blog posts
+# Usage: ./scripts/generate-categories
 
-POSTS_DIR = '_posts/'
-CATEGORIES_DIR = 'categories/'
+set -e
 
-Dir.foreach(POSTS_DIR) do |post|
+POSTS_DIR="_posts"
+CATEGORIES_DIR="categories"
 
-  next if post == '.' or post == '..' or post == '.DS_Store'
-  postYaml = YAML.load_file(POSTS_DIR + post)
-  unless (postYaml['category'] == nil)
-    category = postYaml['category']
+# Check if posts directory exists
+if [ ! -d "$POSTS_DIR" ]; then
+    echo "Error: Posts directory '$POSTS_DIR' not found"
+    exit 1
+fi
 
-    unless File.exist?(CATEGORIES_DIR + category.downcase + '.html')
+# Create categories directory if it doesn't exist
+mkdir -p "$CATEGORIES_DIR"
 
-      puts('[+] Generating #' + category + ' page')
+# Function to extract category from frontmatter
+extract_category() {
+    local file="$1"
+    # Extract YAML frontmatter and get category line
+    awk '/^---$/{flag++} flag==1 && /^category:/{gsub(/^category: */, ""); gsub(/["'"'"']/, ""); print; exit}' "$file"
+}
 
-      File.open(CATEGORIES_DIR + category.downcase + '.html', 'w') {|f| f.write(
-      "---\nlayout: category\nsection-type: category\ntitle: " + category + "\n---\n## Category")}
+# Function to convert to lowercase
+to_lowercase() {
+    echo "$1" | tr '[:upper:]' '[:lower:]'
+}
 
-    end
+echo "Scanning posts for categories..."
 
-  end
+# Process each markdown file in posts directory
+for post_file in "$POSTS_DIR"/*.md; do
+    # Skip if no markdown files exist
+    [ ! -f "$post_file" ] && continue
+    
+    # Extract category from post
+    category=$(extract_category "$post_file")
+    
+    # Skip if no category found
+    [ -z "$category" ] && continue
+    
+    # Convert category to lowercase for filename
+    category_lower=$(to_lowercase "$category")
+    
+    # Category page file path
+    category_file="$CATEGORIES_DIR/$category_lower.html"
+    
+    # Create category page if it doesn't exist
+    if [ ! -f "$category_file" ]; then
+        echo "[+] Generating #$category page"
+        
+        cat > "$category_file" << EOF
+---
+layout: category
+section-type: category
+title: $category
+---
+## Category
+EOF
+    fi
+done
 
-end
+echo "Category page generation complete!"
+echo "Generated files are in: $CATEGORIES_DIR/"
