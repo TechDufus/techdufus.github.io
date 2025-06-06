@@ -31,7 +31,7 @@ force-https: true
 lang: "en"
 author: "TechDufus"
 title: "{ TechDufus }"
-description: "Blog and website of THE TechDufus™, blogging anything I want. Opinions expressed are mine."
+description: "DevOps Engineer sharing insights on Kubernetes, Docker, PowerShell, and modern infrastructure. Building scalable solutions and sharing the journey."
 keywords: "techdufus, powershell, windows, tech, linux, neovim, hardware, nerd."
 favicon: "/img/favicon32x32.png"
 
