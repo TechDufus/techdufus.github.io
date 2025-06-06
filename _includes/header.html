@@ -1320,10 +1320,23 @@
   .command-line *,
   .output-line * {
     word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
+    overflow-wrap: anywhere !important;
     white-space: pre-wrap !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
+    /* Force break even on URLs and long strings */
+    word-break: break-all !important;
+    hyphens: auto !important;
+  }
+  
+  /* Specifically target command text for aggressive wrapping */
+  .command-line .command,
+  .current-command {
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+    white-space: pre-wrap !important;
+    font-size: 10px !important;
+    line-height: 1.3 !important;
   }
   
   /* Prevent any horizontal scrolling in terminal */
@@ -1333,6 +1346,23 @@
   .current-command-line {
     overflow-x: hidden !important;
     max-width: 100% !important;
+    /* Ensure strict width constraints */
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Force terminal window to not expand */
+  .terminal-window {
+    max-width: 100vw !important;
+    width: 96% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+  
+  .terminal-body {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
   }
   
   /* Ensure character stats grid doesn't overflow */
@@ -1373,6 +1403,19 @@
   .current-command {
     font-size: 9px !important;
     line-height: 1.2 !important;
+    /* Force aggressive word breaking for very long commands */
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+    white-space: pre-wrap !important;
+    hyphens: auto !important;
+  }
+  
+  /* Additional command line wrapping */
+  .command-line {
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+    white-space: pre-wrap !important;
+    max-width: 100% !important;
   }
 }
 </style>
@@ -1457,7 +1500,7 @@ const terminalCommands = [
     delay: 0
   },
   {
-    command: "docker ps --filter 'status=running' --format 'table {{.Names}}\\t{{.Status}}\\t{{.Ports}}'",
+    command: "docker ps --filter status=running --format table",
     output: [
       "<span class='output-info'>NAMES               STATUS              PORTS</span>",
       "<span class='output-success'>nginx-proxy</span>         <span class='output-success'>Up 14 days</span>          <span class='output-warning'>0.0.0.0:80->80/tcp</span>",
@@ -1508,7 +1551,7 @@ const terminalCommands = [
     delay: 10
   },
   {
-    command: "ansible-playbook -i inventory/prod deploy-coffee-service.yml --check",
+    command: "ansible-playbook -i prod coffee-deploy.yml --check",
     output: [
       "<span class='output-info'>PLAY [Deploy Ultimate Coffee Service] ******************************************</span>",
       "",
@@ -1535,7 +1578,7 @@ const terminalCommands = [
     delay: 30
   },
   {
-    command: "curl -X POST https://api.techdufus.com/v1/status -H 'Content-Type: application/json' -d '{\"mood\":\"caffeinated\",\"productivity\":\"200%\"}'",
+    command: "curl -X POST api.techdufus.com/status -d '{\"mood\":\"caffeinated\",\"productivity\":\"200%\"}'",
     output: [
       "<span class='output-dim'>{</span>",
       "  <span class='output-info'>\"status\"</span>: <span class='output-success'>\"success\"</span>,",
