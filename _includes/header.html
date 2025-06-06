@@ -180,11 +180,33 @@
   z-index: 10;
   animation: terminal-glow 4s ease-in-out infinite;
   transition: all 0.3s ease;
+  /* Prevent horizontal expansion */
+  box-sizing: border-box;
 }
 
 /* Override terminal background for light mode using Catppuccin Latte */
 [data-theme="light"] .terminal-window {
   background: #dce0e8; /* Latte surface1 - slightly lighter for terminal frame */
+}
+
+/* Ensure light mode colors are properly inherited on mobile */
+@media (max-width: 768px) {
+  [data-theme="light"] .terminal-window {
+    background: #dce0e8 !important;
+  }
+  
+  [data-theme="light"] .terminal-header {
+    background: #ccd0da !important;
+    border-bottom: 1px solid #bcc0cc !important;
+  }
+  
+  [data-theme="light"] .tmux-container {
+    background: rgba(76, 79, 105, 0.95) !important;
+  }
+  
+  [data-theme="light"] .terminal-output {
+    background: rgba(76, 79, 105, 0.95) !important;
+  }
 }
 
 @keyframes terminal-glow {
@@ -510,6 +532,15 @@
 .system-info {
   flex: 1;
   max-width: 300px;
+  /* Reduce width on smaller screens */
+  
+  @media (max-width: 992px) {
+    max-width: 220px;
+  }
+  
+  @media (max-width: 768px) {
+    max-width: 180px;
+  }
 }
 
 .info-line {
@@ -639,7 +670,15 @@
   font-size: 12px;
   line-height: 1.3;
   background: transparent;
-  pointer-events: none;
+  /* Enable scrolling and interactions */
+  pointer-events: auto;
+  /* Ensure proper text wrapping */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  /* Constrain width to prevent horizontal growth */
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* System Monitor (Right Pane) */
@@ -700,6 +739,9 @@
 .terminal-output {
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
   scrollbar-width: none;  /* Firefox */
+  /* Improve mobile scrolling performance */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
 
 
@@ -707,6 +749,10 @@
   color: var(--ctp-text);
   margin: 8px 0 4px 0;
   text-align: left;
+  /* Ensure command lines wrap properly */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .prompt {
@@ -724,7 +770,11 @@
   margin: 2px 0;
   white-space: pre-wrap;
   word-wrap: break-word;
+  overflow-wrap: break-word;
   text-align: left;
+  /* Prevent horizontal overflow */
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .output-success { color: var(--ctp-green); }
@@ -739,11 +789,23 @@
   align-items: center;
   flex-shrink: 0;
   text-align: left;
+  /* Prevent overflow and ensure wrapping */
+  flex-wrap: wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .current-command {
   color: var(--ctp-text);
   min-height: 20px;
+  /* Ensure command text wraps properly */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  flex: 1;
+  max-width: calc(100% - 30px); /* Account for prompt and cursor */
 }
 
 /* Cursor Animation */
@@ -875,7 +937,7 @@
   }
 
   .system-info {
-    max-width: 220px;
+    max-width: 180px;
   }
 
   .system-info .info-line {
@@ -889,12 +951,16 @@
   .terminal-window {
     width: 96%;
     margin: 10px auto;
+    /* Ensure no horizontal overflow */
+    overflow-x: hidden;
   }
 
   .terminal-body {
     height: 65vh;
     min-height: 450px;
     padding: 15px;
+    /* Prevent horizontal overflow */
+    overflow-x: hidden;
   }
 
   .terminal-top-section {
@@ -913,6 +979,8 @@
     max-width: 100%;
     width: 100%;
     padding: 0;
+    /* Compact for mobile */
+    margin: 0 auto;
   }
 
   .character-card .card-header {
@@ -924,13 +992,23 @@
   .character-card .character-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 6px;
+    /* More compact on mobile */
+    padding: 0 10px;
   }
 
   .system-info {
     order: 3;
     max-width: 100%;
     width: 100%;
+  }
+  
+  /* More compact info display on mobile */
+  .system-info .info-line {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 8px;
+    align-items: center;
   }
 
   .img-me {
@@ -948,6 +1026,12 @@
 
   .terminal-output {
     font-size: 11px;
+    /* Ensure better mobile scrolling */
+    overflow-x: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    padding: 10px;
   }
 
   .floating-icon {
@@ -986,12 +1070,17 @@
   .terminal-window {
     width: 98%;
     margin: 5px auto;
+    /* Strict overflow prevention */
+    overflow: hidden;
   }
 
   .terminal-body {
     height: 60vh;
     min-height: 400px;
     padding: 12px;
+    /* Prevent any horizontal overflow */
+    overflow-x: hidden;
+    box-sizing: border-box;
   }
 
   .img-me {
@@ -1013,6 +1102,12 @@
 
   .terminal-output {
     font-size: 10px;
+    /* Mobile-optimized terminal output */
+    padding: 8px;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
   }
 
   .profile-name {
@@ -1214,6 +1309,70 @@
 
   .scroll-text {
     font-size: 10px;
+  }
+}
+
+/* Additional mobile responsiveness fixes */
+@media (max-width: 768px) {
+  /* Ensure all terminal content wraps properly */
+  .terminal-output *,
+  .current-command-line *,
+  .command-line *,
+  .output-line * {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: pre-wrap !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Prevent any horizontal scrolling in terminal */
+  .tmux-container,
+  .tmux-pane-left,
+  .terminal-output,
+  .current-command-line {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+  }
+  
+  /* Ensure character stats grid doesn't overflow */
+  .character-card .character-stats {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+  
+  .character-card .stat-row {
+    font-size: 11px !important;
+    margin-bottom: 4px !important;
+  }
+  
+  .character-card .stat-row .stat-label {
+    min-width: 50px !important;
+    max-width: 60px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screen optimizations */
+  .terminal-top-section {
+    gap: 10px !important;
+  }
+  
+  .character-card .character-stats {
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+  }
+  
+  .character-card .stat-row {
+    font-size: 10px !important;
+  }
+  
+  /* Ensure terminal commands don't break layout */
+  .command,
+  .current-command {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
   }
 }
 </style>
@@ -1766,6 +1925,11 @@ function executeCommand() {
   // Clear current command
   currentCommandElement.textContent = '';
 
+  // Enhanced auto scroll after adding command
+  requestAnimationFrame(() => {
+    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+  });
+
   // Show output
   currentOutputIndex = 0;
   showOutput();
@@ -1780,8 +1944,10 @@ function showOutput() {
     outputLine.innerHTML = command.output[currentOutputIndex];
     terminalOutput.appendChild(outputLine);
 
-    // Auto scroll to bottom to show new content
-    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    // Enhanced auto scroll to bottom with smooth behavior
+    requestAnimationFrame(() => {
+      terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    });
 
     currentOutputIndex++;
     setTimeout(showOutput, command.delay);
@@ -1795,8 +1961,10 @@ function showOutput() {
     spacer.style.height = '10px';
     terminalOutput.appendChild(spacer);
 
-    // Auto scroll to bottom
-    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    // Enhanced auto scroll to bottom with smooth behavior
+    requestAnimationFrame(() => {
+      terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    });
 
     // Wait a bit before typing next command
     setTimeout(typeNextCommand, 800);
