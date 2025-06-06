@@ -38,8 +38,8 @@ to_lowercase() {
 
 echo "Scanning posts for tags..."
 
-# Keep track of processed tags to avoid duplicates
-declare -A processed_tags
+# Keep track of processed tags to avoid duplicates using a temporary file
+PROCESSED_TAGS_FILE=$(mktemp)
 
 # Process each markdown file in posts directory
 for post_file in "$POSTS_DIR"/*.md; do
@@ -57,28 +57,30 @@ for post_file in "$POSTS_DIR"/*.md; do
         # Skip empty lines
         [ -z "$tag" ] && continue
         
-        # Trim whitespace and convert to lowercase
+        # Trim whitespace
         tag=$(echo "$tag" | sed 's/^[ \t]*//;s/[ \t]*$//')
         tag_lower=$(to_lowercase "$tag")
         
         # Skip if we've already processed this tag
-        [ "${processed_tags[$tag_lower]}" = "1" ] && continue
+        if grep -q "^$tag_lower$" "$PROCESSED_TAGS_FILE" 2>/dev/null; then
+            continue
+        fi
         
         # Mark as processed
-        processed_tags[$tag_lower]=1
+        echo "$tag_lower" >> "$PROCESSED_TAGS_FILE"
         
-        # Tag page file path
+        # Tag page file path (use lowercase for filename)
         tag_file="$TAGS_DIR/$tag_lower.html"
         
         # Create tag page if it doesn't exist
         if [ ! -f "$tag_file" ]; then
-            echo "[+] Generating #$tag_lower page"
+            echo "[+] Generating #$tag page"
             
             cat > "$tag_file" << EOF
 ---
 layout: tag
 section-type: tag
-title: $tag_lower
+title: $tag
 ---
 ## Tag
 EOF
@@ -88,3 +90,6 @@ done
 
 echo "Tag page generation complete!"
 echo "Generated files are in: $TAGS_DIR/"
+
+# Clean up temporary file
+rm -f "$PROCESSED_TAGS_FILE"

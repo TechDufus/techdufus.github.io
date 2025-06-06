@@ -10,23 +10,102 @@
 
     {% include navigation.html %}
 
-    <section class="container content-section text-center">
+    <section id="page" class="container content-section">
+
       <div class="row">
-        <div class="col-md-10 col-md-offset-1 col-xs-10 col-xs-offset-1">
+        <div class="col-md-10 col-md-offset-1 col-xs-12">
 
           {% assign tag = page.title %}
-
-          <h3 id="#{{ tag }}">#{{ tag }}</h3>
-
-          <div>
-            {% for post in site.posts %}
-              {% for t in post.tags %}
-                {% capture tg %}{{ t | downcase }}{% endcapture %}
-                {% if tg == tag %}
-                  {% include post-list.html%}
-                {% endif %}
-              {% endfor %}
+          {% assign tag_posts = '' | split: '' %}
+          {% for post in site.posts %}
+            {% for post_tag in post.tags %}
+              {% assign post_tag_lower = post_tag | downcase %}
+              {% assign page_tag_lower = tag | downcase %}
+              {% if post_tag_lower == page_tag_lower %}
+                {% assign tag_posts = tag_posts | push: post %}
+                {% break %}
+              {% endif %}
             {% endfor %}
+          {% endfor %}
+
+          <!-- Tag Terminal -->
+          <div class="category-terminal">
+            <div class="terminal-header">
+              <div class="terminal-controls">
+                <span class="control close"></span>
+                <span class="control minimize"></span>
+                <span class="control maximize"></span>
+              </div>
+              <div class="terminal-title">~/blog/tags/{{ tag }}</div>
+            </div>
+            
+            <div class="terminal-content">
+              <div class="category-header">
+                <div class="category-info">
+                  <h1 class="category-title">
+                    <i class="fa fa-tag"></i>
+                    #{{ tag }} Posts
+                  </h1>
+                  <div class="category-description">
+                    <p>All posts tagged with <strong>#{{ tag }}</strong></p>
+                  </div>
+                </div>
+                
+                <div class="category-stats">
+                  <div class="stat">
+                    <i class="fa fa-file-text"></i>
+                    <span class="stat-number">{{ tag_posts.size }}</span>
+                    <span class="stat-label">Posts</span>
+                  </div>
+                  {% if tag_posts.size > 0 %}
+                  <div class="stat">
+                    <i class="fa fa-calendar"></i>
+                    <span class="stat-number">{{ tag_posts.first.date | date: "%Y" }}</span>
+                    <span class="stat-label">Latest</span>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <div class="terminal-prompt">
+                <span class="user">techdufus@blog</span><span class="separator">:</span><span class="path">~/tags/{{ tag }}</span><span class="prompt">$</span> ls -la --sort=time --tag="{{ tag }}"
+              </div>
+              
+              <div class="blog-entries">
+                {% if tag_posts.size > 0 %}
+                  {% for post in tag_posts %}
+                    {% include post-list.html %}
+                  {% endfor %}
+                {% else %}
+                  <div class="no-posts">
+                    <i class="fa fa-tag"></i>
+                    <p>No posts found with this tag yet.</p>
+                    <a href="{{site.baseurl}}/blog/" class="back-link">
+                      <i class="fa fa-arrow-left"></i> Back to all posts
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+              
+              {% if tag_posts.size > 0 %}
+              <div class="terminal-summary">
+                <div class="summary-line">
+                  <span class="user">techdufus@blog</span><span class="separator">:</span><span class="path">~/tags/{{ tag }}</span><span class="prompt">$</span> wc -l *.md
+                </div>
+                <div class="file-count">
+                  {{ tag_posts.size }} blog post{% if tag_posts.size != 1 %}s{% endif %} tagged with #{{ tag }}
+                </div>
+                <div class="navigation-links">
+                  <a href="{{site.baseurl}}/blog/" class="nav-link">
+                    <i class="fa fa-list"></i> All Posts
+                  </a>
+                  <a href="{{site.baseurl}}/#blog" class="nav-link">
+                    <i class="fa fa-home"></i> Blog Home
+                  </a>
+                </div>
+              </div>
+              {% endif %}
+            </div>
           </div>
 
         </div>
