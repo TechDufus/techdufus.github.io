@@ -1391,7 +1391,7 @@ const terminalCommands = [
       "  <span class='output-info'>\"timestamp\"</span>: <span class='output-warning'>\"2024-01-20T10:42:00Z\"</span>",
       "<span class='output-dim'>}</span>"
     ],
-    delay: 0
+    delay: 150
   },
   {
     command: "helm upgrade coffee-chart ./charts/ultimate-coffee --values production.yaml --atomic",
@@ -1408,7 +1408,7 @@ const terminalCommands = [
       "<span class='output-success'>2. Caffeine levels have been optimized</span>",
       "<span class='output-success'>3. Developer productivity increased by 200%</span>"
     ],
-    delay: 0
+    delay: 200
   },
   {
     command: "systemctl status coffee-maker.service",
@@ -1426,7 +1426,7 @@ const terminalCommands = [
       "Jan 20 10:42:00 coffee-server coffee-maker[1337]: <span class='output-info'>Brewing espresso shot 42/42</span>",
       "Jan 20 10:42:01 coffee-server coffee-maker[1337]: <span class='output-success'>Coffee ready! Productivity mode: ACTIVATED</span>"
     ],
-    delay: 10
+    delay: 100
   },
   {
     command: "neofetch --config ~/.config/neofetch/tech_config.conf",
@@ -1461,7 +1461,7 @@ const terminalCommands = [
       "<span class='output-success'>monitoring-stack</span>    <span class='output-dim'>https://kubernetes.default.svc</span>  <span class='output-info'>monitoring</span>  <span class='output-info'>platform</span>             <span class='output-success'>Synced</span>        <span class='output-success'>Healthy</span>",
       "<span class='output-success'>cert-manager</span>        <span class='output-dim'>https://kubernetes.default.svc</span>  <span class='output-info'>cert-mgr</span>    <span class='output-info'>platform</span>             <span class='output-success'>Synced</span>        <span class='output-success'>Healthy</span>"
     ],
-    delay: 0
+    delay: 200
   },
   {
     command: "vault kv get -mount=secret coffee/api-keys",
@@ -1485,7 +1485,7 @@ const terminalCommands = [
       "espresso_token     ****************************",
       "caffeine_secret    ****************************"
     ],
-    delay: 0
+    delay: 120
   },
   {
     command: "flux get kustomizations",
@@ -1496,7 +1496,7 @@ const terminalCommands = [
       "monitoring              main@sha1:2b4a6f9       False           True    Applied revision: main@sha1:2b4a6f9",
       "cert-manager            main@sha1:7c3d1e8       False           True    Applied revision: main@sha1:7c3d1e8"
     ],
-    delay: 0
+    delay: 180
   },
   {
     command: "istioctl proxy-status",
@@ -1506,7 +1506,7 @@ const terminalCommands = [
       "coffee-backend-5c7d8e9f2-a1b3c.default        SYNCED     SYNCED     SYNCED     SYNCED     NOT SENT     istiod-1-19-3-7d8f9c5b4    1.19.3",
       "istio-gateway-6b8a9d2e1-k4m7n.istio-system    SYNCED     SYNCED     SYNCED     SYNCED     NOT SENT     istiod-1-19-3-7d8f9c5b4    1.19.3"
     ],
-    delay: 0
+    delay: 150
   },
   {
     command: "k9s info",
@@ -1526,7 +1526,7 @@ const terminalCommands = [
       "  ● Namespace:         default",
       "  ● User:              techdufus@coffee-corp.com"
     ],
-    delay: 10
+    delay: 100
   },
   {
     command: "trivy image --security-checks vuln coffee-app:latest",
@@ -1543,7 +1543,7 @@ const terminalCommands = [
       "<span class='output-info'>🔒 Security score: 100/100</span>",
       "<span class='output-info'>☕ Coffee quality: PREMIUM</span>"
     ],
-    delay: 10
+    delay: 80
   },
   {
     command: "linkerd check",
@@ -1567,7 +1567,7 @@ const terminalCommands = [
       "",
       "<span class='output-success'>Status check results are √</span>"
     ],
-    delay: 10
+    delay: 90
   }
 ];
 

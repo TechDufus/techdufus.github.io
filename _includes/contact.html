@@ -15,12 +15,11 @@
               function join_at_email(user, domain){
               return (user && domain)?(user + "@" + domain):"";
               }
-              document.write('<a href="mailto:'
-              + join_at_email( "{{ newemail[0] }}", "{{ newemail[1] }}" )
-              + '">'
-              + join_at_email( "{{ newemail[0] }}", "{{ newemail[1] }}" )
-              + '</a>'
-              );
+              const emailAddr = join_at_email( "{{ newemail[0] }}", "{{ newemail[1] }}" );
+              const emailLink = document.createElement('a');
+              emailLink.href = 'mailto:' + emailAddr;
+              emailLink.textContent = emailAddr;
+              document.currentScript.parentNode.insertBefore(emailLink, document.currentScript);
               </script>
             </p>
         {% else %}

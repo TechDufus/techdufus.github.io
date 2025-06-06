@@ -13,16 +13,50 @@
     <section id="page" class="container content-section">
 
       <div class="row">
-        <div class="col-md-10 col-md-offset-1 col-xs-10 col-xs-offset-1">
+        <div class="col-md-10 col-md-offset-1">
 
-        {{ page.content | markdownify }}
+          <!-- Setup Header -->
+          <div class="setup-header-card">
+            <div class="setup-hero">
+              <h1 class="setup-title">{{ page.title }}</h1>
+              <div class="setup-intro">
+                {{ page.content | markdownify }}
+              </div>
+            </div>
+          </div>
 
-        <div>
-          <!-- for file in setup  -->
-          {% for file in site.setup %}
-            {{ file.content | markdownify }}
-          {% endfor %}
-        </div>
+          <!-- Setup Navigation -->
+          <div class="setup-nav-card">
+            <div class="setup-nav-tabs">
+              {% for file in site.setup %}
+                {% assign filename = file.path | split: '/' | last | split: '.' | first %}
+                {% unless filename contains '_' %}
+                  <button class="setup-tab {% if forloop.first %}active{% endif %}" 
+                          data-target="setup-{{ filename | downcase }}">
+                    <i class="fa fa-{% if filename == 'Hardware' %}microchip{% elsif filename == 'Software' %}code{% elsif filename == 'Homelab' %}server{% endif %}"></i>
+                    {{ filename }}
+                  </button>
+                {% endunless %}
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Setup Content Sections -->
+          <div class="setup-content">
+            {% for file in site.setup %}
+              {% assign filename = file.path | split: '/' | last | split: '.' | first %}
+              {% unless filename contains '_' %}
+                <div id="setup-{{ filename | downcase }}" 
+                     class="setup-section {% if forloop.first %}active{% endif %}">
+                  <div class="setup-section-card">
+                    <div class="setup-section-content">
+                      {{ file.content | markdownify }}
+                    </div>
+                  </div>
+                </div>
+              {% endunless %}
+            {% endfor %}
+          </div>
 
         </div>
       </div>
@@ -31,6 +65,39 @@
     {% include footer.html %}
 
     {% include js.html %}
+
+    <!-- Setup Page JavaScript -->
+    <script>
+    $(document).ready(function() {
+      // Tab switching functionality
+      $('.setup-tab').click(function() {
+        const target = $(this).data('target');
+        
+        // Remove active class from all tabs and sections
+        $('.setup-tab').removeClass('active');
+        $('.setup-section').removeClass('active');
+        
+        // Add active class to clicked tab and corresponding section
+        $(this).addClass('active');
+        $('#' + target).addClass('active');
+        
+        // Smooth scroll to content
+        $('html, body').animate({
+          scrollTop: $('.setup-content').offset().top - 80
+        }, 400);
+      });
+      
+      // Add smooth hover effects to setup cards
+      $('.setup-section-card').hover(
+        function() {
+          $(this).addClass('hovered');
+        },
+        function() {
+          $(this).removeClass('hovered');
+        }
+      );
+    });
+    </script>
 
   </body>
 </html>

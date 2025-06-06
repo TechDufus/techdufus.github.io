@@ -3,10 +3,502 @@ layout: null
 section-type: about
 title: About
 ---
-## About
 
-<!-- Welcome welcome welcome! I wanted to create a space where I can share my thoughts, things I'm learning, or anything else I want! You've found that place. :) -->
-Hello and welcome! This is where I share my thoughts, current learnings, and anything else that sparks interest along the way. Glad you’re here!
+<div class="about-hero">
+  <div class="hero-content">
+    <div class="profile-section">
+      <img src="{{site.baseurl}}{{site.me-img}}" alt="TechDufus Profile" class="profile-image">
+      <div class="profile-info">
+        <h2>Hello, I'm TechDufus</h2>
+        <p class="call-me">You can call me Dufus</p>
+        <p class="tagline">DevOps Engineer • Defense Contractor • Cloud Architect • Terminal Enthusiast</p>
+        <div class="status-indicator">
+          <span class="status-dot"></span>
+          <span>Status: Probably fighting with DNS somewhere</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-<sub><sup>My thoughts and opinions are mine.</sup></sub>
-<sub><sup>I use Neovimᵇᵗʷ</sup></sub>
+<div class="about-content">
+  <div class="intro-card">
+    <div class="card-icon">
+      <i class="fa fa-rocket"></i>
+    </div>
+    <div class="card-content">
+      <h3>Welcome to My Digital Space</h3>
+      <p>I'm a DevOps engineer working in defense contracting, passionate about cloud-native technologies, automation, and building resilient, mission-critical infrastructure. This is where I share my journey through the ever-evolving world of technology and national security.</p>
+    </div>
+  </div>
+
+  <div class="journey-section">
+    <h3><i class="fa fa-map"></i> My Journey</h3>
+    <div class="journey-content">
+      <p>I started my career deep in the PowerShell ecosystem, building automation tools like <a href="https://github.com/techdufus/AdminToolkit" target="_blank">AdminToolkit</a> and <a href="https://github.com/techdufus/Helpdesk" target="_blank">Helpdesk</a> to help teams streamline their Windows operations. Over time, my curiosity led me to explore containerization, orchestration, and cloud platforms.</p>
+      
+      <div class="tech-grid">
+        <div class="tech-card">
+          <i class="fa fa-dharmachakra tech-icon"></i>
+          <h4>Kubernetes & Containers</h4>
+          <p>Building scalable, resilient applications</p>
+        </div>
+        <div class="tech-card">
+          <i class="fa fa-code-branch tech-icon"></i>
+          <h4>GitOps & CI/CD</h4>
+          <p>Automated deployment pipelines with ArgoCD and Helm</p>
+        </div>
+        <div class="tech-card">
+          <i class="fa fa-cube tech-icon"></i>
+          <h4>Infrastructure as Code</h4>
+          <p>Crafting infrastructure with Terraform</p>
+        </div>
+        <div class="tech-card">
+          <i class="fa fa-cloud tech-icon"></i>
+          <h4>Cloud Platforms</h4>
+          <p>Designing solutions across AWS, Azure, and secure government cloud environments</p>
+        </div>
+        <div class="tech-card">
+          <i class="fa fa-chart-line tech-icon"></i>
+          <h4>Monitoring & Observability</h4>
+          <p>Ensuring systems are observable and maintainable</p>
+        </div>
+        <div class="tech-card">
+          <i class="fa fa-shield-alt tech-icon"></i>
+          <h4>Defense & Security</h4>
+          <p>Building secure, mission-critical infrastructure for national security</p>
+        </div>
+        <div class="tech-card">
+          <i class="fa fa-terminal tech-icon"></i>
+          <h4>Terminal Workflow</h4>
+          <p>Living in tmux sessions and Neovim</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-cards">
+    <div class="info-card">
+      <div class="card-header">
+        <i class="fa fa-seedling"></i>
+        <h3>What You'll Find Here</h3>
+      </div>
+      <p>This blog serves as my digital garden where I document learnings, share tutorials, and occasionally dive into personal reflections. Whether you're here for PowerShell tips, Kubernetes deep-dives, or just curious about the tech industry, I hope you find something valuable.</p>
+    </div>
+
+    <div class="info-card">
+      <div class="card-header">
+        <i class="fa fa-terminal"></i>
+        <h3>Living in the Terminal</h3>
+      </div>
+      <p>My daily workflow is dominated by terminal and CLI tools - I try to work exclusively from the command line whenever possible. You'll find me navigating through tmux sessions, editing code in Neovim, and automating everything I can.</p>
+      <div class="dotfiles-link">
+        <a href="https://github.com/techdufus/dotfiles" target="_blank" class="dotfiles-btn">
+          <i class="fa fa-github"></i> Check out my dotfiles
+        </a>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="card-header">
+        <i class="fa fa-heart"></i>
+        <h3>Beyond the Code</h3>
+      </div>
+      <p>When I'm not knee-deep in YAML files or debugging network policies, you might find me exploring new technologies, contributing to open source projects, or sharing knowledge with the community. As a follower of Christ, I believe in building with purpose and serving others through the gifts I've been given.</p>
+    </div>
+  </div>
+
+  <div class="fun-facts">
+    <div class="fact-item">
+      <i class="fa fa-code"></i>
+      <span>My thoughts and opinions are mine</span>
+    </div>
+    <div class="fact-item">
+      <i class="fa fa-vim"></i>
+      <span>I use Neovim<sup>btw</sup> (and yes, I'll tell you about it)</span>
+    </div>
+    <div class="fact-item">
+      <i class="fa fa-server"></i>
+      <span>DNS is always the culprit</span>
+    </div>
+  </div>
+</div>
+
+<style>
+/* About Section Enhanced Styling */
+.about-hero {
+  background: linear-gradient(135deg, rgba(var(--ctp-crust-rgb), 0.95), rgba(var(--ctp-mantle-rgb), 0.9));
+  border: 1px solid rgba(var(--ctp-mauve-rgb), 0.3);
+  border-radius: 15px;
+  padding: 40px;
+  margin-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.about-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(var(--ctp-mauve-rgb), 0.05) 50%, transparent 70%);
+  pointer-events: none;
+}
+
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid var(--ctp-mauve);
+  box-shadow: 0 0 30px rgba(var(--ctp-mauve-rgb), 0.4);
+  transition: all 0.3s ease;
+}
+
+.profile-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 40px rgba(var(--ctp-mauve-rgb), 0.6);
+}
+
+.profile-info h2 {
+  color: var(--ctp-text);
+  margin-bottom: 10px;
+  font-size: 28px;
+  background: linear-gradient(45deg, var(--ctp-mauve), var(--ctp-lavender));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.call-me {
+  color: var(--ctp-teal);
+  font-size: 16px;
+  margin-bottom: 8px;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.tagline {
+  color: var(--ctp-subtext1);
+  font-size: 18px;
+  margin-bottom: 15px;
+  font-weight: 300;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ctp-subtext0);
+  font-size: 14px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--ctp-green);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(var(--ctp-green-rgb), 0.6);
+  animation: statusGlow 2s ease-in-out infinite;
+  position: relative;
+}
+
+.status-dot::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: var(--ctp-green);
+  border-radius: 50%;
+  opacity: 0;
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusGlow {
+  0%, 100% { 
+    box-shadow: 0 0 8px rgba(var(--ctp-green-rgb), 0.6);
+  }
+  50% { 
+    box-shadow: 0 0 15px rgba(var(--ctp-green-rgb), 0.9), 0 0 25px rgba(var(--ctp-green-rgb), 0.4);
+  }
+}
+
+@keyframes statusPulse {
+  0% { 
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% { 
+    opacity: 0.3;
+    transform: scale(1.2);
+  }
+  100% { 
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+.about-content {
+  max-width: 100%;
+}
+
+.intro-card {
+  background: rgba(var(--ctp-crust-rgb), 0.6);
+  border: 1px solid rgba(var(--ctp-mauve-rgb), 0.2);
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 40px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  transition: all 0.3s ease;
+}
+
+.intro-card:hover {
+  border-color: rgba(var(--ctp-mauve-rgb), 0.4);
+  transform: translateY(-2px);
+}
+
+.card-icon {
+  background: linear-gradient(45deg, var(--ctp-mauve), var(--ctp-lavender));
+  color: var(--ctp-crust);
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.card-content h3 {
+  color: var(--ctp-mauve);
+  margin-bottom: 15px;
+}
+
+.card-content p {
+  color: var(--ctp-subtext1);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.journey-section h3 {
+  color: var(--ctp-mauve);
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+}
+
+.journey-content p {
+  color: var(--ctp-subtext1);
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.journey-content a {
+  color: var(--ctp-sky);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.journey-content a:hover {
+  color: var(--ctp-sapphire);
+}
+
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.tech-card {
+  background: rgba(var(--ctp-mantle-rgb), 0.6);
+  border: 1px solid rgba(var(--ctp-surface1-rgb), 0.5);
+  border-radius: 10px;
+  padding: 25px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.tech-card:hover {
+  border-color: rgba(var(--ctp-mauve-rgb), 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(var(--ctp-mauve-rgb), 0.15);
+}
+
+.tech-icon {
+  font-size: 32px;
+  color: var(--ctp-mauve);
+  margin-bottom: 15px;
+  display: block;
+}
+
+.tech-card h4 {
+  color: var(--ctp-text);
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.tech-card p {
+  color: var(--ctp-subtext0);
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.info-card {
+  background: rgba(var(--ctp-crust-rgb), 0.6);
+  border: 1px solid rgba(var(--ctp-mauve-rgb), 0.2);
+  border-radius: 12px;
+  padding: 30px;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  border-color: rgba(var(--ctp-mauve-rgb), 0.4);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.card-header i {
+  color: var(--ctp-mauve);
+  font-size: 20px;
+}
+
+.card-header h3 {
+  color: var(--ctp-text);
+  margin: 0;
+  font-size: 18px;
+}
+
+.info-card p {
+  color: var(--ctp-subtext1);
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.dotfiles-link {
+  margin-top: 20px;
+}
+
+.dotfiles-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ctp-mauve);
+  color: var(--ctp-crust);
+  padding: 10px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.dotfiles-btn:hover {
+  background: var(--ctp-lavender);
+  color: var(--ctp-crust);
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.fun-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  padding: 30px;
+  background: rgba(var(--ctp-surface1-rgb), 0.4);
+  border-radius: 12px;
+  border: 1px solid rgba(var(--ctp-surface2-rgb), 0.5);
+  transition: all 0.3s ease;
+}
+
+.fact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ctp-subtext0);
+  font-size: 14px;
+  font-style: italic;
+}
+
+.fact-item i {
+  color: var(--ctp-teal);
+  font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  
+  .profile-info h2 {
+    font-size: 24px;
+  }
+  
+  .intro-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .tech-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .fun-facts {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-hero {
+    padding: 25px;
+  }
+  
+  .profile-image {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .tagline {
+    font-size: 16px;
+  }
+}
+</style>

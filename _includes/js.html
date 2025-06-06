@@ -15,9 +15,109 @@
 * Code licensed under the Apache License v2.0.
 * For details, see http://www.apache.org/licenses/LICENSE-2.0.-->
 <script>
-function toggleNavCollapse(){50<$(".navbar").offset().top?$(".navbar-fixed-top").addClass("top-nav-collapse"):$(".navbar-fixed-top").removeClass("top-nav-collapse");}
-$(document).ready(toggleNavCollapse);
-$(window).scroll(toggleNavCollapse);$(function(){$("a.page-scroll").bind("click",function(b){var a=$(this);$("html, body").stop().animate({scrollTop:$(a.attr("href")).offset().top-50},1500,"easeInOutExpo",function(){a.blur()});b.preventDefault()})});$(".navbar-collapse ul li a").click(function(){$(".navbar-toggle:visible").click()});
+// Enhanced navbar scroll animation
+function handleNavbarScroll() {
+  const navbar = $(".navbar-fixed-top");
+  const scrollTop = $(window).scrollTop();
+  const threshold = 50;
+  
+  if (scrollTop > threshold) {
+    navbar.addClass("top-nav-collapse");
+  } else {
+    navbar.removeClass("top-nav-collapse");
+  }
+  
+  // Add scrolling class for micro-interactions
+  if (scrollTop > 10) {
+    navbar.addClass("navbar-scrolling");
+  } else {
+    navbar.removeClass("navbar-scrolling");
+  }
+}
+
+// Debounced scroll handler for better performance
+let ticking = false;
+function requestTick() {
+  if (!ticking) {
+    requestAnimationFrame(handleNavbarScroll);
+    ticking = true;
+  }
+}
+
+function finishTick() {
+  ticking = false;
+}
+
+$(document).ready(function() {
+  handleNavbarScroll();
+  
+  // Enhanced scroll event with requestAnimationFrame for smooth performance
+  $(window).scroll(function() {
+    requestTick();
+    setTimeout(finishTick, 16); // ~60fps
+  });
+  
+  // Smooth scroll with enhanced easing
+  $("a.page-scroll").bind("click", function(e) {
+    const target = $(this);
+    const href = target.attr("href");
+    const offsetTop = $(href).offset().top - 60; // Account for navbar height
+    
+    $("html, body").stop().animate({
+      scrollTop: offsetTop
+    }, 1200, "easeInOutExpo", function() {
+      target.blur();
+    });
+    
+    e.preventDefault();
+  });
+  
+  // Auto-collapse mobile menu on item click
+  $(".navbar-collapse ul li a").click(function() {
+    const toggle = $(".navbar-toggle:visible");
+    if (toggle.length) {
+      toggle.click();
+    }
+  });
+  
+  // Add hover effects to navbar items
+  $(".navbar-nav li a").hover(
+    function() {
+      $(this).addClass("nav-hover");
+    },
+    function() {
+      $(this).removeClass("nav-hover");
+    }
+  );
+  
+  // Theme toggle animation enhancement
+  $("#theme-toggle").on("click", function() {
+    $(this).addClass("theme-switching");
+    setTimeout(() => {
+      $(this).removeClass("theme-switching");
+    }, 400);
+  });
+  
+  // Universal scroll-to-top functionality
+  $(".scroll-to-top").on("click", function(e) {
+    e.preventDefault();
+    $("html, body").animate({
+      scrollTop: 0
+    }, 800, "easeInOutExpo");
+  });
+  
+  // Show/hide scroll-to-top button based on scroll position
+  $(window).scroll(function() {
+    const scrollTop = $(window).scrollTop();
+    const button = $(".scroll-to-top");
+    
+    if (scrollTop > 200) {
+      button.addClass("visible");
+    } else {
+      button.removeClass("visible");
+    }
+  });
+});
 </script>
 
 {% if page.section-type == "index" %}
@@ -275,5 +375,53 @@ function addTohistory() {
 <!-- Gesture Navigation / Swipe Instruction End -->
 
 {% endif %}
+
+<!-- Theme Toggle Functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById('theme-icon');
+  const body = document.body;
+  
+  // Initialize theme from localStorage or default to dark
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  setTheme(savedTheme);
+  
+  function setTheme(theme) {
+    if (theme === 'light') {
+      body.setAttribute('data-theme', 'light');
+      themeIcon.className = 'fa fa-sun theme-icon';
+      localStorage.setItem('theme', 'light');
+    } else {
+      body.removeAttribute('data-theme');
+      themeIcon.className = 'fa fa-moon theme-icon';
+      localStorage.setItem('theme', 'dark');
+    }
+  }
+  
+  function toggleTheme() {
+    const currentTheme = body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    
+    // Add a small animation to the toggle button
+    themeToggle.style.transform = 'rotate(180deg)';
+    setTimeout(() => {
+      themeToggle.style.transform = 'rotate(0deg)';
+    }, 300);
+  }
+  
+  // Theme toggle event listener
+  themeToggle.addEventListener('click', toggleTheme);
+  
+  // Keyboard accessibility
+  themeToggle.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleTheme();
+    }
+  });
+});
+</script>
 
 <!-- Javascript End -->

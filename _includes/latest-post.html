@@ -1,29 +1,342 @@
 
 <!-- Latest Post Preview Start -->
 
-<section id="{{ page.section-type }}" class="container content-section text-center">
+<section id="{{ page.section-type }}" class="container content-section">
     <div class="row">
       <div class="col-md-10 col-md-offset-1">
+        
+        <div class="text-center section-header">
+          {{ page.content | markdownify }}
+        </div>
 
-        {{ page.content | markdownify }}
-
+        <!-- Featured Latest Post -->
         {% assign post = site.posts.first %}
-        <h4> <strong> {{ post.date | date_to_string }} </strong>
-          <small>.
-            <a class="category" href="{{site.baseurl}}/categories/{{post.category | downcase}}.html">
-              {{ post.category }}
+        <div class="featured-post-card">
+          <div class="post-meta">
+            <span class="post-date">{{ post.date | date: "%B %d, %Y" }}</span>
+            <span class="post-separator">•</span>
+            <a class="post-category" href="{{site.baseurl}}/categories/{{post.category | downcase}}.html">
+              {{ post.category | upcase }}
             </a>
-          .</small>
-          <strong> <a href="{{site.baseurl}}{{ post.url }}">{{post.title}} </a> </strong>
-          <small> <a href="{{site.baseurl}}{{post.url}}#disqus_thread">Comments</a></small>
-        </h4>
+            <span class="post-separator">•</span>
+            <span class="reading-time">{{ post.content | strip_html | number_of_words | divided_by: 200 | plus: 1 }} min read</span>
+          </div>
+          
+          <h2 class="post-title">
+            <a href="{{site.baseurl}}{{ post.url }}">{{ post.title }}</a>
+          </h2>
+          
+          {% if post.tags.size > 0 %}
+          <div class="post-tags">
+            {% for tag in post.tags %}
+              <span class="tag">#{{ tag }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+          
+          <div class="post-excerpt">
+            {{ post.content | strip_html | truncatewords: site.post-preview-words }}
+            <div class="excerpt-fade"></div>
+          </div>
+          
+          <div class="post-actions">
+            <a href="{{site.baseurl}}{{ post.url }}" class="btn btn-primary read-more">
+              Read Full Post <i class="fa fa-arrow-right"></i>
+            </a>
+            <a href="{{site.baseurl}}{{post.url}}#disqus_thread" class="comments-link">
+              <i class="fa fa-comments"></i> Comments
+            </a>
+          </div>
+        </div>
 
-        <section class="text-justify">
-          {{ post.content | strip_html | markdownify | truncatewords: site.post-preview-words }}
-        </section>
-        <h4><a href="{{site.baseurl}}/blog/">View Blog Archive</a></h4>
+        <!-- Recent Posts Grid -->
+        {% if site.posts.size > 1 %}
+        <div class="recent-posts-section">
+          <h3>Recent Posts</h3>
+          <div class="recent-posts-grid">
+            {% for post in site.posts limit:3 offset:1 %}
+            <div class="recent-post-card">
+              <div class="recent-post-meta">
+                <span class="recent-post-date">{{ post.date | date: "%b %d" }}</span>
+                <a class="recent-post-category" href="{{site.baseurl}}/categories/{{post.category | downcase}}.html">
+                  {{ post.category }}
+                </a>
+              </div>
+              <h4 class="recent-post-title">
+                <a href="{{site.baseurl}}{{ post.url }}">{{ post.title }}</a>
+              </h4>
+              <p class="recent-post-excerpt">
+                {{ post.content | strip_html | truncatewords: 20 }}
+              </p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="blog-cta text-center">
+          <a href="{{site.baseurl}}/blog/" class="btn btn-outline">
+            <i class="fa fa-archive"></i> View All Posts
+          </a>
+        </div>
+        
       </div>
     </div>
 </section>
+
+<style>
+/* Latest Post Section Styling */
+.section-header {
+  margin-bottom: 40px;
+}
+
+.featured-post-card {
+  background: rgba(var(--ctp-crust-rgb), 0.8);
+  border: 1px solid rgba(var(--ctp-mauve-rgb), 0.3);
+  border-radius: 12px;
+  padding: 40px;
+  margin-bottom: 50px;
+  transition: all 0.3s ease;
+}
+
+.featured-post-card:hover {
+  border-color: rgba(var(--ctp-mauve-rgb), 0.5);
+  box-shadow: 0 10px 30px rgba(var(--ctp-mauve-rgb), 0.2);
+}
+
+.post-meta {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--ctp-subtext1);
+}
+
+.post-date {
+  color: var(--ctp-subtext0);
+}
+
+.post-separator {
+  margin: 0 10px;
+  color: var(--ctp-overlay0);
+}
+
+.post-category {
+  color: var(--ctp-mauve);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.post-category:hover {
+  color: var(--ctp-lavender);
+  text-decoration: none;
+}
+
+.reading-time {
+  color: var(--ctp-teal);
+}
+
+.post-title {
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+.post-title a {
+  color: var(--ctp-text);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.post-title a:hover {
+  color: var(--ctp-mauve);
+  text-decoration: none;
+}
+
+.post-tags {
+  margin-bottom: 25px;
+}
+
+.tag {
+  display: inline-block;
+  background: rgba(var(--ctp-mauve-rgb), 0.2);
+  color: var(--ctp-mauve);
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  margin-right: 8px;
+  margin-bottom: 5px;
+}
+
+.post-excerpt {
+  position: relative;
+  margin-bottom: 30px;
+  color: var(--ctp-subtext1);
+  line-height: 1.6;
+  text-align: left;
+}
+
+.excerpt-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(transparent, rgba(var(--ctp-crust-rgb), 0.8));
+  pointer-events: none;
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.read-more {
+  background: var(--ctp-mauve);
+  color: var(--ctp-crust);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.read-more:hover {
+  background: var(--ctp-lavender);
+  color: var(--ctp-crust);
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.comments-link {
+  color: var(--ctp-sky);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.comments-link:hover {
+  color: var(--ctp-sapphire);
+  text-decoration: none;
+}
+
+/* Recent Posts Section */
+.recent-posts-section {
+  margin-bottom: 40px;
+}
+
+.recent-posts-section h3 {
+  color: var(--ctp-mauve);
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.recent-posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.recent-post-card {
+  background: rgba(var(--ctp-mantle-rgb), 0.6);
+  border: 1px solid rgba(var(--ctp-surface1-rgb), 0.5);
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.recent-post-card:hover {
+  border-color: rgba(var(--ctp-mauve-rgb), 0.4);
+  transform: translateY(-2px);
+}
+
+.recent-post-meta {
+  margin-bottom: 12px;
+  font-size: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.recent-post-date {
+  color: var(--ctp-subtext0);
+}
+
+.recent-post-category {
+  color: var(--ctp-teal);
+  text-decoration: none;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.recent-post-title {
+  margin-bottom: 10px;
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.recent-post-title a {
+  color: var(--ctp-text);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.recent-post-title a:hover {
+  color: var(--ctp-mauve);
+  text-decoration: none;
+}
+
+.recent-post-excerpt {
+  color: var(--ctp-subtext1);
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.blog-cta {
+  margin-top: 30px;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--ctp-mauve);
+  border: 2px solid var(--ctp-mauve);
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background: var(--ctp-mauve);
+  color: var(--ctp-crust);
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .featured-post-card {
+    padding: 25px;
+  }
+  
+  .post-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .read-more {
+    text-align: center;
+  }
+  
+  .recent-posts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
 
 <!-- Latest Post Preview End -->

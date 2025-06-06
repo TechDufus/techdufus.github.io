@@ -1,19 +1,39 @@
 
 <!-- Post List Start -->
 
-<h4 align="left">
-  <strong>{{ post.date | date_to_string }}</strong>
-  <small>.
-    <a class="category" href="{{site.baseurl}}/categories/{{ post.category | downcase }}.html">
-      {{ post.category }}
+<div class="blog-entry">
+  <div class="file-info">
+    <span class="permissions">-rw-r--r--</span>
+    {% if post.guest_author %}
+      <a href="{{site.baseurl}}/authors/{{ post.guest_author.name | slugify }}.html" class="owner-link" title="View all posts by {{ post.guest_author.name }}">
+        <span class="owner">{{ post.guest_author.name | slugify }}</span>
+      </a>
+    {% else %}
+      <a href="{{site.baseurl}}/authors/techdufus.html" class="owner-link" title="View all posts by {{ site.author }}">
+        <span class="owner">techdufus</span>
+      </a>
+    {% endif %}
+    <span class="group">blog</span>
+    <span class="size">{{ post.content | strip_html | size | append: 'K' }}</span>
+    <span class="date">{{ post.date | date: "%b %d %Y" }}</span>
+    <span class="time">{{ post.date | date: "%H:%M" }}</span>
+  </div>
+  <div class="file-name">
+    <a href="{{site.baseurl}}{{post.url}}" class="post-link">
+      <i class="fa fa-file-text-o"></i>
+      {{ post.title | append: '.md' }}
     </a>
-  .</small>
-  <br class="visible-xs-block">
-  <a href="{{site.baseurl}}{{post.url}}">
-    <strong>{{ post.title }}</strong>
-  </a>
-  <br class="visible-xs-block">
-  <small><a href="{{site.baseurl}}{{post.url}}#disqus_thread">Comments</a></small>
-</h4>
+    <span class="category-tag">
+      <a href="{{site.baseurl}}/categories/{{ post.category | downcase }}.html" class="category-link">
+        #{{ post.category }}
+      </a>
+    </span>
+  </div>
+  {% if post.excerpt %}
+  <div class="file-preview">
+    <span class="preview-indicator">└──</span> {{ post.excerpt | strip_html | truncatewords: 15 }}
+  </div>
+  {% endif %}
+</div>
 
 <!-- Post List End -->

@@ -1,5 +1,4 @@
-
-<!-- Category Layout Start -->
+<!-- Author Layout Start -->
 
 <!DOCTYPE html>
 <html lang="{{ site.lang }}">
@@ -15,10 +14,20 @@
       <div class="row">
         <div class="col-md-10 col-md-offset-1 col-xs-12">
 
-          {% assign category = page.title %}
-          {% assign category_posts = site.posts | where: "category", category %}
+          {% assign author_name = page.title %}
+          {% assign author_posts = "" | split: "" %}
+          
+          {% for post in site.posts %}
+            {% if post.guest_author %}
+              {% if post.guest_author.name == author_name %}
+                {% assign author_posts = author_posts | push: post %}
+              {% endif %}
+            {% elsif author_name == "TechDufus" or author_name == site.author %}
+              {% assign author_posts = author_posts | push: post %}
+            {% endif %}
+          {% endfor %}
 
-          <!-- Category Terminal -->
+          <!-- Author Terminal -->
           <div class="category-terminal">
             <div class="terminal-header">
               <div class="terminal-controls">
@@ -26,31 +35,31 @@
                 <span class="control minimize"></span>
                 <span class="control maximize"></span>
               </div>
-              <div class="terminal-title">~/blog/{{ category }}</div>
+              <div class="terminal-title">~/blog/authors/{{ author_name | slugify }}</div>
             </div>
             
             <div class="terminal-content">
               <div class="category-header">
                 <div class="category-info">
                   <h1 class="category-title">
-                    <i class="fa fa-folder-open"></i>
-                    {{ category | capitalize }} Posts
+                    <i class="fa fa-user"></i>
+                    Posts by {{ author_name }}
                   </h1>
                   <div class="category-description">
-                    <p>All posts in the <strong>{{ category }}</strong> category</p>
+                    <p>All posts authored by <strong>{{ author_name }}</strong></p>
                   </div>
                 </div>
                 
                 <div class="category-stats">
                   <div class="stat">
                     <i class="fa fa-file-text"></i>
-                    <span class="stat-number">{{ category_posts.size }}</span>
+                    <span class="stat-number">{{ author_posts.size }}</span>
                     <span class="stat-label">Posts</span>
                   </div>
-                  {% if category_posts.size > 0 %}
+                  {% if author_posts.size > 0 %}
                   <div class="stat">
                     <i class="fa fa-calendar"></i>
-                    <span class="stat-number">{{ category_posts.first.date | date: "%Y" }}</span>
+                    <span class="stat-number">{{ author_posts.first.date | date: "%Y" }}</span>
                     <span class="stat-label">Latest</span>
                   </div>
                   {% endif %}
@@ -58,18 +67,18 @@
               </div>
               
               <div class="terminal-prompt">
-                <span class="user">techdufus@blog</span><span class="separator">:</span><span class="path">~/{{ category }}</span><span class="prompt">$</span> ls -la --sort=time
+                <span class="user">techdufus@blog</span><span class="separator">:</span><span class="path">~/authors/{{ author_name | slugify }}</span><span class="prompt">$</span> ls -la --sort=time
               </div>
               
               <div class="blog-entries">
-                {% if category_posts.size > 0 %}
-                  {% for post in category_posts %}
+                {% if author_posts.size > 0 %}
+                  {% for post in author_posts %}
                     {% include post-list.html %}
                   {% endfor %}
                 {% else %}
                   <div class="no-posts">
-                    <i class="fa fa-folder-open-o"></i>
-                    <p>No posts found in this category yet.</p>
+                    <i class="fa fa-user-o"></i>
+                    <p>No posts found by this author yet.</p>
                     <a href="{{site.baseurl}}/blog/" class="back-link">
                       <i class="fa fa-arrow-left"></i> Back to all posts
                     </a>
@@ -77,13 +86,13 @@
                 {% endif %}
               </div>
               
-              {% if category_posts.size > 0 %}
+              {% if author_posts.size > 0 %}
               <div class="terminal-summary">
                 <div class="summary-line">
-                  <span class="user">techdufus@blog</span><span class="separator">:</span><span class="path">~/{{ category }}</span><span class="prompt">$</span> wc -l *.md
+                  <span class="user">techdufus@blog</span><span class="separator">:</span><span class="path">~/authors/{{ author_name | slugify }}</span><span class="prompt">$</span> wc -l *.md
                 </div>
                 <div class="file-count">
-                  {{ category_posts.size }} {{ category }} blog post{% if category_posts.size != 1 %}s{% endif %} found
+                  {{ author_posts.size }} blog post{% if author_posts.size != 1 %}s{% endif %} by {{ author_name }} found
                 </div>
                 <div class="navigation-links">
                   <a href="{{site.baseurl}}/blog/" class="nav-link">
@@ -109,4 +118,4 @@
   </body>
 </html>
 
-<!-- Category Layout End -->
+<!-- Author Layout End -->

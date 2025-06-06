@@ -1,20 +1,183 @@
 <!-- Footer Start -->
 
-<footer>
+<footer class="site-footer">
+  <div class="footer-container">
+    
+    <!-- Main Footer Content -->
+    <div class="footer-content">
+      
+      <!-- About Section -->
+      <div class="footer-section">
+        <h4>TechDufus</h4>
+        <p>DevOps Engineer building resilient infrastructure and sharing knowledge about technology, life, and faith.</p>
+      </div>
 
-    {% include social-buttons.html %}
+      <!-- Connect -->
+      <div class="footer-section">
+        <h4>Connect</h4>
+        <div class="social-links">
+          {% for network in site.social %}
+          <a href="{{ network.url }}" target="_blank" rel="noopener" class="social-link" title="{{ network.title | replace: 'fab fa-', '' | replace: 'fa fa-', '' | capitalize }}">
+            <i class="{{ network.title }}"></i>
+          </a>
+          {% endfor %}
+          {% if site.keybase-in-social %}
+          <a href="https://keybase.io/{{site.keybase-username}}" target="_blank" rel="noopener" class="social-link" title="Keybase">
+            <i class="fa fa-key"></i>
+          </a>
+          {% endif %}
+        </div>
+      </div>
 
-    <p><br><br></p>
-
-    <div class="container text-center">
-        <p>Copyright &copy; {{ site.author }} {{ site.time | date: "%Y" }}. This site brought to you by Neovimᵇᵗʷ.</p>
-        {% if site.keybase-in-footer %}
-        <p style="font-size: 16px;"><a href="https://keybase.io/{{site.keybase-username}}" target="_blank"><i
-                class="fa fa-key"></i> {{site.keybase-username}} on Keybase</a></p>
-        {% endif %}
     </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <div class="footer-bottom-content">
+        <div class="copyright">
+          <p>&copy; {{ site.time | date: "%Y" }} {{ site.author }}. Built with Jekyll + Neovimᵇᵗʷ</p>
+        </div>
+        <div class="back-to-top">
+          <a href="#" class="scroll-to-top">
+            <i class="fa fa-chevron-up"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </footer>
 
-<p></p>
+<style>
+/* Simple Footer Styling */
+.site-footer {
+  background: var(--ctp-crust);
+  border-top: 1px solid var(--ctp-surface1);
+  color: var(--ctp-text);
+  margin-top: 80px;
+  padding: 50px 0 30px;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.footer-section h4 {
+  color: var(--ctp-mauve);
+  margin-bottom: 15px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.footer-section p {
+  color: var(--ctp-subtext1);
+  line-height: 1.5;
+  font-size: 14px;
+  margin: 0;
+}
+
+
+.social-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.social-link {
+  background: rgba(var(--ctp-surface0-rgb), 0.6);
+  color: var(--ctp-mauve);
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(var(--ctp-surface2-rgb), 0.3);
+}
+
+.social-link:hover {
+  background: var(--ctp-mauve);
+  color: var(--ctp-base);
+  transform: translateY(-2px);
+}
+
+.social-link i {
+  font-size: 14px;
+}
+
+.footer-bottom {
+  border-top: 1px solid var(--ctp-surface1);
+  padding: 20px 0;
+}
+
+.footer-bottom-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.copyright p {
+  margin: 0;
+  color: var(--ctp-subtext0);
+  font-size: 13px;
+}
+
+.back-to-top a {
+  color: var(--ctp-mauve);
+  text-decoration: none;
+  padding: 8px 12px;
+  border: 1px solid var(--ctp-mauve);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.back-to-top a:hover {
+  background: var(--ctp-mauve);
+  color: var(--ctp-base);
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.back-to-top a.visible {
+  opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    text-align: center;
+  }
+  
+  .footer-bottom-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-footer {
+    margin-top: 60px;
+    padding: 40px 0 20px;
+  }
+}
+</style>
 
 <!-- Footer End -->
