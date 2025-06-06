@@ -4,6 +4,99 @@
 @import "variables";
 @import "mixins";
 
+// Ensure CSS custom properties are included in output
+:root {
+  // Dark theme (default) - Colors
+  --ctp-rosewater: #{$ctp-dark-rosewater};
+  --ctp-flamingo: #{$ctp-dark-flamingo};
+  --ctp-pink: #{$ctp-dark-pink};
+  --ctp-mauve: #{$ctp-dark-mauve};
+  --ctp-red: #{$ctp-dark-red};
+  --ctp-maroon: #{$ctp-dark-maroon};
+  --ctp-peach: #{$ctp-dark-peach};
+  --ctp-yellow: #{$ctp-dark-yellow};
+  --ctp-green: #{$ctp-dark-green};
+  --ctp-teal: #{$ctp-dark-teal};
+  --ctp-sky: #{$ctp-dark-sky};
+  --ctp-sapphire: #{$ctp-dark-sapphire};
+  --ctp-blue: #{$ctp-dark-blue};
+  --ctp-lavender: #{$ctp-dark-lavender};
+  --ctp-text: #{$ctp-dark-text};
+  --ctp-subtext1: #{$ctp-dark-subtext1};
+  --ctp-subtext0: #{$ctp-dark-subtext0};
+  --ctp-overlay2: #{$ctp-dark-overlay2};
+  --ctp-overlay1: #{$ctp-dark-overlay1};
+  --ctp-overlay0: #{$ctp-dark-overlay0};
+  --ctp-surface2: #{$ctp-dark-surface2};
+  --ctp-surface1: #{$ctp-dark-surface1};
+  --ctp-surface0: #{$ctp-dark-surface0};
+  --ctp-base: #{$ctp-dark-base};
+  --ctp-mantle: #{$ctp-dark-mantle};
+  --ctp-crust: #{$ctp-dark-crust};
+  --ctp-ultra-dark: #{$ctp-dark-ultra-dark};
+  
+  // Dark theme RGB values for rgba() functions
+  --ctp-mauve-rgb: 203, 166, 247;
+  --ctp-text-rgb: 205, 214, 244;
+  --ctp-subtext1-rgb: 186, 194, 222;
+  --ctp-subtext0-rgb: 166, 173, 200;
+  --ctp-teal-rgb: 148, 226, 213;
+  --ctp-sky-rgb: 137, 220, 235;
+  --ctp-green-rgb: 166, 227, 161;
+  --ctp-yellow-rgb: 249, 226, 175;
+  --ctp-blue-rgb: 137, 180, 250;
+  --ctp-peach-rgb: 250, 179, 135;
+  --ctp-crust-rgb: 17, 17, 27;
+  --ctp-mantle-rgb: 24, 24, 37;
+  --ctp-surface1-rgb: 69, 71, 90;
+}
+
+// Light theme
+[data-theme="light"] {
+  --ctp-rosewater: #{$ctp-light-rosewater};
+  --ctp-flamingo: #{$ctp-light-flamingo};
+  --ctp-pink: #{$ctp-light-pink};
+  --ctp-mauve: #{$ctp-light-mauve};
+  --ctp-red: #{$ctp-light-red};
+  --ctp-maroon: #{$ctp-light-maroon};
+  --ctp-peach: #{$ctp-light-peach};
+  --ctp-yellow: #{$ctp-light-yellow};
+  --ctp-green: #{$ctp-light-green};
+  --ctp-teal: #{$ctp-light-teal};
+  --ctp-sky: #{$ctp-light-sky};
+  --ctp-sapphire: #{$ctp-light-sapphire};
+  --ctp-blue: #{$ctp-light-blue};
+  --ctp-lavender: #{$ctp-light-lavender};
+  --ctp-text: #{$ctp-light-text};
+  --ctp-subtext1: #{$ctp-light-subtext1};
+  --ctp-subtext0: #{$ctp-light-subtext0};
+  --ctp-overlay2: #{$ctp-light-overlay2};
+  --ctp-overlay1: #{$ctp-light-overlay1};
+  --ctp-overlay0: #{$ctp-light-overlay0};
+  --ctp-surface2: #{$ctp-light-surface2};
+  --ctp-surface1: #{$ctp-light-surface1};
+  --ctp-surface0: #{$ctp-light-surface0};
+  --ctp-base: #{$ctp-light-base};
+  --ctp-mantle: #{$ctp-light-mantle};
+  --ctp-crust: #{$ctp-light-crust};
+  --ctp-ultra-dark: #{$ctp-light-base}; // Use base for "ultra-dark" in light theme
+  
+  // Light theme RGB values for rgba() functions
+  --ctp-mauve-rgb: 136, 57, 239;
+  --ctp-text-rgb: 76, 79, 105;
+  --ctp-subtext1-rgb: 92, 95, 119;
+  --ctp-subtext0-rgb: 108, 111, 133;
+  --ctp-teal-rgb: 23, 146, 153;
+  --ctp-sky-rgb: 4, 165, 229;
+  --ctp-green-rgb: 64, 160, 43;
+  --ctp-yellow-rgb: 223, 142, 29;
+  --ctp-blue-rgb: 30, 102, 245;
+  --ctp-peach-rgb: 254, 100, 11;
+  --ctp-crust-rgb: 220, 224, 232;
+  --ctp-mantle-rgb: 230, 233, 239;
+  --ctp-surface1-rgb: 188, 192, 204;
+}
+
 /*!
  * Start Bootstrap - Grayscale Bootstrap Theme (http://startbootstrap.com)
  * Code licensed under the Apache License v2.0.
