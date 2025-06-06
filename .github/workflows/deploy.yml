@@ -3,6 +3,17 @@ name: Deploy Jekyll site to GitHub Pages
 on:
   push:
     branches: ["master"]
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - 'CONTRIBUTING'
+      - 'CONTRIBUTORS'
+      - 'scripts/**'
+      - '.gitignore'
+      - '.github/**'
+      - '!.github/workflows/deploy.yml'
+      - 'docker-compose.yml'
+      - 'Gemfile.lock'
   workflow_dispatch:
 
 permissions:

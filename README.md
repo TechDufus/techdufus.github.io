@@ -1,6 +1,6 @@
 # { TechDufus }
 ![license](https://img.shields.io/badge/license-MIT-blue.svg?link=https://github.com/TechDufus/TechDufus.github.io/LICENSE)
-![Deploy Jekyll site to GitHub Pages](https://github.com/TechDufus/techdufus.github.io/actions/workflows/deploy.yml/badge.svg)
+[![Deploy Jekyll site to GitHub Pages](https://github.com/TechDufus/techdufus.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/TechDufus/techdufus.github.io/actions/workflows/deploy.yml)
 
 { TechDufus } is a modern, terminal-themed Jekyll blog and portfolio showcasing DevOps engineering, cloud-native technologies, and personal insights about technology, life, and faith.
 
