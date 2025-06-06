@@ -19,6 +19,11 @@ This is a Jekyll-based personal blog and portfolio website for TechDufus, hosted
 - `docker-compose up` - Run Jekyll in Docker container
 - `docker run --rm -it -p 4000:4000 -v "$PWD:/srv/jekyll" jekyll/jekyll jekyll serve --watch --host "0.0.0.0" --config _config.yml,_config.dev.yml`
 
+### GitHub Actions Deployment
+- Uses custom workflow at `.github/workflows/deploy.yml`
+- Automatically deploys on push to master branch
+- Can manually trigger via Actions tab or: `gh workflow run deploy.yml`
+
 ### Content Management
 - `./scripts/newpost <title>` - Create new blog post in _posts/ directory
 - `./scripts/generate-categories` - Generate category pages for blog posts
