@@ -52,11 +52,7 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-.timeline>li .timeline-panel:hover {
-    border-color: rgba(var(--ctp-mauve-rgb), 0.6);
-    box-shadow: 0 8px 25px rgba(var(--ctp-mauve-rgb), 0.2);
-    transform: translateY(-2px);
-}
+/* Removed hover effect - timeline panels are not interactive */
 
 .timeline>li .timeline-panel:before {
     right: auto;
@@ -89,11 +85,7 @@
     overflow: hidden;
 }
 
-.timeline>li .timeline-image:hover {
-    border-color: var(--ctp-lavender);
-    box-shadow: 0 0 30px rgba(var(--ctp-mauve-rgb), 0.6);
-    transform: scale(1.05);
-}
+/* Removed hover effect - timeline images are not interactive */
 
 .timeline>li .timeline-image img {
     width: 100%;
