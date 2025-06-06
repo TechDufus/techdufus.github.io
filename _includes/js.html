@@ -386,6 +386,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Navigation scroll illusion for external pages
   initNavigationScrollIllusion();
   
+  // Initialize return-to-main-page fade-in effect
+  initMainPageFadeIn();
+  
   // Initialize theme from localStorage or default to dark
   const savedTheme = localStorage.getItem('theme') || 'dark';
   setTheme(savedTheme);
@@ -495,7 +498,22 @@ document.addEventListener('DOMContentLoaded', function() {
       ? Math.min(startScroll + scrollDistance, documentHeight - windowHeight)
       : Math.max(startScroll - scrollDistance, 0);
     
-    // Add loading overlay for better UX
+    // Create content fade container
+    const contentFadeOverlay = document.createElement('div');
+    contentFadeOverlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(var(--ctp-base-rgb, 30, 30, 46), 0);
+      z-index: 9998;
+      transition: background 0.6s ease;
+      pointer-events: none;
+    `;
+    document.body.appendChild(contentFadeOverlay);
+    
+    // Add enhanced loading overlay with smoother transitions
     const overlay = document.createElement('div');
     overlay.style.cssText = `
       position: fixed;
@@ -503,71 +521,148 @@ document.addEventListener('DOMContentLoaded', function() {
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(var(--ctp-base-rgb, 30, 30, 46), 0.8);
+      background: rgba(var(--ctp-base-rgb, 30, 30, 46), 0.95);
       z-index: 9999;
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--ctp-text, #cdd6f4);
-      font-family: monospace;
+      font-family: 'Courier New', monospace;
       opacity: 0;
-      transition: opacity 0.3s ease;
-      backdrop-filter: blur(4px);
+      transition: opacity 0.4s ease;
+      backdrop-filter: blur(8px);
     `;
     overlay.innerHTML = `
-      <div style="text-align: center;">
-        <div style="font-size: 18px; margin-bottom: 10px;">Navigating to ${targetNav.name}...</div>
-        <div style="width: 200px; height: 2px; background: rgba(var(--ctp-mauve-rgb, 203, 166, 247), 0.3); border-radius: 1px; overflow: hidden;">
-          <div style="width: 0%; height: 100%; background: var(--ctp-mauve, #cba6f7); border-radius: 1px; animation: loadingBar 1.2s ease-out forwards;"></div>
+      <div style="text-align: center; transform: translateY(20px); transition: transform 0.6s ease;">
+        <div style="font-size: 20px; margin-bottom: 16px; font-weight: 600;">Navigating to ${targetNav.name}...</div>
+        <div style="width: 240px; height: 3px; background: rgba(var(--ctp-mauve-rgb, 203, 166, 247), 0.2); border-radius: 2px; overflow: hidden; margin: 0 auto;">
+          <div style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--ctp-mauve, #cba6f7), var(--ctp-blue, #89b4fa)); border-radius: 2px; animation: loadingBar 1.4s ease-out forwards;"></div>
         </div>
+        <div style="margin-top: 12px; font-size: 14px; opacity: 0.7;">Preparing content...</div>
       </div>
     `;
     
-    // Add loading animation CSS
+    // Add enhanced loading animation CSS
     const style = document.createElement('style');
     style.textContent = `
       @keyframes loadingBar {
-        0% { width: 0%; }
-        100% { width: 100%; }
+        0% { 
+          width: 0%; 
+          background: var(--ctp-mauve, #cba6f7);
+        }
+        50% { 
+          background: var(--ctp-blue, #89b4fa);
+        }
+        100% { 
+          width: 100%; 
+          background: var(--ctp-green, #a6e3a1);
+        }
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
     `;
     document.head.appendChild(style);
     
     document.body.appendChild(overlay);
     
-    // Fade in overlay
-    requestAnimationFrame(() => {
-      overlay.style.opacity = '1';
-    });
+    // Start content fade out and loading sequence
+    setTimeout(() => {
+      // Fade out page content
+      contentFadeOverlay.style.background = `rgba(var(--ctp-base-rgb, 30, 30, 46), 0.7)`;
+    }, 100);
     
-    // Animate scroll with easing
-    const duration = 800;
+    setTimeout(() => {
+      // Show loading overlay
+      overlay.style.opacity = '1';
+      // Animate loading content
+      const loadingContent = overlay.querySelector('div');
+      loadingContent.style.transform = 'translateY(0)';
+    }, 300);
+    
+    // Animate scroll with enhanced easing and fade coordination
+    const duration = 1000;
     const startTime = performance.now();
     
     function animateScroll(currentTime) {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
       
-      // Easing function (ease-out-cubic)
-      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      // Enhanced easing function (ease-out-quart)
+      const easeProgress = 1 - Math.pow(1 - progress, 4);
       
       const currentPosition = startScroll + (targetScroll - startScroll) * easeProgress;
       window.scrollTo(0, currentPosition);
       
+      // Progressive content fade during scroll
+      const fadeProgress = Math.min(progress * 1.5, 1);
+      contentFadeOverlay.style.background = `rgba(var(--ctp-base-rgb, 30, 30, 46), ${0.7 + (fadeProgress * 0.3)})`;
+      
       if (progress < 1) {
         requestAnimationFrame(animateScroll);
       } else {
-        // Scroll complete, navigate to external page
+        // Complete the fade out
+        contentFadeOverlay.style.background = `rgba(var(--ctp-base-rgb, 30, 30, 46), 1)`;
+        
+        // Navigate to external page after fade completes
         setTimeout(() => {
           window.location.href = finalUrl;
-        }, 200);
+        }, 100);
       }
     }
     
-    // Start scroll animation after a brief delay
+    // Start scroll animation with coordinated timing
     setTimeout(() => {
       requestAnimationFrame(animateScroll);
-    }, 100);
+    }, 200);
+  }
+  
+  function initMainPageFadeIn() {
+    // Check if we're on the main page and came from an external page
+    if (document.getElementById('page-top') && document.querySelector('.intro')) {
+      const referrer = document.referrer;
+      const currentHost = window.location.host;
+      const isFromExternalNav = referrer.includes(currentHost) && 
+                               (referrer.includes('/setup/') || referrer.includes('/contact/'));
+      
+      if (isFromExternalNav) {
+        // Create fade-in effect for returning to main page
+        const fadeInOverlay = document.createElement('div');
+        fadeInOverlay.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(var(--ctp-base-rgb, 30, 30, 46), 1);
+          z-index: 9999;
+          transition: opacity 0.8s ease, background 0.8s ease;
+          pointer-events: none;
+        `;
+        
+        document.body.appendChild(fadeInOverlay);
+        
+        // Fade in the main page content
+        setTimeout(() => {
+          fadeInOverlay.style.opacity = '0';
+          fadeInOverlay.style.background = 'rgba(var(--ctp-base-rgb, 30, 30, 46), 0)';
+        }, 100);
+        
+        // Remove overlay after animation
+        setTimeout(() => {
+          if (fadeInOverlay.parentNode) {
+            fadeInOverlay.parentNode.removeChild(fadeInOverlay);
+          }
+        }, 1000);
+      }
+    }
   }
   
 });
