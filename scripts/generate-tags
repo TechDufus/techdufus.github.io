@@ -20,15 +20,19 @@ mkdir -p "$TAGS_DIR"
 # Function to extract tags from frontmatter
 extract_tags() {
     local file="$1"
-    # Extract YAML frontmatter and get tags line, then clean it up
-    awk '/^---$/{flag++} flag==1 && /^tags:/{
-        gsub(/^tags: *\[ */, ""); 
-        gsub(/ *\] *$/, ""); 
-        gsub(/["'"'"']/, ""); 
-        gsub(/, */, "\n"); 
-        print; 
-        exit
-    }' "$file"
+    # Use ruby to properly parse the YAML tags
+    ruby -e "
+    require 'yaml'
+    content = File.read('$file')
+    frontmatter = content.split('---')[1]
+    data = YAML.load(frontmatter)
+    if data && data['tags']
+      data['tags'].each { |tag| puts tag }
+    end
+    " 2>/dev/null || {
+        # Fallback to manual parsing if ruby fails
+        grep "^tags:" "$file" | sed 's/^tags:[ ]*\[[ ]*//' | sed 's/[ ]*\][ ]*$//' | sed "s/['\"]//g" | sed 's/,/\n/g' | sed 's/^[ \t]*//;s/[ \t]*$//' | grep -v '^$'
+    }
 }
 
 # Function to convert to lowercase
