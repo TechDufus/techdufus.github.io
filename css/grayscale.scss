@@ -1036,6 +1036,11 @@ body {
       padding: 20px;
       margin-bottom: 16px;
     }
+    
+    @media (max-width: 480px) {
+      padding: 16px;
+      margin-bottom: 12px;
+    }
   }
 }
 
@@ -1364,7 +1369,11 @@ body {
       /* Prevent text overflow and ensure proper wrapping */
       word-wrap: break-word;
       overflow-wrap: break-word;
+      word-break: break-word;
       hyphens: auto;
+      /* Ensure text fills available width */
+      width: 100%;
+      max-width: 100%;
     }
 
     .author-social {
@@ -1419,10 +1428,18 @@ body {
       }
 
       p {
-        font-size: 0.9rem;
-        line-height: 1.5;
+        font-size: 1rem;
+        line-height: 1.6;
         text-align: left;
         margin-bottom: 20px;
+        /* Better text handling on mobile */
+        word-spacing: 0.05em;
+        letter-spacing: 0.01em;
+        /* Use full width available */
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: 0;
+        margin-right: 0;
       }
 
       .author-social {
@@ -1451,8 +1468,11 @@ body {
       }
 
       p {
-        font-size: 0.85rem;
-        line-height: 1.4;
+        font-size: 0.95rem;
+        line-height: 1.55;
+        /* Maintain readability on very small screens */
+        text-align: justify;
+        text-justify: inter-word;
       }
 
       .author-social {
