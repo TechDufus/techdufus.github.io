@@ -261,9 +261,9 @@
   font-family: 'Courier New', monospace;
   color: var(--ctp-green);
   background: transparent; /* Inherit from terminal-window */
-  height: 75vh;
-  min-height: 550px;
-  max-height: 900px;
+  height: 78vh;
+  min-height: 580px;
+  max-height: 920px;
   display: flex;
   flex-direction: column;
   text-align: left;
@@ -328,12 +328,12 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 15px;
-  padding-bottom: 15px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
   flex-shrink: 0;
-  gap: 30px;
+  gap: 20px;
   position: relative;
-  border-bottom: 2px solid var(--ctp-surface1);
+  border-bottom: 1px solid var(--ctp-surface1);
 }
 
 /* Add a decorative divider line */
@@ -370,12 +370,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .img-me {
-  width: 180px;
-  height: 180px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   border: 3px solid var(--ctp-mauve);
   box-shadow: 0 0 20px rgba(var(--ctp-mauve-rgb), 0.5);
@@ -396,8 +396,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 0 20px;
-  max-width: 380px;
+  padding: 0 15px;
+  max-width: 350px;
   margin: 0 auto;
 }
 
@@ -406,25 +406,25 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid rgba(var(--ctp-mauve-rgb), 0.3);
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(var(--ctp-mauve-rgb), 0.3);
 }
 
 .card-title {
   color: var(--ctp-mauve);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
 }
 
 .level-badge {
   background: linear-gradient(45deg, var(--ctp-mauve), var(--ctp-lavender), var(--ctp-mauve));
   color: var(--ctp-base);
-  padding: 4px 10px;
-  border-radius: 15px;
-  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
   font-weight: bold;
   position: relative;
   overflow: hidden;
@@ -467,9 +467,10 @@
 .stat-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-  font-size: 13px;
+  gap: 6px;
+  margin-bottom: 2px;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .stat-row i {
@@ -480,7 +481,7 @@
 
 .stat-row .stat-label {
   color: var(--ctp-subtext0);
-  min-width: 70px;
+  min-width: 60px;
 }
 
 .stat-row .stat-value {
@@ -545,8 +546,9 @@
 
 .info-line {
   display: flex;
-  margin-bottom: 4px;
-  font-size: 13px;
+  margin-bottom: 2px;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .info-label {
