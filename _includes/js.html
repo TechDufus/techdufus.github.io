@@ -402,7 +402,6 @@ function addTohistory() {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const themeToggle = document.getElementById('theme-toggle');
-  const themeIcon = document.getElementById('theme-icon');
   const body = document.body;
   
   // Initialize theme from localStorage or default to dark
@@ -412,37 +411,22 @@ document.addEventListener('DOMContentLoaded', function() {
   function setTheme(theme) {
     if (theme === 'light') {
       body.setAttribute('data-theme', 'light');
-      themeIcon.className = 'fa fa-sun theme-icon';
+      themeToggle.checked = true;
       localStorage.setItem('theme', 'light');
     } else {
       body.removeAttribute('data-theme');
-      themeIcon.className = 'fa fa-moon theme-icon';
+      themeToggle.checked = false;
       localStorage.setItem('theme', 'dark');
     }
   }
   
   function toggleTheme() {
-    const currentTheme = body.getAttribute('data-theme');
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    const newTheme = themeToggle.checked ? 'light' : 'dark';
     setTheme(newTheme);
-    
-    // Add a small animation to the toggle button
-    themeToggle.style.transform = 'rotate(180deg)';
-    setTimeout(() => {
-      themeToggle.style.transform = 'rotate(0deg)';
-    }, 300);
   }
   
   // Theme toggle event listener
-  themeToggle.addEventListener('click', toggleTheme);
-  
-  // Keyboard accessibility
-  themeToggle.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      toggleTheme();
-    }
-  });
+  themeToggle.addEventListener('change', toggleTheme);
 });
 </script>
 
