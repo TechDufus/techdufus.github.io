@@ -1330,6 +1330,10 @@ body {
 
   .author-info {
     flex: 1;
+    /* Ensure content stays within bounds */
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 
     h3 {
       color: var(--ctp-text);
@@ -1337,6 +1341,9 @@ body {
       margin-bottom: 8px;
       text-transform: none;
       font-weight: 600;
+      /* Prevent text overflow */
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     .author-title {
@@ -1345,17 +1352,25 @@ body {
       font-style: italic;
       margin-bottom: 12px;
       font-weight: 500;
+      /* Prevent text overflow */
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     p {
       color: var(--ctp-subtext1);
       line-height: 1.6;
       margin-bottom: 16px;
+      /* Prevent text overflow and ensure proper wrapping */
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
     }
 
     .author-social {
       display: flex;
       gap: 12px;
+      flex-wrap: wrap;
 
       .social-link {
         color: var(--ctp-subtext0);
@@ -1375,9 +1390,76 @@ body {
   @media (max-width: 768px) {
     flex-direction: column;
     text-align: center;
+    /* Additional constraints for mobile */
+    max-width: 100%;
+    overflow: hidden;
 
     .author-avatar {
       align-self: center;
+      margin-bottom: 16px;
+
+      img {
+        width: 70px;
+        height: 70px;
+      }
+    }
+
+    .author-info {
+      /* Ensure proper text wrapping on mobile */
+      width: 100%;
+      max-width: 100%;
+      
+      h3 {
+        font-size: 1.1rem;
+        line-height: 1.3;
+      }
+
+      .author-title {
+        font-size: 0.85rem;
+      }
+
+      p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        text-align: left;
+        margin-bottom: 20px;
+      }
+
+      .author-social {
+        justify-content: center;
+        margin-top: 16px;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    /* Extra small screens - more aggressive spacing */
+    .author-avatar {
+      img {
+        width: 60px;
+        height: 60px;
+      }
+    }
+
+    .author-info {
+      h3 {
+        font-size: 1rem;
+      }
+
+      .author-title {
+        font-size: 0.8rem;
+      }
+
+      p {
+        font-size: 0.85rem;
+        line-height: 1.4;
+      }
+
+      .author-social {
+        .social-link {
+          font-size: 16px;
+        }
+      }
     }
   }
 }
@@ -2058,11 +2140,8 @@ body {
       overflow: hidden;
       min-width: 140px;
 
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-        border-color: var(--ctp-surface1);
-      }
+      /* Removed hover effect - only the links inside should be interactive */
+      /* The individual pagination links handle their own hover states */
 
       .pagination-link,
       .current-page {
@@ -2169,10 +2248,7 @@ body {
           color: var(--ctp-teal);
         }
 
-        &:hover {
-          transform: none;
-          box-shadow: none;
-        }
+        /* Current page card should not have hover effects */
       }
 
       @media (max-width: 768px) {
@@ -2347,5 +2423,42 @@ body {
         font-size: 10px;
       }
     }
+  }
+}
+
+/* Explicit hover effect removal for informational cards */
+/* These cards contain information but are not interactive elements */
+.achievement-card,
+.stat-card,
+.contact-card:not(a),
+.social-card,
+.featured-post-card,
+.recent-post-card,
+.character-card {
+  /* Remove any inherited hover effects from Bootstrap or other frameworks */
+  transition: none !important;
+  
+  &:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    scale: none !important;
+    background-color: inherit !important;
+    border-color: inherit !important;
+  }
+}
+
+/* Ensure that interactive elements within these cards still work */
+.achievement-card a,
+.stat-card a,
+.contact-card a,
+.social-card a,
+.featured-post-card a,
+.recent-post-card a,
+.character-card a {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    color: var(--ctp-mauve);
   }
 }
