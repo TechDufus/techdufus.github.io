@@ -264,32 +264,34 @@
   color: var(--ctp-green);
   background: transparent; /* Inherit from terminal-window */
   /* Dynamic height that respects available space */
-  height: calc(100vh - 280px);
-  min-height: 450px;
-  max-height: 800px;
+  height: calc(100vh - 350px);
+  min-height: 400px;
+  max-height: 700px;
   display: flex;
   flex-direction: column;
   text-align: left;
+  /* Ensure proper flex behavior */
+  overflow: hidden;
 }
 
 /* Adjust terminal height for different screen sizes */
 @media (min-height: 900px) {
   .terminal-body {
-    max-height: 700px;
+    max-height: 650px;
   }
 }
 
 @media (max-height: 700px) {
   .terminal-body {
-    height: calc(100vh - 320px);
-    min-height: 380px;
+    height: calc(100vh - 380px);
+    min-height: 350px;
   }
 }
 
 @media (max-height: 600px) {
   .terminal-body {
-    height: calc(100vh - 350px);
-    min-height: 320px;
+    height: calc(100vh - 400px);
+    min-height: 300px;
   }
 }
 
@@ -633,6 +635,10 @@
 .tmux-pane-left {
   flex: 2;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
 }
 
 .tmux-pane-right {
@@ -705,6 +711,10 @@
   /* Constrain width to prevent horizontal growth */
   max-width: 100%;
   box-sizing: border-box;
+  /* Ensure it doesn't push content out of view */
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* System Monitor (Right Pane) */
@@ -816,11 +826,14 @@
   flex-shrink: 0;
   text-align: left;
   /* Prevent overflow and ensure wrapping */
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   word-wrap: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
   box-sizing: border-box;
+  /* Keep cursor at the end of the line */
+  position: relative;
+  margin-bottom: 10px;
 }
 
 .current-command {
@@ -1221,12 +1234,18 @@
 
 /* Scroll Down Indicator */
 .scroll-indicator {
-  position: absolute;
+  position: fixed;
   bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
   z-index: 20;
+  /* Ensure it's always visible and not overlapping */
+  pointer-events: none;
+}
+
+.scroll-indicator a {
+  pointer-events: auto;
 }
 
 .scroll-indicator a {
