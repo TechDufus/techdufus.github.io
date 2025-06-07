@@ -1825,6 +1825,10 @@ function initTerminal() {
   terminalOutput = document.getElementById('terminal-output');
   currentCommandElement = document.getElementById('current-command');
 
+  // Ensure cursor is visible initially
+  const cursor = document.querySelector('.cursor');
+  if (cursor) cursor.style.display = 'inline-block';
+
   // Start the terminal animation
   setTimeout(() => {
     typeNextCommand();
@@ -1983,6 +1987,12 @@ ${processes.slice(0, 12).map(proc =>
 
 function typeNextCommand() {
   const command = terminalCommands[currentCommandIndex];
+  
+  // Show cursor when starting to type
+  const cursor = document.querySelector('.cursor');
+  if (cursor && currentCharIndex === 0) {
+    cursor.style.display = 'inline-block';
+  }
 
   if (currentCharIndex < command.command.length) {
     currentCommandElement.textContent += command.command[currentCharIndex];
@@ -1998,6 +2008,10 @@ function typeNextCommand() {
 
 function executeCommand() {
   const command = terminalCommands[currentCommandIndex];
+
+  // Hide cursor during command execution
+  const cursor = document.querySelector('.cursor');
+  if (cursor) cursor.style.display = 'none';
 
   // Add command to output (keep history)
   const commandLine = document.createElement('div');
