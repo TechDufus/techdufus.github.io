@@ -1234,18 +1234,13 @@
 
 /* Scroll Down Indicator */
 .scroll-indicator {
-  position: fixed;
+  position: absolute;
   bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
   z-index: 20;
-  /* Ensure it's always visible and not overlapping */
-  pointer-events: none;
-}
-
-.scroll-indicator a {
-  pointer-events: auto;
+  transition: opacity 0.3s ease;
 }
 
 .scroll-indicator a {
