@@ -182,6 +182,8 @@
   transition: all 0.3s ease;
   /* Prevent horizontal expansion */
   box-sizing: border-box;
+  /* Ensure space for scroll button */
+  margin-bottom: 20px;
 }
 
 /* Override terminal background for light mode using Catppuccin Latte */
@@ -261,12 +263,34 @@
   font-family: 'Courier New', monospace;
   color: var(--ctp-green);
   background: transparent; /* Inherit from terminal-window */
-  height: 78vh;
-  min-height: 580px;
-  max-height: 920px;
+  /* Dynamic height that respects available space */
+  height: calc(100vh - 280px);
+  min-height: 450px;
+  max-height: 800px;
   display: flex;
   flex-direction: column;
   text-align: left;
+}
+
+/* Adjust terminal height for different screen sizes */
+@media (min-height: 900px) {
+  .terminal-body {
+    max-height: 700px;
+  }
+}
+
+@media (max-height: 700px) {
+  .terminal-body {
+    height: calc(100vh - 320px);
+    min-height: 380px;
+  }
+}
+
+@media (max-height: 600px) {
+  .terminal-body {
+    height: calc(100vh - 350px);
+    min-height: 320px;
+  }
 }
 
 [data-theme="light"] .terminal-body {

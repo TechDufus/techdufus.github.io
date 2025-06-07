@@ -446,10 +446,25 @@ a {
     background-size: cover;
     -o-background-size: cover;
     transition: all 0.3s ease;
+    /* Ensure minimum padding for scroll button */
+    padding-bottom: 100px;
+    min-height: 100vh;
+    position: relative;
 
     /* Extra padding on desktop to prevent navbar from cutting off terminal */
     @media(min-width:768px) {
         padding-top: 80px;
+        padding-bottom: 120px;
+    }
+    
+    /* Smaller screens need less bottom padding */
+    @media(max-width: 768px) {
+        padding-bottom: 90px;
+        min-height: auto;
+    }
+    
+    @media(max-width: 480px) {
+        padding-bottom: 80px;
     }
     .intro-body {
         display: table-cell;
