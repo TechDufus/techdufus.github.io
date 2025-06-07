@@ -28,9 +28,13 @@
       <ul class="nav navbar-nav">
         <!-- Theme Toggle -->
         <li class="theme-toggle-container">
-          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
-            <i class="fa fa-moon theme-icon" id="theme-icon"></i>
-          </button>
+          <label class="theme-toggle-switch" aria-label="Toggle theme">
+            <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
+            <span class="theme-toggle-slider">
+              <i class="fa fa-sun theme-icon-sun"></i>
+              <i class="fa fa-moon theme-icon-moon"></i>
+            </span>
+          </label>
         </li>
         {% if page.section-type == "index" %}
 
