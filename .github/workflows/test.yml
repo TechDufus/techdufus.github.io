@@ -112,7 +112,7 @@ jobs:
 
     - name: 🔍 Run Lighthouse CI
       run: |
-        lhci autorun --upload.target=temporary-public-storage || echo "Lighthouse CI failed, but continuing..."
+        lhci autorun || echo "Lighthouse CI failed, but continuing..."
       env:
         LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
