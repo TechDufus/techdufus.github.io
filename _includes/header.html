@@ -131,7 +131,6 @@
               <div class="current-command-line">
                 <span class="prompt">$</span>
                 <span class="current-command" id="current-command"></span>
-                <span class="cursor">_</span>
               </div>
             </div>
           </div>
@@ -1697,9 +1696,8 @@ function initTerminal() {
   terminalOutput = document.getElementById('terminal-output');
   currentCommandElement = document.getElementById('current-command');
 
-  // Ensure cursor is visible initially
-  const cursor = document.querySelector('.cursor');
-  if (cursor) cursor.style.display = 'inline-block';
+  // Initialize with cursor in the command line
+  currentCommandElement.innerHTML = '<span class="cursor">_</span>';
 
   // Start the terminal animation
   setTimeout(() => {
@@ -1858,18 +1856,16 @@ ${processes.slice(0, 12).map(proc =>
 function typeNextCommand() {
   const command = terminalCommands[currentCommandIndex];
   
-  // Show cursor when starting to type
-  const cursor = document.querySelector('.cursor');
-  if (cursor && currentCharIndex === 0) {
-    cursor.style.display = 'inline-block';
-  }
-
   if (currentCharIndex < command.command.length) {
-    currentCommandElement.textContent += command.command[currentCharIndex];
+    // Update command text with current progress and cursor
+    const typedText = command.command.substring(0, currentCharIndex + 1);
+    currentCommandElement.innerHTML = typedText + '<span class="cursor">_</span>';
+    
     currentCharIndex++;
     setTimeout(typeNextCommand, 15 + Math.random() * 20);
   } else {
-    // Command typed, execute it
+    // Command typed, show cursor at end briefly before executing
+    currentCommandElement.innerHTML = command.command + '<span class="cursor">_</span>';
     setTimeout(() => {
       executeCommand();
     }, 300);
@@ -1879,10 +1875,6 @@ function typeNextCommand() {
 function executeCommand() {
   const command = terminalCommands[currentCommandIndex];
 
-  // Hide cursor during command execution
-  const cursor = document.querySelector('.cursor');
-  if (cursor) cursor.style.display = 'none';
-
   // Add command to output (keep history)
   const commandLine = document.createElement('div');
   commandLine.className = 'command-line';
@@ -1890,7 +1882,7 @@ function executeCommand() {
   terminalOutput.appendChild(commandLine);
 
   // Clear current command
-  currentCommandElement.textContent = '';
+  currentCommandElement.innerHTML = '';
 
   // Enhanced auto scroll after adding command
   requestAnimationFrame(() => {
@@ -1934,7 +1926,11 @@ function showOutput() {
     });
 
     // Wait a bit before typing next command
-    setTimeout(typeNextCommand, 800);
+    setTimeout(() => {
+      // Show cursor for next command
+      currentCommandElement.innerHTML = '<span class="cursor">_</span>';
+      typeNextCommand();
+    }, 800);
   }
 }
 
