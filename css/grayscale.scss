@@ -296,7 +296,7 @@ a {
   
   /* Responsive layout */
   @media (max-width: 768px) {
-    grid-template-columns: auto auto;
+    grid-template-columns: 1fr auto;
     grid-template-areas: "brand controls";
     gap: 1rem;
     padding: 0 1rem;
@@ -481,11 +481,11 @@ a {
   
   /* Move controls closer to center on mobile */
   @media (max-width: 768px) {
-    margin-right: 1.5rem;
+    margin-right: 2.5rem;
   }
   
   @media (max-width: 480px) {
-    margin-right: 2rem;
+    margin-right: 3rem;
   }
 }
 
