@@ -290,11 +290,11 @@
   color: #40a02b; /* Latte green */
 }
 
-/* Use bright colors for terminal text in light mode against dark background */
+/* Use dark colors for terminal text in light mode */
 [data-theme="light"] .command-line,
 [data-theme="light"] .command,
 [data-theme="light"] .current-command {
-  color: #eff1f5; /* Light text for dark background */
+  color: var(--ctp-text); /* Use theme-aware text color */
 }
 
 [data-theme="light"] .prompt {
