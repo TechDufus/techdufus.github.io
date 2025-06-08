@@ -1,7 +1,7 @@
 ---
 ---
 
-/* Force cache refresh - theme flicker fix v3 - HTML element targeting */
+/* Force cache refresh - comprehensive mobile light mode fix v4 */
 @import "variables";
 @import "mixins";
 
@@ -873,6 +873,12 @@ a {
 /* Ensure light mode colors are consistent on mobile */
 @media (max-width: 768px) {
   [data-theme="light"] {
+    /* Core page elements */
+    body {
+      background-color: var(--ctp-ultra-dark);
+      color: var(--ctp-text);
+    }
+    
     /* Header and navigation */
     .site-header {
       background: rgba(var(--ctp-base-rgb), 0.85);
@@ -929,6 +935,35 @@ a {
     .theme-toggle-button {
       &:hover {
         background: rgba(var(--ctp-mauve-rgb), 0.08);
+      }
+    }
+    
+    /* Main content sections */
+    .intro {
+      background-color: var(--ctp-ultra-dark);
+      color: var(--ctp-text);
+    }
+    
+    /* Content sections */
+    .content-section {
+      color: var(--ctp-text);
+    }
+    
+    /* General text elements */
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--ctp-text);
+    }
+    
+    p {
+      color: var(--ctp-text);
+    }
+    
+    a {
+      color: var(--ctp-mauve);
+      
+      &:hover,
+      &:focus {
+        color: var(--ctp-pink);
       }
     }
   }
