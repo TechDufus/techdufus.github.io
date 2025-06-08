@@ -478,6 +478,15 @@ a {
   display: flex;
   align-items: center;
   gap: 1rem;
+  
+  /* Move controls closer to center on mobile */
+  @media (max-width: 768px) {
+    margin-right: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    margin-right: 2rem;
+  }
 }
 
 /* ========================================
