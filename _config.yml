@@ -260,8 +260,8 @@ collections:
 pages_list:
   About: 'about'
   Blog: 'latest-post'
-  Setup: 'setup-preview'
   Timeline: 'timeline'
+  Setup: 'setup-preview'
   Contact: 'contact-page'
 
 # Exclusion list from the generated _site
