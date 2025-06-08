@@ -28,7 +28,7 @@
   <title>{{site.title}}{% if page.title %} | {{page.title}}{% endif %}</title>
 
   <!-- Security Headers -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://code.jquery.com https://maxcdn.bootstrapcdn.com https://cdnjs.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://maxcdn.bootstrapcdn.com; img-src 'self' data: https: http:; connect-src 'self' https://www.google-analytics.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://code.jquery.com https://maxcdn.bootstrapcdn.com https://cdnjs.cloudflare.com https://www.googletagmanager.com https://matthewjdegarmo.disqus.com https://disqus.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://maxcdn.bootstrapcdn.com; img-src 'self' data: https: http:; connect-src 'self' https://www.google-analytics.com;">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-XSS-Protection" content="1; mode=block">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -37,8 +37,6 @@
   <link rel="dns-prefetch" href="//fonts.googleapis.com">
   <link rel="dns-prefetch" href="//code.jquery.com">
   <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
-  <link rel="preload" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" as="style">
-  <link rel="preload" href="https://fonts.googleapis.com/css?family=Montserrat:400,700" as="style">
 
   <!-- Bootstrap Core CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
@@ -57,114 +55,6 @@
   <link href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
 
-  <!-- Theme Toggle and Navigation Styles -->
-  <style>
-    /* Theme Toggle Styles */
-    .theme-toggle-container {
-      margin-right: 15px;
-    }
-    
-    .theme-toggle-btn {
-      background: transparent;
-      border: 2px solid var(--ctp-mauve);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--ctp-mauve);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 5px;
-    }
-    
-    .theme-toggle-btn:hover {
-      background: rgba(var(--ctp-mauve-rgb), 0.1);
-      box-shadow: 0 0 15px rgba(var(--ctp-mauve-rgb), 0.3);
-      transform: scale(1.05);
-    }
-    
-    .theme-toggle-btn:active {
-      transform: scale(0.95);
-    }
-    
-    .theme-icon {
-      font-size: 16px;
-      transition: all 0.3s ease;
-    }
-    
-    /* Theme transition for smooth switching */
-    * {
-      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
-    }
-    
-    /* Update existing navigation to use CSS variables */
-    .navbar-custom .nav li a {
-      transition: all 0.3s ease;
-      border-radius: 5px;
-      position: relative;
-      font-weight: 500;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    
-    .navbar-custom .nav li a:hover,
-    .navbar-custom .nav li a:focus {
-      background-color: rgba(var(--ctp-mauve-rgb), 0.1);
-      box-shadow: 0 0 20px rgba(var(--ctp-mauve-rgb), 0.3);
-      color: var(--ctp-mauve);
-      outline: none;
-    }
-    
-    .navbar-custom .nav li.active a {
-      background-color: rgba(var(--ctp-mauve-rgb), 0.15);
-      box-shadow: 0 0 15px rgba(var(--ctp-mauve-rgb), 0.2);
-      color: var(--ctp-mauve);
-    }
-    
-    .navbar-custom .nav li.active a:hover {
-      background-color: rgba(var(--ctp-mauve-rgb), 0.2);
-      box-shadow: 0 0 25px rgba(var(--ctp-mauve-rgb), 0.4);
-    }
-    
-    /* Brand/Logo Glow Effect */
-    .navbar-custom .navbar-brand {
-      font-weight: 600;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    
-    .navbar-custom .navbar-brand:hover,
-    .navbar-custom .navbar-brand:focus {
-      color: var(--ctp-mauve);
-    }
-    
-    /* Mobile Menu Button Glow */
-    .navbar-custom .navbar-toggle:hover,
-    .navbar-custom .navbar-toggle:focus {
-      background-color: rgba(var(--ctp-mauve-rgb), 0.1);
-      box-shadow: 0 0 15px rgba(var(--ctp-mauve-rgb), 0.3);
-      border-color: var(--ctp-mauve);
-    }
-    
-    /* Smooth color transition for scrolled navbar */
-    .navbar-custom.top-nav-collapse .nav li a:hover {
-      background-color: rgba(var(--ctp-mauve-rgb), 0.15);
-      box-shadow: 0 0 20px rgba(var(--ctp-mauve-rgb), 0.4);
-    }
-    
-    /* Add subtle animation to nav items */
-    @keyframes navGlow {
-      0% { box-shadow: 0 0 5px rgba(var(--ctp-mauve-rgb), 0.2); }
-      50% { box-shadow: 0 0 20px rgba(var(--ctp-mauve-rgb), 0.4); }
-      100% { box-shadow: 0 0 5px rgba(var(--ctp-mauve-rgb), 0.2); }
-    }
-    
-    .navbar-custom .nav li a:hover {
-      animation: navGlow 2s ease-in-out infinite;
-    }
-  </style>
   <link rel="stylesheet" href="{{site.baseurl}}/css/rrssb.css" />
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
