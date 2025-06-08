@@ -720,9 +720,7 @@ a {
   width: 100vw;
   height: 100vh;
   height: 100dvh; /* Use dynamic viewport height when supported */
-  background: rgba(var(--ctp-crust-rgb), 0.98);
-  backdrop-filter: var(--nav-backdrop-blur);
-  -webkit-backdrop-filter: var(--nav-backdrop-blur);
+  background: var(--ctp-crust);
   z-index: var(--mobile-nav-z-index);
   
   /* Ensure it's above everything */
@@ -738,7 +736,7 @@ a {
   }
   
   [data-theme="light"] & {
-    background: rgba(var(--ctp-base-rgb), 0.98);
+    background: var(--ctp-base);
   }
   
   &.is-open {
@@ -793,22 +791,32 @@ a {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-radius: var(--nav-border-radius);
-  background: rgba(var(--ctp-surface0-rgb), 0.5);
+  background: var(--ctp-surface0);
   border: 1px solid var(--ctp-surface1);
   transition: all var(--nav-transition-medium);
+  
+  /* Ensure solid, opaque background */
   
   &:hover,
   &:focus {
     color: var(--ctp-mauve);
     text-decoration: none;
-    background: rgba(var(--ctp-mauve-rgb), 0.15);
+    background: var(--ctp-surface1);
     border-color: var(--ctp-mauve);
     transform: translateX(0.5rem);
+    
+    /* Add subtle glow effect */
+    box-shadow: 0 4px 12px rgba(var(--ctp-mauve-rgb), 0.2);
   }
   
   &:focus {
     outline: 2px solid var(--ctp-mauve);
     outline-offset: 2px;
+  }
+  
+  &:active {
+    transform: translateX(0.25rem);
+    background: var(--ctp-surface2);
   }
 }
 
