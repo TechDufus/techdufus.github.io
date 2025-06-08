@@ -419,12 +419,12 @@ a {
     .theme-toggle-slider:before {
         content: '';
         position: absolute;
-        height: 24px;
-        width: 28px;
+        height: 20px;
+        width: 20px;
         left: 2px;
         top: 2px;
         background: var(--ctp-mauve);
-        border-radius: 24px;
+        border-radius: 50%;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         display: flex;
@@ -435,9 +435,10 @@ a {
     /* Icons positioned at each end */
     .theme-icon-moon {
         position: absolute;
-        left: 8px;
+        left: 50%;
         top: 50%;
-        transform: translateY(-50%);
+        transform: translate(-50%, -50%);
+        margin-left: -15px;
         font-size: 12px;
         color: var(--ctp-blue);
         transition: all 0.3s ease;
@@ -446,9 +447,10 @@ a {
 
     .theme-icon-sun {
         position: absolute;
-        right: 8px;
+        right: 50%;
         top: 50%;
-        transform: translateY(-50%);
+        transform: translate(50%, -50%);
+        margin-right: -15px;
         font-size: 12px;
         color: var(--ctp-yellow);
         transition: all 0.3s ease;
@@ -462,7 +464,7 @@ a {
     }
 
     .theme-toggle-input:checked + .theme-toggle-slider:before {
-        transform: translateX(30px);
+        transform: translateX(32px);
         background: var(--ctp-yellow);
     }
 
