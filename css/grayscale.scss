@@ -713,14 +713,15 @@ a {
 .mobile-navigation {
   display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh; /* Use dynamic viewport height when supported */
-  background: var(--ctp-crust);
+  top: var(--nav-height);
+  left: 1rem;
+  right: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+  background: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface1);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   z-index: var(--mobile-nav-z-index);
   
   /* Ensure it's above everything */
@@ -735,8 +736,14 @@ a {
     display: block;
   }
   
+  @media (max-width: 480px) {
+    left: 0.5rem;
+    right: 0.5rem;
+  }
+  
   [data-theme="light"] & {
     background: var(--ctp-base);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   }
   
   &.is-open {
@@ -747,22 +754,10 @@ a {
 }
 
 .mobile-nav-content {
-  padding: calc(var(--nav-height) + 2rem) 1rem 2rem;
-  max-width: 400px;
-  margin: 0 auto;
-  min-height: 100vh;
-  min-height: 100dvh; /* Use dynamic viewport height when supported */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  
-  /* Prevent content from being cut off */
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  padding: 1.5rem;
   
   @media (max-width: 480px) {
-    padding: calc(var(--nav-height) + 1rem) 0.75rem 1rem;
-    max-width: none;
+    padding: 1rem;
   }
 }
 
@@ -782,20 +777,18 @@ a {
 .mobile-nav-link {
   display: flex;
   align-items: center;
-  padding: 1rem 1.5rem;
+  padding: 0.875rem 1.25rem;
   color: var(--ctp-text);
   text-decoration: none;
   font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 500;
-  font-size: 1.1rem;
+  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-radius: var(--nav-border-radius);
+  border-radius: 0.75rem;
   background: var(--ctp-surface0);
   border: 1px solid var(--ctp-surface1);
   transition: all var(--nav-transition-medium);
-  
-  /* Ensure solid, opaque background */
   
   &:hover,
   &:focus {
@@ -803,7 +796,7 @@ a {
     text-decoration: none;
     background: var(--ctp-surface1);
     border-color: var(--ctp-mauve);
-    transform: translateX(0.5rem);
+    transform: translateY(-2px);
     
     /* Add subtle glow effect */
     box-shadow: 0 4px 12px rgba(var(--ctp-mauve-rgb), 0.2);
@@ -815,7 +808,7 @@ a {
   }
   
   &:active {
-    transform: translateX(0.25rem);
+    transform: translateY(0);
     background: var(--ctp-surface2);
   }
 }
