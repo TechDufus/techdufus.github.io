@@ -391,8 +391,8 @@ a {
     .theme-toggle-switch {
         position: relative;
         display: inline-block;
-        width: 50px;
-        height: 24px;
+        width: 60px;
+        height: 28px;
         cursor: pointer;
     }
 
@@ -410,62 +410,60 @@ a {
         bottom: 0;
         background: var(--ctp-surface0);
         border: 2px solid var(--ctp-surface1);
-        border-radius: 24px;
+        border-radius: 28px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 4px;
         overflow: hidden;
     }
 
+    /* Sliding button that contains the icon */
     .theme-toggle-slider:before {
         content: '';
         position: absolute;
-        height: 18px;
-        width: 18px;
-        left: 3px;
+        height: 24px;
+        width: 28px;
+        left: 2px;
+        top: 2px;
         background: var(--ctp-mauve);
-        border-radius: 50%;
+        border-radius: 24px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .theme-icon-sun,
+    /* Icons positioned at each end */
     .theme-icon-moon {
-        font-size: 10px;
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
+        color: var(--ctp-blue);
         transition: all 0.3s ease;
         z-index: 1;
-        position: relative;
     }
 
     .theme-icon-sun {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
         color: var(--ctp-yellow);
-        opacity: 0.5;
+        transition: all 0.3s ease;
+        z-index: 1;
     }
 
-    .theme-icon-moon {
-        color: var(--ctp-blue);
-        opacity: 1;
-    }
-
-    /* When checked (light mode) */
+    /* When checked (light mode) - slider moves to cover sun icon */
     .theme-toggle-input:checked + .theme-toggle-slider {
         background: var(--ctp-surface0);
         border-color: var(--ctp-yellow);
     }
 
     .theme-toggle-input:checked + .theme-toggle-slider:before {
-        transform: translateX(26px);
+        transform: translateX(30px);
         background: var(--ctp-yellow);
-    }
-
-    .theme-toggle-input:checked + .theme-toggle-slider .theme-icon-sun {
-        opacity: 1;
-    }
-
-    .theme-toggle-input:checked + .theme-toggle-slider .theme-icon-moon {
-        opacity: 0.5;
     }
 
     /* Hover effects */
@@ -475,7 +473,13 @@ a {
     }
 
     .theme-toggle-switch:hover .theme-toggle-slider:before {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* When checked, use light theme colors for hover */
+    .theme-toggle-input:checked + .theme-toggle-slider:hover {
+        border-color: var(--ctp-yellow);
+        box-shadow: 0 0 8px rgba(var(--ctp-yellow-rgb), 0.3);
     }
 
     /* Mobile menu enhancements */
@@ -529,25 +533,17 @@ a {
     background-size: cover;
     -o-background-size: cover;
     transition: all 0.3s ease;
-    /* Ensure minimum padding for scroll button */
-    padding-bottom: 120px;
     min-height: 100vh;
     position: relative;
 
     /* Extra padding on desktop to prevent navbar from cutting off terminal */
     @media(min-width:768px) {
         padding-top: 80px;
-        padding-bottom: 120px;
     }
     
-    /* Smaller screens need less bottom padding */
+    /* Smaller screens - maintain auto height */
     @media(max-width: 768px) {
-        padding-bottom: 90px;
         min-height: auto;
-    }
-    
-    @media(max-width: 480px) {
-        padding-bottom: 80px;
     }
     .intro-body {
         display: table-cell;

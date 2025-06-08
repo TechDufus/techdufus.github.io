@@ -118,27 +118,6 @@ $(document).ready(function() {
     }
   });
   
-  // Hide scroll indicator when scrolling
-  function handleScrollIndicator() {
-    const scrollTop = $(window).scrollTop();
-    const scrollIndicator = $(".scroll-indicator");
-    const windowHeight = $(window).height();
-    
-    // Hide the scroll indicator once user scrolls past 50px or 5% of viewport
-    if (scrollTop > Math.max(50, windowHeight * 0.05)) {
-      scrollIndicator.fadeOut(300);
-    } else {
-      scrollIndicator.fadeIn(300);
-    }
-  }
-  
-  // Initial check
-  handleScrollIndicator();
-  
-  // Handle on scroll
-  $(window).scroll(function() {
-    handleScrollIndicator();
-  });
 });
 </script>
 
