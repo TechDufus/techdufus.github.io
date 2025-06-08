@@ -380,9 +380,9 @@ function addTohistory() {
 <!-- Theme Toggle Functionality -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const themeToggle = document.getElementById('theme-toggle');
+  const themeToggleInput = document.getElementById('theme-toggle-input');
   const body = document.body;
-  const toggleIcon = themeToggle.querySelector('.toggle-icon');
+  const handleIcon = document.querySelector('.handle-icon');
   
   // Initialize theme from localStorage or default to dark
   const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -391,25 +391,24 @@ document.addEventListener('DOMContentLoaded', function() {
   function setTheme(theme) {
     if (theme === 'light') {
       body.setAttribute('data-theme', 'light');
-      themeToggle.setAttribute('data-theme', 'light');
-      toggleIcon.className = 'toggle-icon fa fa-sun';
+      themeToggleInput.checked = true;
+      handleIcon.className = 'handle-icon fa fa-sun';
       localStorage.setItem('theme', 'light');
     } else {
       body.setAttribute('data-theme', 'dark');
-      themeToggle.setAttribute('data-theme', 'dark');
-      toggleIcon.className = 'toggle-icon fa fa-moon';
+      themeToggleInput.checked = false;
+      handleIcon.className = 'handle-icon fa fa-moon';
       localStorage.setItem('theme', 'dark');
     }
   }
   
   function toggleTheme() {
-    const currentTheme = body.getAttribute('data-theme') || 'dark';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    const newTheme = themeToggleInput.checked ? 'light' : 'dark';
     setTheme(newTheme);
   }
   
   // Theme toggle event listener
-  themeToggle.addEventListener('click', toggleTheme);
+  themeToggleInput.addEventListener('change', toggleTheme);
 });
 </script>
 

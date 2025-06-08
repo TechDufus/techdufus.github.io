@@ -347,6 +347,11 @@ a {
             #logo_nav {
                 height: 30px;
             }
+
+            /* Adjust nav link padding when collapsed */
+            .nav li a {
+                padding: 6px 12px;
+            }
         }
 
         /* Smooth scroll enhancement */
@@ -381,25 +386,32 @@ a {
         transform: translateY(-1px) scale(1.02);
     }
 
-    /* Theme Toggle */
+    /* Theme Toggle - Sliding Switch */
     .theme-toggle-wrapper {
         display: flex;
         align-items: center;
         padding: 0 8px;
     }
 
-    .theme-toggle-btn {
-        background: none;
-        border: none;
-        padding: 4px;
+    .theme-toggle {
+        position: relative;
+        display: inline-block;
         cursor: pointer;
+    }
+
+    .toggle-input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+    }
+
+    .toggle-slider {
+        position: relative;
+        display: block;
+        padding: 4px;
         border-radius: 20px;
         transition: all 0.3s ease;
-        
-        &:focus {
-            outline: 2px solid var(--ctp-mauve);
-            outline-offset: 2px;
-        }
 
         &:hover {
             background: rgba(var(--ctp-mauve-rgb), 0.1);
@@ -408,38 +420,16 @@ a {
 
     .toggle-track {
         position: relative;
-        width: 52px;
-        height: 26px;
+        width: 56px;
+        height: 28px;
         background: var(--ctp-surface0);
         border: 2px solid var(--ctp-surface1);
         border-radius: 16px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         overflow: hidden;
     }
 
-    .toggle-thumb {
-        position: absolute;
-        top: 1px;
-        left: 1px;
-        width: 20px;
-        height: 20px;
-        background: var(--ctp-mauve);
-        border-radius: 50%;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        z-index: 2;
-    }
-
-    .toggle-icon {
-        font-size: 10px;
-        color: var(--ctp-base);
-        transition: all 0.3s ease;
-    }
-
-    .toggle-indicators {
+    .toggle-icons {
         position: absolute;
         top: 0;
         left: 0;
@@ -448,78 +438,130 @@ a {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 6px;
+        padding: 0 8px;
         z-index: 1;
     }
 
-    .toggle-indicator {
-        font-size: 10px;
-        transition: all 0.3s ease;
+    .toggle-icon-moon,
+    .toggle-icon-sun {
+        font-size: 11px;
+        transition: all 0.4s ease;
         opacity: 0.6;
-        
-        &.toggle-indicator-moon {
-            color: var(--ctp-blue);
-        }
-        
-        &.toggle-indicator-sun {
-            color: var(--ctp-yellow);
-        }
     }
 
-    /* Light theme active state */
-    [data-theme="light"] .theme-toggle-btn {
+    .toggle-icon-moon {
+        color: var(--ctp-blue);
+    }
+
+    .toggle-icon-sun {
+        color: var(--ctp-yellow);
+    }
+
+    .toggle-handle {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 22px;
+        height: 22px;
+        background: var(--ctp-mauve);
+        border-radius: 50%;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 2;
+    }
+
+    .handle-icon {
+        font-size: 10px;
+        color: var(--ctp-base);
+        transition: all 0.4s ease;
+    }
+
+    /* Checked state (Light mode) */
+    .toggle-input:checked + .toggle-slider {
         .toggle-track {
             background: var(--ctp-surface0);
             border-color: var(--ctp-yellow);
         }
-        
-        .toggle-thumb {
-            transform: translateX(26px);
+
+        .toggle-handle {
+            transform: translateX(28px);
             background: var(--ctp-yellow);
         }
-        
-        .toggle-icon {
+
+        .handle-icon {
+            transform: rotate(180deg);
             color: var(--ctp-base);
         }
-        
-        .toggle-indicator-sun {
+
+        .toggle-icon-sun {
             opacity: 1;
+            transform: scale(1.1);
         }
-        
-        .toggle-indicator-moon {
+
+        .toggle-icon-moon {
             opacity: 0.3;
+            transform: scale(0.9);
         }
     }
 
-    /* Dark theme active state (default) */
-    [data-theme="dark"] .theme-toggle-btn,
-    .theme-toggle-btn {
-        .toggle-indicator-moon {
+    /* Default state (Dark mode) */
+    .toggle-input:not(:checked) + .toggle-slider {
+        .toggle-icon-moon {
             opacity: 1;
+            transform: scale(1.1);
         }
-        
-        .toggle-indicator-sun {
+
+        .toggle-icon-sun {
             opacity: 0.3;
+            transform: scale(0.9);
         }
     }
 
     /* Hover effects */
-    .theme-toggle-btn:hover {
+    .theme-toggle:hover {
         .toggle-track {
             border-color: var(--ctp-mauve);
-            box-shadow: 0 0 12px rgba(var(--ctp-mauve-rgb), 0.3);
+            box-shadow: 0 0 12px rgba(var(--ctp-mauve-rgb), 0.2);
         }
-        
-        .toggle-thumb {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+        .toggle-handle {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            transform: scale(1.05);
         }
     }
 
-    /* Light theme hover */
-    [data-theme="light"] .theme-toggle-btn:hover {
+    .toggle-input:checked + .toggle-slider:hover {
         .toggle-track {
             border-color: var(--ctp-yellow);
-            box-shadow: 0 0 12px rgba(var(--ctp-yellow-rgb), 0.3);
+            box-shadow: 0 0 12px rgba(var(--ctp-yellow-rgb), 0.2);
+        }
+
+        .toggle-handle {
+            transform: translateX(28px) scale(1.05);
+        }
+    }
+
+    /* Focus state */
+    .toggle-input:focus + .toggle-slider {
+        .toggle-track {
+            outline: 2px solid var(--ctp-mauve);
+            outline-offset: 2px;
+        }
+    }
+
+    /* Active state */
+    .theme-toggle:active {
+        .toggle-handle {
+            transform: scale(0.95);
+        }
+    }
+
+    .toggle-input:checked + .toggle-slider:active {
+        .toggle-handle {
+            transform: translateX(28px) scale(0.95);
         }
     }
 
