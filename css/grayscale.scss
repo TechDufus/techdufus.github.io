@@ -381,108 +381,148 @@ a {
         transform: translateY(-1px) scale(1.02);
     }
 
-    /* Theme toggle switch */
-    .theme-toggle-container {
+    /* Theme Toggle */
+    .theme-toggle-wrapper {
         display: flex;
         align-items: center;
-        padding: 0 10px;
+        padding: 0 8px;
     }
 
-    .theme-toggle-switch {
-        position: relative;
-        display: inline-block;
-        width: 60px;
-        height: 28px;
+    .theme-toggle-btn {
+        background: none;
+        border: none;
+        padding: 4px;
         cursor: pointer;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        
+        &:focus {
+            outline: 2px solid var(--ctp-mauve);
+            outline-offset: 2px;
+        }
+
+        &:hover {
+            background: rgba(var(--ctp-mauve-rgb), 0.1);
+        }
     }
 
-    .theme-toggle-input {
-        opacity: 0;
-        width: 0;
-        height: 0;
+    .toggle-track {
+        position: relative;
+        width: 52px;
+        height: 26px;
+        background: var(--ctp-surface0);
+        border: 2px solid var(--ctp-surface1);
+        border-radius: 16px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
     }
 
-    .theme-toggle-slider {
+    .toggle-thumb {
+        position: absolute;
+        top: 1px;
+        left: 1px;
+        width: 20px;
+        height: 20px;
+        background: var(--ctp-mauve);
+        border-radius: 50%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 2;
+    }
+
+    .toggle-icon {
+        font-size: 10px;
+        color: var(--ctp-base);
+        transition: all 0.3s ease;
+    }
+
+    .toggle-indicators {
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: var(--ctp-surface0);
-        border: 2px solid var(--ctp-surface1);
-        border-radius: 28px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        overflow: hidden;
-    }
-
-    /* Sliding button that contains the icon */
-    .theme-toggle-slider:before {
-        content: '';
-        position: absolute;
-        height: 18px;
-        width: 18px;
-        left: 3px;
-        top: 3px;
-        background: var(--ctp-mauve);
-        border-radius: 50%;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         display: flex;
         align-items: center;
-        justify-content: center;
-    }
-
-    /* Icons positioned at each end */
-    .theme-icon-moon {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        margin-left: -15px;
-        font-size: 12px;
-        color: var(--ctp-blue);
-        transition: all 0.3s ease;
+        justify-content: space-between;
+        padding: 0 6px;
         z-index: 1;
     }
 
-    .theme-icon-sun {
-        position: absolute;
-        right: 50%;
-        top: 50%;
-        transform: translate(50%, -50%);
-        margin-right: -15px;
-        font-size: 12px;
-        color: var(--ctp-yellow);
+    .toggle-indicator {
+        font-size: 10px;
         transition: all 0.3s ease;
-        z-index: 1;
+        opacity: 0.6;
+        
+        &.toggle-indicator-moon {
+            color: var(--ctp-blue);
+        }
+        
+        &.toggle-indicator-sun {
+            color: var(--ctp-yellow);
+        }
     }
 
-    /* When checked (light mode) - slider moves to cover sun icon */
-    .theme-toggle-input:checked + .theme-toggle-slider {
-        background: var(--ctp-surface0);
-        border-color: var(--ctp-yellow);
+    /* Light theme active state */
+    [data-theme="light"] .theme-toggle-btn {
+        .toggle-track {
+            background: var(--ctp-surface0);
+            border-color: var(--ctp-yellow);
+        }
+        
+        .toggle-thumb {
+            transform: translateX(26px);
+            background: var(--ctp-yellow);
+        }
+        
+        .toggle-icon {
+            color: var(--ctp-base);
+        }
+        
+        .toggle-indicator-sun {
+            opacity: 1;
+        }
+        
+        .toggle-indicator-moon {
+            opacity: 0.3;
+        }
     }
 
-    .theme-toggle-input:checked + .theme-toggle-slider:before {
-        transform: translateX(33px);
-        background: var(--ctp-yellow);
+    /* Dark theme active state (default) */
+    [data-theme="dark"] .theme-toggle-btn,
+    .theme-toggle-btn {
+        .toggle-indicator-moon {
+            opacity: 1;
+        }
+        
+        .toggle-indicator-sun {
+            opacity: 0.3;
+        }
     }
 
     /* Hover effects */
-    .theme-toggle-switch:hover .theme-toggle-slider {
-        border-color: var(--ctp-mauve);
-        box-shadow: 0 0 8px rgba(var(--ctp-mauve-rgb), 0.3);
+    .theme-toggle-btn:hover {
+        .toggle-track {
+            border-color: var(--ctp-mauve);
+            box-shadow: 0 0 12px rgba(var(--ctp-mauve-rgb), 0.3);
+        }
+        
+        .toggle-thumb {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
     }
 
-    .theme-toggle-switch:hover .theme-toggle-slider:before {
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    /* Light theme hover */
+    [data-theme="light"] .theme-toggle-btn:hover {
+        .toggle-track {
+            border-color: var(--ctp-yellow);
+            box-shadow: 0 0 12px rgba(var(--ctp-yellow-rgb), 0.3);
+        }
     }
 
-    /* When checked, use light theme colors for hover */
-    .theme-toggle-input:checked + .theme-toggle-slider:hover {
-        border-color: var(--ctp-yellow);
-        box-shadow: 0 0 8px rgba(var(--ctp-yellow-rgb), 0.3);
-    }
 
     /* Mobile menu enhancements */
     @media(max-width: 767px) {

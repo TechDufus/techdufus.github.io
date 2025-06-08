@@ -27,14 +27,18 @@
     <div class="collapse navbar-collapse navbar-right navbar-main-collapse">
       <ul class="nav navbar-nav">
         <!-- Theme Toggle -->
-        <li class="theme-toggle-container">
-          <label class="theme-toggle-switch" aria-label="Toggle theme">
-            <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
-            <span class="theme-toggle-slider">
-              <i class="fa fa-sun theme-icon-sun"></i>
-              <i class="fa fa-moon theme-icon-moon"></i>
-            </span>
-          </label>
+        <li class="theme-toggle-wrapper">
+          <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle between light and dark theme">
+            <div class="toggle-track">
+              <div class="toggle-thumb">
+                <i class="toggle-icon fa fa-moon" aria-hidden="true"></i>
+              </div>
+              <div class="toggle-indicators">
+                <i class="toggle-indicator toggle-indicator-moon fa fa-moon" aria-hidden="true"></i>
+                <i class="toggle-indicator toggle-indicator-sun fa fa-sun" aria-hidden="true"></i>
+              </div>
+            </div>
+          </button>
         </li>
         {% if page.section-type == "index" %}
 
