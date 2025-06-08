@@ -686,14 +686,13 @@
 /* Terminal Output (Left Pane) */
 .terminal-output {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   padding: 15px;
   font-size: 12px;
   line-height: 1.3;
   background: transparent;
-  /* Enable scrolling and interactions */
-  pointer-events: auto;
+  /* Disable scrolling to prevent page scroll interference */
+  pointer-events: none;
   /* Ensure proper text wrapping */
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -757,18 +756,7 @@
   background: rgba(76, 79, 105, 0.95); /* Much darker background for excellent readability */
 }
 
-/* Hide scrollbar while keeping scroll functionality */
-.terminal-output::-webkit-scrollbar {
-  display: none;
-}
-
-.terminal-output {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
-  /* Improve mobile scrolling performance */
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-}
+/* Terminal output is non-scrollable to prevent page scroll interference */
 
 
 .command-line {
@@ -1055,8 +1043,8 @@
 
   .terminal-output {
     font-size: 11px;
-    /* Ensure better mobile scrolling */
-    overflow-x: hidden;
+    /* Non-scrollable to prevent page scroll interference */
+    overflow: hidden;
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: pre-wrap;
@@ -1131,9 +1119,9 @@
 
   .terminal-output {
     font-size: 10px;
-    /* Mobile-optimized terminal output */
+    /* Mobile-optimized non-scrollable terminal output */
     padding: 8px;
-    overflow-x: hidden;
+    overflow: hidden;
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: pre-wrap;
@@ -1884,10 +1872,7 @@ function executeCommand() {
   // Clear current command
   currentCommandElement.innerHTML = '';
 
-  // Enhanced auto scroll after adding command
-  requestAnimationFrame(() => {
-    terminalOutput.scrollTop = terminalOutput.scrollHeight;
-  });
+  // Terminal output auto-flows without scrolling
 
   // Show output
   currentOutputIndex = 0;
@@ -1903,10 +1888,7 @@ function showOutput() {
     outputLine.innerHTML = command.output[currentOutputIndex];
     terminalOutput.appendChild(outputLine);
 
-    // Enhanced auto scroll to bottom with smooth behavior
-    requestAnimationFrame(() => {
-      terminalOutput.scrollTop = terminalOutput.scrollHeight;
-    });
+    // Terminal output flows naturally without scrolling
 
     currentOutputIndex++;
     setTimeout(showOutput, command.delay);
@@ -1920,10 +1902,7 @@ function showOutput() {
     spacer.style.height = '10px';
     terminalOutput.appendChild(spacer);
 
-    // Enhanced auto scroll to bottom with smooth behavior
-    requestAnimationFrame(() => {
-      terminalOutput.scrollTop = terminalOutput.scrollHeight;
-    });
+    // Terminal output flows naturally without scrolling
 
     // Wait a bit before typing next command
     setTimeout(() => {
