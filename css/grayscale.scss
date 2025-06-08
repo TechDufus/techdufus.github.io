@@ -1102,9 +1102,16 @@ a {
         padding-top: 80px;
     }
     
-    /* Smaller screens - maintain auto height */
+    /* Mobile screens - optimize for terminal showcase */
     @media(max-width: 768px) {
-        min-height: auto;
+        min-height: 85vh; /* Fill most of viewport to show terminal better */
+        padding: 60px 0;
+    }
+    
+    /* Very small screens - slightly shorter but still prominent */
+    @media(max-width: 480px) {
+        min-height: 80vh;
+        padding: 40px 0;
     }
     .intro-body {
         display: table-cell;
@@ -1400,11 +1407,13 @@ body {
     border-radius: 8px;
     margin: 1rem 0;
     font-size: 13px;
+    min-height: 350px; /* Ensure terminal is tall enough to showcase content */
   }
   
   @media (max-width: 480px) {
     font-size: 12px;
     margin: 0.5rem 0;
+    min-height: 300px; /* Slightly shorter for very small screens */
   }
 
   .terminal-header {
@@ -1448,10 +1457,12 @@ body {
     
     @media (max-width: 768px) {
       padding: 15px;
+      min-height: 280px; /* Ensure enough vertical space for command output */
     }
     
     @media (max-width: 480px) {
       padding: 12px;
+      min-height: 240px; /* Slightly shorter for very small screens */
     }
 
     .terminal-prompt {
