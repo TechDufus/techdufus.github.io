@@ -48,6 +48,8 @@
   --ctp-peach-rgb: 250, 179, 135;
   --ctp-crust-rgb: 17, 17, 27;
   --ctp-mantle-rgb: 24, 24, 37;
+  --ctp-base-rgb: 30, 30, 46;
+  --ctp-surface0-rgb: 49, 50, 68;
   --ctp-surface1-rgb: 69, 71, 90;
 }
 
@@ -94,6 +96,8 @@
   --ctp-peach-rgb: 254, 100, 11;
   --ctp-crust-rgb: 220, 224, 232;
   --ctp-mantle-rgb: 230, 233, 239;
+  --ctp-base-rgb: 239, 241, 245;
+  --ctp-surface0-rgb: 204, 208, 218;
   --ctp-surface1-rgb: 188, 192, 204;
 }
 
@@ -646,6 +650,10 @@ a {
   border-radius: 0.5rem;
   transition: all var(--nav-transition-medium);
   
+  /* Ensure button is always accessible */
+  position: relative;
+  z-index: calc(var(--mobile-nav-z-index) + 1);
+  
   @media (max-width: 768px) {
     display: flex;
   }
@@ -657,6 +665,11 @@ a {
   &:focus {
     outline: 2px solid var(--ctp-mauve);
     outline-offset: 2px;
+  }
+  
+  /* Ensure button remains clickable when menu is open */
+  &[aria-expanded="true"] {
+    background: rgba(var(--ctp-mauve-rgb), 0.15);
   }
 }
 
@@ -678,7 +691,7 @@ a {
 }
 
 /* Animated hamburger states */
-[aria-expanded="true"] .hamburger-line {
+.mobile-menu-toggle[aria-expanded="true"] .hamburger-line {
   &:nth-child(1) {
     transform: translateY(0.375rem) rotate(45deg);
   }
@@ -700,16 +713,23 @@ a {
 .mobile-navigation {
   display: none;
   position: fixed;
-  top: var(--nav-height);
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh; /* Use dynamic viewport height when supported */
   background: rgba(var(--ctp-crust-rgb), 0.98);
   backdrop-filter: var(--nav-backdrop-blur);
   -webkit-backdrop-filter: var(--nav-backdrop-blur);
   z-index: var(--mobile-nav-z-index);
   
+  /* Ensure it's above everything */
+  isolation: isolate;
+  
   opacity: 0;
+  visibility: hidden;
   transform: translateY(-1rem);
   transition: all var(--nav-transition-smooth);
   
@@ -723,14 +743,29 @@ a {
   
   &.is-open {
     opacity: 1;
+    visibility: visible;
     transform: translateY(0);
   }
 }
 
 .mobile-nav-content {
-  padding: 2rem 1rem;
+  padding: calc(var(--nav-height) + 2rem) 1rem 2rem;
   max-width: 400px;
   margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh; /* Use dynamic viewport height when supported */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  
+  /* Prevent content from being cut off */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  
+  @media (max-width: 480px) {
+    padding: calc(var(--nav-height) + 1rem) 0.75rem 1rem;
+    max-width: none;
+  }
 }
 
 .mobile-nav-list {
@@ -841,6 +876,20 @@ a {
   .mobile-navigation {
     /* Optimize mobile menu rendering */
     transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    
+    /* Force hardware acceleration */
+    will-change: opacity, transform, visibility;
+  }
+  
+  .mobile-nav-content {
+    /* Optimize content rendering */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+  }
+  
+  .mobile-nav-link {
+    /* Optimize link animations */
     backface-visibility: hidden;
   }
 }

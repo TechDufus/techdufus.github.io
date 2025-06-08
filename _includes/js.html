@@ -95,18 +95,42 @@ class ModernNavigation {
   
   openMobileMenu() {
     this.isMobileMenuOpen = true;
-    this.mobileToggle.setAttribute('aria-expanded', 'true');
-    this.mobileNav.setAttribute('aria-hidden', 'false');
-    this.mobileNav.classList.add('is-open');
+    
+    if (this.mobileToggle) {
+      this.mobileToggle.setAttribute('aria-expanded', 'true');
+    }
+    
+    if (this.mobileNav) {
+      this.mobileNav.setAttribute('aria-hidden', 'false');
+      this.mobileNav.classList.add('is-open');
+    }
+    
     document.body.style.overflow = 'hidden'; // Prevent body scroll
+    
+    // Debug logging for development
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      console.log('Mobile menu opened');
+    }
   }
   
   closeMobileMenu() {
     this.isMobileMenuOpen = false;
-    this.mobileToggle.setAttribute('aria-expanded', 'false');
-    this.mobileNav.setAttribute('aria-hidden', 'true');
-    this.mobileNav.classList.remove('is-open');
+    
+    if (this.mobileToggle) {
+      this.mobileToggle.setAttribute('aria-expanded', 'false');
+    }
+    
+    if (this.mobileNav) {
+      this.mobileNav.setAttribute('aria-hidden', 'true');
+      this.mobileNav.classList.remove('is-open');
+    }
+    
     document.body.style.overflow = ''; // Restore body scroll
+    
+    // Debug logging for development
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      console.log('Mobile menu closed');
+    }
   }
   
   // 🌓 Theme Management
