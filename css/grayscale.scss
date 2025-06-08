@@ -334,7 +334,7 @@ a {
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
         &.top-nav-collapse {
-            padding: 4px 0;
+            padding: 2px 0;
             background: rgba(8, 8, 8, 0.95);
             border-bottom: 1px solid rgba(var(--ctp-surface1-rgb), 0.3);
             box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
@@ -348,9 +348,14 @@ a {
                 height: 30px;
             }
 
-            /* Adjust nav link padding when collapsed to match brand button height */
+            /* Reduce brand button padding when collapsed */
+            .navbar-brand {
+                padding: 5px 15px;
+            }
+
+            /* Adjust nav link padding when collapsed to match reduced brand button */
             .nav li a {
-                padding: 10px 12px;
+                padding: 5px 12px;
             }
 
             /* Adjust theme toggle wrapper padding when collapsed */
