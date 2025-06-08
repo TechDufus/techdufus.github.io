@@ -296,10 +296,10 @@ a {
   
   /* Responsive layout */
   @media (max-width: 768px) {
-    grid-template-columns: auto auto;
+    grid-template-columns: 1fr auto;
     grid-template-areas: "brand controls";
-    gap: 1rem;
-    padding: 0 1rem;
+    gap: 0;
+    padding: 0 0.5rem;
   }
 }
 
@@ -479,7 +479,11 @@ a {
   align-items: center;
   gap: 1rem;
   
-  /* Keep controls in proper top-right position on mobile */
+  /* Ensure controls are in top-right position on mobile */
+  @media (max-width: 768px) {
+    justify-self: end;
+    margin-left: auto;
+  }
 }
 
 /* ========================================
