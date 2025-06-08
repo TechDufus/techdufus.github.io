@@ -122,75 +122,75 @@
       </button>
     </div>
   </div>
-
-  <!-- Mobile Navigation Overlay -->
+  
+  <!-- Mobile Navigation Dropdown -->
   <div class="mobile-navigation" id="mobile-navigation" aria-hidden="true">
-    <div class="mobile-nav-content">
-      <nav class="mobile-nav" role="navigation" aria-label="Mobile navigation">
-        <ul class="mobile-nav-list" role="menubar">
-          {% if page.section-type == "index" %}
-            {% for p in site.pages_list %}
-              <li class="mobile-nav-item" role="none">
-                {% if p[1] == "setup-preview" %}
+  <div class="mobile-nav-content">
+    <nav class="mobile-nav" role="navigation" aria-label="Mobile navigation">
+      <ul class="mobile-nav-list" role="menubar">
+        {% if page.section-type == "index" %}
+          {% for p in site.pages_list %}
+            <li class="mobile-nav-item" role="none">
+              {% if p[1] == "setup-preview" %}
+                <a href="{{site.baseurl}}/setup/" class="mobile-nav-link" role="menuitem">
+                  <span class="mobile-nav-text">{{p[0]}}</span>
+                </a>
+              {% elsif p[1] == "contact-page" %}
+                <a href="{{site.baseurl}}/contact/" class="mobile-nav-link" role="menuitem">
+                  <span class="mobile-nav-text">{{p[0]}}</span>
+                </a>
+              {% else %}
+                <a href="#{{ p[1] }}" class="mobile-nav-link page-scroll" role="menuitem">
+                  <span class="mobile-nav-text">{{p[0]}}</span>
+                </a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        {% else %}
+          {% for p in site.pages_list %}
+            <li class="mobile-nav-item" role="none">
+              {% if p[1] == "latest-post" %}
+                {% if page.url == "/blog/index.html" | prepend: {{site.baseurl}} %}
+                  <a href="#page" class="mobile-nav-link page-scroll" role="menuitem">
+                    <span class="mobile-nav-text">{{p[0]}}</span>
+                  </a>
+                {% else %}
+                  <a href="{{site.baseurl}}/blog/" class="mobile-nav-link" role="menuitem">
+                    <span class="mobile-nav-text">{{p[0]}}</span>
+                  </a>
+                {% endif %}
+              {% elsif p[1] == "setup-preview" %}
+                {% if page.url == "/setup/index.html" | prepend: {{site.baseurl}} %}
+                  <a href="#page" class="mobile-nav-link page-scroll" role="menuitem">
+                    <span class="mobile-nav-text">{{p[0]}}</span>
+                  </a>
+                {% else %}
                   <a href="{{site.baseurl}}/setup/" class="mobile-nav-link" role="menuitem">
                     <span class="mobile-nav-text">{{p[0]}}</span>
                   </a>
-                {% elsif p[1] == "contact-page" %}
+                {% endif %}
+              {% elsif p[1] == "contact-page" %}
+                {% if page.url == "/contact/index.html" | prepend: {{site.baseurl}} %}
+                  <a href="#page" class="mobile-nav-link page-scroll" role="menuitem">
+                    <span class="mobile-nav-text">{{p[0]}}</span>
+                  </a>
+                {% else %}
                   <a href="{{site.baseurl}}/contact/" class="mobile-nav-link" role="menuitem">
                     <span class="mobile-nav-text">{{p[0]}}</span>
                   </a>
-                {% else %}
-                  <a href="#{{ p[1] }}" class="mobile-nav-link page-scroll" role="menuitem">
-                    <span class="mobile-nav-text">{{p[0]}}</span>
-                  </a>
                 {% endif %}
-              </li>
-            {% endfor %}
-          {% else %}
-            {% for p in site.pages_list %}
-              <li class="mobile-nav-item" role="none">
-                {% if p[1] == "latest-post" %}
-                  {% if page.url == "/blog/index.html" | prepend: {{site.baseurl}} %}
-                    <a href="#page" class="mobile-nav-link page-scroll" role="menuitem">
-                      <span class="mobile-nav-text">{{p[0]}}</span>
-                    </a>
-                  {% else %}
-                    <a href="{{site.baseurl}}/blog/" class="mobile-nav-link" role="menuitem">
-                      <span class="mobile-nav-text">{{p[0]}}</span>
-                    </a>
-                  {% endif %}
-                {% elsif p[1] == "setup-preview" %}
-                  {% if page.url == "/setup/index.html" | prepend: {{site.baseurl}} %}
-                    <a href="#page" class="mobile-nav-link page-scroll" role="menuitem">
-                      <span class="mobile-nav-text">{{p[0]}}</span>
-                    </a>
-                  {% else %}
-                    <a href="{{site.baseurl}}/setup/" class="mobile-nav-link" role="menuitem">
-                      <span class="mobile-nav-text">{{p[0]}}</span>
-                    </a>
-                  {% endif %}
-                {% elsif p[1] == "contact-page" %}
-                  {% if page.url == "/contact/index.html" | prepend: {{site.baseurl}} %}
-                    <a href="#page" class="mobile-nav-link page-scroll" role="menuitem">
-                      <span class="mobile-nav-text">{{p[0]}}</span>
-                    </a>
-                  {% else %}
-                    <a href="{{site.baseurl}}/contact/" class="mobile-nav-link" role="menuitem">
-                      <span class="mobile-nav-text">{{p[0]}}</span>
-                    </a>
-                  {% endif %}
-                {% else %}
-                  <a href="{{site.baseurl}}/#{{ p[1] }}" class="mobile-nav-link" role="menuitem">
-                    <span class="mobile-nav-text">{{p[0]}}</span>
-                  </a>
-                {% endif %}
-              </li>
-            {% endfor %}
-          {% endif %}
-        </ul>
-      </nav>
-    </div>
+              {% else %}
+                <a href="{{site.baseurl}}/#{{ p[1] }}" class="mobile-nav-link" role="menuitem">
+                  <span class="mobile-nav-text">{{p[0]}}</span>
+                </a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        {% endif %}
+      </ul>
+    </nav>
   </div>
+</div>
 </header>
 
 <!-- Modern Navigation End -->

@@ -712,8 +712,8 @@ a {
 
 .mobile-navigation {
   display: none;
-  position: fixed;
-  top: var(--nav-height);
+  position: absolute;
+  top: 100%;
   left: 1rem;
   right: 1rem;
   max-width: 400px;
@@ -749,7 +749,7 @@ a {
   &.is-open {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateY(0.5rem);
   }
 }
 
