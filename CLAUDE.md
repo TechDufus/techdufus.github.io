@@ -8,16 +8,16 @@ This is a Jekyll-based personal blog and portfolio website for TechDufus, hosted
 
 ## Development Commands
 
-### Local Development
-- `./scripts/install` - Install Jekyll and dependencies
-- `./scripts/serve` - Build and serve for development (dev config, no analytics/comments)
-- `./scripts/serve-production` - Build and serve with production config at 127.0.0.1:4000
-- `./scripts/serve-lan` - Serve across LAN (development config)
-- `./scripts/serve-lan-production` - Serve across LAN (production config)
-
-### Docker Development
-- `docker-compose up` - Run Jekyll in Docker container
+### Docker Development (Preferred Method)
+- `docker-compose up` - Run Jekyll in Docker container (recommended)
+- `podman-compose up` - Alternative using Podman
 - `docker run --rm -it -p 4000:4000 -v "$PWD:/srv/jekyll" jekyll/jekyll jekyll serve --watch --host "0.0.0.0" --config _config.yml,_config.dev.yml`
+
+### Native Development (Fallback)
+- `bundle exec jekyll serve` - Build and serve for development (production config)
+- `bundle exec jekyll serve --config _config.yml,_config.dev.yml` - Build and serve with development overrides
+- `bundle exec jekyll serve --host 0.0.0.0` - Serve across LAN
+- `bundle exec jekyll build` - Build the site without serving
 
 ### GitHub Actions Deployment
 - Uses custom workflow at `.github/workflows/deploy.yml`
@@ -28,10 +28,7 @@ This is a Jekyll-based personal blog and portfolio website for TechDufus, hosted
 - `./scripts/newpost <title>` - Create new blog post in _posts/ directory
 - `./scripts/generate-categories` - Generate category pages for blog posts
 - `./scripts/generate-tags` - Generate tag pages for blog posts
-- `./scripts/Add-BlogPostFromQueue.ps1` - PowerShell script to process blog post queue
-
-### Maintenance
-- `./scripts/integrate-personal` - Integrate latest updates from upstream theme
+- `./scripts/generate-authors` - Generate author pages for blog posts
 
 ## Architecture
 
@@ -69,7 +66,7 @@ This is a Jekyll-based personal blog and portfolio website for TechDufus, hosted
 
 ### Docker/Podman Issues
 If encountering platform compatibility issues (ARM64 vs x86_64) or protobuf errors:
-1. Use native Jekyll installation with `./scripts/serve`
+1. Use native Jekyll installation with `bundle exec jekyll serve`
 2. For Docker issues, the provided docker-compose.yml uses Ruby Alpine with build tools
 3. SCSS compilation errors may occur due to sass-embedded compatibility - consider using sassc gem instead
 
@@ -128,10 +125,10 @@ These are warnings only - the site builds and runs correctly.
 - Added _site/, .sass-cache/, .jekyll-cache/ to ignore list
 - Added Bundler and development files to ignore list
 
-### Native Development
-Preferred approach for development:
+### Preferred Development Approach
+Use Docker for consistent development environment:
 ```bash
-./scripts/install  # Install dependencies (may need sudo/admin rights)
-./scripts/serve     # Development server
-./scripts/serve-production  # Production server
+docker-compose up  # Start development server
 ```
+
+The site will be available at http://localhost:4000

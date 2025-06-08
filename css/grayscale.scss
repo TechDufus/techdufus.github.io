@@ -1,7 +1,7 @@
 ---
 ---
 
-/* Force cache refresh - updated mobile positioning */
+/* Force cache refresh - updated mobile positioning and light mode consistency v2 */
 @import "variables";
 @import "mixins";
 
@@ -667,6 +667,10 @@ a {
   
   &:hover {
     background: rgba(var(--ctp-mauve-rgb), 0.1);
+    
+    [data-theme="light"] & {
+      background: rgba(var(--ctp-mauve-rgb), 0.08);
+    }
   }
   
   &:focus {
@@ -677,6 +681,10 @@ a {
   /* Ensure button remains clickable when menu is open */
   &[aria-expanded="true"] {
     background: rgba(var(--ctp-mauve-rgb), 0.15);
+    
+    [data-theme="light"] & {
+      background: rgba(var(--ctp-mauve-rgb), 0.12);
+    }
   }
 }
 
@@ -797,6 +805,13 @@ a {
   border: 1px solid var(--ctp-surface1);
   transition: all var(--nav-transition-medium);
   
+  /* Light mode specific styles for mobile nav links */
+  [data-theme="light"] & {
+    background: var(--ctp-surface0);
+    border-color: var(--ctp-surface1);
+    color: var(--ctp-text);
+  }
+  
   &:hover,
   &:focus {
     color: var(--ctp-mauve);
@@ -807,6 +822,13 @@ a {
     
     /* Add subtle glow effect */
     box-shadow: 0 4px 12px rgba(var(--ctp-mauve-rgb), 0.2);
+    
+    /* Light mode hover states */
+    [data-theme="light"] & {
+      background: var(--ctp-surface1);
+      color: var(--ctp-mauve);
+      box-shadow: 0 4px 12px rgba(var(--ctp-mauve-rgb), 0.15);
+    }
   }
   
   &:focus {
@@ -817,6 +839,10 @@ a {
   &:active {
     transform: translateY(0);
     background: var(--ctp-surface2);
+    
+    [data-theme="light"] & {
+      background: var(--ctp-surface2);
+    }
   }
 }
 
@@ -837,6 +863,74 @@ a {
   outline: 2px solid var(--ctp-mauve);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* ========================================
+   🌞 LIGHT MODE MOBILE CONSISTENCY
+   ======================================== */
+
+/* Ensure light mode colors are consistent on mobile */
+@media (max-width: 768px) {
+  [data-theme="light"] {
+    /* Header and navigation */
+    .site-header {
+      background: rgba(var(--ctp-base-rgb), 0.85);
+      
+      &.is-scrolled {
+        background: rgba(var(--ctp-base-rgb), 0.95);
+      }
+    }
+    
+    /* Mobile navigation background */
+    .mobile-navigation {
+      background: var(--ctp-base);
+      border-color: var(--ctp-surface1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Mobile nav links */
+    .mobile-nav-link {
+      background: var(--ctp-surface0);
+      border-color: var(--ctp-surface1);
+      color: var(--ctp-text);
+      
+      &:hover,
+      &:focus {
+        background: var(--ctp-surface1);
+        color: var(--ctp-mauve);
+        border-color: var(--ctp-mauve);
+      }
+    }
+    
+    /* Hamburger menu lines */
+    .hamburger-line {
+      background: var(--ctp-text);
+    }
+    
+    /* Mobile menu toggle hover */
+    .mobile-menu-toggle:hover {
+      background: rgba(var(--ctp-mauve-rgb), 0.08);
+    }
+    
+    .mobile-menu-toggle[aria-expanded="true"] {
+      background: rgba(var(--ctp-mauve-rgb), 0.12);
+    }
+    
+    /* Brand text gradient in light mode */
+    .brand-text {
+      background: linear-gradient(135deg, var(--ctp-mauve), var(--ctp-blue));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    /* Theme toggle button specific light mode styles */
+    .theme-toggle-button {
+      &:hover {
+        background: rgba(var(--ctp-mauve-rgb), 0.08);
+      }
+    }
+  }
 }
 
 /* ========================================
