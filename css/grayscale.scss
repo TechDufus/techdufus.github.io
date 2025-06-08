@@ -1,7 +1,7 @@
 ---
 ---
 
-/* Force cache refresh - updated mobile positioning and light mode consistency v2 */
+/* Force cache refresh - theme flicker fix v3 - HTML element targeting */
 @import "variables";
 @import "mixins";
 
@@ -55,6 +55,7 @@
 }
 
 // Light theme
+html[data-theme="light"],
 [data-theme="light"] {
   --ctp-rosewater: #{$ctp-light-rosewater};
   --ctp-flamingo: #{$ctp-light-flamingo};

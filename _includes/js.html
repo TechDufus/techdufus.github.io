@@ -177,6 +177,10 @@ class ModernNavigation {
     document.documentElement.setAttribute('data-theme', theme);
     document.body.setAttribute('data-theme', theme);
     
+    // Update theme classes on html element
+    document.documentElement.classList.remove('theme-light', 'theme-dark');
+    document.documentElement.classList.add('theme-' + theme);
+    
     // Update theme toggle button
     this.syncThemeToggleState();
     

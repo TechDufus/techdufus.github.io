@@ -85,16 +85,16 @@
         const storedTheme = localStorage.getItem('theme');
         const preferredTheme = storedTheme || 'dark';
         
-        // Apply theme immediately before any CSS renders
+        // Apply theme immediately to html element
         document.documentElement.setAttribute('data-theme', preferredTheme);
-        document.body.setAttribute('data-theme', preferredTheme);
+        document.documentElement.classList.add('theme-' + preferredTheme);
         
         // Store the detected theme for later JavaScript access
         window.initialTheme = preferredTheme;
       } catch (e) {
         // Fallback if localStorage is not available
         document.documentElement.setAttribute('data-theme', 'dark');
-        document.body.setAttribute('data-theme', 'dark');
+        document.documentElement.classList.add('theme-dark');
         window.initialTheme = 'dark';
       }
     })();
