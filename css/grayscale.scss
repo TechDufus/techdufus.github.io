@@ -334,7 +334,7 @@ a {
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
         &.top-nav-collapse {
-            padding: 8px 0;
+            padding: 4px 0;
             background: rgba(8, 8, 8, 0.95);
             border-bottom: 1px solid rgba(var(--ctp-surface1-rgb), 0.3);
             box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
@@ -350,7 +350,12 @@ a {
 
             /* Adjust nav link padding when collapsed */
             .nav li a {
-                padding: 6px 12px;
+                padding: 4px 12px;
+            }
+
+            /* Adjust theme toggle wrapper padding when collapsed */
+            .theme-toggle-wrapper {
+                padding: 0 8px;
             }
         }
 
@@ -404,6 +409,8 @@ a {
         width: 0;
         height: 0;
         position: absolute;
+        visibility: hidden;
+        pointer-events: none;
     }
 
     .toggle-slider {
