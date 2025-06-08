@@ -1,5 +1,5 @@
 
-<!-- Javascript Start -->
+<!-- Javascript Start - Theme Flicker Fix v1 -->
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
@@ -27,7 +27,8 @@ class ModernNavigation {
     // State management
     this.isScrolled = false;
     this.isMobileMenuOpen = false;
-    this.currentTheme = localStorage.getItem('theme') || 'dark';
+    // Use pre-applied theme from critical script, fallback to localStorage or dark
+    this.currentTheme = window.initialTheme || localStorage.getItem('theme') || 'dark';
     
     // Performance optimization
     this.scrollTicking = false;
@@ -144,7 +145,9 @@ class ModernNavigation {
   
   // 🌓 Theme Management
   initializeTheme() {
-    this.setTheme(this.currentTheme, false);
+    // Theme was already applied in head.html critical script
+    // Just sync the toggle button state with the current theme
+    this.syncThemeToggleState();
   }
   
   toggleTheme() {
@@ -152,24 +155,30 @@ class ModernNavigation {
     this.setTheme(newTheme, true);
   }
   
-  setTheme(theme, animate = true) {
-    this.currentTheme = theme;
-    
-    // Update DOM
-    document.body.setAttribute('data-theme', theme);
-    
-    // Update theme toggle button
+  syncThemeToggleState() {
+    // Only update the toggle button state - theme is already applied
     if (this.themeToggle) {
-      this.themeToggle.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
+      this.themeToggle.setAttribute('aria-pressed', this.currentTheme === 'light' ? 'true' : 'false');
       
       // Update icon in the handle
       const toggleIcon = this.themeToggle.querySelector('.toggle-icon');
       if (toggleIcon) {
-        toggleIcon.className = theme === 'light' ? 
+        toggleIcon.className = this.currentTheme === 'light' ? 
           'toggle-icon fa fa-sun' : 
           'toggle-icon fa fa-moon';
       }
     }
+  }
+
+  setTheme(theme, animate = true) {
+    this.currentTheme = theme;
+    
+    // Update DOM (both html and body for maximum compatibility)
+    document.documentElement.setAttribute('data-theme', theme);
+    document.body.setAttribute('data-theme', theme);
+    
+    // Update theme toggle button
+    this.syncThemeToggleState();
     
     // Store preference
     localStorage.setItem('theme', theme);

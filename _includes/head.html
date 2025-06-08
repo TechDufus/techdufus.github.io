@@ -76,6 +76,30 @@
 
   {% include syntax-highlight.html %}
 
+  <!-- Critical Theme Detection Script - Prevents FOUC -->
+  <script>
+    // CRITICAL: This script must run IMMEDIATELY to prevent theme flicker
+    (function() {
+      try {
+        // Get stored theme preference
+        const storedTheme = localStorage.getItem('theme');
+        const preferredTheme = storedTheme || 'dark';
+        
+        // Apply theme immediately before any CSS renders
+        document.documentElement.setAttribute('data-theme', preferredTheme);
+        document.body.setAttribute('data-theme', preferredTheme);
+        
+        // Store the detected theme for later JavaScript access
+        window.initialTheme = preferredTheme;
+      } catch (e) {
+        // Fallback if localStorage is not available
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.setAttribute('data-theme', 'dark');
+        window.initialTheme = 'dark';
+      }
+    })();
+  </script>
+
 </head>
 
 <!-- HEAD End -->
