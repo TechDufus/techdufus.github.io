@@ -405,12 +405,19 @@ a {
     }
 
     .toggle-input {
+        position: absolute;
         opacity: 0;
         width: 0;
         height: 0;
-        position: absolute;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        clip: rect(0, 0, 0, 0);
+        overflow: hidden;
+        white-space: nowrap;
         visibility: hidden;
         pointer-events: none;
+        z-index: -1;
     }
 
     .toggle-slider {
