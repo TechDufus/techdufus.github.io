@@ -1,0 +1,35 @@
+{
+  "name": "techdufus-blog",
+  "version": "1.0.0",
+  "description": "Personal blog and portfolio website for TechDufus",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:mobile": "playwright test --grep @mobile",
+    "test:desktop": "playwright test --grep @desktop",
+    "test:ci": "playwright test --reporter=github",
+    "install-browsers": "playwright install",
+    "serve": "bundle exec jekyll serve --config _config.yml,_config.dev.yml",
+    "serve:production": "bundle exec jekyll serve --host 0.0.0.0",
+    "build": "bundle exec jekyll build",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down"
+  },
+  "keywords": [
+    "jekyll",
+    "blog",
+    "portfolio",
+    "powershell",
+    "devops"
+  ],
+  "author": "TechDufus",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
