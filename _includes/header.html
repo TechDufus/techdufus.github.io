@@ -289,11 +289,19 @@
   color: #40a02b; /* Latte green */
 }
 
-/* Use dark colors for terminal text in light mode */
-[data-theme="light"] .command-line,
-[data-theme="light"] .command,
+/* Use dark colors for current command input in light mode */
 [data-theme="light"] .current-command {
-  color: var(--ctp-text); /* Use theme-aware text color */
+  color: var(--ctp-text); /* Use theme-aware text color for input */
+}
+
+/* Keep light colors for terminal output history in light mode (dark background) */
+[data-theme="light"] .terminal-output .command-line,
+[data-theme="light"] .terminal-output .command {
+  color: #eff1f5; /* Light text for dark terminal background */
+}
+
+[data-theme="light"] .terminal-output .prompt {
+  color: #40c02b; /* Bright green for terminal output prompts */
 }
 
 [data-theme="light"] .prompt {
