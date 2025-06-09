@@ -202,4 +202,55 @@ sitemap:
   border-color: var(--ctp-lavender);
   color: var(--ctp-base);
 }
+
+/* CRITICAL: Mobile button text visibility fixes */
+@media (max-width: 768px) {
+  /* Force button visibility in both themes on mobile */
+  .btn-primary,
+  .contact-card .btn,
+  .contact-card .btn-primary {
+    background-color: #8839ef !important; /* Light theme mauve */
+    border-color: #8839ef !important;
+    color: #eff1f5 !important; /* Light theme base */
+    font-weight: bold !important;
+    text-decoration: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  .btn-primary:hover,
+  .contact-card .btn:hover,
+  .contact-card .btn-primary:hover {
+    background-color: #7287fd !important; /* Light theme lavender */
+    border-color: #7287fd !important;
+    color: #eff1f5 !important;
+    text-decoration: none !important;
+  }
+  
+  /* Dark theme mobile button fixes */
+  [data-theme="dark"] .btn-primary,
+  [data-theme="dark"] .contact-card .btn,
+  [data-theme="dark"] .contact-card .btn-primary {
+    background-color: #cba6f7 !important; /* Dark theme mauve */
+    border-color: #cba6f7 !important;
+    color: #1e1e2e !important; /* Dark theme base */
+  }
+  
+  [data-theme="dark"] .btn-primary:hover,
+  [data-theme="dark"] .contact-card .btn:hover,
+  [data-theme="dark"] .contact-card .btn-primary:hover {
+    background-color: #b4befe !important; /* Dark theme lavender */
+    border-color: #b4befe !important;
+    color: #1e1e2e !important;
+  }
+  
+  /* Ensure button text is always visible */
+  .contact-card .btn *,
+  .btn-primary *,
+  .contact-card .btn-primary * {
+    color: inherit !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+}
 </style>
