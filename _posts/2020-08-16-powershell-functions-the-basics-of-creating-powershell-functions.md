@@ -2,8 +2,8 @@
 layout: post
 section-type: post
 title: 'PowerShell Functions: The Basics of Creating PowerShell Functions'
-category: powershell
-tags: [ 'function' ]
+category: tech
+tags: [ 'powershell', 'function' ]
 ---
 
 # If you've read my previous posts ([Module Creation - Part 1](https://matthewjdegarmo.com/powershell/2020/07/28/how-to-organize-your-powershell-functions-into-a-module-part-1.html), [Module Creation - Part 2](https://matthewjdegarmo.com/powershell/2020/08/03/how-to-organize-your-powershell-functions-into-a-module-part-2.html)), then you know how to organize functions to create your own PowerShell module, but how do we go about making our own functions in the first place?

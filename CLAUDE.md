@@ -52,6 +52,7 @@ This is a Jekyll-based personal blog and portfolio website for TechDufus, hosted
 - Google Analytics tracking
 - Web app mode with custom icons
 - Gesture navigation for mobile
+- **Blog search functionality** - Full-text search with Lunr.js, supports partial matching and typo tolerance
 
 ### Styling
 - Uses SCSS with compression enabled in production
@@ -132,3 +133,42 @@ docker-compose up  # Start development server
 ```
 
 The site will be available at http://localhost:4000
+
+## Blog Search System
+
+### Implementation Details
+- **Search Index**: `/search.json` - Auto-generated JSON index of all blog posts
+- **Search Page**: `/search/` - Dedicated search interface with real-time results
+- **Navigation Integration**: Search input in header navigation bar
+- **Search Engine**: Lunr.js v2.3.9 with custom configuration for optimal partial matching
+
+### Search Features
+- **Multi-strategy searching**: Exact match, wildcard (`query*`), and fuzzy search (`query~1`)
+- **Full-text indexing**: Searches titles, content, tags, categories, and excerpts
+- **Smart highlighting**: Query terms highlighted in results
+- **Real-time filtering**: Category and tag filters without page reload
+- **URL parameter support**: Direct links to search results (`/search/?q=query`)
+- **Responsive design**: Mobile-friendly search interface
+
+### Content Organization
+- **Blog categories**: All posts reorganized under unified category structure:
+  - `tech` - Technical content (formerly separate `go` and `powershell` categories)
+  - `personal` - Personal blog posts
+  - `automation`, `pester`, `terraform` - Specialized technical topics
+- **Tag system**: Technology-specific tags (`go`, `powershell`, `kubernetes`, etc.) for granular filtering
+- **Auto-generation**: Category and tag pages auto-generated via `./scripts/generate-*` commands
+
+### Testing Search Functionality
+```bash
+# Test different search terms to verify partial matching:
+# http://localhost:4000/search/?q=kube      # Should find kubernetes posts
+# http://localhost:4000/search/?q=kuber     # Should now find results (fixed)
+# http://localhost:4000/search/?q=kubernet  # Should find kubernetes posts  
+# http://localhost:4000/search/?q=powershell # Should find all PowerShell posts
+```
+
+### Development Notes
+- Search functionality requires both `search.html` and `search.json` to be properly generated
+- Lunr.js index rebuilds automatically when `search.json` content changes
+- CSP whitelist includes `cdnjs.cloudflare.com` for Lunr.js CDN access
+- Search data excluded from Jekyll build via `_config.yml` exclude list

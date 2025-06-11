@@ -2,8 +2,8 @@
 layout: post
 section-type: post
 title: How to organize your powershell functions into a module - Part 2
-category: powershell
-tags: [ 'module' ]
+category: tech
+tags: [ 'powershell', 'module' ]
 ---
 
 ## In this post, we will be diving into a more advanced way of creating and structuring our PowerShell modules.

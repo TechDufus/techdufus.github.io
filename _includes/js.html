@@ -497,6 +497,23 @@ criticalElements.forEach(elementClass => {
   }
 });
 
+// 🔍 Navigation Search Handler
+function handleNavSearch(event) {
+  event.preventDefault();
+  const searchInput = document.getElementById('nav-search-input');
+  const query = searchInput.value.trim();
+  
+  if (query) {
+    // Redirect to search page with query parameter
+    window.location.href = `/search/?q=${encodeURIComponent(query)}`;
+  } else {
+    // If empty, just go to search page
+    window.location.href = '/search/';
+  }
+  
+  return false;
+}
+
 // 📊 Navigation Usage Analytics (Privacy-friendly)
 if (window.modernNav && window.localStorage) {
   const navStats = JSON.parse(localStorage.getItem('nav-stats') || '{}');
@@ -525,7 +542,7 @@ if (window.modernNav && window.localStorage) {
 
   <!-- Syntax highlight in post pages-->
 
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/highlight.min.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
 
 {% endif %}

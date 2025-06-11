@@ -91,6 +91,20 @@
 
     <!-- Header Controls -->
     <div class="header-controls">
+      <!-- Search Input -->
+      <div class="nav-search-container">
+        <form class="nav-search-form" onsubmit="return handleNavSearch(event)">
+          <input type="text" 
+                 id="nav-search-input" 
+                 class="nav-search-input" 
+                 placeholder="Search..."
+                 aria-label="Search blog posts">
+          <button type="submit" class="nav-search-button" aria-label="Submit search">
+            <i class="fa fa-search"></i>
+          </button>
+        </form>
+      </div>
+      
       <!-- Theme Toggle -->
       <button class="theme-toggle-button" 
               aria-label="Toggle between light and dark theme" 
