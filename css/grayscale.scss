@@ -942,6 +942,59 @@ a {
 }
 
 /* ========================================
+   🔍 MOBILE SEARCH
+   ======================================== */
+
+.mobile-search-container {
+  padding: 1rem 1.25rem 0.5rem;
+  border-bottom: 1px solid var(--ctp-surface1);
+  margin-bottom: 0.5rem;
+}
+
+.mobile-search-link {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1.25rem;
+  color: var(--ctp-base);
+  text-decoration: none;
+  font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 0.75rem;
+  background: var(--ctp-mauve);
+  border: 1px solid var(--ctp-mauve);
+  transition: all var(--nav-transition-medium);
+  
+  &:hover,
+  &:focus {
+    background: var(--ctp-lavender);
+    color: var(--ctp-base);
+    border-color: var(--ctp-lavender);
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(var(--ctp-mauve-rgb), 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.mobile-search-icon {
+  margin-right: 0.75rem;
+  font-size: 1.1em;
+  color: var(--ctp-base);
+  transition: color var(--nav-transition-medium);
+}
+
+.mobile-search-text {
+  color: var(--ctp-base);
+  transition: color var(--nav-transition-medium);
+}
+
+/* ========================================
    🎨 ENHANCED FOCUS STATES
    ======================================== */
 
@@ -949,6 +1002,7 @@ a {
 .brand-link:focus,
 .nav-link:focus,
 .mobile-nav-link:focus,
+.mobile-search-link:focus,
 .theme-toggle-button:focus,
 .mobile-menu-toggle:focus {
   outline: 2px solid var(--ctp-mauve);
@@ -1049,6 +1103,27 @@ a {
       color: #8839ef !important; /* Light mauve */
       border-color: #8839ef !important; /* Light mauve */
     }
+  }
+  
+  html[data-theme="light"] .mobile-search-link,
+  [data-theme="light"] .mobile-search-link {
+    background: #8839ef !important; /* Light mauve */
+    border-color: #8839ef !important; /* Light mauve */
+    color: #eff1f5 !important; /* Light base */
+    
+    &:hover,
+    &:focus {
+      background: #7c3aed !important; /* Light lavender */
+      color: #eff1f5 !important; /* Light base */
+      border-color: #7c3aed !important; /* Light lavender */
+    }
+  }
+  
+  html[data-theme="light"] .mobile-search-icon,
+  html[data-theme="light"] .mobile-search-text,
+  [data-theme="light"] .mobile-search-icon,
+  [data-theme="light"] .mobile-search-text {
+    color: #eff1f5 !important; /* Light base */
   }
   
   /* UI Elements */
