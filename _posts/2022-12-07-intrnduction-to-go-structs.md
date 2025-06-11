@@ -2,8 +2,8 @@
 layout: post
 section-type: post
 title: Introduction to GoLang Structs
-category: go
-tags: [ 'devops' ]
+category: tech
+tags: [ 'go', 'devops' ]
 ---
 
 # Introduction to Golang Structs

@@ -17,6 +17,7 @@
     <span class="size">{{ post.content | strip_html | size | append: 'K' }}</span>
     <span class="date">{{ post.date | date: "%b %d %Y" }}</span>
     <span class="time">{{ post.date | date: "%H:%M" }}</span>
+    <span class="reading-time-mini">{% assign words = post.content | strip_html | number_of_words %}{% assign reading_time = words | divided_by: 200 %}{% if reading_time == 0 %}{% assign reading_time = 1 %}{% endif %}{{ reading_time }}min</span>
   </div>
   <div class="file-name">
     <a href="{{site.baseurl}}{{post.url}}" class="post-link">

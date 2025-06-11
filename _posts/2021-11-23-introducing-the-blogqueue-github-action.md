@@ -2,8 +2,8 @@
 layout: post
 section-type: post
 title: Introducing the BlogQueue GitHub Action
-category: powershell
-tags: [ 'tutorial','github' ]
+category: tech
+tags: [ 'powershell', 'tutorial','github' ]
 ---
 
 # Have you ever started a blog, only to find yourself not posting content?

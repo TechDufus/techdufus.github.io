@@ -2,8 +2,8 @@
 layout: post
 section-type: post
 title: How to organize your powershell functions into a module - Part 1
-category: powershell
-tags: [ 'module' ]
+category: tech
+tags: [ 'powershell', 'module' ]
 ---
 
 ## So you've written a few functions in PowerShell... Now what?

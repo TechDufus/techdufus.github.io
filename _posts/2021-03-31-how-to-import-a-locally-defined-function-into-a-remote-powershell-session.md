@@ -2,7 +2,7 @@
 layout: post
 section-type: post
 title: 'How to Import a Locally Defined Function into a Remote PowerShell Session'
-category: powershell
+category: tech
 tags: [ 'powershell' ]
 ---
 

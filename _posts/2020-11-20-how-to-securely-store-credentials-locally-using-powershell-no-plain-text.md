@@ -2,8 +2,8 @@
 layout: post
 section-type: post
 title: 'How to securely store credentials locally using PowerShell. NO PLAIN TEXT.'
-category: powershell
-tags: [ 'function' ]
+category: tech
+tags: [ 'powershell', 'function' ]
 ---
 
 # When scripting authenticated tasks, it's very important to make sure that you are handling credentials properly and not storing plain text passwords in your scripts or modules.

@@ -2,7 +2,7 @@
 layout: post
 section-type: post
 title: 'Use PowerShell to Detect Running OS'
-category: powershell
+category: tech
 tags: [ 'powershell' ]
 ---
 

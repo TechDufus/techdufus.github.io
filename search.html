@@ -1,0 +1,587 @@
+---
+permalink: /search/
+---
+
+<!DOCTYPE html>
+<html lang="{{ site.lang }}">
+
+  {% include head.html %}
+
+  <body id="page-top" data-spy="scroll" data-target=".navbar-fixed-top" data-offset="151">
+
+    {% include navigation.html %}
+
+    <section class="container content-section text-center" style="padding-top: 120px;">
+      <div class="row">
+    <div class="col-lg-8 col-lg-offset-2">
+      <div class="search-container">
+        <h2 class="search-title">Search Blog Posts</h2>
+        
+        <div class="search-input-container">
+          <input type="text" 
+                 id="search-input" 
+                 class="search-input" 
+                 placeholder="Search posts, tags, categories..."
+                 autocomplete="off"
+                 aria-label="Search blog posts"
+                 aria-describedby="search-stats">
+          <div class="search-icon">
+            <i class="fa fa-search"></i>
+          </div>
+        </div>
+        
+        <div class="search-stats" id="search-stats" style="display: none;">
+          <span id="search-results-count">0</span> results for "<span id="search-query-display"></span>"
+        </div>
+        
+        <div class="search-filters" id="search-filters" style="display: none;">
+          <div class="filter-group">
+            <label for="category-filter">Category:</label>
+            <select id="category-filter" class="filter-select">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="tag-filter">Tag:</label>
+            <select id="tag-filter" class="filter-select">
+              <option value="">All Tags</option>
+            </select>
+          </div>
+        </div>
+        
+        <div id="search-results" class="search-results">
+          <div class="search-welcome" id="search-welcome">
+            <i class="fa fa-search search-welcome-icon"></i>
+            <p>Start typing to search through {{ site.posts.size }} blog posts...</p>
+          </div>
+          
+          <div class="no-results" id="no-results" style="display: none;">
+            <i class="fa fa-exclamation-circle no-results-icon"></i>
+            <h3>No results found</h3>
+            <p>Try adjusting your search terms or browse <a href="/blog/">all posts</a>.</p>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    {% include footer.html %}
+    {% include js.html %}
+
+  </body>
+</html>
+
+<style>
+.search-container {
+  padding: 40px 0;
+}
+
+.search-title {
+  color: var(--ctp-text);
+  margin-bottom: 30px;
+  font-weight: 300;
+}
+
+.search-input-container {
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 15px 50px 15px 20px;
+  font-size: 16px;
+  border: 2px solid var(--ctp-surface0);
+  border-radius: 25px;
+  background: var(--ctp-base);
+  color: var(--ctp-text);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: var(--ctp-mauve);
+  box-shadow: 0 0 0 3px rgba(var(--ctp-mauve-rgb), 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ctp-subtext1);
+  pointer-events: none;
+}
+
+.search-stats {
+  color: var(--ctp-subtext1);
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.search-filters {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-group label {
+  color: var(--ctp-subtext1);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 6px;
+  background: var(--ctp-base);
+  color: var(--ctp-text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.filter-select:focus {
+  border-color: var(--ctp-mauve);
+}
+
+.search-results {
+  text-align: left;
+}
+
+.search-welcome,
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ctp-subtext1);
+}
+
+.search-welcome-icon,
+.no-results-icon {
+  font-size: 3em;
+  margin-bottom: 20px;
+  color: var(--ctp-subtext0);
+}
+
+.search-result {
+  background: var(--ctp-surface0);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  border: 1px solid var(--ctp-surface1);
+  transition: all 0.3s ease;
+}
+
+.search-result:hover {
+  border-color: var(--ctp-mauve);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(var(--ctp-base-rgb), 0.3);
+}
+
+.search-result-title {
+  margin: 0 0 8px 0;
+  font-size: 1.4em;
+  font-weight: 600;
+}
+
+.search-result-title a {
+  color: var(--ctp-text);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.search-result-title a:hover {
+  color: var(--ctp-mauve);
+}
+
+.search-result-meta {
+  color: var(--ctp-subtext1);
+  font-size: 0.9em;
+  margin-bottom: 12px;
+}
+
+.search-result-excerpt {
+  color: var(--ctp-subtext0);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.search-result-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.search-result-tag {
+  background: var(--ctp-mauve);
+  color: var(--ctp-base);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.search-result-tag:hover {
+  background: var(--ctp-lavender);
+  color: var(--ctp-base);
+  text-decoration: none;
+}
+
+.search-highlight {
+  background: rgba(var(--ctp-yellow-rgb), 0.3);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+/* Light theme overrides */
+[data-theme="light"] .search-input {
+  background: var(--ctp-base);
+  border-color: var(--ctp-surface0);
+  color: var(--ctp-text);
+}
+
+[data-theme="light"] .search-result {
+  background: var(--ctp-surface0);
+  border-color: var(--ctp-surface1);
+}
+
+[data-theme="light"] .search-highlight {
+  background: rgba(var(--ctp-yellow-rgb), 0.4);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .search-filters {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .search-result {
+    padding: 16px;
+  }
+  
+  .search-result-title {
+    font-size: 1.2em;
+  }
+}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js" integrity="sha512-4xUl/d6D6THrAnXAwGajXkoWaeMNwEKK4iNfq5DotEbLPAfk6FSxSP3ydNxqDgCw1c/0Z1Jg6L8h2j+++9BZmg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Search page DOM loaded');
+  console.log('Lunr available:', typeof lunr !== 'undefined');
+  let searchIndex;
+  let searchData;
+  let allCategories = new Set();
+  let allTags = new Set();
+  
+  const searchInput = document.getElementById('search-input');
+  const searchResults = document.getElementById('search-results');
+  const searchStats = document.getElementById('search-stats');
+  const searchWelcome = document.getElementById('search-welcome');
+  const noResults = document.getElementById('no-results');
+  const searchFilters = document.getElementById('search-filters');
+  const categoryFilter = document.getElementById('category-filter');
+  const tagFilter = document.getElementById('tag-filter');
+  const searchResultsCount = document.getElementById('search-results-count');
+  const searchQueryDisplay = document.getElementById('search-query-display');
+  
+  // Load search data and create index
+  console.log('Fetching search data...');
+  fetch('/search.json')
+    .then(response => {
+      console.log('Search.json response:', response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Search data loaded:', data.length, 'posts');
+      searchData = data;
+      
+      // Build Lunr index
+      console.log('Building Lunr index...');
+      searchIndex = lunr(function() {
+        this.ref('url');
+        this.field('title', { boost: 10 });
+        this.field('content');
+        this.field('categories', { boost: 5 });
+        this.field('tags', { boost: 5 });
+        this.field('excerpt', { boost: 3 });
+        
+        data.forEach(post => {
+          this.add(post);
+          
+          // Collect unique categories and tags
+          if (post.categories) {
+            post.categories.forEach(cat => allCategories.add(cat));
+          }
+          if (post.tags) {
+            post.tags.forEach(tag => allTags.add(tag));
+          }
+        });
+      });
+      console.log('Search index built successfully');
+      
+      // Populate filter dropdowns
+      populateFilters();
+    })
+    .catch(error => {
+      console.error('Error loading search data:', error);
+      showError();
+    });
+  
+  function populateFilters() {
+    // Sort and add categories
+    Array.from(allCategories).sort().forEach(category => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      categoryFilter.appendChild(option);
+    });
+    
+    // Sort and add tags
+    Array.from(allTags).sort().forEach(tag => {
+      const option = document.createElement('option');
+      option.value = tag;
+      option.textContent = tag;
+      tagFilter.appendChild(option);
+    });
+  }
+  
+  function performSearch(query) {
+    console.log('performSearch called with query:', query);
+    console.log('searchIndex available:', !!searchIndex);
+    console.log('searchData available:', !!searchData);
+    
+    if (!searchIndex || !query.trim()) {
+      console.log('No search index or empty query, showing welcome');
+      showWelcome();
+      return;
+    }
+    
+    try {
+      // Perform multiple search strategies and combine results
+      let allResults = [];
+      
+      // 1. Exact search
+      const exactResults = searchIndex.search(query);
+      console.log('Exact search results:', exactResults.length);
+      allResults = allResults.concat(exactResults);
+      
+      // 2. Wildcard search for partial matches
+      if (query.length >= 3) {
+        const wildcardResults = searchIndex.search(`${query}*`);
+        console.log('Wildcard search results:', wildcardResults.length);
+        allResults = allResults.concat(wildcardResults);
+      }
+      
+      // 3. Fuzzy search for typos (if exact results are few)
+      if (exactResults.length < 3 && query.length >= 4) {
+        const fuzzyResults = searchIndex.search(`${query}~1`);
+        console.log('Fuzzy search results:', fuzzyResults.length);
+        allResults = allResults.concat(fuzzyResults);
+      }
+      
+      // Remove duplicates and sort by score
+      const uniqueResults = [];
+      const seenUrls = new Set();
+      
+      allResults.forEach(result => {
+        if (!seenUrls.has(result.ref)) {
+          seenUrls.add(result.ref);
+          uniqueResults.push(result);
+        }
+      });
+      
+      // Sort by score (highest first)
+      uniqueResults.sort((a, b) => b.score - a.score);
+      
+      console.log('Combined unique results:', uniqueResults.length);
+      
+      // Get full post data for results
+      const posts = uniqueResults.map(result => {
+        const post = searchData.find(p => p.url === result.ref);
+        return { ...post, score: result.score };
+      });
+      console.log('Posts with data:', posts);
+      
+      // Apply filters
+      const filteredPosts = applyFilters(posts);
+      console.log('Filtered posts:', filteredPosts);
+      
+      displayResults(filteredPosts, query);
+    } catch (error) {
+      console.error('Search error:', error);
+      showError();
+    }
+  }
+  
+  function applyFilters(posts) {
+    const selectedCategory = categoryFilter.value;
+    const selectedTag = tagFilter.value;
+    
+    return posts.filter(post => {
+      const categoryMatch = !selectedCategory || 
+        (post.categories && post.categories.includes(selectedCategory));
+      
+      const tagMatch = !selectedTag || 
+        (post.tags && post.tags.includes(selectedTag));
+      
+      return categoryMatch && tagMatch;
+    });
+  }
+  
+  function displayResults(posts, query) {
+    searchStats.style.display = 'block';
+    searchFilters.style.display = 'flex';
+    searchWelcome.style.display = 'none';
+    
+    searchResultsCount.textContent = posts.length;
+    searchQueryDisplay.textContent = query;
+    
+    if (posts.length === 0) {
+      noResults.style.display = 'block';
+      clearResultsContainer();
+      return;
+    }
+    
+    noResults.style.display = 'none';
+    
+    // Create results HTML
+    const resultsHTML = posts.map(post => createResultHTML(post, query)).join('');
+    
+    clearResultsContainer();
+    const resultsContainer = document.createElement('div');
+    resultsContainer.innerHTML = resultsHTML;
+    searchResults.appendChild(resultsContainer);
+  }
+  
+  function createResultHTML(post, query) {
+    const highlightedTitle = highlightText(post.title, query);
+    const highlightedExcerpt = highlightText(post.excerpt, query);
+    
+    const tagsHTML = post.tags ? 
+      post.tags.map(tag => `<a href="/tags/${tag.toLowerCase()}/" class="search-result-tag">${tag}</a>`).join('') : '';
+    
+    return `
+      <div class="search-result">
+        <h3 class="search-result-title">
+          <a href="${post.url}">${highlightedTitle}</a>
+        </h3>
+        <div class="search-result-meta">
+          ${post.date}${post.categories ? ` • ${post.categories.join(', ')}` : ''}
+        </div>
+        <p class="search-result-excerpt">${highlightedExcerpt}</p>
+        ${tagsHTML ? `<div class="search-result-tags">${tagsHTML}</div>` : ''}
+      </div>
+    `;
+  }
+  
+  function highlightText(text, query) {
+    if (!text || !query) return text;
+    
+    const words = query.toLowerCase().split(/\s+/).filter(word => word.length > 2);
+    let highlightedText = text;
+    
+    words.forEach(word => {
+      const regex = new RegExp(`(${word})`, 'gi');
+      highlightedText = highlightedText.replace(regex, '<span class="search-highlight">$1</span>');
+    });
+    
+    return highlightedText;
+  }
+  
+  function showWelcome() {
+    searchStats.style.display = 'none';
+    searchFilters.style.display = 'none';
+    searchWelcome.style.display = 'block';
+    noResults.style.display = 'none';
+    clearResultsContainer();
+  }
+  
+  function showError() {
+    searchStats.style.display = 'none';
+    searchFilters.style.display = 'none';
+    searchWelcome.style.display = 'none';
+    noResults.style.display = 'block';
+    clearResultsContainer();
+  }
+  
+  function clearResultsContainer() {
+    const children = Array.from(searchResults.children);
+    children.forEach(child => {
+      if (!child.id) { // Keep welcome and no-results elements
+        child.remove();
+      }
+    });
+  }
+  
+  // Event listeners
+  searchInput.addEventListener('input', function(e) {
+    const query = e.target.value;
+    if (query.length === 0) {
+      showWelcome();
+    } else if (query.length >= 2) {
+      performSearch(query);
+    }
+  });
+  
+  // Keyboard navigation
+  searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      searchInput.value = '';
+      showWelcome();
+    }
+  });
+  
+  categoryFilter.addEventListener('change', function() {
+    const query = searchInput.value;
+    if (query.length >= 2) {
+      performSearch(query);
+    }
+  });
+  
+  tagFilter.addEventListener('change', function() {
+    const query = searchInput.value;
+    if (query.length >= 2) {
+      performSearch(query);
+    }
+  });
+  
+  // Handle URL parameters for direct search
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialQuery = urlParams.get('q');
+  if (initialQuery) {
+    searchInput.value = initialQuery;
+    console.log('Initial query found:', initialQuery);
+    // Wait for data to load before searching
+    const waitForData = setInterval(() => {
+      if (searchIndex && searchData) {
+        console.log('Search data loaded, performing search...');
+        performSearch(initialQuery);
+        clearInterval(waitForData);
+      }
+    }, 100);
+  }
+});
+</script>

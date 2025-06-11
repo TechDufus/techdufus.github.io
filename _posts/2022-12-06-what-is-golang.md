@@ -2,8 +2,8 @@
 layout: post
 section-type: post
 title: What is GoLang?
-category: go
-tags: [ 'devops' ]
+category: tech
+tags: [ 'go', 'devops' ]
 ---
 
 # Introduction to Golang
