@@ -33,10 +33,6 @@
                 <a href="{{site.baseurl}}/setup/" class="nav-link" role="menuitem">
                   <span class="nav-text">{{p[0]}}</span>
                 </a>
-              {% elsif p[1] == "contact-page" %}
-                <a href="{{site.baseurl}}/contact/" class="nav-link" role="menuitem">
-                  <span class="nav-text">{{p[0]}}</span>
-                </a>
               {% else %}
                 <a href="#{{ p[1] }}" class="nav-link page-scroll" role="menuitem">
                   <span class="nav-text">{{p[0]}}</span>
@@ -65,16 +61,6 @@
                   </a>
                 {% else %}
                   <a href="{{site.baseurl}}/setup/" class="nav-link" role="menuitem">
-                    <span class="nav-text">{{p[0]}}</span>
-                  </a>
-                {% endif %}
-              {% elsif p[1] == "contact-page" %}
-                {% if page.url == "/contact/index.html" | prepend: {{site.baseurl}} %}
-                  <a href="#page" class="nav-link page-scroll" role="menuitem">
-                    <span class="nav-text">{{p[0]}}</span>
-                  </a>
-                {% else %}
-                  <a href="{{site.baseurl}}/contact/" class="nav-link" role="menuitem">
                     <span class="nav-text">{{p[0]}}</span>
                   </a>
                 {% endif %}
@@ -157,10 +143,6 @@
                 <a href="{{site.baseurl}}/setup/" class="mobile-nav-link" role="menuitem">
                   <span class="mobile-nav-text">{{p[0]}}</span>
                 </a>
-              {% elsif p[1] == "contact-page" %}
-                <a href="{{site.baseurl}}/contact/" class="mobile-nav-link" role="menuitem">
-                  <span class="mobile-nav-text">{{p[0]}}</span>
-                </a>
               {% else %}
                 <a href="#{{ p[1] }}" class="mobile-nav-link page-scroll" role="menuitem">
                   <span class="mobile-nav-text">{{p[0]}}</span>
@@ -188,16 +170,6 @@
                   </a>
                 {% else %}
                   <a href="{{site.baseurl}}/setup/" class="mobile-nav-link" role="menuitem">
-                    <span class="mobile-nav-text">{{p[0]}}</span>
-                  </a>
-                {% endif %}
-              {% elsif p[1] == "contact-page" %}
-                {% if page.url == "/contact/index.html" | prepend: {{site.baseurl}} %}
-                  <a href="#page" class="mobile-nav-link page-scroll" role="menuitem">
-                    <span class="mobile-nav-text">{{p[0]}}</span>
-                  </a>
-                {% else %}
-                  <a href="{{site.baseurl}}/contact/" class="mobile-nav-link" role="menuitem">
                     <span class="mobile-nav-text">{{p[0]}}</span>
                   </a>
                 {% endif %}

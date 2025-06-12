@@ -3230,10 +3230,16 @@ body {
   }
 }
 
+/* Terminal Header Actions Container */
+.terminal-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Terminal Header Search */
 .terminal-search {
-  margin-left: auto;
-
   .search-link {
     background: rgba(var(--ctp-surface1-rgb), 0.6);
     color: var(--ctp-subtext1);

@@ -1,39 +1,376 @@
+<!-- Contact Section Start -->
 
-<!-- Contact Start -->
-
-<section id="{{ page.section-type }}" class="container content-section text-center">
+<section id="contact" class="container content-section text-center">
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
+      <div class="contact-section">
+        <div class="contact-header">
+          <h2>Let's Connect</h2>
+          <p class="lead">Whether you want to discuss DevOps, share knowledge, or just say hello - I'd love to hear from you!</p>
+        </div>
 
-      {{ page.content | markdownify }}
+        <div class="contact-grid">
+          
+          <!-- Email Card -->
+          <div class="contact-card">
+            <div class="card-icon">
+              <i class="fa fa-envelope fa-3x"></i>
+            </div>
+            <h3>Email Me</h3>
+            <p>Best for detailed discussions or project inquiries</p>
+            {% if site.email %}
+              <a href="mailto:{{ site.email }}" class="btn btn-primary">
+                {{ site.email }}
+              </a>
+            {% endif %}
+          </div>
 
-      {% if site.email %}
-        {% if site.email contains '@' %}
-          {% assign newemail = site.email | split: '@' %}
-            <p>
-            <script>
-              function join_at_email(user, domain){
-              return (user && domain)?(user + "@" + domain):"";
-              }
-              const emailAddr = join_at_email( "{{ newemail[0] }}", "{{ newemail[1] }}" );
-              const emailLink = document.createElement('a');
-              emailLink.href = 'mailto:' + emailAddr;
-              emailLink.textContent = emailAddr;
-              document.currentScript.parentNode.insertBefore(emailLink, document.currentScript);
-              </script>
-            </p>
-        {% else %}
-          <p><a href="mailto:{{ site.email }}">{{ site.email }}</a></p>
-        {% endif %}
-      {% endif %}
+          <!-- Calendar Card -->
+          <div class="contact-card">
+            <div class="card-icon">
+              <i class="fa fa-calendar fa-3x"></i>
+            </div>
+            <h3>Schedule a Chat</h3>
+            <p>Book a time slot for a quick call or discussion</p>
+            <a href="https://cal.com/techdufus" target="_blank" class="btn btn-primary" rel="noopener">
+              Book a Meeting
+            </a>
+          </div>
 
-      {% if site.pgp %}
-        <a href="{{ site.pgp }}" target="_blank">PGP Key</a>
-        <p/>
-      {% endif %}
+          {% if site.pgp %}
+          <!-- PGP Card -->
+          <div class="contact-card">
+            <div class="card-icon">
+              <i class="fa fa-lock fa-3x"></i>
+            </div>
+            <h3>Secure Contact</h3>
+            <p>For sensitive communications</p>
+            <a href="{{ site.pgp }}" target="_blank" class="btn btn-primary" rel="noopener">
+              PGP Public Key
+            </a>
+          </div>
+          {% endif %}
+          
+        </div>
 
+        <!-- Social Links Section -->
+        <div class="social-section">
+          <h3>Find Me Online</h3>
+          <div class="social-grid">
+            {% for link in site.social %}
+              {% if link.title == "fa-brands fa-github" %}
+                <a href="{{ link.url }}" target="_blank" class="social-card github" rel="noopener">
+                  <i class="{{ link.title }} fa-2x"></i>
+                  <span>GitHub</span>
+                </a>
+              {% elsif link.title == "fa-brands fa-x-twitter" %}
+                <a href="{{ link.url }}" target="_blank" class="social-card twitter" rel="noopener">
+                  <i class="{{ link.title }} fa-2x"></i>
+                  <span>Twitter/X</span>
+                </a>
+              {% elsif link.title == "fa-brands fa-youtube" %}
+                <a href="{{ link.url }}" target="_blank" class="social-card youtube" rel="noopener">
+                  <i class="{{ link.title }} fa-2x"></i>
+                  <span>YouTube</span>
+                </a>
+              {% elsif link.title == "fa-brands fa-linkedin" %}
+                <a href="{{ link.url }}" target="_blank" class="social-card linkedin" rel="noopener">
+                  <i class="{{ link.title }} fa-2x"></i>
+                  <span>LinkedIn</span>
+                </a>
+              {% elsif link.title == "fa-brands fa-discord" %}
+                <a href="{{ link.url }}" target="_blank" class="social-card discord" rel="noopener">
+                  <i class="{{ link.title }} fa-2x"></i>
+                  <span>Discord</span>
+                </a>
+              {% elsif link.title == "fa-brands fa-twitch" %}
+                <a href="{{ link.url }}" target="_blank" class="social-card twitch" rel="noopener">
+                  <i class="{{ link.title }} fa-2x"></i>
+                  <span>Twitch</span>
+                </a>
+              {% elsif link.title == "fa-brands fa-reddit" %}
+                <a href="{{ link.url }}" target="_blank" class="social-card reddit" rel="noopener">
+                  <i class="{{ link.title }} fa-2x"></i>
+                  <span>Reddit</span>
+                </a>
+              {% elsif link.title == "fa-solid fa-tree" %}
+                <a href="{{ link.url }}" target="_blank" class="social-card linktree" rel="noopener">
+                  <i class="{{ link.title }} fa-2x"></i>
+                  <span>Linktree</span>
+                </a>
+              {% elsif link.title == "fa-solid fa-mug-saucer" %}
+                <a href="{{ link.url }}" target="_blank" class="social-card coffee" rel="noopener">
+                  <i class="{{ link.title }} fa-2x"></i>
+                  <span>Buy Me Coffee</span>
+                </a>
+              {% elsif link.title == "fa-solid fa-rss" %}
+                <a href="{{ link.url }}" target="_blank" class="social-card rss" rel="noopener">
+                  <i class="{{ link.title }} fa-2x"></i>
+                  <span>RSS Feed</span>
+                </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 </section>
 
-<!-- Contact End -->
+<style>
+/* Contact Section Styling */
+.contact-section {
+  padding: 80px 0 40px;
+  background: var(--ctp-ultra-dark);
+  color: var(--ctp-text);
+  transition: all 0.3s ease;
+}
+
+.contact-header {
+  margin-bottom: 60px;
+}
+
+.contact-header h2 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  color: var(--ctp-text);
+  text-transform: uppercase;
+  font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+}
+
+/* Contact Cards Grid */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+.contact-card {
+  background: var(--ctp-surface0);
+  padding: 40px 30px;
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid rgba(var(--ctp-mauve-rgb), 0.3);
+  transition: all 0.3s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(var(--ctp-mauve-rgb), 0.3);
+  border-color: var(--ctp-mauve);
+}
+
+.card-icon {
+  margin-bottom: 20px;
+  color: var(--ctp-mauve);
+}
+
+.contact-card h3 {
+  color: var(--ctp-text);
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  font-size: 1.5em;
+  font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+}
+
+.contact-card p {
+  color: var(--ctp-subtext1);
+  margin-bottom: 20px;
+  font-size: 0.95em;
+}
+
+.contact-card .btn {
+  padding: 10px 25px;
+  font-weight: bold;
+  text-transform: none;
+}
+
+/* Social Section */
+.social-section {
+  background: var(--ctp-surface1);
+  padding: 40px;
+  border-radius: 10px;
+  margin-bottom: 40px;
+  border: 1px solid rgba(var(--ctp-mauve-rgb), 0.2);
+  transition: all 0.3s ease;
+}
+
+.social-section h3 {
+  color: var(--ctp-mauve);
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+}
+
+.social-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+}
+
+.social-card {
+  background: var(--ctp-surface0);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--ctp-text);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(var(--ctp-mauve-rgb), 0.2);
+}
+
+.social-card:hover {
+  transform: translateY(-3px);
+  text-decoration: none;
+  color: var(--ctp-text);
+  border-color: rgba(var(--ctp-mauve-rgb), 0.5);
+}
+
+.social-card span {
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+/* Social card colors on hover - using Catppuccin colors */
+.social-card.github:hover { 
+  background: rgba(108, 112, 134, 0.8) !important; 
+  box-shadow: 0 5px 20px rgba(108, 112, 134, 0.5) !important; 
+}
+.social-card.twitter:hover { 
+  background: rgba(137, 180, 250, 0.8) !important; 
+  box-shadow: 0 5px 20px rgba(137, 180, 250, 0.5) !important; 
+}
+.social-card.youtube:hover { 
+  background: rgba(243, 139, 168, 0.8) !important; 
+  box-shadow: 0 5px 20px rgba(243, 139, 168, 0.5) !important; 
+}
+.social-card.linkedin:hover { 
+  background: rgba(116, 199, 236, 0.8) !important; 
+  box-shadow: 0 5px 20px rgba(116, 199, 236, 0.5) !important; 
+}
+.social-card.discord:hover { 
+  background: rgba(203, 166, 247, 0.8) !important; 
+  box-shadow: 0 5px 20px rgba(203, 166, 247, 0.5) !important; 
+}
+.social-card.twitch:hover { 
+  background: rgba(245, 194, 231, 0.8) !important; 
+  box-shadow: 0 5px 20px rgba(245, 194, 231, 0.5) !important; 
+}
+.social-card.reddit:hover { 
+  background: rgba(250, 179, 135, 0.8) !important; 
+  box-shadow: 0 5px 20px rgba(250, 179, 135, 0.5) !important; 
+}
+.social-card.linktree:hover { 
+  background: rgba(166, 227, 161, 0.8) !important; 
+  box-shadow: 0 5px 20px rgba(166, 227, 161, 0.5) !important; 
+}
+.social-card.coffee:hover { 
+  background: rgba(249, 226, 175, 0.8) !important; 
+  box-shadow: 0 5px 20px rgba(249, 226, 175, 0.5) !important; 
+}
+.social-card.rss:hover { 
+  background: rgba(148, 226, 213, 0.8) !important; 
+  box-shadow: 0 5px 20px rgba(148, 226, 213, 0.5) !important; 
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .contact-section {
+    padding: 60px 0 30px;
+  }
+  
+  .contact-header h2 {
+    font-size: 2em;
+  }
+  
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .social-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  .contact-card, .social-section {
+    padding: 30px 20px;
+  }
+}
+
+/* Button overrides for better visibility */
+.contact-section .btn-primary {
+  background-color: var(--ctp-mauve);
+  border-color: var(--ctp-mauve);
+  color: var(--ctp-base);
+  font-weight: bold;
+}
+
+.contact-section .btn-primary:hover {
+  background-color: var(--ctp-lavender);
+  border-color: var(--ctp-lavender);
+  color: var(--ctp-base);
+}
+
+/* CRITICAL: Mobile button text visibility fixes */
+@media (max-width: 768px) {
+  /* Force button visibility in both themes on mobile */
+  .contact-section .btn-primary,
+  .contact-card .btn,
+  .contact-card .btn-primary {
+    background-color: #8839ef !important; /* Light theme mauve */
+    border-color: #8839ef !important;
+    color: #eff1f5 !important; /* Light theme base */
+    font-weight: bold !important;
+    text-decoration: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  .contact-section .btn-primary:hover,
+  .contact-card .btn:hover,
+  .contact-card .btn-primary:hover {
+    background-color: #7287fd !important; /* Light theme lavender */
+    border-color: #7287fd !important;
+    color: #eff1f5 !important;
+    text-decoration: none !important;
+  }
+  
+  /* Dark theme mobile button fixes */
+  [data-theme="dark"] .contact-section .btn-primary,
+  [data-theme="dark"] .contact-card .btn,
+  [data-theme="dark"] .contact-card .btn-primary {
+    background-color: #cba6f7 !important; /* Dark theme mauve */
+    border-color: #cba6f7 !important;
+    color: #1e1e2e !important; /* Dark theme base */
+  }
+  
+  [data-theme="dark"] .contact-section .btn-primary:hover,
+  [data-theme="dark"] .contact-card .btn:hover,
+  [data-theme="dark"] .contact-card .btn-primary:hover {
+    background-color: #b4befe !important; /* Dark theme lavender */
+    border-color: #b4befe !important;
+    color: #1e1e2e !important;
+  }
+  
+  /* Ensure button text is always visible */
+  .contact-card .btn *,
+  .contact-section .btn-primary *,
+  .contact-card .btn-primary * {
+    color: inherit !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+}
+</style>
+
+<!-- Contact Section End -->
