@@ -1,1 +1,24 @@
-{}
+{
+  "name": "techdufus.github.io",
+  "version": "1.0.0",
+  "description": "![license](https://img.shields.io/badge/license-MIT-blue.svg?link=https://github.com/TechDufus/TechDufus.github.io/LICENSE) [![Deploy Jekyll site to GitHub Pages](https://github.com/TechDufus/techdufus.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/TechDufus/techdufus.github.io/actions/workflows/deploy.yml)",
+  "main": "screenshot-contact.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TechDufus/techdufus.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/TechDufus/techdufus.github.io/issues"
+  },
+  "homepage": "https://github.com/TechDufus/techdufus.github.io#readme",
+  "dependencies": {
+    "puppeteer": "^24.10.0"
+  }
+}
