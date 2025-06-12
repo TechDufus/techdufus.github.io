@@ -33,10 +33,6 @@
                 <a href="{{site.baseurl}}/setup/" class="nav-link" role="menuitem">
                   <span class="nav-text">{{p[0]}}</span>
                 </a>
-              {% elsif p[1] == "contact-page" %}
-                <a href="{{site.baseurl}}/contact/" class="nav-link" role="menuitem">
-                  <span class="nav-text">{{p[0]}}</span>
-                </a>
               {% else %}
                 <a href="#{{ p[1] }}" class="nav-link page-scroll" role="menuitem">
                   <span class="nav-text">{{p[0]}}</span>
@@ -65,16 +61,6 @@
                   </a>
                 {% else %}
                   <a href="{{site.baseurl}}/setup/" class="nav-link" role="menuitem">
-                    <span class="nav-text">{{p[0]}}</span>
-                  </a>
-                {% endif %}
-              {% elsif p[1] == "contact-page" %}
-                {% if page.url == "/contact/index.html" | prepend: {{site.baseurl}} %}
-                  <a href="#page" class="nav-link page-scroll" role="menuitem">
-                    <span class="nav-text">{{p[0]}}</span>
-                  </a>
-                {% else %}
-                  <a href="{{site.baseurl}}/contact/" class="nav-link" role="menuitem">
                     <span class="nav-text">{{p[0]}}</span>
                   </a>
                 {% endif %}
@@ -140,6 +126,14 @@
   <!-- Mobile Navigation Dropdown -->
   <div class="mobile-navigation" id="mobile-navigation" aria-hidden="true">
   <div class="mobile-nav-content">
+    <!-- Mobile Search -->
+    <div class="mobile-search-container">
+      <a href="/search/" class="mobile-search-link" role="menuitem">
+        <i class="fa fa-search mobile-search-icon" aria-hidden="true"></i>
+        <span class="mobile-search-text">Search Blog</span>
+      </a>
+    </div>
+    
     <nav class="mobile-nav" role="navigation" aria-label="Mobile navigation">
       <ul class="mobile-nav-list" role="menubar">
         {% if page.section-type == "index" %}
@@ -147,10 +141,6 @@
             <li class="mobile-nav-item" role="none">
               {% if p[1] == "setup-preview" %}
                 <a href="{{site.baseurl}}/setup/" class="mobile-nav-link" role="menuitem">
-                  <span class="mobile-nav-text">{{p[0]}}</span>
-                </a>
-              {% elsif p[1] == "contact-page" %}
-                <a href="{{site.baseurl}}/contact/" class="mobile-nav-link" role="menuitem">
                   <span class="mobile-nav-text">{{p[0]}}</span>
                 </a>
               {% else %}
@@ -180,16 +170,6 @@
                   </a>
                 {% else %}
                   <a href="{{site.baseurl}}/setup/" class="mobile-nav-link" role="menuitem">
-                    <span class="mobile-nav-text">{{p[0]}}</span>
-                  </a>
-                {% endif %}
-              {% elsif p[1] == "contact-page" %}
-                {% if page.url == "/contact/index.html" | prepend: {{site.baseurl}} %}
-                  <a href="#page" class="mobile-nav-link page-scroll" role="menuitem">
-                    <span class="mobile-nav-text">{{p[0]}}</span>
-                  </a>
-                {% else %}
-                  <a href="{{site.baseurl}}/contact/" class="mobile-nav-link" role="menuitem">
                     <span class="mobile-nav-text">{{p[0]}}</span>
                   </a>
                 {% endif %}

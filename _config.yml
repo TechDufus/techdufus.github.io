@@ -232,7 +232,7 @@ pages_list:
   Blog: 'latest-post'
   Timeline: 'timeline'
   Setup: 'setup-preview'
-  Contact: 'contact-page'
+  Contact: 'contact'
 
 # Exclusion list from the generated _site
 

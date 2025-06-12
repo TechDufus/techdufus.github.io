@@ -245,6 +245,7 @@ permalink: /search/
   font-weight: 600;
 }
 
+
 /* Light theme overrides */
 [data-theme="light"] .search-input {
   background: var(--ctp-base);
@@ -256,6 +257,7 @@ permalink: /search/
   background: var(--ctp-surface0);
   border-color: var(--ctp-surface1);
 }
+
 
 [data-theme="light"] .search-highlight {
   background: rgba(var(--ctp-yellow-rgb), 0.4);
@@ -583,5 +585,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }, 100);
   }
+  
+  // Auto-focus the search input for immediate typing
+  searchInput.focus();
 });
 </script>
