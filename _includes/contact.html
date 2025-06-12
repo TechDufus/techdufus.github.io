@@ -14,7 +14,7 @@
           <!-- Email Card -->
           <div class="contact-card">
             <div class="card-icon">
-              <i class="fa fa-envelope fa-3x"></i>
+              <i class="fa-solid fa-envelope fa-3x"></i>
             </div>
             <h3>Email Me</h3>
             <p>Best for detailed discussions or project inquiries</p>
@@ -28,7 +28,7 @@
           <!-- Calendar Card -->
           <div class="contact-card">
             <div class="card-icon">
-              <i class="fa fa-calendar fa-3x"></i>
+              <i class="fa-solid fa-calendar fa-3x"></i>
             </div>
             <h3>Schedule a Chat</h3>
             <p>Book a time slot for a quick call or discussion</p>
@@ -41,7 +41,7 @@
           <!-- PGP Card -->
           <div class="contact-card">
             <div class="card-icon">
-              <i class="fa fa-lock fa-3x"></i>
+              <i class="fa-solid fa-lock fa-3x"></i>
             </div>
             <h3>Secure Contact</h3>
             <p>For sensitive communications</p>
@@ -163,9 +163,23 @@
   border-color: var(--ctp-mauve);
 }
 
-.card-icon {
+.contact-card .card-icon {
   margin-bottom: 20px;
   color: var(--ctp-mauve);
+  background: none;
+  border: none;
+  box-shadow: none;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.contact-card .card-icon i {
+  display: block;
+  text-align: center;
+  width: 100%;
 }
 
 .contact-card h3 {
