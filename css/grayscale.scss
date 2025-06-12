@@ -3232,6 +3232,8 @@ body {
 
 /* Terminal Header Search */
 .terminal-search {
+  margin-left: auto;
+
   .search-link {
     background: rgba(var(--ctp-surface1-rgb), 0.6);
     color: var(--ctp-subtext1);
@@ -3275,7 +3277,6 @@ body {
 
 /* Terminal Header Toggle */
 .terminal-toggle {
-  margin-left: auto;
 
   .view-toggle-link {
     background: rgba(var(--ctp-surface1-rgb), 0.6);
