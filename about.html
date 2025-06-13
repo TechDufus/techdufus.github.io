@@ -24,7 +24,7 @@ title: About
 <div class="about-content">
   <div class="intro-card">
     <div class="card-icon">
-      <i class="fa fa-rocket"></i>
+      <i class="fa-solid fa-rocket"></i>
     </div>
     <div class="card-content">
       <h3>Welcome to My Digital Space</h3>
@@ -33,43 +33,43 @@ title: About
   </div>
 
   <div class="journey-section">
-    <h3><i class="fa fa-map"></i> My Journey</h3>
+    <h3><i class="fa-solid fa-map"></i> My Journey</h3>
     <div class="journey-content">
       <p>I started my career deep in the PowerShell ecosystem, building automation tools like <a href="https://github.com/techdufus/AdminToolkit" target="_blank">AdminToolkit</a> and <a href="https://github.com/techdufus/Helpdesk" target="_blank">Helpdesk</a> to help teams streamline their Windows operations. Over time, my curiosity led me to explore containerization, orchestration, and cloud platforms.</p>
       
       <div class="tech-grid">
         <div class="tech-card">
-          <i class="fa fa-dharmachakra tech-icon"></i>
+          <i class="fa-solid fa-dharmachakra tech-icon"></i>
           <h4>Kubernetes & Containers</h4>
           <p>Building scalable, resilient applications</p>
         </div>
         <div class="tech-card">
-          <i class="fa fa-code-branch tech-icon"></i>
+          <i class="fa-solid fa-code-branch tech-icon"></i>
           <h4>GitOps & CI/CD</h4>
           <p>Automated deployment pipelines with ArgoCD and Helm</p>
         </div>
         <div class="tech-card">
-          <i class="fa fa-cube tech-icon"></i>
+          <i class="fa-solid fa-cube tech-icon"></i>
           <h4>Infrastructure as Code</h4>
           <p>Crafting infrastructure with Terraform</p>
         </div>
         <div class="tech-card">
-          <i class="fa fa-cloud tech-icon"></i>
+          <i class="fa-solid fa-cloud tech-icon"></i>
           <h4>Cloud Platforms</h4>
           <p>Designing solutions across AWS, Azure, and secure government cloud environments</p>
         </div>
         <div class="tech-card">
-          <i class="fa fa-chart-line tech-icon"></i>
+          <i class="fa-solid fa-chart-line tech-icon"></i>
           <h4>Monitoring & Observability</h4>
           <p>Ensuring systems are observable and maintainable</p>
         </div>
         <div class="tech-card">
-          <i class="fa fa-shield-alt tech-icon"></i>
+          <i class="fa-solid fa-shield-halved tech-icon"></i>
           <h4>Defense & Security</h4>
           <p>Building secure, mission-critical infrastructure for national security</p>
         </div>
         <div class="tech-card">
-          <i class="fa fa-terminal tech-icon"></i>
+          <i class="fa-solid fa-terminal tech-icon"></i>
           <h4>Terminal Workflow</h4>
           <p>Living in tmux sessions and Neovim</p>
         </div>
@@ -80,7 +80,7 @@ title: About
   <div class="info-cards">
     <div class="info-card">
       <div class="card-header">
-        <i class="fa fa-seedling"></i>
+        <i class="fa-solid fa-seedling"></i>
         <h3>What You'll Find Here</h3>
       </div>
       <p>This blog serves as my digital garden where I document learnings, share tutorials, and occasionally dive into personal reflections. Whether you're here for PowerShell tips, Kubernetes deep-dives, or just curious about the tech industry, I hope you find something valuable.</p>
@@ -88,20 +88,20 @@ title: About
 
     <div class="info-card">
       <div class="card-header">
-        <i class="fa fa-terminal"></i>
+        <i class="fa-solid fa-terminal"></i>
         <h3>Living in the Terminal</h3>
       </div>
       <p>My daily workflow is dominated by terminal and CLI tools - I try to work exclusively from the command line whenever possible. You'll find me navigating through tmux sessions, editing code in Neovim, and automating everything I can.</p>
       <div class="dotfiles-link">
         <a href="https://github.com/techdufus/dotfiles" target="_blank" class="dotfiles-btn">
-          <i class="fa fa-github"></i> Check out my dotfiles
+          <i class="fa-brands fa-github"></i> Check out my dotfiles
         </a>
       </div>
     </div>
 
     <div class="info-card">
       <div class="card-header">
-        <i class="fa fa-heart"></i>
+        <i class="fa-solid fa-heart"></i>
         <h3>Beyond the Code</h3>
       </div>
       <p>When I'm not knee-deep in YAML files or debugging network policies, you might find me exploring new technologies, contributing to open source projects, or sharing knowledge with the community. As a follower of Christ, I believe in building with purpose and serving others through the gifts I've been given.</p>
@@ -110,15 +110,15 @@ title: About
 
   <div class="fun-facts">
     <div class="fact-item">
-      <i class="fa fa-code"></i>
+      <i class="fa-solid fa-code"></i>
       <span>My thoughts and opinions are mine</span>
     </div>
     <div class="fact-item">
-      <i class="fa fa-vim"></i>
+      <i class="fa-brands fa-vim"></i>
       <span>I use Neovim<sup>btw</sup> (and yes, I'll tell you about it)</span>
     </div>
     <div class="fact-item">
-      <i class="fa fa-server"></i>
+      <i class="fa-solid fa-server"></i>
       <span>DNS is always the culprit</span>
     </div>
   </div>
@@ -270,17 +270,18 @@ title: About
   transform: translateY(-2px);
 }
 
-.card-icon {
+.intro-card .card-icon {
   background: linear-gradient(45deg, var(--ctp-mauve), var(--ctp-lavender));
-  color: var(--ctp-crust);
+  color: var(--ctp-base);
   width: 50px;
   height: 50px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 22px;
   flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .card-content h3 {
