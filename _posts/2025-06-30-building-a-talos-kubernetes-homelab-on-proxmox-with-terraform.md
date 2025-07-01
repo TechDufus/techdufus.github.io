@@ -185,7 +185,7 @@ The memory ballooning thing: Proxmox tries to be clever about memory but it can 
 Talos does things differently than traditional Linux:
 
 - No SSH access feels wrong at first. Yeah, security, but debugging requires learning new approaches
-- [Certificate stuff](https://www.talos.dev/v1.10/kubernetes-guides/configuration/certificate-rotation/) just... happens automatically. Nice but takes trust
+- [Certificate stuff](https://www.talos.dev/v1.10/learn-more/talosctl/#endpoints-and-nodes) just... happens automatically. Nice but takes trust
 - Immutable filesystem is cool in theory but changes how you think about troubleshooting
 
 ## What I'd Do Differently
