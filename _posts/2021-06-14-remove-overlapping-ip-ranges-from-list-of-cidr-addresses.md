@@ -2,7 +2,7 @@
 layout: post
 section-type: post
 title: Remove Overlapping IP Address Ranges from a List of CIDR IP Addresses
-category: 'powershell'
+category: tech
 tags: [ 'azure', 'tutorial' ]
 ---
 

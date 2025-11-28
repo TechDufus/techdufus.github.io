@@ -16,6 +16,9 @@ vendor/
 # Development files
 Gemfile.lock
 
+# Claude Code snapshots (personal work state)
+.claude/snapshots/
+
 # Node.js dependencies
 node_modules/
 npm-debug.log*

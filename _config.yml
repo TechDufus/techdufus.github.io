@@ -14,9 +14,8 @@ url: "https://TechDufus.com"
 
 baseurl: "/"
 
-# Google Analytics 4 tracking id (GA4)
-# TODO: Replace G-XXXXXXXXXX with your actual GA4 measurement ID
-google-tracking-id: "G-XXXXXXXXXX"
+# Google Analytics disabled - uncomment and set your GA4 measurement ID to enable
+# google-tracking-id: "G-XXXXXXXXXX"
 
 # Forces https everywhere in your website, except when you serve it locally
 # If you are not hosted on Github Pages, and your host doesn't support https
