@@ -327,27 +327,38 @@ class ModernNavigation {
   // 🎯 Active Link Management
   updateActiveNavLinks() {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const sections = document.querySelectorAll('section[id], div[id]');
+    // Only select main navigation sections, not all divs with IDs
+    const sections = document.querySelectorAll('section#about, section#latest-post, section#timeline, section#contact');
     const navLinks = document.querySelectorAll('.nav-link, .mobile-nav-link');
-    
+
     let activeSection = '';
-    
-    // Find the current section
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop - this.header.offsetHeight - 100;
-      const sectionHeight = section.offsetHeight;
-      
-      if (scrollTop >= sectionTop && scrollTop < sectionTop + sectionHeight) {
-        activeSection = section.getAttribute('id');
-      }
-    });
-    
+
+    // Check if scrolled to bottom of page - activate last section (contact)
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50;
+
+    if (isAtBottom) {
+      activeSection = 'contact';
+    } else {
+      // Find the current section
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - this.header.offsetHeight - 100;
+        const sectionHeight = section.offsetHeight;
+
+        if (scrollTop >= sectionTop && scrollTop < sectionTop + sectionHeight) {
+          activeSection = section.getAttribute('id');
+        }
+      });
+    }
+
     // Update active states
     navLinks.forEach(link => {
       const href = link.getAttribute('href');
       link.classList.remove('is-active');
-      
-      if (href && href.includes(`#${activeSection}`)) {
+
+      // Use exact match to prevent false positives
+      if (activeSection && href && href.endsWith(`#${activeSection}`)) {
         link.classList.add('is-active');
       }
     });
