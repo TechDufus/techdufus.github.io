@@ -26,13 +26,16 @@
           </div>
 
           <!-- Setup Navigation -->
+          {% assign active_tab = page.active_tab | default: 'hardware' %}
           <div class="setup-nav-card">
             <div class="setup-nav-tabs">
               {% for file in site.setup %}
                 {% assign filename = file.path | split: '/' | last | split: '.' | first %}
+                {% assign filename_lower = filename | downcase %}
                 {% unless filename contains '_' %}
-                  <button class="setup-tab {% if forloop.first %}active{% endif %}" 
-                          data-target="setup-{{ filename | downcase }}">
+                  <button class="setup-tab {% if filename_lower == active_tab %}active{% endif %}"
+                          data-target="setup-{{ filename_lower }}"
+                          data-url="{{ site.baseurl }}/setup/{{ filename_lower }}/">
                     <i class="fa fa-{% if filename == 'Hardware' %}microchip{% elsif filename == 'Software' %}code{% elsif filename == 'Homelab' %}server{% endif %}"></i>
                     {{ filename }}
                   </button>
@@ -45,9 +48,10 @@
           <div class="setup-content">
             {% for file in site.setup %}
               {% assign filename = file.path | split: '/' | last | split: '.' | first %}
+              {% assign filename_lower = filename | downcase %}
               {% unless filename contains '_' %}
-                <div id="setup-{{ filename | downcase }}" 
-                     class="setup-section {% if forloop.first %}active{% endif %}">
+                <div id="setup-{{ filename_lower }}"
+                     class="setup-section {% if filename_lower == active_tab %}active{% endif %}">
                   <div class="setup-section-card">
                     <div class="setup-section-content">
                       {{ file.content | markdownify }}
@@ -72,21 +76,38 @@
       // Tab switching functionality
       $('.setup-tab').click(function() {
         const target = $(this).data('target');
-        
+        const url = $(this).data('url');
+
         // Remove active class from all tabs and sections
         $('.setup-tab').removeClass('active');
         $('.setup-section').removeClass('active');
-        
+
         // Add active class to clicked tab and corresponding section
         $(this).addClass('active');
         $('#' + target).addClass('active');
-        
+
+        // Update URL without page reload
+        if (url && history.pushState) {
+          history.pushState({ tab: target }, '', url);
+        }
+
         // Smooth scroll to content
         $('html, body').animate({
           scrollTop: $('.setup-content').offset().top - 80
         }, 400);
       });
-      
+
+      // Handle browser back/forward navigation
+      $(window).on('popstate', function(event) {
+        if (event.originalEvent.state && event.originalEvent.state.tab) {
+          const target = event.originalEvent.state.tab;
+          $('.setup-tab').removeClass('active');
+          $('.setup-section').removeClass('active');
+          $('.setup-tab[data-target="' + target + '"]').addClass('active');
+          $('#' + target).addClass('active');
+        }
+      });
+
       // Add smooth hover effects to setup cards
       $('.setup-section-card').hover(
         function() {
