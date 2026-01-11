@@ -1034,6 +1034,19 @@
     padding: 0 10px;
   }
 
+  .character-card .stat-row {
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  .character-card .stat-row .stat-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+
   .system-info {
     order: 3;
     max-width: 100%;
@@ -1079,6 +1092,11 @@
   /* Stack tmux panes vertically on small screens */
   .tmux-container {
     flex-direction: column;
+  }
+
+  .tmux-pane-left {
+    flex: 1;
+    min-height: 180px;
   }
 
   .tmux-pane-right {
@@ -1298,9 +1316,22 @@
     margin-bottom: 4px !important;
   }
   
+  .character-card .stat-row {
+    flex-wrap: nowrap !important;
+    overflow: hidden !important;
+  }
+
   .character-card .stat-row .stat-label {
-    min-width: 50px !important;
-    max-width: 60px !important;
+    min-width: 65px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .character-card .stat-row .stat-value {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    flex: 1 !important;
+    min-width: 0 !important;
   }
 }
 
