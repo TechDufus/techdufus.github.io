@@ -659,11 +659,11 @@ function addTohistory() {
 <!-- Gesture Navigation / Swipe Instruction Start -->
 {% if site.enable-gesture-navigation %}
 
+  <script type="text/javascript" src="{{site.baseurl}}/js/hammer.min.js"></script>
+
   {% if page.section-type == "post" %}
 
     <!-- Post Gesture Navigation Start -->
-
-    <script type="text/javascript" src="{{site.baseurl}}/js/hammer.min.js"></script>
 
     <script>
       var post = document.getElementById('post');
@@ -687,15 +687,13 @@ function addTohistory() {
       });
     </script>
 
-    <!-- Post Gesture Navigation Start -->
+    <!-- Post Gesture Navigation End -->
 
   {% endif %}
 
   {% if page.section-type == "blog" %}
 
     <!-- Blog Gesture Navigation Start -->
-
-    <script type="text/javascript" src="{{site.baseurl}}/js/hammer.min.js"></script>
 
     <script>
       var page = document.getElementById('page');
@@ -718,7 +716,7 @@ function addTohistory() {
       });
     </script>
 
-    <!-- Blog Gesture Navigation Start -->
+    <!-- Blog Gesture Navigation End -->
 
   {% endif %}
 
