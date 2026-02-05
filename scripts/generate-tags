@@ -31,7 +31,7 @@ extract_tags() {
     end
     " 2>/dev/null || {
         # Fallback to manual parsing if ruby fails
-        grep "^tags:" "$file" | sed 's/^tags:[ ]*\[[ ]*//' | sed 's/[ ]*\][ ]*$//' | sed "s/['\"]//g" | sed 's/,/\n/g' | sed 's/^[ \t]*//;s/[ \t]*$//' | grep -v '^$'
+        grep "^tags:" "$file" | sed 's/^tags:[ ]*\[[ ]*//' | sed 's/[ ]*\][ ]*$//' | sed "s/['\"]//g" | sed 's/,/\n/g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -v '^$'
     }
 }
 
@@ -61,8 +61,8 @@ for post_file in "$POSTS_DIR"/*.md; do
         # Skip empty lines
         [ -z "$tag" ] && continue
 
-        # Trim whitespace
-        tag=$(echo "$tag" | sed 's/^[ \t]*//;s/[ \t]*$//')
+        # Trim whitespace (use [[:space:]] for macOS compatibility)
+        tag=$(echo "$tag" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
         tag_lower=$(to_lowercase "$tag")
 
         # Skip if we've already processed this tag
