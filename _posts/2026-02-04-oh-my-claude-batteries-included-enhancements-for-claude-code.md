@@ -2,7 +2,7 @@
 layout: post
 section-type: post
 title: 'oh-my-claude: Batteries-Included Enhancements for Claude Code'
-category: devops
+category: tech
 tags: ['ai', 'claude-code']
 ---
 
