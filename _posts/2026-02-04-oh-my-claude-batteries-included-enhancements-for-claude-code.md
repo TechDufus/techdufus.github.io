@@ -6,7 +6,22 @@ category: tech
 tags: ['ai', 'claude-code']
 ---
 
-<img src="/img/posts/oh-my-claude-og.png" alt="oh-my-claude" style="float: right; max-width: 400px; margin: 0 0 1rem 1.5rem;">
+<style>
+.post-img {
+  float: right;
+  max-width: 400px;
+  margin: 0 0 1rem 1.5rem;
+}
+@media (max-width: 768px) {
+  .post-img {
+    float: none;
+    display: block;
+    max-width: 100%;
+    margin: 0 auto 1.5rem auto;
+  }
+}
+</style>
+<img src="/img/posts/oh-my-claude-og.png" alt="oh-my-claude" class="post-img">
 
 Hey folks. I built a thing.
 
