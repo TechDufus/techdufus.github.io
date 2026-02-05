@@ -57,34 +57,34 @@ for post_file in "$POSTS_DIR"/*.md; do
     [ -z "$tags_line" ] && continue
     
     # Process each tag (tags are separated by newlines now)
-    while IFS= read -r tag; do
+    while IFS= read -r tag || [ -n "$tag" ]; do
         # Skip empty lines
         [ -z "$tag" ] && continue
-        
+
         # Trim whitespace
         tag=$(echo "$tag" | sed 's/^[ \t]*//;s/[ \t]*$//')
         tag_lower=$(to_lowercase "$tag")
-        
+
         # Skip if we've already processed this tag
         if grep -q "^$tag_lower$" "$PROCESSED_TAGS_FILE" 2>/dev/null; then
             continue
         fi
-        
+
         # Mark as processed
         echo "$tag_lower" >> "$PROCESSED_TAGS_FILE"
-        
+
         # Tag page file path (use lowercase for filename)
         tag_file="$TAGS_DIR/$tag_lower.html"
-        
+
         # Create tag page if it doesn't exist
         if [ ! -f "$tag_file" ]; then
-            echo "[+] Generating #$tag page"
-            
+            echo "[+] Generating #$tag_lower page"
+
             cat > "$tag_file" << EOF
 ---
 layout: tag
 section-type: tag
-title: $tag
+title: $tag_lower
 ---
 ## Tag
 EOF
