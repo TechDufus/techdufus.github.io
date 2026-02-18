@@ -29,11 +29,11 @@
 }
 
 .rrssb-buttons li.rrssb-email a {
-  background-color: #0a88ff
+  background-color: #2563eb
 }
 
 .rrssb-buttons li.rrssb-email a:hover {
-  background-color: #006ed6
+  background-color: #1d4ed8
 }
 
 .rrssb-buttons li.rrssb-facebook a {
@@ -53,35 +53,35 @@
 }
 
 .rrssb-buttons li.rrssb-linkedin a {
-  background-color: #007bb6
+  background-color: #0a66c2
 }
 
 .rrssb-buttons li.rrssb-linkedin a:hover {
-  background-color: #005983
+  background-color: #084c94
 }
 
 .rrssb-buttons li.rrssb-twitter a {
-  background-color: #26c4f1
+  background-color: #111111
 }
 
 .rrssb-buttons li.rrssb-twitter a:hover {
-  background-color: #0eaad6
+  background-color: #000000
 }
 
 .rrssb-buttons li.rrssb-bluesky a {
-  background-color: #1185fe
+  background-color: #0a7cff
 }
 
 .rrssb-buttons li.rrssb-bluesky a:hover {
-  background-color: #0f6fd3
+  background-color: #0968d9
 }
 
 .rrssb-buttons li.rrssb-mastodon a {
-  background-color: #6364ff
+  background-color: #563acc
 }
 
 .rrssb-buttons li.rrssb-mastodon a:hover {
-  background-color: #4f51d9
+  background-color: #452ea8
 }
 
 .rrssb-buttons li.rrssb-googleplus a {
@@ -101,11 +101,11 @@
 }
 
 .rrssb-buttons li.rrssb-reddit a {
-  background-color: #8bbbe3
+  background-color: #ff4500
 }
 
 .rrssb-buttons li.rrssb-reddit a:hover {
-  background-color: #62a3d9
+  background-color: #d83a00
 }
 
 .rrssb-buttons li.rrssb-pinterest a {
@@ -173,11 +173,11 @@
   -webkit-font-smoothing: antialiased;
   font-weight: 700;
   height: 100%;
-  padding: 11px 7px 12px 27px;
+  padding: 11px 10px 12px 30px;
   position: relative;
   text-align: center;
   text-decoration: none;
-  text-transform: uppercase;
+  text-transform: none;
   -webkit-transition: background-color .2s ease-in-out;
   transition: background-color .2s ease-in-out;
   width: 100%
@@ -309,7 +309,7 @@
 }
 
 .rrssb-buttons.tiny-format li.rrssb-email a .rrssb-icon svg path {
-  fill: #0a88ff
+  fill: #2563eb
 }
 
 .rrssb-buttons.tiny-format li.rrssb-email a .rrssb-icon:hover .rrssb-icon svg path {
@@ -333,7 +333,7 @@
 }
 
 .rrssb-buttons.tiny-format li.rrssb-linkedin a .rrssb-icon svg path {
-  fill: #007bb6
+  fill: #0a66c2
 }
 
 .rrssb-buttons.tiny-format li.rrssb-linkedin a .rrssb-icon:hover .rrssb-icon svg path {
@@ -341,7 +341,7 @@
 }
 
 .rrssb-buttons.tiny-format li.rrssb-twitter a .rrssb-icon svg path {
-  fill: #26c4f1
+  fill: #111111
 }
 
 .rrssb-buttons.tiny-format li.rrssb-twitter a .rrssb-icon:hover .rrssb-icon svg path {
@@ -365,7 +365,7 @@
 }
 
 .rrssb-buttons.tiny-format li.rrssb-reddit a .rrssb-icon svg path {
-  fill: #8bbbe3
+  fill: #ff4500
 }
 
 .rrssb-buttons.tiny-format li.rrssb-reddit a .rrssb-icon:hover .rrssb-icon svg path {
