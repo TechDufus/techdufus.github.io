@@ -95,14 +95,17 @@ post-preview-words: 60
 paginate: 10
 
 email-share: true
-fb-share: true
-twitter-share: true
+x-share: true
 linkedin-share: true
+bluesky-share: true
 reddit-share: true
-tumblr-share: true
-pinterest-share: true
-pocket-share: true
-vkontakte-share: true
+mastodon-share: true
+fb-share: false
+twitter-share: false
+tumblr-share: false
+pinterest-share: false
+pocket-share: false
+vkontakte-share: false
 
 
 syntax-highlight: true

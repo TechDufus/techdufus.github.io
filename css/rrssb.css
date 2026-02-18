@@ -68,6 +68,22 @@
   background-color: #0eaad6
 }
 
+.rrssb-buttons li.rrssb-bluesky a {
+  background-color: #1185fe
+}
+
+.rrssb-buttons li.rrssb-bluesky a:hover {
+  background-color: #0f6fd3
+}
+
+.rrssb-buttons li.rrssb-mastodon a {
+  background-color: #6364ff
+}
+
+.rrssb-buttons li.rrssb-mastodon a:hover {
+  background-color: #4f51d9
+}
+
 .rrssb-buttons li.rrssb-googleplus a {
   background-color: #e93f2e
 }
@@ -183,6 +199,12 @@
 
 .rrssb-buttons li a .rrssb-icon svg path {
   fill: #fff
+}
+
+.rrssb-buttons li a .rrssb-icon i {
+  color: #fff;
+  font-size: 17px;
+  line-height: 17px;
 }
 
 .rrssb-buttons li a .rrssb-text {
