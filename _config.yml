@@ -169,7 +169,7 @@ pgp: false
 # This works best when your author blurb image has a transparent background, or matches your site background color.
 
 # if the author_blurb is not set, then this feature is skipped
-author_blurb: "The Dufus is an awesome person. He is a daily learner and nerd. A husband, and a father of 4, he likes long walks on the beach, and eating ice cream in his spare time."
+author_blurb: "Senior engineer and open-source tinkerer building at the intersection of infrastructure and AI. Creator of oh-my-claude. When he's not in a terminal, he's a husband and father of 4."
 author_blurb_image: "https://www.gravatar.com/avatar/0bbf5d7c13901bd5a2f4e2a6d53e0476?s=500"
 
 ##################
