@@ -30,8 +30,8 @@ force-https: true
 lang: "en"
 author: "TechDufus"
 title: "{ TechDufus }"
-description: "DevOps Engineer sharing insights on Kubernetes, Docker, PowerShell, and modern infrastructure. Building scalable solutions and sharing the journey."
-keywords: "techdufus, powershell, windows, tech, linux, neovim, hardware, nerd."
+description: "Platform engineer and agentic engineering practitioner sharing insights on multi-agent workflows, Kubernetes, infrastructure automation, and AI-assisted delivery. Building and shipping from the terminal."
+keywords: "techdufus, agentic, ai, claude-code, platform-engineering, multi-agent, mcp, kubernetes, devops, powershell, linux, infrastructure, automation, neovim, homelab"
 favicon: "/img/favicon32x32.png"
 
 ################
@@ -171,7 +171,7 @@ pgp: false
 # This works best when your author blurb image has a transparent background, or matches your site background color.
 
 # if the author_blurb is not set, then this feature is skipped
-author_blurb: "Senior engineer and open-source tinkerer building at the intersection of infrastructure and AI. Creator of oh-my-claude. When he's not in a terminal, he's a husband and father of 4."
+author_blurb: "Platform engineer, open-source tinkerer, and agentic workflow builder. Creator of oh-my-claude. When he's not orchestrating agents from a terminal, he's a husband and father of 4."
 author_blurb_image: "https://www.gravatar.com/avatar/0bbf5d7c13901bd5a2f4e2a6d53e0476?s=500"
 
 ##################
