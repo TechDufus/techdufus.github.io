@@ -16,7 +16,7 @@ This is my single source of truth for what I run every day. I keep it practical 
 
 #### Sherlock (primary desktop)
 
-Sherlock is my main desk machine. Custom build, dual-boot Windows 11 + Linux.
+Sherlock is my main desk machine. Custom build, running Ubuntu Linux.
 
 ![](/img/setup/setup-sherlock-desktop.jpg)
 
@@ -32,18 +32,15 @@ Sherlock is my main desk machine. Custom build, dual-boot Windows 11 + Linux.
 | Storage | [Samsung 980 PRO NVMe (1TB + 500GB)](https://a.co/d/6b3r6GJ) |
 | PSU | [Cooler Master V850 SFX Gold](https://a.co/d/7YxFnKy) |
 
-#### MacBooks
+#### Laptops
 
 - [M3 MacBook Pro (14-inch, Nov 2023)](https://support.apple.com/en-us/117735)
 - [Intel MacBook Pro (Retina, 15-inch, Mid 2015)](https://support.apple.com/en-us/111955)
+- [HP mt46 Mobile Thin Client](https://www.productindetail.com/pn/hp-mobile-thin-client-mt46)
 
 ### Displays
 
-I currently run mostly on a single ultrawide for focus.
-
-- [Samsung 49in CRG9](https://www.samsung.com/us/computing/monitors/gaming/49-crg9-dual-qhd-curved-qled-gaming-monitor-lc49rg90ssnxza/) (primary)
-- Viotek 27in curved
-- [HP P224 21.5in](https://support.hp.com/us-en/product/product-specs/hp-p224-21.5-inch-monitor/26575345)
+I currently run a single 4K 60Hz monitor.
 
 ### Peripherals
 
@@ -88,6 +85,7 @@ On Linux this runs through AwesomeWM automation; on macOS through Hammerspoon. S
 
 ### Agent workflow tooling
 
+- **Codex**
 - **Claude Code** with custom hooks and status integration in tmux.
 - **[oh-my-claude](https://github.com/TechDufus/oh-my-claude)** for sane defaults and repeatable workflows.
 - **[openkanban](https://github.com/TechDufus/openkanban)** for tracking parallel agent sessions.
@@ -96,8 +94,6 @@ On Linux this runs through AwesomeWM automation; on macOS through Hammerspoon. S
 <h2 id="setup-homelab">Homelab</h2>
 
 My homelab is built for repeatability, not hand-tuned snowflakes.
-
-![](/img/setup/setup-homelab-cabinet-open.jpg)
 
 ### Hardware at a glance
 
@@ -120,21 +116,3 @@ My homelab is built for repeatability, not hand-tuned snowflakes.
 I run 25+ services including Immich, dashboards, self-hosted runners, and an observability stack.
 
 Everything is declarative through [`home.io`](https://github.com/techdufus/home.io) using Terraform + Ansible + ArgoCD. If I lose a node, I rebuild from git.
-
-<h2 id="setup-wiring">Wiring Diagram</h2>
-
-Quick map of the desk wiring path:
-
-```text
-[Moonlander Keyboard] --USB--> [USB Switch]
-[C925 Webcam]        --USB--> [USB Switch]
-[MX Master 3]        --USB--> [USB Switch]
-[Rode NT-USB+]       --USB--> [USB Switch]
-
-[USB Switch] ==USB==> [HP Dock]
-[USB Switch] ==USB==> [Sherlock PC]
-
-[CRG9] --HDMI--> [Sherlock PC]
-[CRG9] --HDMI--> [HP Dock]
-[HP Dock] --TB--> [MacBook Pro]
-```
