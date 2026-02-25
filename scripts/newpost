@@ -1,52 +1,43 @@
 #!/bin/bash
 
-# Create a new blog post with proper frontmatter
+# Create a new Astro blog post under src/content/blog.
 # Usage: ./scripts/newpost "Your Post Title"
 
-set -e
+set -euo pipefail
 
-POSTS_DIR="_posts"
-POST_TITLE="$1"
+POSTS_DIR="src/content/blog"
+POST_TITLE="${1:-}"
 
-# Check if title was provided
 if [ -z "$POST_TITLE" ]; then
-    echo "Error: Please provide a post title"
-    echo "Usage: ./scripts/newpost \"Your Post Title\""
-    exit 1
+  echo "Error: Please provide a post title"
+  echo "Usage: ./scripts/newpost \"Your Post Title\""
+  exit 1
 fi
 
-# Create posts directory if it doesn't exist
-mkdir -p "$POSTS_DIR"
-
-# Get current date in YYYY-MM-DD format
 DATE=$(date +%Y-%m-%d)
 
-# Convert title to filename-friendly format (lowercase, spaces to hyphens)
-FILENAME=$(echo "$POST_TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-\|-$//g')
+FILENAME=$(echo "$POST_TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^[-]*//; s/[-]*$//')
+mkdir -p "$POSTS_DIR"
+FILEPATH="$POSTS_DIR/$FILENAME.md"
 
-# Full file path
-FILEPATH="$POSTS_DIR/$DATE-$FILENAME.md"
-
-# Check if file already exists
 if [ -f "$FILEPATH" ]; then
-    echo "Error: Post file already exists: $FILEPATH"
-    exit 1
+  echo "Error: Post file already exists: $FILEPATH"
+  exit 1
 fi
 
-# Create the post file with frontmatter template
-cat > "$FILEPATH" << EOF
+cat > "$FILEPATH" <<EOF2
 ---
-layout: post
-section-type: post
 title: "$POST_TITLE"
+description: "Short summary of your post."
+pubDate: '$DATE'
+tags:
+  - blog
 category: tech
-tags: [ 'blog' ]
 ---
 
-Write your post content here...
+# $POST_TITLE
 
-EOF
+Write your post content here.
+EOF2
 
 echo "[+] Created new post: $FILEPATH"
-echo "[+] Title: $POST_TITLE"
-echo "[+] Edit the file to add your content, update category, and tags!"

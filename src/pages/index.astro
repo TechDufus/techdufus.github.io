@@ -1,0 +1,175 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import {
+  aboutNow,
+  homeCopy,
+  homeOperatingStyle,
+  homeProofPoints,
+  homeRepoLinks,
+  profileSpotlight,
+  siteMetadata
+} from '../data/site';
+import { formatDate } from '../lib/formatDate';
+import { getSortedPosts } from '../lib/content';
+
+const posts = await getSortedPosts();
+const recentPosts = posts.slice(0, 4);
+---
+
+<BaseLayout title="Home" description={profileSpotlight.intro}>
+  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
+    <div class="grid gap-6 lg:grid-cols-[1.25fr_0.75fr] lg:items-start">
+      <div>
+        <p class="eyebrow">{homeCopy.eyebrow}</p>
+        <h1 class="hero-title">{profileSpotlight.introTitle}</h1>
+        <p class="mt-2 font-mono text-sm text-signal">{profileSpotlight.nickname}</p>
+        <p class="mt-4 max-w-3xl text-zinc-200 sm:text-lg">{profileSpotlight.intro}</p>
+        <p class="mt-3 max-w-2xl text-zinc-300">{homeCopy.description}</p>
+        <p class="mt-4 status-pill">
+          <span class="status-dot" aria-hidden="true"></span>
+          {profileSpotlight.status}
+        </p>
+
+        <div class="mt-5 rounded-xl border border-line/90 bg-[#0a0f17]/82 px-4 py-3">
+          <h2 class="terminal-note m-0">Current focus</h2>
+          <p class="m-0 mt-2 text-sm leading-relaxed text-zinc-200">{aboutNow.primaryFocus}</p>
+          <ul class="m-0 mt-3 grid gap-1.5 list-none p-0 text-sm text-zinc-300">
+            {aboutNow.activeTracks.map((track) => (
+              <li>
+                <span class="font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{track.title}:</span>{' '}
+                {track.detail}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-2">
+          <a class="nav-link nav-link-active" href="/about">About Me</a>
+          <a class="nav-link" href="/blog">Read Blog</a>
+          <a class="nav-link" href="/docs/setup">Setup Docs</a>
+          <a class="nav-link" href="/contact">Contact</a>
+        </div>
+      </div>
+
+      <div class="grid gap-3">
+        <figure class="profile-frame gentle-float mx-auto w-full max-w-[18rem] sm:max-w-sm lg:mx-0">
+          <img
+            src={profileSpotlight.photo}
+            alt={profileSpotlight.photoAlt}
+            class="profile-photo"
+            width={profileSpotlight.photoWidth}
+            height={profileSpotlight.photoHeight}
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          />
+          <figcaption class="border-t border-white/10 px-4 py-3 font-mono text-xs uppercase tracking-[0.12em] text-zinc-300">
+            {siteMetadata.role} | {siteMetadata.location}
+          </figcaption>
+        </figure>
+
+        <aside class="panel compact-panel p-4">
+          <h2 class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">Elsewhere</h2>
+          <p class="m-0 mt-2 text-sm text-zinc-300">
+            I share what I am building (and breaking) in public as{' '}
+            <span class="font-mono text-signal">{profileSpotlight.handle}</span>.
+          </p>
+        </aside>
+      </div>
+    </div>
+
+    <div class="mt-6 grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
+      <section class="panel compact-panel p-4 sm:p-5">
+        <h2 class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">Start here</h2>
+        <ul class="m-0 mt-3 grid list-none gap-2 p-0">
+          <li>
+            <a class="interactive-card card-link-block px-3 py-2.5" href="/blog/ai-already-took-my-job">
+              <p class="m-0 text-sm font-medium text-zinc-100">AI Already Took My Job</p>
+              <p class="m-0 mt-1 text-xs text-zinc-300">Where I break down how AI changed my day-to-day workflow.</p>
+            </a>
+          </li>
+          <li>
+            <a class="interactive-card card-link-block px-3 py-2.5" href="/docs/setup">
+              <p class="m-0 text-sm font-medium text-zinc-100">Setup I Actually Use</p>
+              <p class="m-0 mt-1 text-xs text-zinc-300">Terminal, tmux, tooling, and notes I really keep updated.</p>
+            </a>
+          </li>
+          <li>
+            <a class="interactive-card card-link-block px-3 py-2.5" href="/about">
+              <p class="m-0 text-sm font-medium text-zinc-100">About / How I Work</p>
+              <p class="m-0 mt-1 text-xs text-zinc-300">Who I am, how I work, and the repos I always come back to.</p>
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="panel compact-panel p-4 sm:p-5">
+        <h2 class="m-0 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">How I Actually Work</h2>
+        <ul class="m-0 mt-3 grid gap-2 list-none p-0 text-sm text-zinc-300">
+          {homeOperatingStyle.map((item) => (
+            <li class="rounded-lg border border-line/80 bg-[#0a111b]/70 px-3 py-2.5">{item}</li>
+          ))}
+        </ul>
+
+        <div class="mt-4 border-t border-white/10 pt-4">
+          <h2 class="m-0 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">Repos I touch most</h2>
+          <div class="mt-2 flex flex-wrap gap-2">
+            {homeRepoLinks.map((repo) => (
+              <a class="link-chip" href={repo.url} target="_blank" rel="noopener noreferrer">
+                {repo.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section class="mt-8 reveal reveal-delay-2">
+    <div class="section-head">
+      <h2>What I&apos;m Shipping Lately</h2>
+      <p>real projects, real constraints</p>
+    </div>
+    <div class="grid gap-3 md:grid-cols-3">
+      {homeProofPoints.map((point) => (
+        <article class="interactive-card metric-card p-4">
+          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{point.label}</p>
+          <p class="m-0 mt-2 text-base font-semibold text-zinc-100">{point.value}</p>
+          <p class="m-0 mt-2 text-sm text-zinc-300">{point.note}</p>
+          {point.sourceHref && (
+            <a class="text-link mt-2 inline-flex text-xs" href={point.sourceHref} target="_blank" rel="noopener noreferrer">
+              {point.sourceLabel ?? 'Source'}
+            </a>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="mt-8 reveal reveal-delay-3">
+    <div class="section-head">
+      <h2>Latest Posts</h2>
+      <p>{posts.length} total entries</p>
+    </div>
+
+    <div class="grid gap-3">
+      {recentPosts.map((post) => (
+        <article class="interactive-card compact-panel p-4 sm:p-5">
+          <a class="card-link-overlay" href={`/blog/${post.slug}`} aria-label={`Read post: ${post.data.title}`}></a>
+          <div class="card-content">
+            <p class="mb-2 font-mono text-xs uppercase tracking-[0.12em] text-muted">
+              {formatDate(post.data.pubDate)}
+            </p>
+            <h3 class="m-0 text-lg font-semibold text-zinc-100">{post.data.title}</h3>
+            <p class="mt-2 text-sm text-zinc-300">{post.data.description}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <a class="nav-link nav-link-active" href="/blog">All Posts</a>
+      <a class="nav-link" href="/docs/setup">Setup Docs</a>
+      <a class="nav-link" href="/docs/career">Career Notes</a>
+    </div>
+  </section>
+</BaseLayout>

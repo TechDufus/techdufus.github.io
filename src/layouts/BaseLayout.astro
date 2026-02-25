@@ -1,0 +1,58 @@
+---
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { siteMetadata } from '../data/site';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const {
+  title = siteMetadata.siteName,
+  description = siteMetadata.description,
+  noindex = false
+} = Astro.props;
+
+const pageTitle = title === siteMetadata.siteName ? title : `${title} | ${siteMetadata.siteName}`;
+const canonicalPath =
+  Astro.url.pathname === '/404/' || Astro.url.pathname === '/404' ? '/404.html' : Astro.url.pathname;
+const canonical = new URL(canonicalPath, siteMetadata.url).toString();
+const ogImage = new URL('/img/labtocat.png', siteMetadata.url).toString();
+---
+
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={siteMetadata.author} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" href="/img/favicon32x32.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteMetadata.siteName} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
+  </head>
+  <body class="bg-canvas text-ink antialiased">
+    <div class="site-bg" aria-hidden="true"></div>
+    <div class="site-shell">
+      <Nav />
+      <main class="site-main">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+  </body>
+</html>

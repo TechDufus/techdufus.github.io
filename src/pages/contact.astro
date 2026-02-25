@@ -1,0 +1,170 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { socialLinks } from '../data/site';
+
+type ChannelTone = 'core' | 'social' | 'community' | 'support';
+type ChannelPriority = 'primary' | 'secondary';
+
+type ChannelMeta = {
+  lane: string;
+  bestFor: string;
+  command: string;
+  tone: ChannelTone;
+  priority: ChannelPriority;
+  spotlight?: boolean;
+};
+
+const toDisplayValue = (href: string) => {
+  if (href.startsWith('mailto:')) return href.replace('mailto:', '');
+  try {
+    const url = new URL(href);
+    return url.hostname.replace(/^www\./, '');
+  } catch {
+    return href;
+  }
+};
+
+const channelMetaByLabel: Record<string, ChannelMeta> = {
+  Email: {
+    lane: 'Project + client',
+    bestFor: 'Long-form project details and client conversations.',
+    command: 'email',
+    tone: 'core',
+    priority: 'secondary'
+  },
+  GitHub: {
+    lane: 'Open source',
+    bestFor: 'Issues, PRs, and anything code-first.',
+    command: 'github',
+    tone: 'core',
+    priority: 'primary',
+    spotlight: true
+  },
+  LinkedIn: {
+    lane: 'Professional',
+    bestFor: 'Network intros and business conversations.',
+    command: 'linkedin',
+    tone: 'core',
+    priority: 'primary',
+    spotlight: true
+  },
+  X: {
+    lane: 'Quick updates',
+    bestFor: 'Short questions and day-to-day tech chatter.',
+    command: 'x',
+    tone: 'social',
+    priority: 'primary',
+    spotlight: true
+  },
+  YouTube: {
+    lane: 'Video',
+    bestFor: 'Walkthroughs, demos, and longer explainer content.',
+    command: 'youtube',
+    tone: 'social',
+    priority: 'secondary'
+  },
+  Discord: {
+    lane: 'Community',
+    bestFor: 'Ongoing conversations about tooling and experiments.',
+    command: 'discord',
+    tone: 'community',
+    priority: 'secondary'
+  }
+};
+
+const defaultChannelMeta: ChannelMeta = {
+  lane: 'General',
+  bestFor: 'General conversations and follow-ups.',
+  command: 'ping',
+  tone: 'core',
+  priority: 'secondary'
+};
+
+const channels = socialLinks
+  .map((link) => ({
+    ...link,
+    ...(channelMetaByLabel[link.label] ?? defaultChannelMeta),
+    displayValue: toDisplayValue(link.href),
+    external: link.href.startsWith('http')
+  }))
+  .sort((a, b) => {
+  if ((a.spotlight ?? false) !== (b.spotlight ?? false)) {
+    return a.spotlight ? -1 : 1;
+  }
+  if (a.priority !== b.priority) {
+    return a.priority === 'primary' ? -1 : 1;
+  }
+  return a.label.localeCompare(b.label);
+  });
+
+const channelByLabel = new Map(channels.map((channel) => [channel.label, channel]));
+
+const quickRoutes = [
+  { label: 'Open source', channel: 'GitHub' },
+  { label: 'Professional', channel: 'LinkedIn' },
+  { label: 'Quick updates', channel: 'X' }
+] as const;
+---
+
+<BaseLayout title="Contact" description="Pick a channel and reach out.">
+  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
+    <p class="eyebrow">Contact</p>
+    <h1 class="hero-title">No forms. Just direct routes.</h1>
+    <p class="mt-4 max-w-2xl text-zinc-300">
+      Pick the channel that matches your intent. GitHub, LinkedIn, and X are the fastest lanes; email is best for longer client/project threads.
+    </p>
+    <div class="mt-5 flex flex-wrap gap-2">
+      {quickRoutes.map((route) => {
+        const channel = channelByLabel.get(route.channel);
+        if (!channel) return null;
+        return (
+          <a
+            class="contact-quick-link"
+            href={channel.href}
+            target={channel.external ? '_blank' : undefined}
+            rel={channel.external ? 'noopener noreferrer' : undefined}
+          >
+            {route.label} -> {channel.label}
+          </a>
+        );
+      })}
+    </div>
+  </section>
+
+  <section class="mt-8 reveal reveal-delay-2">
+    <div class="section-head">
+      <h2>Channels</h2>
+      <p>Primary routes first, then everything else.</p>
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {channels.map((channel) => (
+        <a
+          class:list={[
+            'interactive-card card-link-block p-4 contact-grid-card',
+            `contact-card-${channel.tone}`,
+            channel.spotlight && 'contact-grid-card-spotlight'
+          ]}
+          href={channel.href}
+          target={channel.external ? '_blank' : undefined}
+          rel={channel.external ? 'noopener noreferrer' : undefined}
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="font-mono text-xs uppercase tracking-[0.14em] text-muted">{channel.label}</p>
+              <p class="mt-1.5 text-sm font-semibold text-zinc-100">{channel.displayValue}</p>
+            </div>
+            <span class:list={['contact-priority', channel.priority === 'primary' && 'contact-priority-primary']}>
+              {channel.priority}
+            </span>
+          </div>
+          <p class="mt-2.5 text-sm text-zinc-300">{channel.bestFor}</p>
+          <div class="mt-3 flex flex-wrap gap-1.5">
+            <span class="contact-pill">{channel.lane}</span>
+            <span class="contact-pill">/{channel.command}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

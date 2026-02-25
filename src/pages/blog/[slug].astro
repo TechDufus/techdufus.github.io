@@ -1,0 +1,60 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
+import readingTime from 'reading-time';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../lib/formatDate';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post }
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+const stats = readingTime(post.body);
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article>
+    <header class="panel p-6 sm:p-8">
+      <p class="eyebrow">Post</p>
+      <h1 class="hero-title">{post.data.title}</h1>
+      <p class="mt-4 max-w-3xl text-zinc-300">{post.data.description}</p>
+
+      <p class="mt-5 font-mono text-xs uppercase tracking-[0.12em] text-muted">
+        {formatDate(post.data.pubDate)} | {stats.text}
+      </p>
+
+      <div class="mt-3 flex flex-wrap gap-1.5">
+        {post.data.category && (
+          <span class="rounded-full border border-line bg-white/5 px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted">
+            {post.data.category}
+          </span>
+        )}
+        {post.data.tags.map((tag) => (
+          <span class="rounded-full border border-line bg-white/5 px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted">
+            #{tag}
+          </span>
+        ))}
+      </div>
+    </header>
+
+    <section class="panel mt-5 p-6 sm:p-8">
+      <div class="doc-prose">
+        <Content />
+      </div>
+    </section>
+
+    <div class="mt-5">
+      <a class="nav-link nav-link-active" href="/blog">Back to blog</a>
+    </div>
+  </article>
+</BaseLayout>

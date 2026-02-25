@@ -1,0 +1,163 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { careerHighlights, externalReferences } from '../../data/site';
+
+const careerDoc = await getEntry('docs', 'career');
+
+if (!careerDoc) {
+  throw new Error('Missing docs/career content source.');
+}
+
+const { Content } = await careerDoc.render();
+
+const proofPoints = [
+  {
+    label: 'Production scale',
+    value: '200-node AKS + 100TB+ datasets',
+    note: 'Published in Raft data platform work.',
+    sourceLabel: 'Read the Raft write-up',
+    sourceHref:
+      'https://teamraft.com/resources/insights/secure-low-latency-queries-at-scale-with-raft-data-platform-rdp/'
+  },
+  {
+    label: 'Secure environments',
+    value: 'IL5 / IL6 + air-gapped operations',
+    note: 'TS-cleared delivery with strict controls.',
+    sourceLabel: 'Related Fox coverage (Starsage AI test)',
+    sourceHref:
+      'https://www.foxnews.com/politics/fighter-pilots-take-directions-from-ai-pentagons-groundbreaking-test'
+  },
+  {
+    label: 'Platform coverage',
+    value: 'OpenShift, AKS, EKS, GKE, RKE2',
+    note: 'Plus local Kind and k3s validation loops.'
+  }
+];
+
+const currentLanes = [
+  'ArgoCD GitOps delivery across production clusters with tight audit trails.',
+  'Terraform/Terragrunt automation for repeatable platform changes.',
+  'Agentic orchestration patterns with one owner per change and explicit review.',
+  'Security and compliance rails: STIG hardening, secret handling, and policy enforcement.'
+];
+
+const timeline = [
+  {
+    range: '2024 -> now',
+    role: 'Raft | Sr. DevSecOps Engineer',
+    detail:
+      'Defense platform delivery across classified and unclassified environments, with agentic workflow enablement and secure GitOps.'
+  },
+  {
+    range: '2022 -> 2024',
+    role: 'Lumen | Infrastructure + Platform Engineering',
+    detail:
+      'Kubernetes platform operations, admission controls, namespace automation, and developer-platform guardrails.'
+  },
+  {
+    range: '2020 -> 2022',
+    role: 'Ansira | DevOps Engineering',
+    detail:
+      'Terraform-based infrastructure, CI/CD pipelines, and certificate automation that removed repetitive manual work.'
+  },
+  {
+    range: '2016 -> 2020',
+    role: 'Nebraska Public Power District | IT Automation',
+    detail:
+      'PowerShell-heavy automation roots in a regulated environment, including DNS/AD workflows and internal tooling.'
+  }
+];
+---
+
+<BaseLayout title="Docs: Career" description={careerDoc.data.description}>
+  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
+    <p class="eyebrow">Career Notes</p>
+    <h1 class="hero-title">{careerDoc.data.title}</h1>
+    <p class="mt-4 max-w-2xl text-zinc-300">{careerDoc.data.description}</p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <a class="nav-link nav-link-active" href="/about">About me</a>
+      <a class="nav-link" href="/docs/setup">Setup docs</a>
+      <a class="nav-link" href="/contact">Contact</a>
+    </div>
+  </section>
+
+  <section class="mt-8 reveal reveal-delay-2">
+    <div class="section-head">
+      <h2>Career at a glance</h2>
+      <p>selected signal from the full story below</p>
+    </div>
+
+    <div class="grid gap-3 md:grid-cols-3">
+      {proofPoints.map((item) => (
+        <article class="interactive-card metric-card p-4">
+          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{item.label}</p>
+          <p class="m-0 mt-2 text-base font-semibold text-zinc-100">{item.value}</p>
+          <p class="m-0 mt-2 text-sm text-zinc-300">{item.note}</p>
+          {item.sourceHref && (
+            <a class="text-link mt-2 inline-flex text-xs" href={item.sourceHref} target="_blank" rel="noopener noreferrer">
+              {item.sourceLabel ?? 'Source'}
+            </a>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="mt-5 reveal reveal-delay-2">
+    <div class="panel compact-panel p-4">
+      <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Related references</p>
+      <div class="mt-2 flex flex-wrap gap-2">
+        {externalReferences.map((reference) => (
+          <a class="link-chip" href={reference.href} target="_blank" rel="noopener noreferrer">
+            {reference.title}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-8 grid gap-3 lg:grid-cols-[1.05fr_0.95fr] reveal reveal-delay-3">
+    <article class="panel compact-panel p-5">
+      <div class="section-head">
+        <h2>Current lanes</h2>
+        <p>what I spend most cycles on</p>
+      </div>
+      <ul class="m-0 grid list-none gap-2 p-0">
+        {currentLanes.map((lane) => (
+          <li class="story-card">{lane}</li>
+        ))}
+      </ul>
+      <div class="mt-4 grid gap-2 sm:grid-cols-2">
+        {careerHighlights.map((item) => (
+          <article class="rounded-lg border border-line/85 bg-[#0a111b]/70 px-3 py-2.5">
+            <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{item.title}</p>
+            <p class="m-0 mt-1.5 text-sm leading-relaxed text-zinc-300">{item.body}</p>
+          </article>
+        ))}
+      </div>
+    </article>
+
+    <article class="panel compact-panel p-5">
+      <div class="section-head">
+        <h2>Timeline snapshot</h2>
+        <p>automation roots -> platform depth -> agentic delivery</p>
+      </div>
+      <ul class="m-0 grid list-none gap-2.5 p-0">
+        {timeline.map((item) => (
+          <li class="timeline-card">
+            <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{item.range}</p>
+            <p class="m-0 mt-1 text-sm font-semibold text-zinc-100">{item.role}</p>
+            <p class="m-0 mt-1.5 text-sm text-zinc-300">{item.detail}</p>
+          </li>
+        ))}
+      </ul>
+    </article>
+  </section>
+
+  <section class="panel mt-8 p-6 sm:p-8 reveal reveal-delay-4">
+    <div class="doc-prose">
+      <Content />
+    </div>
+  </section>
+</BaseLayout>

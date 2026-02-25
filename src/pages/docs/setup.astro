@@ -1,0 +1,73 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const setupDoc = await getEntry('docs', 'setup');
+
+if (!setupDoc) {
+  throw new Error('Missing docs/setup content source.');
+}
+
+const { Content } = await setupDoc.render();
+
+const anchorSections = [
+  { id: 'setup-overview', label: 'Overview' },
+  { id: 'setup-hardware', label: 'Hardware' },
+  { id: 'setup-software', label: 'Software Workflow' },
+  { id: 'setup-homelab', label: 'Homelab' },
+  { id: 'setup-wiring', label: 'Wiring' }
+];
+---
+
+<BaseLayout title="Docs: Setup" description={setupDoc.data.description}>
+  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
+    <p class="eyebrow">Documentation</p>
+    <h1 class="hero-title">{setupDoc.data.title}</h1>
+    <p class="mt-4 max-w-2xl text-zinc-300">
+      {setupDoc.data.description}
+    </p>
+    <div class="setup-anchor-list mt-5">
+      {anchorSections.map((section) => (
+        <a class="setup-anchor-link" href={`#${section.id}`}>
+          {section.label}
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="mt-8 reveal reveal-delay-2">
+    <div class="grid gap-3 sm:grid-cols-3">
+      <article class="interactive-card p-4">
+        <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">Source of truth</p>
+        <p class="m-0 mt-2 text-sm text-zinc-300">
+          I update this page when I actually change gear, tooling, or topology.
+        </p>
+      </article>
+      <article class="interactive-card p-4">
+        <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">Repos behind it</p>
+        <p class="m-0 mt-2 text-sm text-zinc-300">
+          <a class="text-link" href="https://github.com/techdufus/dotfiles" target="_blank" rel="noopener noreferrer">
+            dotfiles
+          </a>{' '}
+          for workstation automation and{' '}
+          <a class="text-link" href="https://github.com/techdufus/home.io" target="_blank" rel="noopener noreferrer">
+            home.io
+          </a>{' '}
+          for homelab IaC.
+        </p>
+      </article>
+      <article class="interactive-card p-4">
+        <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">How to use</p>
+        <p class="m-0 mt-2 text-sm text-zinc-300">
+          Jump with the anchors above, or read top-to-bottom for the full setup picture.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="panel mt-8 p-6 sm:p-8 reveal reveal-delay-3">
+    <div class="doc-prose setup-prose">
+      <Content />
+    </div>
+  </section>
+</BaseLayout>

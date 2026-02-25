@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404" description="Well... this page is missing." noindex>
+  <section class="panel p-6 sm:p-8 reveal reveal-delay-1">
+    <p class="eyebrow">404</p>
+    <h1 class="hero-title">Well... this link is busted.</h1>
+    <p class="mt-4 max-w-2xl text-zinc-300">
+      That route does not exist in the current site map. It happens.
+    </p>
+
+    <div class="mt-6 flex flex-wrap gap-2">
+      <a class="nav-link nav-link-active" href="/">Home</a>
+      <a class="nav-link" href="/blog">Blog</a>
+      <a class="nav-link" href="/docs">Docs</a>
+      <a class="nav-link" href="/contact">Contact</a>
+    </div>
+  </section>
+</BaseLayout>

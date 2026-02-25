@@ -1,6 +1,6 @@
 ---
 ---
-# Software
+## Software
 
 My entire development environment lives in my [dotfiles repository](https://github.com/techdufus/dotfiles) - 76 Ansible roles that configure everything from terminal emulators to cloud CLIs. Rather than list every tool, let me walk you through how I actually work.
 

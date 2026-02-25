@@ -1,0 +1,169 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../lib/formatDate';
+import { buildCategoryMap, getSortedPosts } from '../../lib/content';
+
+const posts = await getSortedPosts();
+const totalPosts = posts.length;
+const latestPost = posts[0];
+
+const categoryMap = buildCategoryMap(posts);
+const categories = Array.from(categoryMap.entries())
+  .map(([slug, count]) => ({ slug, count, label: slug.replace(/-/g, ' ') }))
+  .sort((a, b) => b.count - a.count);
+
+const startHereSlugs = [
+  'ai-already-took-my-job',
+  'oh-my-claude-batteries-included-enhancements-for-claude-code',
+  'i-deleted-my-cloudflare-tunnels-tailscale-operator-homelab-k8s'
+];
+
+const startHere = startHereSlugs
+  .map((slug) => posts.find((post) => post.slug === slug))
+  .filter((post): post is NonNullable<typeof post> => Boolean(post));
+---
+
+<BaseLayout title="Blog" description="Posts about platform work, incidents, and agent workflow experiments.">
+  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
+    <p class="eyebrow">Archive</p>
+    <h1 class="hero-title">Blog</h1>
+    <p class="mt-4 max-w-2xl text-zinc-300">
+      Real notes from the field: what broke, what held up, and what I changed after the smoke cleared.
+    </p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <span class="link-chip">{totalPosts} posts</span>
+      {latestPost && <span class="link-chip">Latest: {formatDate(latestPost.data.pubDate)}</span>}
+      <span class="link-chip">{categories.length} categories</span>
+    </div>
+  </section>
+
+  <section class="mt-8 panel compact-panel p-4 sm:p-5 reveal reveal-delay-2">
+    <div class="section-head">
+      <h2>Start Here</h2>
+      <p>Three posts that represent how I write and work.</p>
+    </div>
+
+    <div class="grid gap-2 sm:grid-cols-3">
+      {startHere.map((post) => (
+        <a class="interactive-card card-link-block p-3.5" href={`/blog/${post.slug}`}>
+          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">{formatDate(post.data.pubDate)}</p>
+          <p class="m-0 mt-1.5 text-sm font-medium text-zinc-100">{post.data.title}</p>
+          <p class="m-0 mt-1 text-xs text-zinc-300">{post.data.description}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="mt-8 panel compact-panel p-4 sm:p-5 reveal reveal-delay-3">
+    <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+      <label class="blog-search-wrap" for="blog-search">
+        <span class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Search posts</span>
+        <input
+          id="blog-search"
+          class="blog-search-input"
+          type="search"
+          placeholder="Try: kubernetes, powershell, homelab, agentic..."
+          autocomplete="off"
+        />
+      </label>
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button class="filter-chip filter-chip-active" type="button" data-category="all">All</button>
+        {categories.map((category) => (
+          <button class="filter-chip" type="button" data-category={category.slug}>
+            {category.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-8 reveal reveal-delay-4">
+    <div class="section-head">
+      <h2>All posts</h2>
+      <p id="blog-count-label">{posts.length} entries</p>
+    </div>
+
+    <div class="grid gap-3" id="blog-post-list">
+      {posts.map((post) => (
+        <article
+          class="interactive-card p-5 blog-post-card"
+          data-title={post.data.title}
+          data-description={post.data.description}
+          data-category={post.data.category?.toLowerCase() ?? ''}
+          data-tags={post.data.tags.join(' ').toLowerCase()}
+        >
+          <a class="card-link-overlay" href={`/blog/${post.slug}`} aria-label={`Read post: ${post.data.title}`}></a>
+          <div class="card-content">
+            <p class="mb-2 font-mono text-xs uppercase tracking-[0.12em] text-muted">
+              {formatDate(post.data.pubDate)}
+            </p>
+            <h2 class="m-0 text-xl font-semibold text-zinc-100">{post.data.title}</h2>
+            <p class="mt-2 text-sm text-zinc-300">{post.data.description}</p>
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              {post.data.category && (
+                <span class="rounded-full border border-line bg-white/5 px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted">
+                  {post.data.category}
+                </span>
+              )}
+              {post.data.tags.map((tag) => (
+                <span class="rounded-full border border-line bg-white/5 px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <script>
+    const searchInput = document.querySelector('#blog-search');
+    const countLabel = document.querySelector('#blog-count-label');
+    const postCards = Array.from(document.querySelectorAll('.blog-post-card'));
+    const categoryButtons = Array.from(document.querySelectorAll('.filter-chip'));
+    let activeCategory = 'all';
+
+    const normalize = (value: string) => value.trim().toLowerCase();
+
+    const applyFilters = () => {
+      const query = searchInput instanceof HTMLInputElement ? normalize(searchInput.value) : '';
+      let visible = 0;
+
+      postCards.forEach((card) => {
+        if (!(card instanceof HTMLElement)) return;
+        const category = card.dataset.category ?? '';
+        const haystack = normalize(
+          `${card.dataset.title ?? ''} ${card.dataset.description ?? ''} ${card.dataset.tags ?? ''}`
+        );
+
+        const matchesCategory = activeCategory === 'all' || category === activeCategory;
+        const matchesQuery = query.length === 0 || haystack.includes(query);
+        const isVisible = matchesCategory && matchesQuery;
+
+        card.hidden = !isVisible;
+        if (isVisible) visible += 1;
+      });
+
+      if (countLabel instanceof HTMLElement) {
+        countLabel.textContent = `${visible} shown`;
+      }
+    };
+
+    if (searchInput instanceof HTMLInputElement) {
+      searchInput.addEventListener('input', applyFilters);
+    }
+
+    categoryButtons.forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) return;
+      button.addEventListener('click', () => {
+        activeCategory = button.dataset.category ?? 'all';
+        categoryButtons.forEach((node) => node.classList.remove('filter-chip-active'));
+        button.classList.add('filter-chip-active');
+        applyFilters();
+      });
+    });
+
+    applyFilters();
+  </script>
+</BaseLayout>

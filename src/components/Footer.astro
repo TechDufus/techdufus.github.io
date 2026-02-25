@@ -1,0 +1,39 @@
+---
+import { siteMetadata, socialLinks } from '../data/site';
+
+const featuredChannels = new Set(['GitHub', 'LinkedIn', 'X']);
+const year = new Date().getFullYear();
+
+const orderedSocialLinks = [...socialLinks].sort((a, b) => {
+  if (featuredChannels.has(a.label) !== featuredChannels.has(b.label)) {
+    return featuredChannels.has(a.label) ? -1 : 1;
+  }
+  return a.label.localeCompare(b.label);
+});
+---
+
+<footer class="mt-8 border-t border-white/10 pt-6 sm:pt-7">
+  <div class="footer-shell footer-shell-minimal">
+    <div class="footer-minimal-row">
+      <div class="footer-minimal-copy">
+        <p class="footer-wordmark">{siteMetadata.siteName}</p>
+        <p class="footer-note">Made with coffee, tokens, and neovim.</p>
+        <p class="footer-copyright">© {year} {siteMetadata.siteName}</p>
+      </div>
+      <ul class="footer-social-list" aria-label="Social links">
+        {orderedSocialLinks.map((link) => (
+          <li>
+            <a
+              class:list={['footer-social-link', featuredChannels.has(link.label) && 'footer-social-link-featured']}
+              href={link.href}
+              target={link.href.startsWith('http') ? '_blank' : undefined}
+              rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</footer>

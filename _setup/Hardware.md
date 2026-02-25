@@ -1,6 +1,6 @@
 ---
 ---
-# Hardware
+## Hardware
 
 ## Computers
 
@@ -96,5 +96,4 @@ I have used the [Creative T100 Speakers](https://us.creative.com/p/speakers/crea
 I use the [Sony WH-1000XM5](https://electronics.sony.com/audio/headphones/headband/p/wh1000xm5-b)'s. I'm a big fan of noise cancelling headphones since my office is pretty noisy. The room next-door is our HVAC, I have a portable A/C unit, [walking pad](https://www.urevo.com/products/spacewalk-3s-treadmill), air purifier, and children all make a lot of noise which necessitates noise-cancelling vs. open-ear style headphones.
 
 My last pair that I used for YEARS was the [Bose QuietComfort 35 II](https://global.bose.com/content/consumer_electronics/b2c_catalog/worldwide/websites/en_ae/product/qc35_ii.html) headphones which were great, but just getting old and worn.
-
 

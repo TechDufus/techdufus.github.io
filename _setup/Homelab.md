@@ -1,6 +1,6 @@
 ---
 ---
-# Homelab
+## Homelab
 
 My homelab is a production-grade infrastructure running in a 42U enclosed server rack. Everything is deployed via GitOps - no manual configuration, no snowflakes.
 

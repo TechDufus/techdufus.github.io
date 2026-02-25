@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Docs" description="Reference docs for my setup, workflow, and career context.">
+  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
+    <p class="eyebrow">Documentation</p>
+    <h1 class="hero-title">Docs</h1>
+    <p class="mt-4 max-w-2xl text-zinc-300">
+      These are the pages I keep reopening during real work: setup notes, workflow context, and career background behind the posts.
+    </p>
+  </section>
+
+  <section class="mt-8 grid gap-3 sm:grid-cols-2 reveal reveal-delay-2">
+    <a class="interactive-card card-link-block p-6" href="/docs/setup">
+      <p class="font-mono text-xs uppercase tracking-[0.14em] text-signal">/docs/setup</p>
+      <h2 class="mt-2 text-xl font-semibold text-zinc-100">Setup</h2>
+      <p class="mt-2 text-sm text-zinc-300">What I run, how it is wired, and what changed most recently.</p>
+      <p class="mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Open setup reference</p>
+    </a>
+
+    <a class="interactive-card card-link-block p-6" href="/docs/career">
+      <p class="font-mono text-xs uppercase tracking-[0.14em] text-signal">/docs/career</p>
+      <h2 class="mt-2 text-xl font-semibold text-zinc-100">Career</h2>
+      <p class="mt-2 text-sm text-zinc-300">How I got from PowerShell scripts to platform and agent workflow engineering.</p>
+      <p class="mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Open career context</p>
+    </a>
+  </section>
+</BaseLayout>
