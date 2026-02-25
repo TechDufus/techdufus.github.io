@@ -11,8 +11,6 @@ on:
       - '.gitignore'
       - '.github/**'
       - '!.github/workflows/deploy.yml'
-      - 'Gemfile'
-      - 'Gemfile.lock'
       - 'docker-compose.yml'
   workflow_dispatch:
 

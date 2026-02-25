@@ -22,7 +22,17 @@ const { Content } = await post.render();
 const stats = readingTime(post.body);
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description}>
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  ogType="article"
+  ogImage={post.data.socialImage}
+  ogImageAlt={post.data.socialImageAlt ?? `Preview image for ${post.data.title}`}
+  ogImageWidth={post.data.socialImageWidth}
+  ogImageHeight={post.data.socialImageHeight}
+  publishedTime={post.data.pubDate.toISOString()}
+  modifiedTime={(post.data.updatedDate ?? post.data.pubDate).toISOString()}
+>
   <article>
     <header class="panel p-6 sm:p-8">
       <p class="eyebrow">Post</p>

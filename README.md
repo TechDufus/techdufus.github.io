@@ -60,7 +60,20 @@ Build pipeline: `astro build`
 - Docs career source: `src/content/docs/career.md`
 - Site metadata/nav/copy: `src/data/site.ts`
 
-Legacy migration source (optional): `_posts/` + `_setup/` via `npm run migrate:content`
+## Media and Preview Metadata
+
+- Global metadata lives in `src/data/site.ts` under `siteMetadata` and `siteMetadata.media`.
+- Head tags are rendered in `src/layouts/BaseLayout.astro`.
+- Per-post social previews can be set in blog frontmatter:
+  - `socialImage`
+  - `socialImageAlt`
+  - `socialImageWidth`
+  - `socialImageHeight`
+- App/browser icons and manifest files are in `public/`:
+  - `favicon.ico`, `favicon-16x16.png`, `favicon-32x32.png`
+  - `apple-touch-icon.png`
+  - `android-chrome-192x192.png`, `android-chrome-512x512.png`
+  - `site.webmanifest`
 
 ## New post helper
 

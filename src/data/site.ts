@@ -7,7 +7,20 @@ export const siteMetadata = {
   author: 'TechDufus',
   email: 'hey@techdufus.com',
   location: 'United States',
-  role: 'Platform Engineer / Agentic Engineer'
+  role: 'Platform Engineer / Agentic Engineer',
+  xHandle: '@TechDufus',
+  media: {
+    faviconIco: '/favicon.ico',
+    favicon16: '/favicon-16x16.png',
+    favicon32: '/favicon-32x32.png',
+    appleTouchIcon: '/apple-touch-icon.png',
+    manifestPath: '/site.webmanifest',
+    themeColor: '#060b12',
+    defaultSocialImage: '/img/background.jpg',
+    defaultSocialImageAlt: 'TechDufus site preview',
+    defaultSocialImageWidth: 1920,
+    defaultSocialImageHeight: 1080
+  }
 };
 
 export const primaryNavigation = [
