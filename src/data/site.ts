@@ -60,7 +60,7 @@ export const homeCopy = {
 
 export const aboutCopy = {
   intro:
-    "Hello, I'm TechDufus. You can call me Dufus. I started in PowerShell, then moved into Kubernetes platform work, and now I spend a lot of time sharpening agentic workflows and riding the tech wave.",
+    "I'm Matthew, but most people online know me as TechDufus. I started in PowerShell, then moved into Kubernetes platform work, and now I spend a lot of time sharpening agentic workflows.",
   body: [
     'I started with PowerShell because I was tired of repetitive clicks. AdminToolkit and HelpDesk were my early scratch-my-own-itch tools.',
     'That same mindset pulled me into Terraform, GitOps, and Kubernetes platform work.',
@@ -217,5 +217,5 @@ export const profileSpotlight = {
   status: 'Status: probably fighting DNS somewhere.',
   introTitle: "Hello, I'm TechDufus.",
   intro:
-    "I'm Matthew (TechDufus). I build platform systems, tinker in my homelab, and share what actually worked."
+    'I build platform systems, tinker in my homelab, and share what actually worked.'
 };
