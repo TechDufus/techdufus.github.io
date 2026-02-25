@@ -11,7 +11,8 @@ vendor/
 # System files
 .vscode
 .DS_Store
-**/.DS_store
+**/.DS_Store
+.idea/
 
 # Development files
 Gemfile.lock
@@ -24,7 +25,20 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+*.log
 
 # Astro
 dist/
 .astro/
+
+# Local test/build outputs
+coverage/
+playwright-report/
+test-results/
+.eslintcache
+
+# Local environment files
+.env
+.env.*
+!.env.example

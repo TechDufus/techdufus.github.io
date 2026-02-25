@@ -1,4 +1,5 @@
 const starsCache = new Map<string, number | null>();
+const GITHUB_TIMEOUT_MS = 2600;
 
 const parseRepoPath = (repoUrl: string): string | null => {
   try {
@@ -29,12 +30,20 @@ export const getGitHubStarsByRepoUrl = async (repoUrl: string): Promise<number |
   }
 
   try {
-    const response = await fetch(`https://api.github.com/repos/${repoPath}`, {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'techdufus-github-pages-site'
-      }
-    });
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), GITHUB_TIMEOUT_MS);
+    let response: Response;
+    try {
+      response = await fetch(`https://api.github.com/repos/${repoPath}`, {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          'User-Agent': 'techdufus-github-pages-site'
+        },
+        signal: abortController.signal
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       starsCache.set(repoPath, null);

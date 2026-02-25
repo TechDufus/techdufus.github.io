@@ -7,7 +7,6 @@ TechDufus.com is a full in-place Astro rebuild with a new IA, dark-only terminal
 ## Stack
 
 - Astro (TypeScript)
-- React integration for UI primitives
 - Tailwind + shadcn-style component foundation
 - Markdown content collections
 - GitHub Pages deployment via Actions
@@ -52,6 +51,14 @@ npm run build
 ```
 
 Build pipeline: `astro build`
+
+### Performance budget check
+
+```bash
+npm run check:perf
+```
+
+Checks built JS/CSS bundle sizes used by top-level pages and fails if budgets are exceeded.
 
 ## Content locations
 

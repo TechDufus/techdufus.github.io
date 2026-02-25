@@ -37,7 +37,7 @@ const startHere = startHereSlugs
     </div>
   </section>
 
-  <section class="mt-8 panel compact-panel p-4 sm:p-5 reveal reveal-delay-2">
+  <section class="content-section panel compact-panel p-4 sm:p-5 reveal reveal-delay-2">
     <div class="section-head">
       <h2>Start Here</h2>
       <p>Three posts that represent how I write and work.</p>
@@ -54,7 +54,7 @@ const startHere = startHereSlugs
     </div>
   </section>
 
-  <section class="mt-8 panel compact-panel p-4 sm:p-5 reveal reveal-delay-3">
+  <section class="content-section panel compact-panel p-4 sm:p-5 reveal reveal-delay-3">
     <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
       <label class="blog-search-wrap" for="blog-search">
         <span class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Search posts</span>
@@ -77,10 +77,12 @@ const startHere = startHereSlugs
     </div>
   </section>
 
-  <section class="mt-8 reveal reveal-delay-4">
+  <section class="content-section reveal reveal-delay-4">
     <div class="section-head">
       <h2>All posts</h2>
-      <p id="blog-count-label">{posts.length} entries</p>
+      <p id="blog-count-label" aria-live="polite">
+        {posts.length} entries
+      </p>
     </div>
 
     <div class="grid gap-3" id="blog-post-list">
@@ -115,55 +117,17 @@ const startHere = startHereSlugs
         </article>
       ))}
     </div>
+
+    <article id="blog-empty-state" class="blog-empty-state panel p-4 sm:p-5 mt-3" hidden>
+      <h3 class="m-0 text-lg font-semibold text-zinc-100">No posts matched</h3>
+      <p class="m-0 mt-2 text-sm text-zinc-300">
+        Try another search term or switch to the <span class="font-mono text-signal">All</span> category.
+      </p>
+    </article>
   </section>
 
   <script>
-    const searchInput = document.querySelector('#blog-search');
-    const countLabel = document.querySelector('#blog-count-label');
-    const postCards = Array.from(document.querySelectorAll('.blog-post-card'));
-    const categoryButtons = Array.from(document.querySelectorAll('.filter-chip'));
-    let activeCategory = 'all';
-
-    const normalize = (value: string) => value.trim().toLowerCase();
-
-    const applyFilters = () => {
-      const query = searchInput instanceof HTMLInputElement ? normalize(searchInput.value) : '';
-      let visible = 0;
-
-      postCards.forEach((card) => {
-        if (!(card instanceof HTMLElement)) return;
-        const category = card.dataset.category ?? '';
-        const haystack = normalize(
-          `${card.dataset.title ?? ''} ${card.dataset.description ?? ''} ${card.dataset.tags ?? ''}`
-        );
-
-        const matchesCategory = activeCategory === 'all' || category === activeCategory;
-        const matchesQuery = query.length === 0 || haystack.includes(query);
-        const isVisible = matchesCategory && matchesQuery;
-
-        card.hidden = !isVisible;
-        if (isVisible) visible += 1;
-      });
-
-      if (countLabel instanceof HTMLElement) {
-        countLabel.textContent = `${visible} shown`;
-      }
-    };
-
-    if (searchInput instanceof HTMLInputElement) {
-      searchInput.addEventListener('input', applyFilters);
-    }
-
-    categoryButtons.forEach((button) => {
-      if (!(button instanceof HTMLButtonElement)) return;
-      button.addEventListener('click', () => {
-        activeCategory = button.dataset.category ?? 'all';
-        categoryButtons.forEach((node) => node.classList.remove('filter-chip-active'));
-        button.classList.add('filter-chip-active');
-        applyFilters();
-      });
-    });
-
-    applyFilters();
+    import { initBlogFilters } from '../../lib/client/blogFilters';
+    initBlogFilters();
   </script>
 </BaseLayout>
