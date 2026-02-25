@@ -60,7 +60,7 @@ export const homeCopy = {
 
 export const aboutCopy = {
   intro:
-    "Hello, I'm TechDufus. You can call me Dufus. I started in PowerShell, then moved into Kubernetes platform work, and now I spend a lot of time making agent workflows useful without making production scarier.",
+    "Hello, I'm TechDufus. You can call me Dufus. I started in PowerShell, then moved into Kubernetes platform work, and now I spend a lot of time sharpening agentic workflows and riding the tech wave.",
   body: [
     'I started with PowerShell because I was tired of repetitive clicks. AdminToolkit and HelpDesk were my early scratch-my-own-itch tools.',
     'That same mindset pulled me into Terraform, GitOps, and Kubernetes platform work.',
