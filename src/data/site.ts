@@ -47,6 +47,8 @@ export const socialLinks = [
 export const homeCopy = {
   eyebrow: 'Hello from the command line',
   headline: 'I break things, fix them, and write down what actually worked.',
+  metaDescription:
+    'TechDufus writes about platform engineering, homelab rebuilds, and agent workflows that hold up in the real world.',
   description:
     'This is my digital garden for incident fallout, homelab experiments, setup docs, and AI workflow lessons that survived real use.',
   highlights: [
@@ -215,5 +217,5 @@ export const profileSpotlight = {
   status: 'Status: probably fighting DNS somewhere.',
   introTitle: "Hello, I'm TechDufus.",
   intro:
-    'I am a platform engineer in defense, husband, dad of four, and terminal-first builder. I like reliable systems, clean rollback paths, and practical docs over shiny demos.'
+    "I'm Matthew (TechDufus). I build platform systems, tinker in my homelab, and share what actually worked."
 };
