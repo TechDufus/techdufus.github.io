@@ -51,6 +51,8 @@ If we have to fail over half the country to different data centers, the last thi
 
 Yes, uptime still matters, but what had to happen for us to get there?
 
+AI stress is one side of this. The other is velocity. More AI-assisted infra changes means more chances for one vibe-coded mistake to hit a critical layer at the wrong time.
+
 ## The part I think people underestimate
 
 What I think people underestimate is not that outages happen, but how close we might be to an outage size where it cannot stay contained anymore. So far, even big incidents have still been partial. One DNS provider goes down, not all DNS. One CA has issues, not every certificate authority at once. One CDN has a bad day, not all CDNs globally. That partial behavior is exactly why we keep limping through.
