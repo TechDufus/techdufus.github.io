@@ -8,6 +8,8 @@ const routeMatches = (href: string) =>
 
 const docsActive = docsNavigation.some((item) => routeMatches(item.href));
 const docsMenuId = 'docs-menu-popover';
+const supportHref = '/support';
+const supportActive = routeMatches(supportHref);
 ---
 
 <header class="sticky top-4 z-40 mb-8 sm:mb-10">
@@ -20,7 +22,21 @@ const docsMenuId = 'docs-menu-popover';
         {`{ TechDufus }`}
       </a>
 
-      <nav aria-label="Primary" class="w-full sm:w-auto">
+      <a
+        class:list={[
+          'order-2 inline-flex items-center rounded-full border border-signal/30 bg-signal/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-signal no-underline transition',
+          'hover:border-signal/55 hover:text-electric',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-canvas',
+          supportActive && 'border-white/20 bg-white/10 text-zinc-100',
+          'sm:order-3'
+        ]}
+        href={supportHref}
+        aria-current={supportActive ? 'page' : undefined}
+      >
+        Support
+      </a>
+
+      <nav aria-label="Primary" class="order-3 w-full sm:order-2 sm:w-auto">
         <ul class="flex flex-wrap items-center gap-1.5 text-sm">
           {primaryNavigation.map((item) => (
             <li>

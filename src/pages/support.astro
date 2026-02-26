@@ -1,0 +1,71 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { supportLinks } from '../data/site';
+
+const supportChannels = supportLinks.map((link) => ({
+  ...link,
+  external: link.href.startsWith('http')
+}));
+---
+
+<BaseLayout
+  title="Support"
+  description="Support TechDufus if the content helped. Everything stays free, and support is optional."
+>
+  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
+    <p class="eyebrow">Support</p>
+    <h1 class="hero-title">Keep the notes free. Support only if you want to.</h1>
+    <p class="mt-4 max-w-2xl text-zinc-300">
+      Every post and doc on this site stays free. No paywall and no premium tier. Support is optional, and it helps me
+      keep publishing practical writeups from real platform work.
+    </p>
+    <div class="mt-5 flex flex-wrap gap-2">
+      {supportChannels.map((channel) => (
+        <a
+          class="contact-quick-link"
+          href={channel.href}
+          target={channel.external ? '_blank' : undefined}
+          rel={channel.external ? 'noopener noreferrer' : undefined}
+        >
+          {channel.label}
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section reveal reveal-delay-2">
+    <div class="section-head">
+      <h2>Support routes</h2>
+      <p>Pick whichever platform you already use.</p>
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-2">
+      {supportChannels.map((channel) => (
+        <a
+          class="interactive-card card-link-block p-5 contact-grid-card contact-card-support"
+          href={channel.href}
+          target={channel.external ? '_blank' : undefined}
+          rel={channel.external ? 'noopener noreferrer' : undefined}
+        >
+          <p class="font-mono text-xs uppercase tracking-[0.14em] text-signal">{channel.label}</p>
+          <p class="mt-2 text-sm leading-relaxed text-zinc-300">{channel.details}</p>
+          <div class="mt-3 flex items-center justify-between gap-2">
+            <span class="contact-pill">Optional support</span>
+            <span class="contact-pill">{channel.lane}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section panel compact-panel p-5 reveal reveal-delay-3">
+    <div class="section-head">
+      <h2>What support changes</h2>
+      <p>Short answer: it helps keep this project sustainable.</p>
+    </div>
+    <p class="m-0 max-w-3xl text-sm leading-relaxed text-zinc-300">
+      Support helps offset hosting, lab costs, and the time it takes to turn broken experiments into useful docs. The
+      content remains free either way, so only contribute if it feels worth it.
+    </p>
+  </section>
+</BaseLayout>
