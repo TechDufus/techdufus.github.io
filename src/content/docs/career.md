@@ -53,14 +53,14 @@ In parallel, I also worked on blockchain infrastructure automation at InFlux.
 That work reinforced the same platform lesson: scale comes from reliable process and automation contracts, not heroics.
 
 ### 2024 to present: defense platform and DevSecOps at Raft
-As a Senior DevSecOps Engineer at Raft, I support mission-critical platform delivery in a TS-cleared context.
+As a Senior DevSecOps Engineer at Raft, I support mission-critical platform delivery in high-security environments.
 
 - Run ArgoCD-based GitOps workflows for secure, auditable Kubernetes deployments in sensitive environments.
 - Operate in production OpenShift, AKS, and RKE2 ecosystems, plus local Kind workflows for development validation.
-- Deploy and maintain platform capabilities in strict environments, including air-gapped IL6 conditions.
+- Deploy and maintain platform capabilities in strict environments, including air-gapped operations.
 - Scale and manage AKS and EKS infrastructure with Terraform and Terragrunt.
 - Built Terraform-focused GitHub pipelines that validate and apply infrastructure changes with consistent controls.
-- Handle classified and CUI workflows across contracts with cross-functional teams under clearance constraints.
+- Handle strict security workflows across contracts with cross-functional teams and clear operational boundaries.
 - Work across security, platform, and application roles where context switching is constant and documentation quality matters.
 
 Specific mission details stay private, but the engineering patterns are the same: automate carefully, verify continuously, and keep accountability explicit.

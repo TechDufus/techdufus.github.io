@@ -2,8 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import {
   aboutCopy,
+  aboutHowIOperate,
   aboutNow,
-  careerHighlights,
   featuredRepos,
   profileSpotlight,
   siteMetadata
@@ -70,14 +70,6 @@ const featuredReposWithStars = await Promise.all(
           <p class="m-0 max-w-4xl leading-relaxed text-zinc-300">{paragraph}</p>
         ))}
       </div>
-      <div class="mt-4 grid gap-2 sm:grid-cols-2">
-        {careerHighlights.map((item) => (
-          <article class="story-card">
-            <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{item.title}</p>
-            <p class="m-0 mt-1.5 text-sm leading-relaxed text-zinc-200">{item.body}</p>
-          </article>
-        ))}
-      </div>
     </article>
 
     <aside class="panel compact-panel p-5">
@@ -94,16 +86,25 @@ const featuredReposWithStars = await Promise.all(
           </li>
         ))}
       </ul>
-      <p class="m-0 mt-3 text-sm text-zinc-300">
-        <span class="font-mono uppercase tracking-[0.1em] text-muted">Not doing:</span> {aboutNow.notDoing}
-      </p>
-      <p class="m-0 mt-2 text-sm text-zinc-300">
-        <span class="font-mono uppercase tracking-[0.1em] text-muted">Learning next:</span> {aboutNow.learning}
-      </p>
     </aside>
   </section>
 
-  <section id="featured-repos" class="content-section reveal reveal-delay-3">
+  <section class="content-section panel compact-panel p-5 reveal reveal-delay-3">
+    <div class="section-head">
+      <h2>How I Operate</h2>
+      <p>{aboutHowIOperate.intro}</p>
+    </div>
+    <div class="grid gap-2 sm:grid-cols-2">
+      {aboutHowIOperate.items.map((item) => (
+        <article class="story-card">
+          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{item.title}</p>
+          <p class="m-0 mt-1.5 text-sm leading-relaxed text-zinc-200">{item.detail}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section id="featured-repos" class="content-section reveal reveal-delay-4">
     <div class="section-head">
       <h2>Featured GitHub Repos</h2>
       <p>The projects I keep open during real work.</p>
@@ -140,7 +141,7 @@ const featuredReposWithStars = await Promise.all(
     </div>
   </section>
 
-  <section class="content-section panel compact-panel p-5 reveal reveal-delay-4">
+  <section class="content-section panel compact-panel p-5 reveal reveal-delay-5">
     <div class="section-head">
       <h2>Say Hey</h2>
       <p>Email is best for project talk. I read everything.</p>

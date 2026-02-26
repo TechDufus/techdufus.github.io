@@ -79,15 +79,16 @@ export const aboutCopy = {
   body: [
     'I started with PowerShell because I was tired of repetitive clicks. AdminToolkit and HelpDesk were my early scratch-my-own-itch tools.',
     'That same mindset pulled me into Terraform, GitOps, and Kubernetes platform work.',
+    'Most of that work runs in secure environments where audit trails and rollback plans are not optional. I learned that one the hard way.',
     'Most days are terminals, CI runs, and cluster cleanup. No rollback plan, no merge.',
     'This site is where I keep notes while details are fresh: what broke, what held, and what I would change next round.'
   ]
 };
 
 export const aboutNow = {
-  timeframe: 'Updated February 24, 2026',
+  timeframe: 'Updated February 26, 2026',
   primaryFocus:
-    'Right now I am tightening agent handoffs so tasks stay owned and context does not disappear.',
+    'Right now I split my cycles between AI inference and GPU workload operations in Kubernetes, plus pushing Codex and agentic workflows until the rough edges show up.',
   activeTracks: [
     {
       title: 'Pushing Agentic Limits',
@@ -103,10 +104,40 @@ export const aboutNow = {
       title: 'Build Notes In Public',
       detail:
         'If something breaks, I write the runbook before I forget.'
+    },
+    {
+      title: 'AI Infra Feedback Loops',
+      detail:
+        'I am researching safer AI-assisted infrastructure workflows with pre-commit risk checks and stronger delivery guardrails.'
     }
-  ],
-  notDoing: 'Demo-first workflows that look slick but do not survive real use.',
-  learning: 'MCP patterns, cleaner repo automation, and better context handoffs.'
+  ]
+};
+
+export const aboutHowIOperate = {
+  intro:
+    'How I keep speed without losing control.',
+  items: [
+    {
+      title: 'Reproducible By Default',
+      detail:
+        'I treat environments as code. If I can hand Terraform a fresh Proxmox box and rebuild the stack, I trust it.'
+    },
+    {
+      title: 'Automate Early',
+      detail:
+        'If I cannot automate something from the start, I usually do not keep investing in it. One-off steps drift fast.'
+    },
+    {
+      title: 'Fast Feedback, Guardrails On',
+      detail:
+        'I move fast with short loops, but risky changes still go through review rails, rollback planning, and verification.'
+    },
+    {
+      title: 'No Tribal-Knowledge Ops',
+      detail:
+        "Any change that only lives in someone's memory is high risk. I prefer scripted workflows and written runbooks that survive handoffs."
+    }
+  ]
 };
 
 export const featuredRepos = [
@@ -173,7 +204,7 @@ export const homeProofPoints = [
   },
   {
     label: 'Secure Delivery',
-    value: 'IL5 / IL6 + air-gapped platform operations',
+    value: 'High-security + air-gapped platform operations',
     note: 'GitOps and compliance in high-stakes environments.',
     sourceLabel: 'Related Fox coverage (Starsage AI test)',
     sourceHref:
@@ -206,7 +237,7 @@ export const homeOperatingStyle = [
 export const careerHighlights = [
   {
     title: 'Current lane',
-    body: 'Senior DevSecOps Engineer at Raft. Shipping secure platform capabilities across classified and unclassified environments with TS clearance.'
+    body: 'Senior DevSecOps Engineer at Raft. Shipping secure platform capabilities across high-security environments.'
   },
   {
     title: 'Platform depth',
