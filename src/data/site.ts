@@ -16,10 +16,10 @@ export const siteMetadata = {
     appleTouchIcon: '/apple-touch-icon.png',
     manifestPath: '/site.webmanifest',
     themeColor: '#060b12',
-    defaultSocialImage: '/img/background.jpg',
-    defaultSocialImageAlt: 'TechDufus site preview',
-    defaultSocialImageWidth: 1920,
-    defaultSocialImageHeight: 1080
+    defaultSocialImage: '/img/social-default.jpg',
+    defaultSocialImageAlt: 'TechDufus homelab desk with terminal-first AI and Kubernetes workflows',
+    defaultSocialImageWidth: 1200,
+    defaultSocialImageHeight: 630
   }
 };
 
