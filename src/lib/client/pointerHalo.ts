@@ -4,6 +4,10 @@ const SIGNATURE_SEEN_KEY = 'tdf_hero_signature_seen'
 const SIGNATURE_DELAY_MS = 450
 const SIGNATURE_DURATION_MS = 1720
 const DESKTOP_POINTER_QUERY = '(hover: hover) and (pointer: fine) and (min-width: 960px)'
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
+
+const trackedSurfaces = new Set<HTMLElement>()
+let pointerWatchersBound = false
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 
@@ -34,24 +38,57 @@ const ensureHaloLayer = (surface: HTMLElement) => {
   return layer
 }
 
-const bindPointerHalo = (surface: HTMLElement, canTrackPointer: boolean) => {
+const syncPointerCapability = () => {
+  const canTrackPointer =
+    window.matchMedia(DESKTOP_POINTER_QUERY).matches && !window.matchMedia(REDUCED_MOTION_QUERY).matches
+
+  trackedSurfaces.forEach((surface) => {
+    surface.dataset.pointerReady = canTrackPointer ? 'true' : 'false'
+    if (!canTrackPointer) {
+      setPointerOrigin(surface, 50, 50)
+    }
+  })
+}
+
+const bindPointerCapabilityWatchers = () => {
+  if (pointerWatchersBound) {
+    return
+  }
+
+  pointerWatchersBound = true
+  const desktopPointerQuery = window.matchMedia(DESKTOP_POINTER_QUERY)
+  const reducedMotionQuery = window.matchMedia(REDUCED_MOTION_QUERY)
+  const handleCapabilityChange = () => syncPointerCapability()
+
+  desktopPointerQuery.addEventListener('change', handleCapabilityChange)
+  reducedMotionQuery.addEventListener('change', handleCapabilityChange)
+  window.addEventListener('resize', handleCapabilityChange, { passive: true })
+
+  window.addEventListener(
+    'pagehide',
+    () => {
+      desktopPointerQuery.removeEventListener('change', handleCapabilityChange)
+      reducedMotionQuery.removeEventListener('change', handleCapabilityChange)
+      window.removeEventListener('resize', handleCapabilityChange)
+      trackedSurfaces.clear()
+      pointerWatchersBound = false
+    },
+    { once: true }
+  )
+}
+
+const bindPointerHalo = (surface: HTMLElement) => {
   if (surface.dataset.pointerHaloBound === 'true') {
     return
   }
 
   surface.dataset.pointerHaloBound = 'true'
+  trackedSurfaces.add(surface)
   setPointerOrigin(surface, 50, 50)
-
-  if (!canTrackPointer) {
-    surface.dataset.pointerReady = 'false'
-    return
-  }
-
-  surface.dataset.pointerReady = 'true'
   ensureHaloLayer(surface)
 
   const updatePointer = (event: PointerEvent) => {
-    if (event.pointerType === 'touch') {
+    if (surface.dataset.pointerReady !== 'true' || event.pointerType === 'touch') {
       return
     }
 
@@ -97,7 +134,7 @@ const initHeroSignature = (root: ParentNode = document) => {
 
   hero.dataset.signatureBound = 'true'
 
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const reducedMotion = window.matchMedia(REDUCED_MOTION_QUERY).matches
   const coarsePointer = window.matchMedia('(pointer: coarse)').matches
   if (reducedMotion || coarsePointer) {
     hero.dataset.signaturePlay = 'done'
@@ -124,12 +161,11 @@ const initHeroSignature = (root: ParentNode = document) => {
 }
 
 export const initPointerHalo = (root: ParentNode = document) => {
-  const canTrackPointer =
-    window.matchMedia(DESKTOP_POINTER_QUERY).matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
   root.querySelectorAll<HTMLElement>(HALO_SELECTOR).forEach((surface) => {
-    bindPointerHalo(surface, canTrackPointer)
+    bindPointerHalo(surface)
   })
 
+  bindPointerCapabilityWatchers()
+  syncPointerCapability()
   initHeroSignature(root)
 }
