@@ -77,10 +77,10 @@ export const aboutCopy = {
   intro:
     "I'm Matthew, but most people online know me as TechDufus. I started in PowerShell, then moved into Kubernetes platform work, and now I spend a lot of time sharpening agentic workflows.",
   body: [
-    'I started with PowerShell because I was tired of repetitive clicks. AdminToolkit and HelpDesk were my early scratch-my-own-itch tools.',
-    'That same mindset pulled me into Terraform, GitOps, and Kubernetes platform work.',
-    'Most of that work runs in secure environments where audit trails and rollback plans are not optional. I learned that one the hard way.',
-    'Most days are terminals, CI runs, and cluster cleanup. No rollback plan, no merge.',
+    'When I found PowerShell, I got bit by the automation bug and realized I could make a career out of being lazy in the best way: automate it once and stop doing it by hand. <a href="https://github.com/matthewjdegarmo/AdminToolkit" target="_blank" rel="noopener noreferrer" class="font-medium text-signal underline decoration-signal/60 underline-offset-2 hover:text-cyan-200">AdminToolkit</a> and <a href="https://github.com/matthewjdegarmo/HelpDesk" target="_blank" rel="noopener noreferrer" class="font-medium text-signal underline decoration-signal/60 underline-offset-2 hover:text-cyan-200">HelpDesk</a> were two of the first tools I built for day-to-day work.',
+    'That push toward automation pulled me into the DevOps world, which came with a whole new toolchain and a whole new set of problems to solve across Terraform, GitOps, and Kubernetes.',
+    'As a DevOps engineer, I realized one of my biggest gaps was empathy for the developer workflows I was shaping. I was blessed to step into a full-stack role where we owned the entire microservices stack end to end: app code, tests, CI/CD, container registry, cloud Kubernetes, security controls, firewalls, backups, and VPN.',
+    'As I grew, that pulled me into platform engineering, where I do not just own CI/CD, I own the platform it deploys to. That means large Kubernetes clusters, RBAC at scale, and high-security air-gapped environments, while pushing AI at the edge of what agentic engineering can do.',
     'This site is where I keep notes while details are fresh: what broke, what held, and what I would change next round.'
   ]
 };

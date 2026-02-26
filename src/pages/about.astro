@@ -63,11 +63,11 @@ const featuredReposWithStars = await Promise.all(
     <article class="panel compact-panel p-5">
       <div class="section-head">
         <h2>The Backstory (Short Version)</h2>
-        <p>Started with PowerShell because I hated repetitive clicks. Same goal, bigger systems.</p>
+        <p>I found PowerShell, caught the automation bug, and realized I could make a career out of being lazy in the best way: automate it.</p>
       </div>
       <div class="grid gap-3">
         {aboutCopy.body.map((paragraph) => (
-          <p class="m-0 max-w-4xl leading-relaxed text-zinc-300">{paragraph}</p>
+          <p class="m-0 max-w-4xl leading-relaxed text-zinc-300" set:html={paragraph}></p>
         ))}
       </div>
     </article>
@@ -141,18 +141,16 @@ const featuredReposWithStars = await Promise.all(
     </div>
   </section>
 
-  <section class="content-section panel compact-panel p-5 reveal reveal-delay-5">
-    <div class="section-head">
-      <h2>Say Hey</h2>
-      <p>Email is best for project talk. I read everything.</p>
+  <a
+    class="content-section panel compact-panel mx-auto w-full max-w-3xl p-6 reveal reveal-delay-5 interactive-card card-link-block no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+    href="/contact"
+  >
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="space-y-1">
+        <h2 class="m-0 text-3xl font-semibold tracking-tight text-zinc-100">Say Hey!</h2>
+        <p class="m-0 text-zinc-200">Seriously, please talk to me.</p>
+      </div>
+      <span class="link-chip inline-flex">Open Contact Page -></span>
     </div>
-
-    <div class="flex flex-wrap gap-2">
-      <a class="link-chip" href={`mailto:${siteMetadata.email}`}>Email Me</a>
-      <a class="link-chip" href="/contact">Contact Page</a>
-      <a class="link-chip" href="https://github.com/TechDufus" target="_blank" rel="noopener noreferrer">
-        GitHub Profile
-      </a>
-    </div>
-  </section>
+  </a>
 </BaseLayout>
