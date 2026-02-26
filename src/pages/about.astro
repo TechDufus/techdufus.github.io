@@ -112,7 +112,7 @@ const featuredReposWithStars = await Promise.all(
 
     <div class="repo-rail">
       {featuredReposWithStars.map((repo) => (
-        <article class="repo-rail-card interactive-card compact-panel p-4">
+        <article class="repo-rail-card interactive-card compact-panel p-4" data-depth="featured" data-pointer-halo="subtle">
           <a
             href={repo.url}
             class="card-link-overlay"
@@ -153,4 +153,9 @@ const featuredReposWithStars = await Promise.all(
       <span class="link-chip inline-flex">Open Contact Page -></span>
     </div>
   </a>
+
+  <script>
+    import { initPointerHalo } from '../lib/client/pointerHalo';
+    initPointerHalo();
+  </script>
 </BaseLayout>

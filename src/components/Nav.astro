@@ -13,7 +13,7 @@ const supportActive = routeMatches(supportHref);
 ---
 
 <header class="sticky top-4 z-40 mb-8 sm:mb-10">
-  <div class="rounded-2xl border border-white/10 bg-[#0b0d13]/82 p-2.5 shadow-editor backdrop-blur-md">
+  <div class="nav-shell" data-scroll-chrome="site-nav">
     <div class="flex flex-wrap items-center justify-between gap-2">
       <a
         class="inline-flex items-center rounded-lg border border-line bg-panel px-3 py-2 font-mono text-sm text-signal no-underline transition hover:border-signal/45 hover:text-electric"
@@ -89,5 +89,7 @@ const supportActive = routeMatches(supportHref);
 
 <script>
   import { initDocsMenus } from '../lib/client/docsMenu';
+  import { initScrollChrome } from '../lib/client/scrollChrome';
   initDocsMenus();
+  initScrollChrome();
 </script>

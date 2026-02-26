@@ -17,7 +17,12 @@ const recentPosts = posts.slice(0, 4);
 ---
 
 <BaseLayout title="Home" description={homeCopy.metaDescription}>
-  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
+  <section
+    class="hero-surface hero-grid-lines reveal reveal-delay-1"
+    data-signature="home-hero"
+    data-pointer-halo="subtle"
+  >
+    <span class="hero-signature-layer" aria-hidden="true"></span>
     <div class="grid gap-6 lg:grid-cols-[1.25fr_0.75fr] lg:items-start">
       <div>
         <p class="eyebrow">{homeCopy.eyebrow}</p>
@@ -83,7 +88,12 @@ const recentPosts = posts.slice(0, 4);
         <h2 class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">Start here</h2>
         <ul class="m-0 mt-3 grid list-none gap-2 p-0">
           <li>
-            <a class="interactive-card card-link-block px-3 py-2.5" href="/blog/ai-already-took-my-job">
+            <a
+              class="interactive-card card-link-block px-3 py-2.5"
+              href="/blog/ai-already-took-my-job"
+              data-depth="signature"
+              data-pointer-halo="subtle"
+            >
               <p class="m-0 text-sm font-medium text-zinc-100">AI Already Took My Job</p>
               <p class="m-0 mt-1 text-xs text-zinc-300">Where I break down how AI changed my day-to-day workflow.</p>
             </a>
@@ -132,7 +142,7 @@ const recentPosts = posts.slice(0, 4);
     </div>
     <div class="grid gap-3 md:grid-cols-3">
       {homeProofPoints.map((point) => (
-        <article class="interactive-card metric-card p-4">
+        <article class="interactive-card metric-card p-4" data-depth="featured" data-pointer-halo="subtle">
           <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{point.label}</p>
           <p class="m-0 mt-2 text-base font-semibold text-zinc-100">{point.value}</p>
           <p class="m-0 mt-2 text-sm text-zinc-300">{point.note}</p>
@@ -172,4 +182,9 @@ const recentPosts = posts.slice(0, 4);
       <a class="nav-link" href="/docs/career">Career Notes</a>
     </div>
   </section>
+
+  <script>
+    import { initPointerHalo } from '../lib/client/pointerHalo';
+    initPointerHalo();
+  </script>
 </BaseLayout>

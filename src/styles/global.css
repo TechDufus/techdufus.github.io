@@ -10,6 +10,11 @@
     --motion-base: 220ms;
     --motion-slow: 320ms;
     --page-section-gap: clamp(1.75rem, 3vw, 2.25rem);
+    --wow-halo-size: 260px;
+    --wow-halo-idle: 0.03;
+    --wow-halo-active: 0.12;
+    --wow-nav-depth: 0;
+    --wow-signature-duration: 1600ms;
   }
 
   html,
@@ -198,6 +203,68 @@
     transform: translateY(-1px);
   }
 
+  .interactive-card[data-depth='featured'] {
+    border-color: rgba(255, 255, 255, 0.14);
+  }
+
+  .interactive-card[data-depth='featured']:hover,
+  .interactive-card[data-depth='featured']:focus-within {
+    border-color: rgba(110, 200, 255, 0.42);
+    box-shadow: 0 22px 36px rgba(1, 5, 12, 0.52);
+  }
+
+  .interactive-card[data-depth='signature'] {
+    border-color: rgba(99, 242, 200, 0.34);
+    background-image: linear-gradient(145deg, rgba(99, 242, 200, 0.08), rgba(110, 200, 255, 0.02) 48%, transparent 76%);
+  }
+
+  .interactive-card[data-depth='signature']::before {
+    background: linear-gradient(128deg, rgba(99, 242, 200, 0.16), rgba(110, 200, 255, 0.07) 40%, transparent 72%);
+  }
+
+  .interactive-card[data-depth='signature']:hover,
+  .interactive-card[data-depth='signature']:focus-within {
+    border-color: rgba(99, 242, 200, 0.5);
+    box-shadow: 0 24px 38px rgba(1, 5, 12, 0.55);
+  }
+
+  [data-pointer-halo='subtle'] {
+    --mx: 50%;
+    --my: 50%;
+    --halo-opacity: var(--wow-halo-idle);
+    isolation: isolate;
+    position: relative;
+  }
+
+  .pointer-halo-layer {
+    position: absolute;
+    inset: -1px;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      var(--wow-halo-size) circle at var(--mx) var(--my),
+      rgba(110, 200, 255, 0.2),
+      rgba(99, 242, 200, 0.1) 40%,
+      transparent 72%
+    );
+    transition: opacity 220ms var(--surface-ease);
+  }
+
+  [data-pointer-ready='true'] > :not(.pointer-halo-layer):not(.card-link-overlay):not(.hero-signature-layer) {
+    position: relative;
+    z-index: 9;
+  }
+
+  [data-pointer-ready='true'] > .pointer-halo-layer {
+    opacity: var(--halo-opacity);
+  }
+
+  [data-pointer-ready='true']:is(:hover, :focus-within) {
+    --halo-opacity: var(--wow-halo-active);
+  }
+
   .card-link-block {
     @apply block no-underline;
   }
@@ -231,17 +298,43 @@
     text-decoration-color: rgba(110, 200, 255, 0.72);
   }
 
+  .nav-shell {
+    @apply rounded-2xl p-2.5 shadow-editor;
+    border: 1px solid rgb(255 255 255 / calc(0.1 + (var(--wow-nav-depth) * 0.1)));
+    background-color: rgb(11 13 19 / calc(0.82 + (var(--wow-nav-depth) * 0.08)));
+    backdrop-filter: blur(calc(10px + (var(--wow-nav-depth) * 4px)));
+    -webkit-backdrop-filter: blur(calc(10px + (var(--wow-nav-depth) * 4px)));
+    box-shadow: 0 calc(24px + (var(--wow-nav-depth) * 6px)) 60px -32px rgb(0 0 0 / calc(0.72 + (var(--wow-nav-depth) * 0.12)));
+    transition:
+      border-color var(--motion-base) var(--surface-ease),
+      background-color var(--motion-base) var(--surface-ease),
+      box-shadow var(--motion-base) var(--surface-ease),
+      backdrop-filter var(--motion-base) var(--surface-ease);
+  }
+
   .nav-link {
     @apply inline-flex items-center rounded-lg border border-transparent px-3 py-1.5 text-sm text-zinc-300 no-underline;
+    background-image: linear-gradient(
+      118deg,
+      transparent 34%,
+      rgba(110, 200, 255, 0.14) 49%,
+      rgba(99, 242, 200, 0.12) 52%,
+      transparent 66%
+    );
+    background-repeat: no-repeat;
+    background-size: 240% 100%;
+    background-position: 135% 0;
     transition:
       border-color var(--motion-fast) var(--surface-ease),
       color var(--motion-fast) var(--surface-ease),
       background-color var(--motion-fast) var(--surface-ease),
+      background-position var(--motion-slow) var(--surface-ease),
       transform var(--motion-fast) var(--surface-ease);
   }
 
   .nav-link:hover {
     @apply border-white/10 bg-white/5 text-zinc-100;
+    background-position: -40% 0;
     transform: translateY(-1px);
   }
 
@@ -415,6 +508,28 @@
     @apply pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent;
   }
 
+  .hero-signature-layer {
+    position: absolute;
+    inset: -24% -18%;
+    z-index: 12;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(-70%, 0, 0) skewX(-16deg);
+    background: linear-gradient(
+      122deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 36%,
+      rgba(110, 200, 255, 0.16) 49%,
+      rgba(99, 242, 200, 0.1) 58%,
+      transparent 74%
+    );
+    will-change: transform, opacity;
+  }
+
+  [data-signature='home-hero'][data-signature-play='true'] .hero-signature-layer {
+    animation: heroSignature var(--wow-signature-duration) cubic-bezier(0.22, 0.8, 0.2, 1) 1 forwards;
+  }
+
   .hero-grid-lines::before {
     content: '';
     position: absolute;
@@ -585,11 +700,22 @@
 
   .contact-quick-link {
     @apply inline-flex rounded-full border border-line bg-panel px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-zinc-200 no-underline;
+    background-image: linear-gradient(
+      118deg,
+      transparent 36%,
+      rgba(110, 200, 255, 0.14) 50%,
+      rgba(99, 242, 200, 0.12) 54%,
+      transparent 68%
+    );
+    background-repeat: no-repeat;
+    background-size: 240% 100%;
+    background-position: 135% 0;
     transition:
       border-color var(--motion-fast) var(--surface-ease),
       color var(--motion-fast) var(--surface-ease),
       transform var(--motion-fast) var(--surface-ease),
-      background-color var(--motion-fast) var(--surface-ease);
+      background-color var(--motion-fast) var(--surface-ease),
+      background-position var(--motion-slow) var(--surface-ease);
   }
 
   .contact-quick-link:focus-visible {
@@ -601,6 +727,7 @@
   .contact-quick-link:hover {
     border-color: rgba(99, 242, 200, 0.45);
     color: rgb(99, 242, 200);
+    background-position: -40% 0;
     transform: translateY(-1px);
   }
 
@@ -801,11 +928,22 @@
 
   .link-chip {
     @apply inline-flex rounded-full border border-line bg-panel px-3 py-1.5 font-mono text-xs text-zinc-200 no-underline;
+    background-image: linear-gradient(
+      118deg,
+      transparent 36%,
+      rgba(110, 200, 255, 0.14) 50%,
+      rgba(99, 242, 200, 0.12) 54%,
+      transparent 68%
+    );
+    background-repeat: no-repeat;
+    background-size: 240% 100%;
+    background-position: 135% 0;
     transition:
       border-color var(--motion-fast) var(--surface-ease),
       color var(--motion-fast) var(--surface-ease),
       transform var(--motion-fast) var(--surface-ease),
-      background-color var(--motion-fast) var(--surface-ease);
+      background-color var(--motion-fast) var(--surface-ease),
+      background-position var(--motion-slow) var(--surface-ease);
   }
 
   .link-chip:focus-visible {
@@ -823,6 +961,7 @@
 
   .link-chip:hover {
     @apply border-signal text-signal;
+    background-position: -40% 0;
     transform: translateY(-1px);
   }
 
@@ -1016,6 +1155,23 @@
   }
 }
 
+@keyframes heroSignature {
+  0% {
+    opacity: 0;
+    transform: translate3d(-70%, 0, 0) skewX(-16deg);
+  }
+  18% {
+    opacity: 0.11;
+  }
+  58% {
+    opacity: 0.08;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(84%, 0, 0) skewX(-16deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -1029,7 +1185,8 @@
   .terminal-cursor,
   .reveal,
   .hero-grid-lines::before,
-  .gentle-float {
+  .gentle-float,
+  .hero-signature-layer {
     animation: none;
   }
 
@@ -1041,6 +1198,7 @@
   .panel,
   .interactive-panel,
   .interactive-card,
+  .nav-shell,
   .nav-link,
   .docs-popover,
   .docs-popover-link,
@@ -1048,8 +1206,13 @@
   .footer-social-link,
   .link-chip,
   .story-card,
+  .pointer-halo-layer,
   a {
     transition: none;
+  }
+
+  .pointer-halo-layer {
+    display: none;
   }
 
   .interactive-panel:hover,
