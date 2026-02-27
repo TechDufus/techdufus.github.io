@@ -15,6 +15,11 @@
     --wow-halo-active: 0.12;
     --wow-nav-depth: 0;
     --wow-signature-duration: 1600ms;
+    --wow-aurora-a-opacity: 0.19;
+    --wow-aurora-b-opacity: 0.15;
+    --wow-aurora-speed-a: 40s;
+    --wow-aurora-speed-b: 54s;
+    --wow-aurora-shift: 4%;
   }
 
   html,
@@ -80,6 +85,7 @@
     inset: 0;
     z-index: -1;
     overflow: hidden;
+    isolation: isolate;
     background:
       radial-gradient(900px 540px at 90% -5%, rgba(110, 200, 255, 0.11), transparent 60%),
       radial-gradient(1080px 700px at 0% -15%, rgba(99, 242, 200, 0.09), transparent 66%),
@@ -96,13 +102,43 @@
   }
 
   .site-bg::before {
+    z-index: 1;
     background:
       radial-gradient(560px 320px at 16% 34%, rgba(110, 200, 255, 0.1), transparent 70%),
       radial-gradient(460px 300px at 82% 78%, rgba(99, 242, 200, 0.08), transparent 74%);
     animation: ambientDriftA 32s ease-in-out infinite alternate;
   }
 
+  .site-bg-aurora {
+    position: absolute;
+    inset: -24%;
+    pointer-events: none;
+    will-change: transform, opacity;
+    mix-blend-mode: screen;
+  }
+
+  .site-bg-aurora-a {
+    z-index: 2;
+    opacity: var(--wow-aurora-a-opacity);
+    background:
+      radial-gradient(760px 420px at 12% 38%, rgba(110, 200, 255, 0.26), transparent 72%),
+      radial-gradient(620px 360px at 84% 70%, rgba(99, 242, 200, 0.23), transparent 74%),
+      radial-gradient(500px 300px at 56% 14%, rgba(140, 215, 255, 0.14), transparent 72%);
+    animation: auroraOrbitA var(--wow-aurora-speed-a) ease-in-out infinite alternate;
+  }
+
+  .site-bg-aurora-b {
+    z-index: 3;
+    opacity: var(--wow-aurora-b-opacity);
+    background:
+      radial-gradient(700px 420px at 72% 24%, rgba(99, 242, 200, 0.25), transparent 72%),
+      radial-gradient(620px 360px at 20% 84%, rgba(110, 200, 255, 0.2), transparent 74%),
+      radial-gradient(520px 320px at 46% 58%, rgba(96, 223, 204, 0.12), transparent 74%);
+    animation: auroraOrbitB var(--wow-aurora-speed-b) ease-in-out infinite alternate;
+  }
+
   .site-bg::after {
+    z-index: 4;
     background:
       repeating-linear-gradient(
         90deg,
@@ -112,7 +148,7 @@
         transparent 34px
       ),
       linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
-    opacity: 0.28;
+    opacity: 0.16;
     animation: ambientDriftB 38s ease-in-out infinite alternate;
   }
 
@@ -1094,6 +1130,32 @@
   }
 }
 
+@keyframes auroraOrbitA {
+  0% {
+    transform: translate3d(calc(var(--wow-aurora-shift) * -0.64), calc(var(--wow-aurora-shift) * 0.36), 0)
+      scale(1.02)
+      rotate(-1.2deg);
+  }
+  100% {
+    transform: translate3d(calc(var(--wow-aurora-shift) * 0.55), calc(var(--wow-aurora-shift) * -0.5), 0)
+      scale(1.05)
+      rotate(1.4deg);
+  }
+}
+
+@keyframes auroraOrbitB {
+  0% {
+    transform: translate3d(calc(var(--wow-aurora-shift) * 0.45), calc(var(--wow-aurora-shift) * -0.41), 0)
+      scale(1.01)
+      rotate(1.3deg);
+  }
+  100% {
+    transform: translate3d(calc(var(--wow-aurora-shift) * -0.6), calc(var(--wow-aurora-shift) * 0.55), 0)
+      scale(1.04)
+      rotate(-1.1deg);
+  }
+}
+
 @keyframes gentleFloat {
   0%,
   100% {
@@ -1173,7 +1235,22 @@
   }
 }
 
+@media (max-width: 767px) {
+  :root {
+    --wow-aurora-a-opacity: 0.14;
+    --wow-aurora-b-opacity: 0.11;
+  }
+}
+
 @media (prefers-reduced-transparency: reduce) {
+  .site-bg-aurora-a {
+    opacity: calc(var(--wow-aurora-a-opacity) * 0.5);
+  }
+
+  .site-bg-aurora-b {
+    opacity: calc(var(--wow-aurora-b-opacity) * 0.5);
+  }
+
   .nav-shell {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -1188,6 +1265,7 @@
 }
 
 @media (prefers-contrast: more) {
+  .site-bg-aurora,
   .hero-signature-layer,
   .pointer-halo-layer {
     display: none;
@@ -1218,6 +1296,7 @@
   .site-bg,
   .site-bg::before,
   .site-bg::after,
+  .site-bg-aurora,
   .hero-signature-layer,
   .pointer-halo-layer {
     display: none;
@@ -1247,6 +1326,7 @@
 
   .site-bg::before,
   .site-bg::after,
+  .site-bg-aurora,
   .footer-shell::before,
   .status-dot,
   .terminal-lab::after,
@@ -1280,6 +1360,10 @@
   }
 
   .pointer-halo-layer {
+    display: none;
+  }
+
+  .site-bg-aurora {
     display: none;
   }
 

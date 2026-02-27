@@ -84,7 +84,10 @@ const socialImage = resolveAbsolute(ogImage ?? siteMetadata.media.defaultSocialI
     {noindex && <meta name="robots" content="noindex,nofollow" />}
   </head>
   <body class="bg-canvas text-ink antialiased">
-    <div class="site-bg" aria-hidden="true"></div>
+    <div class="site-bg" aria-hidden="true">
+      <span class="site-bg-aurora site-bg-aurora-a"></span>
+      <span class="site-bg-aurora site-bg-aurora-b"></span>
+    </div>
     <div class="site-shell">
       <Nav />
       <main class="site-main">
