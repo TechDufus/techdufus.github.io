@@ -48,13 +48,13 @@ export const supportLinks = [
   {
     label: 'Buy Me a Coffee',
     href: 'https://buymeacoffee.com/techdufus',
-    details: 'One-time or monthly coffee support to help cover tooling and writing time.',
+    details: 'One-time or monthly support for writing and tooling.',
     lane: '/coffee'
   },
   {
     label: 'GitHub Sponsors',
     href: 'https://github.com/sponsors/techdufus',
-    details: 'Monthly support through GitHub while I ship open source and platform notes.',
+    details: 'Monthly support while I publish open source and platform notes.',
     lane: '/sponsors'
   }
 ];

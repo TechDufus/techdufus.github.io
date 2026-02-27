@@ -5,7 +5,6 @@ import { supportLinks } from '../data/site';
 type SupportMeta = {
   lane: string;
   commitment: string;
-  bestFor: string;
   command: string;
   recommended?: boolean;
 };
@@ -14,13 +13,11 @@ const supportMetaByLabel: Record<string, SupportMeta> = {
   'Buy Me a Coffee': {
     lane: 'One-time',
     commitment: 'One-time or monthly',
-    bestFor: 'Quick thank-you support when a post or doc helped you solve something.',
     command: 'coffee'
   },
   'GitHub Sponsors': {
     lane: 'Monthly',
     commitment: 'Recurring sponsorship',
-    bestFor: 'Ongoing support while I ship new writeups, runbooks, and open source notes.',
     command: 'sponsor',
     recommended: true
   }
@@ -29,7 +26,6 @@ const supportMetaByLabel: Record<string, SupportMeta> = {
 const defaultSupportMeta: SupportMeta = {
   lane: 'Optional',
   commitment: 'Optional support',
-  bestFor: 'Support the work in the way that feels right for you.',
   command: 'support'
 };
 
@@ -95,7 +91,6 @@ const supportImpact = [
         </a>
       )}
     </div>
-    <p class="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">External links open in a new tab.</p>
   </section>
 
   <section class="content-section">
@@ -127,7 +122,6 @@ const supportImpact = [
           </div>
           <p class="mt-1 text-sm font-medium text-zinc-100">{channel.lane} support</p>
           <p class="mt-2 text-sm leading-relaxed text-zinc-300">{channel.details}</p>
-          <p class="mt-2 text-sm leading-relaxed text-zinc-300">{channel.bestFor}</p>
           <div class="mt-3 flex flex-wrap gap-1.5">
             <span class="contact-pill">{channel.commitment}</span>
             <span class="contact-pill">/{channel.command}</span>
