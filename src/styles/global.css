@@ -582,6 +582,75 @@
     animation: gridDrift 20s linear infinite;
   }
 
+  .support-hero-celebrate {
+    isolation: isolate;
+  }
+
+  .support-hero-celebrate > :not(.support-hero-glint) {
+    position: relative;
+    z-index: 9;
+  }
+
+  .support-hero-glint {
+    position: absolute;
+    inset: -30% -18%;
+    z-index: 8;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(-72%, 0, 0) skewX(-16deg);
+    background: linear-gradient(
+      122deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.02) 34%,
+      rgba(251, 191, 36, 0.22) 48%,
+      rgba(99, 242, 200, 0.14) 56%,
+      transparent 74%
+    );
+    mix-blend-mode: screen;
+    will-change: transform, opacity;
+    animation: supportHeroGlint 1250ms var(--surface-ease) 360ms 1 both;
+  }
+
+  .support-route-card,
+  .support-impact-card,
+  .support-closing-card {
+    will-change: transform, opacity;
+  }
+
+  .support-sheen-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .support-sheen-card > :not(.support-card-sheen) {
+    position: relative;
+    z-index: 9;
+  }
+
+  .support-card-sheen {
+    position: absolute;
+    inset: -26% -18%;
+    z-index: 6;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(-70%, 0, 0) skewX(-18deg);
+    background: linear-gradient(
+      125deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.02) 30%,
+      rgba(251, 191, 36, 0.18) 47%,
+      rgba(110, 200, 255, 0.15) 55%,
+      transparent 74%
+    );
+    mix-blend-mode: screen;
+    will-change: transform, opacity;
+    animation:
+      supportCardSheen 980ms var(--surface-ease)
+      calc(var(--support-stagger, 0ms) + var(--support-sheen-offset, 280ms)) 1 both;
+  }
+
   .profile-frame {
     @apply overflow-hidden rounded-2xl border border-white/20 bg-[#080a0f] shadow-editor;
   }
@@ -1235,6 +1304,37 @@
   }
 }
 
+@keyframes supportHeroGlint {
+  0% {
+    opacity: 0;
+    transform: translate3d(-72%, 0, 0) skewX(-16deg);
+  }
+  22% {
+    opacity: 0.18;
+  }
+  64% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(86%, 0, 0) skewX(-16deg);
+  }
+}
+
+@keyframes supportCardSheen {
+  0% {
+    opacity: 0;
+    transform: translate3d(-70%, 0, 0) skewX(-18deg);
+  }
+  26% {
+    opacity: 0.22;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(80%, 0, 0) skewX(-18deg);
+  }
+}
+
 @media (max-width: 767px) {
   :root {
     --wow-aurora-a-opacity: 0.14;
@@ -1267,6 +1367,8 @@
 @media (prefers-contrast: more) {
   .site-bg-aurora,
   .hero-signature-layer,
+  .support-hero-glint,
+  .support-card-sheen,
   .pointer-halo-layer {
     display: none;
   }
@@ -1298,6 +1400,8 @@
   .site-bg::after,
   .site-bg-aurora,
   .hero-signature-layer,
+  .support-hero-glint,
+  .support-card-sheen,
   .pointer-halo-layer {
     display: none;
   }
@@ -1333,6 +1437,8 @@
   .terminal-cursor,
   .reveal,
   .hero-grid-lines::before,
+  .support-hero-glint,
+  .support-card-sheen,
   .gentle-float,
   .hero-signature-layer {
     animation: none;

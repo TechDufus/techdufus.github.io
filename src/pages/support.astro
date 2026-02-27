@@ -65,7 +65,8 @@ const supportImpact = [
   title="Support"
   description="Support TechDufus if the content helped. Everything stays free, and support is optional."
 >
-  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
+  <section class="hero-surface hero-grid-lines support-hero-celebrate reveal reveal-delay-1">
+    <span class="support-hero-glint" aria-hidden="true"></span>
     <p class="eyebrow">Support</p>
     <h1 class="hero-title">Keep the notes free. Support if it feels worth it.</h1>
     <p class="mt-4 max-w-2xl text-zinc-300">
@@ -97,24 +98,27 @@ const supportImpact = [
     <p class="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">External links open in a new tab.</p>
   </section>
 
-  <section class="content-section reveal reveal-delay-2">
+  <section class="content-section">
     <div class="section-head">
       <h2>Choose your support lane</h2>
       <p>Pick whichever platform you already trust.</p>
     </div>
 
     <div class="grid gap-3 sm:grid-cols-2">
-      {supportChannels.map((channel) => (
+      {supportChannels.map((channel, index) => (
         <a
           class:list={[
             'interactive-card card-link-block p-5 contact-grid-card contact-card-support',
+            'reveal support-route-card support-sheen-card',
             channel.recommended && 'contact-grid-card-spotlight'
           ]}
           href={channel.href}
           target={channel.external ? '_blank' : undefined}
           rel={channel.external ? 'noopener noreferrer' : undefined}
           data-depth={channel.recommended ? 'signature' : undefined}
+          style={`--support-stagger: ${160 + index * 90}ms; animation-delay: var(--support-stagger);`}
         >
+          <span class="support-card-sheen" aria-hidden="true"></span>
           <div class="flex items-start justify-between gap-2">
             <p class="font-mono text-xs uppercase tracking-[0.14em] text-signal">{channel.label}</p>
             <span class:list={['contact-priority', channel.recommended && 'contact-priority-primary']}>
@@ -134,15 +138,19 @@ const supportImpact = [
     </div>
   </section>
 
-  <section class="content-section reveal reveal-delay-3">
+  <section class="content-section">
     <div class="section-head">
       <h2>What support enables</h2>
       <p>Directly funds the work that keeps this site useful.</p>
     </div>
 
     <div class="grid gap-3 md:grid-cols-3">
-      {supportImpact.map((item) => (
-        <article class="interactive-card metric-card p-4">
+      {supportImpact.map((item, index) => (
+        <article
+          class="interactive-card metric-card p-4 reveal support-impact-card support-sheen-card"
+          style={`--support-stagger: ${340 + index * 90}ms; animation-delay: var(--support-stagger);`}
+        >
+          <span class="support-card-sheen" aria-hidden="true"></span>
           <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{item.label}</p>
           <p class="m-0 mt-2 text-sm leading-relaxed text-zinc-300">{item.detail}</p>
           <p class="terminal-strip mt-3 inline-flex">{item.lane}</p>
@@ -151,7 +159,11 @@ const supportImpact = [
     </div>
   </section>
 
-  <section class="content-section panel compact-panel p-5 reveal reveal-delay-4">
+  <section
+    class="content-section panel compact-panel p-5 reveal support-closing-card support-sheen-card"
+    style="--support-stagger: 520ms; --support-sheen-offset: 180ms; animation-delay: var(--support-stagger);"
+  >
+    <span class="support-card-sheen" aria-hidden="true"></span>
     <div class="section-head">
       <h2>No pressure policy</h2>
       <p>Everything here stays free either way.</p>
