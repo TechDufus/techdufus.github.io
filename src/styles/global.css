@@ -608,7 +608,7 @@
     );
     mix-blend-mode: screen;
     will-change: transform, opacity;
-    animation: supportHeroGlint 1250ms var(--surface-ease) 360ms 1 both;
+    animation: supportHeroGlint 1250ms var(--surface-ease) 140ms 1 both;
   }
 
   .support-route-card,
@@ -646,9 +646,7 @@
     );
     mix-blend-mode: screen;
     will-change: transform, opacity;
-    animation:
-      supportCardSheen 980ms var(--surface-ease)
-      calc(var(--support-stagger, 0ms) + var(--support-sheen-offset, 280ms)) 1 both;
+    animation: supportCardSheen 980ms var(--surface-ease) calc(var(--support-stagger, 0ms) + 140ms) 1 both;
   }
 
   .profile-frame {
