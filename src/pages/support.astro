@@ -2,10 +2,63 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { supportLinks } from '../data/site';
 
+type SupportMeta = {
+  lane: string;
+  commitment: string;
+  bestFor: string;
+  command: string;
+  recommended?: boolean;
+};
+
+const supportMetaByLabel: Record<string, SupportMeta> = {
+  'Buy Me a Coffee': {
+    lane: 'One-time',
+    commitment: 'One-time or monthly',
+    bestFor: 'Quick thank-you support when a post or doc helped you solve something.',
+    command: 'coffee'
+  },
+  'GitHub Sponsors': {
+    lane: 'Monthly',
+    commitment: 'Recurring sponsorship',
+    bestFor: 'Ongoing support while I ship new writeups, runbooks, and open source notes.',
+    command: 'sponsor',
+    recommended: true
+  }
+};
+
+const defaultSupportMeta: SupportMeta = {
+  lane: 'Optional',
+  commitment: 'Optional support',
+  bestFor: 'Support the work in the way that feels right for you.',
+  command: 'support'
+};
+
 const supportChannels = supportLinks.map((link) => ({
   ...link,
+  ...(supportMetaByLabel[link.label] ?? defaultSupportMeta),
   external: link.href.startsWith('http')
 }));
+
+const oneTimeRoute = supportChannels.find((channel) => channel.lane === 'One-time');
+const monthlyRoute = supportChannels.find((channel) => channel.lane === 'Monthly');
+
+const supportImpact = [
+  {
+    label: 'Lab costs',
+    detail: 'Offsets hosting, hardware, and homelab rebuild costs behind the examples.',
+    lane: '/infra'
+  },
+  {
+    label: 'Writing time',
+    detail: 'Creates room to turn rough incident notes into practical, searchable docs.',
+    lane: '/docs'
+  },
+  {
+    label: 'Open source upkeep',
+    detail: 'Supports maintenance, issue triage, and updates across active repos.',
+    lane: '/oss'
+  }
+];
 ---
 
 <BaseLayout
@@ -14,58 +67,102 @@ const supportChannels = supportLinks.map((link) => ({
 >
   <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
     <p class="eyebrow">Support</p>
-    <h1 class="hero-title">Keep the notes free. Support only if you want to.</h1>
+    <h1 class="hero-title">Keep the notes free. Support if it feels worth it.</h1>
     <p class="mt-4 max-w-2xl text-zinc-300">
       Every post and doc on this site stays free. No paywall and no premium tier. Support is optional, and it helps me
       keep publishing practical writeups from real platform work.
     </p>
     <div class="mt-5 flex flex-wrap gap-2">
-      {supportChannels.map((channel) => (
+      {oneTimeRoute && (
         <a
           class="contact-quick-link"
-          href={channel.href}
-          target={channel.external ? '_blank' : undefined}
-          rel={channel.external ? 'noopener noreferrer' : undefined}
+          href={oneTimeRoute.href}
+          target={oneTimeRoute.external ? '_blank' : undefined}
+          rel={oneTimeRoute.external ? 'noopener noreferrer' : undefined}
         >
-          {channel.label}
+          One-time support -> {oneTimeRoute.label}
         </a>
-      ))}
+      )}
+      {monthlyRoute && (
+        <a
+          class="contact-quick-link"
+          href={monthlyRoute.href}
+          target={monthlyRoute.external ? '_blank' : undefined}
+          rel={monthlyRoute.external ? 'noopener noreferrer' : undefined}
+        >
+          Monthly support -> {monthlyRoute.label}
+        </a>
+      )}
     </div>
+    <p class="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">External links open in a new tab.</p>
   </section>
 
   <section class="content-section reveal reveal-delay-2">
     <div class="section-head">
-      <h2>Support routes</h2>
-      <p>Pick whichever platform you already use.</p>
+      <h2>Choose your support lane</h2>
+      <p>Pick whichever platform you already trust.</p>
     </div>
 
     <div class="grid gap-3 sm:grid-cols-2">
       {supportChannels.map((channel) => (
         <a
-          class="interactive-card card-link-block p-5 contact-grid-card contact-card-support"
+          class:list={[
+            'interactive-card card-link-block p-5 contact-grid-card contact-card-support',
+            channel.recommended && 'contact-grid-card-spotlight'
+          ]}
           href={channel.href}
           target={channel.external ? '_blank' : undefined}
           rel={channel.external ? 'noopener noreferrer' : undefined}
+          data-depth={channel.recommended ? 'signature' : undefined}
         >
-          <p class="font-mono text-xs uppercase tracking-[0.14em] text-signal">{channel.label}</p>
-          <p class="mt-2 text-sm leading-relaxed text-zinc-300">{channel.details}</p>
-          <div class="mt-3 flex items-center justify-between gap-2">
-            <span class="contact-pill">Optional support</span>
-            <span class="contact-pill">{channel.lane}</span>
+          <div class="flex items-start justify-between gap-2">
+            <p class="font-mono text-xs uppercase tracking-[0.14em] text-signal">{channel.label}</p>
+            <span class:list={['contact-priority', channel.recommended && 'contact-priority-primary']}>
+              {channel.recommended ? 'most sustainable' : 'optional'}
+            </span>
           </div>
+          <p class="mt-1 text-sm font-medium text-zinc-100">{channel.lane} support</p>
+          <p class="mt-2 text-sm leading-relaxed text-zinc-300">{channel.details}</p>
+          <p class="mt-2 text-sm leading-relaxed text-zinc-300">{channel.bestFor}</p>
+          <div class="mt-3 flex flex-wrap gap-1.5">
+            <span class="contact-pill">{channel.commitment}</span>
+            <span class="contact-pill">/{channel.command}</span>
+          </div>
+          <span class="contact-quick-link mt-4 inline-flex">Open {channel.label} -></span>
         </a>
       ))}
     </div>
   </section>
 
-  <section class="content-section panel compact-panel p-5 reveal reveal-delay-3">
+  <section class="content-section reveal reveal-delay-3">
     <div class="section-head">
-      <h2>What support changes</h2>
-      <p>Short answer: it helps keep this project sustainable.</p>
+      <h2>What support enables</h2>
+      <p>Directly funds the work that keeps this site useful.</p>
+    </div>
+
+    <div class="grid gap-3 md:grid-cols-3">
+      {supportImpact.map((item) => (
+        <article class="interactive-card metric-card p-4">
+          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{item.label}</p>
+          <p class="m-0 mt-2 text-sm leading-relaxed text-zinc-300">{item.detail}</p>
+          <p class="terminal-strip mt-3 inline-flex">{item.lane}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section panel compact-panel p-5 reveal reveal-delay-4">
+    <div class="section-head">
+      <h2>No pressure policy</h2>
+      <p>Everything here stays free either way.</p>
     </div>
     <p class="m-0 max-w-3xl text-sm leading-relaxed text-zinc-300">
-      Support helps offset hosting, lab costs, and the time it takes to turn broken experiments into useful docs. The
-      content remains free either way, so only contribute if it feels worth it.
+      No paywall, no premium tier, and no gated docs. If support feels worth it, I appreciate it. If not, keep using
+      the posts and docs exactly the same way.
     </p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <a class="nav-link nav-link-active" href="/blog">Read latest posts</a>
+      <a class="nav-link" href="/docs">Browse docs</a>
+    </div>
   </section>
 </BaseLayout>
