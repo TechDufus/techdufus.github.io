@@ -13,9 +13,9 @@ export default {
         line: '#232a3a',
         ink: '#e8ebf6',
         muted: '#9aa3b8',
-        signal: '#63f2c8',
+        signal: '#d2e6ff',
         ember: '#f4a259',
-        electric: '#6ec8ff'
+        electric: '#7fc8ff'
       },
       fontFamily: {
         sans: ['Sora', 'ui-sans-serif', 'system-ui', 'sans-serif'],
