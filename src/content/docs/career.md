@@ -66,42 +66,25 @@ As a Senior DevSecOps Engineer at Raft, I support mission-critical platform deli
 Specific mission details stay private, but the engineering patterns are the same: automate carefully, verify continuously, and keep accountability explicit.
 
 ## Agentic engineering in production
-I use agentic workflows in real engineering delivery, not as a toy demo. The rule is simple: useful automation only counts if it improves reliability.
+I use agent workflows in real work.
+They help me move faster without giving up quality or ownership.
 
-### Multi-agent orchestration
-- I split work into clear roles (discovery, implementation, verification) so context is focused and handoffs are intentional.
-- I parallelize read-heavy workstreams first (discovery and review), then keep exactly one writer for edits.
-- I treat orchestration output as input to engineering judgment, not a replacement for it.
-
-### Explicit ownership
-- Every change has a named owner for implementation and a named owner for review.
-- "The agent did it" is never an acceptable production accountability model.
-- I keep ownership boundaries clear in incident response and release work so decisions are traceable.
-
-### Review rails
-- I expect policy rails before merge: linting, tests, security checks, and environment-aware validation.
-- For platform and policy changes, I bias toward diff review plus behavioral verification, not just static green checks.
-- For GitOps changes, I care about auditability and drift control as much as speed.
-
-### Rollback expectations
-- If I cannot explain rollback in plain language, the change is not ready.
-- Infrastructure and policy updates should have deterministic rollback paths, not improvised fixes.
-- I plan for partial failure up front, especially in secure or air-gapped deployment paths.
-
-### Reliability over hype
-- I prefer boring, debuggable workflows over flashy autonomous behavior.
-- The goal is lower incident rate and faster recovery, not maximum novelty.
-- Agentic systems should reduce operational load and increase clarity for humans on-call.
+- When work gets big, I split it into phases: gather context, implement, then verify.
+- AI helps with speed, but I still own the final decision and release.
+- I prefer git-first, reproducible workflows because they are easier to review and easier to recover.
+- I use the same pattern in public tooling (`oh-my-claude`, `openkanban`) and in my homelab GitOps flow.
 
 ## Community, mentoring, and public work
-Outside day-job delivery, I spend a lot of time helping people level up.
+At this point, one of my biggest goals is simple: help people.
+I share what worked, what failed, and what I changed.
 
-- I maintain this site to document what worked, what failed, and what changed after incidents.
-- I stream open-source and infra work on Twitch.
-- I mentor and support engineers in community spaces, including PowerShell-focused Discord groups.
-- I keep building in public through GitHub projects and practical writeups.
+- I publish practical notes on this site across PowerShell, Kubernetes, incidents, and AI workflow changes.
+- I maintain open-source tooling tied directly to my workflow (`dotfiles`, `home.io`, `oh-my-claude`, `openkanban`).
+- I stay active in community spaces and share practical patterns there too.
 
-Teaching and sharing force me to keep my own thinking honest. If I cannot explain it clearly, I probably do not understand it deeply enough yet.
+If sharing my work helps people, it is worth it.
 
 ## Why this page exists
-This page is not a polished corporate bio. It is a practical map of how I work: automate repetitive effort, keep ownership explicit, respect security constraints, and optimize for reliable delivery under pressure.
+This page is here for the real version, not polished corporate copy.
+It is a straightforward record of what I have done and how I work.
+If it helps people, then it did its job.
