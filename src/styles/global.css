@@ -10,6 +10,8 @@
     --surface-2-rgb: 7, 12, 20;
     --surface-3-rgb: 11, 18, 30;
     --surface-4-rgb: 16, 28, 44;
+    --ink-body-rgb: 199, 215, 233;
+    --ink-soft-rgb: 171, 190, 212;
     --blue-electric-rgb: 34, 196, 255;
     --blue-signal-rgb: 137, 214, 255;
     --blue-mist-rgb: 76, 145, 214;
@@ -177,6 +179,14 @@
     margin-top: var(--page-section-gap);
   }
 
+  .text-copy {
+    color: rgba(var(--ink-body-rgb), 0.95);
+  }
+
+  .text-copy-soft {
+    color: rgba(var(--ink-soft-rgb), 0.94);
+  }
+
   .panel {
     @apply rounded-xl border border-line bg-panel/90 shadow-editor;
     background-image: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
@@ -198,6 +208,14 @@
 
   .compact-panel {
     background-image: linear-gradient(145deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0));
+  }
+
+  .surface-tier-2 {
+    background-color: rgba(var(--surface-2-rgb), 0.82);
+  }
+
+  .surface-tier-3 {
+    background-color: rgba(var(--surface-3-rgb), 0.72);
   }
 
   .interactive-panel {
@@ -358,12 +376,12 @@
   }
 
   .nav-link {
-    @apply inline-flex items-center rounded-lg border border-transparent px-3 py-1.5 text-sm text-zinc-300 no-underline;
+    @apply inline-flex items-center rounded-lg border border-transparent px-3 py-1.5 text-sm text-zinc-200 no-underline;
     background-image: linear-gradient(
       118deg,
       transparent 34%,
-      rgba(var(--blue-electric-rgb), 0.1) 49%,
-      rgba(var(--blue-signal-rgb), 0.08) 52%,
+      rgba(var(--blue-electric-rgb), 0.06) 49%,
+      rgba(var(--blue-signal-rgb), 0.05) 52%,
       transparent 66%
     );
     background-repeat: no-repeat;
@@ -379,12 +397,12 @@
   }
 
   .nav-link:hover {
-    border-color: rgba(var(--blue-electric-rgb), 0.58);
-    background-color: rgba(var(--blue-electric-rgb), 0.16);
-    color: rgb(236, 246, 255);
+    border-color: rgba(var(--blue-electric-rgb), 0.46);
+    background-color: rgba(var(--blue-electric-rgb), 0.11);
+    color: rgb(228, 240, 252);
     box-shadow:
-      0 0 0 1px rgba(var(--blue-electric-rgb), 0.24),
-      0 14px 24px -18px rgba(var(--blue-electric-rgb), 0.66);
+      0 0 0 1px rgba(var(--blue-electric-rgb), 0.18),
+      0 14px 24px -18px rgba(var(--blue-electric-rgb), 0.38);
     background-position: -40% 0;
     transform: translateY(-1px);
   }
@@ -394,13 +412,13 @@
   }
 
   .nav-link-active {
-    border-color: rgba(var(--blue-electric-rgb), 0.62);
-    background-color: rgba(var(--blue-electric-rgb), 0.2);
+    border-color: rgba(var(--blue-electric-rgb), 0.58);
+    background-color: rgba(var(--blue-electric-rgb), 0.16);
     color: rgb(236, 246, 255);
     background-image: none;
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.14),
-      0 0 0 1px rgba(var(--blue-electric-rgb), 0.22);
+      0 0 0 1px rgba(var(--blue-electric-rgb), 0.16);
   }
 
   .docs-menu {
@@ -463,15 +481,15 @@
   }
 
   .docs-popover-link:hover {
-    background-color: rgba(var(--blue-electric-rgb), 0.18);
-    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.28);
-    color: rgb(236, 246, 255);
+    background-color: rgba(var(--blue-electric-rgb), 0.12);
+    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.2);
+    color: rgb(228, 240, 252);
     transform: translateX(2px);
   }
 
   .docs-popover-link-active {
-    background-color: rgba(var(--blue-electric-rgb), 0.22);
-    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.32);
+    background-color: rgba(var(--blue-electric-rgb), 0.16);
+    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.24);
     color: rgb(236, 246, 255);
   }
 
@@ -496,7 +514,7 @@
   }
 
   .doc-prose {
-    @apply prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-zinc-100 prose-p:text-zinc-300 prose-strong:text-zinc-100 prose-li:text-zinc-300;
+    @apply prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-zinc-100 prose-p:text-zinc-200 prose-strong:text-zinc-100 prose-li:text-zinc-200;
   }
 
   .doc-prose > * {
@@ -529,6 +547,7 @@
   .doc-prose p,
   .doc-prose li {
     line-height: 1.78;
+    color: rgba(var(--ink-body-rgb), 0.95);
   }
 
   .doc-prose p + p {
@@ -556,6 +575,125 @@
   .doc-prose a:hover {
     @apply text-electric;
     text-decoration-color: rgba(var(--blue-electric-rgb), 0.74);
+  }
+
+  .post-prose > p:first-of-type {
+    font-size: clamp(1.05rem, 1.1vw + 0.85rem, 1.28rem);
+    line-height: 1.82;
+    color: rgb(224, 237, 252);
+    margin-bottom: 1.35rem;
+  }
+
+  .post-prose :where(h2, h3) {
+    position: relative;
+    padding-left: 0.9rem;
+    margin-bottom: 0.95rem;
+  }
+
+  .post-prose :where(h2, h3)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.16em;
+    bottom: 0.16em;
+    width: 0.22rem;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(var(--blue-signal-rgb), 0.92), rgba(var(--blue-electric-rgb), 0.62));
+    box-shadow: 0 0 0 1px rgba(var(--blue-electric-rgb), 0.24);
+  }
+
+  .post-prose h2 {
+    font-size: clamp(1.48rem, 1.1vw + 1.24rem, 1.92rem);
+    color: rgb(237, 246, 255);
+  }
+
+  .post-prose h3 {
+    font-size: clamp(1.2rem, 0.62vw + 1.04rem, 1.45rem);
+    color: rgb(227, 239, 254);
+  }
+
+  .post-prose :where(strong) {
+    color: rgb(241, 248, 255);
+  }
+
+  .post-prose :where(code):not(:where(pre code)) {
+    color: rgb(234, 245, 255);
+    border: 1px solid rgba(var(--blue-electric-rgb), 0.28);
+    background-color: rgba(var(--surface-3-rgb), 0.62);
+    padding: 0.14rem 0.42rem;
+    border-radius: 0.38rem;
+    font-size: 0.84em;
+  }
+
+  .post-prose :where(blockquote) {
+    border-left: 3px solid rgba(var(--blue-signal-rgb), 0.56);
+    background:
+      linear-gradient(135deg, rgba(var(--blue-electric-rgb), 0.09), rgba(var(--blue-signal-rgb), 0.03) 44%, transparent 82%),
+      rgba(var(--surface-2-rgb), 0.74);
+    border-radius: 0.85rem;
+    padding: 0.85rem 1rem;
+    color: rgb(224, 236, 252);
+  }
+
+  .post-prose :where(blockquote p:first-of-type)::before,
+  .post-prose :where(blockquote p:last-of-type)::after {
+    content: none;
+  }
+
+  .post-prose :where(ul > li, ol > li)::marker {
+    color: rgba(var(--blue-signal-rgb), 0.86);
+  }
+
+  .post-prose :where(hr) {
+    border: 0;
+    height: 1px;
+    margin: 2rem 0;
+    background: linear-gradient(90deg, transparent, rgba(var(--blue-signal-rgb), 0.42), transparent);
+  }
+
+  .post-prose :where(pre) {
+    border-color: rgba(var(--blue-electric-rgb), 0.28);
+    background:
+      linear-gradient(160deg, rgba(var(--surface-3-rgb), 0.9), rgba(var(--surface-2-rgb), 0.92)),
+      rgba(var(--surface-2-rgb), 0.96);
+    box-shadow: 0 18px 30px rgba(1, 5, 12, 0.32);
+  }
+
+  .post-prose :where(table) {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border: 1px solid rgba(var(--blue-signal-rgb), 0.24);
+    border-radius: 0.8rem;
+    background-color: rgba(var(--surface-2-rgb), 0.72);
+  }
+
+  .post-prose :where(th, td) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.68rem 0.78rem;
+  }
+
+  .post-prose :where(th) {
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(var(--blue-signal-rgb), 0.92);
+    background-color: rgba(var(--surface-3-rgb), 0.74);
+  }
+
+  .post-prose :where(tbody tr:last-child td) {
+    border-bottom: 0;
+  }
+
+  .post-prose :where(tbody tr:nth-child(2n)) {
+    background-color: rgba(var(--surface-3-rgb), 0.34);
+  }
+
+  .post-prose :where(img) {
+    border: 1px solid rgba(var(--blue-signal-rgb), 0.26);
+    box-shadow: 0 20px 34px rgba(1, 5, 12, 0.4);
   }
 
   .hero-surface {
@@ -722,7 +860,7 @@
   }
 
   .terminal-strip {
-    @apply rounded-xl border border-line px-3 py-2 font-mono text-xs uppercase tracking-[0.13em] text-zinc-300;
+    @apply rounded-xl border border-line px-3 py-2 font-mono text-xs uppercase tracking-[0.13em] text-zinc-200;
     background-color: rgb(var(--surface-1-rgb));
   }
 
@@ -731,7 +869,7 @@
   }
 
   .story-card {
-    @apply rounded-xl border border-line p-4 text-sm text-zinc-300;
+    @apply rounded-xl border border-line p-4 text-sm text-zinc-200;
     background-color: rgba(var(--surface-2-rgb), 0.9);
     transition:
       border-color var(--motion-base) var(--surface-ease),
@@ -821,20 +959,20 @@
   }
 
   .filter-chip:hover {
-    border-color: rgba(var(--blue-electric-rgb), 0.72);
-    background-color: rgba(var(--blue-electric-rgb), 0.16);
-    color: rgb(236, 246, 255);
+    border-color: rgba(var(--blue-electric-rgb), 0.54);
+    background-color: rgba(var(--blue-electric-rgb), 0.11);
+    color: rgb(228, 240, 252);
     box-shadow:
-      inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.24),
-      0 0 0 1px rgba(var(--blue-electric-rgb), 0.12);
+      inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.18),
+      0 0 0 1px rgba(var(--blue-electric-rgb), 0.08);
     transform: translateY(-1px);
   }
 
   .filter-chip-active {
-    border-color: rgba(var(--blue-electric-rgb), 0.82);
-    background-color: rgba(var(--blue-electric-rgb), 0.24);
+    border-color: rgba(var(--blue-electric-rgb), 0.66);
+    background-color: rgba(var(--blue-electric-rgb), 0.16);
     color: rgb(242, 249, 255);
-    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.32);
+    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.24);
   }
 
   .contact-quick-link {
@@ -864,10 +1002,10 @@
   }
 
   .contact-quick-link:hover {
-    border-color: rgba(var(--blue-electric-rgb), 0.66);
-    background-color: rgba(var(--blue-electric-rgb), 0.16);
-    color: rgb(236, 246, 255);
-    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.24);
+    border-color: rgba(var(--blue-electric-rgb), 0.5);
+    background-color: rgba(var(--blue-electric-rgb), 0.1);
+    color: rgb(228, 240, 252);
+    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.18);
     background-position: -40% 0;
     transform: translateY(-1px);
   }
@@ -960,10 +1098,10 @@
   }
 
   .setup-anchor-link:hover {
-    border-color: rgba(var(--blue-electric-rgb), 0.62);
-    background-color: rgba(var(--blue-electric-rgb), 0.14);
-    color: rgb(236, 246, 255);
-    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.2);
+    border-color: rgba(var(--blue-electric-rgb), 0.48);
+    background-color: rgba(var(--blue-electric-rgb), 0.09);
+    color: rgb(228, 240, 252);
+    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.16);
     transform: translateY(-1px);
   }
 
@@ -1033,7 +1171,7 @@
   }
 
   .footer-note {
-    @apply m-0 text-xs text-zinc-400;
+    @apply m-0 text-xs text-zinc-300;
   }
 
   .footer-copyright {
@@ -1062,18 +1200,18 @@
   }
 
   .footer-social-link:hover {
-    border-color: rgba(var(--blue-electric-rgb), 0.62);
-    background-color: rgba(var(--blue-electric-rgb), 0.16);
-    color: rgb(236, 246, 255);
-    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.24);
+    border-color: rgba(var(--blue-electric-rgb), 0.5);
+    background-color: rgba(var(--blue-electric-rgb), 0.1);
+    color: rgb(228, 240, 252);
+    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.18);
     transform: translateY(-1px);
   }
 
   .footer-social-link-featured {
-    border-color: rgba(var(--blue-electric-rgb), 0.62);
-    background-color: rgba(var(--blue-electric-rgb), 0.18);
+    border-color: rgba(var(--blue-electric-rgb), 0.58);
+    background-color: rgba(var(--blue-electric-rgb), 0.15);
     color: rgb(236, 246, 255);
-    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.24);
+    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.2);
   }
 
   .link-chip {
@@ -1111,10 +1249,10 @@
   }
 
   .link-chip:hover {
-    border-color: rgba(var(--blue-electric-rgb), 0.68);
-    background-color: rgba(var(--blue-electric-rgb), 0.18);
-    color: rgb(236, 246, 255);
-    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.24);
+    border-color: rgba(var(--blue-electric-rgb), 0.52);
+    background-color: rgba(var(--blue-electric-rgb), 0.11);
+    color: rgb(228, 240, 252);
+    box-shadow: inset 0 0 0 1px rgba(var(--blue-electric-rgb), 0.18);
     background-position: -40% 0;
     transform: translateY(-1px);
   }
@@ -1175,7 +1313,7 @@
   }
 
   .terminal-line {
-    @apply m-0 whitespace-pre-wrap leading-relaxed text-zinc-300;
+    @apply m-0 whitespace-pre-wrap leading-relaxed text-zinc-200;
   }
 
   .terminal-command {
@@ -1187,7 +1325,7 @@
   }
 
   .terminal-output {
-    @apply text-zinc-300;
+    @apply text-zinc-200;
   }
 
   .terminal-cursor {

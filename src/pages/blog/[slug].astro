@@ -37,7 +37,7 @@ const stats = readingTime(post.body);
     <header class="panel p-6 sm:p-8">
       <p class="eyebrow">Post</p>
       <h1 class="hero-title">{post.data.title}</h1>
-      <p class="mt-4 max-w-3xl text-zinc-300">{post.data.description}</p>
+      <p class="mt-4 max-w-3xl text-copy">{post.data.description}</p>
 
       <p class="mt-5 font-mono text-xs uppercase tracking-[0.12em] text-muted">
         {formatDate(post.data.pubDate)} | {stats.text}
@@ -58,7 +58,7 @@ const stats = readingTime(post.body);
     </header>
 
     <section class="panel mt-5 p-6 sm:p-8">
-      <div class="doc-prose">
+      <div class="doc-prose post-prose">
         <Content />
       </div>
     </section>

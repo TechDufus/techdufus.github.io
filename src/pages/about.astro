@@ -34,7 +34,7 @@ const featuredReposWithStars = await Promise.all(
           decoding="async"
           fetchpriority="high"
         />
-        <figcaption class="border-t border-white/10 px-4 py-3 font-mono text-xs uppercase tracking-[0.12em] text-zinc-300">
+        <figcaption class="border-t border-white/10 px-4 py-3 font-mono text-xs uppercase tracking-[0.12em] text-copy">
           {siteMetadata.role}
         </figcaption>
       </figure>
@@ -44,7 +44,7 @@ const featuredReposWithStars = await Promise.all(
         <h1 class="hero-title">{profileSpotlight.introTitle}</h1>
         <p class="mt-2 font-mono text-sm text-signal">{profileSpotlight.nickname}</p>
         <p class="mt-4 max-w-3xl text-zinc-200 sm:text-lg">{aboutCopy.intro}</p>
-        <p class="mt-3 max-w-2xl text-zinc-300">{profileSpotlight.intro}</p>
+        <p class="mt-3 max-w-2xl text-copy">{profileSpotlight.intro}</p>
         <p class="mt-4 status-pill">
           <span class="status-dot" aria-hidden="true"></span>
           {profileSpotlight.status}
@@ -67,7 +67,7 @@ const featuredReposWithStars = await Promise.all(
       </div>
       <div class="grid gap-3">
         {aboutCopy.body.map((paragraph) => (
-          <p class="m-0 max-w-4xl leading-relaxed text-zinc-300" set:html={paragraph}></p>
+          <p class="m-0 max-w-4xl leading-relaxed text-copy" set:html={paragraph}></p>
         ))}
       </div>
     </article>
@@ -80,7 +80,7 @@ const featuredReposWithStars = await Promise.all(
       <p class="m-0 text-sm leading-relaxed text-zinc-200">{aboutNow.primaryFocus}</p>
       <ul class="m-0 mt-3 grid gap-2 list-none p-0">
         {aboutNow.activeTracks.map((track) => (
-          <li class="rounded-lg border border-line/90 bg-[#0c1017] px-3 py-2.5 text-sm text-zinc-300">
+          <li class="surface-tier-3 rounded-lg border border-line/90 px-3 py-2.5 text-sm text-copy">
             <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{track.title}</p>
             <p class="m-0 mt-1.5">{track.detail}</p>
           </li>
@@ -133,7 +133,7 @@ const featuredReposWithStars = await Promise.all(
               </div>
             </div>
             <h3 class="m-0 mt-2.5 text-lg font-semibold text-zinc-100">{repo.name}</h3>
-            <p class="m-0 mt-1.5 text-sm leading-relaxed text-zinc-300">{repo.summary}</p>
+            <p class="m-0 mt-1.5 text-sm leading-relaxed text-copy">{repo.summary}</p>
             <p class="m-0 mt-2.5 text-xs text-muted">Why I keep it around: {repo.whyItMatters}</p>
           </div>
         </article>

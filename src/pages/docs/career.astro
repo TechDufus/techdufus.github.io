@@ -74,7 +74,7 @@ const timeline = [
   <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
     <p class="eyebrow">Career Notes</p>
     <h1 class="hero-title">{careerDoc.data.title}</h1>
-    <p class="mt-4 max-w-2xl text-zinc-300">{careerDoc.data.description}</p>
+    <p class="mt-4 max-w-2xl text-copy">{careerDoc.data.description}</p>
     <div class="mt-4 flex flex-wrap gap-2">
       <a class="nav-link nav-link-active" href="/about">About me</a>
       <a class="nav-link" href="/docs/setup">Setup docs</a>
@@ -93,7 +93,7 @@ const timeline = [
         <article class="interactive-card metric-card p-4">
           <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{item.label}</p>
           <p class="m-0 mt-2 text-base font-semibold text-zinc-100">{item.value}</p>
-          <p class="m-0 mt-2 text-sm text-zinc-300">{item.note}</p>
+          <p class="m-0 mt-2 text-sm text-copy">{item.note}</p>
           {item.sourceHref && (
             <a class="text-link mt-2 inline-flex text-xs" href={item.sourceHref} target="_blank" rel="noopener noreferrer">
               {item.sourceLabel ?? 'Source'}
@@ -130,9 +130,9 @@ const timeline = [
       </ul>
       <div class="mt-4 grid gap-2 sm:grid-cols-2">
         {careerHighlights.map((item) => (
-          <article class="rounded-lg border border-line/85 bg-[#0a111b]/70 px-3 py-2.5">
+          <article class="surface-tier-3 rounded-lg border border-line/85 px-3 py-2.5">
             <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{item.title}</p>
-            <p class="m-0 mt-1.5 text-sm leading-relaxed text-zinc-300">{item.body}</p>
+            <p class="m-0 mt-1.5 text-sm leading-relaxed text-copy">{item.body}</p>
           </article>
         ))}
       </div>
@@ -148,7 +148,7 @@ const timeline = [
           <li class="timeline-card">
             <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{item.range}</p>
             <p class="m-0 mt-1 text-sm font-semibold text-zinc-100">{item.role}</p>
-            <p class="m-0 mt-1.5 text-sm text-zinc-300">{item.detail}</p>
+            <p class="m-0 mt-1.5 text-sm text-copy">{item.detail}</p>
           </li>
         ))}
       </ul>
