@@ -11,7 +11,7 @@ tags:
 category: tech
 ---
 
-**Update (2026-03-03):** Obsidian now has an official sync CLI path. I now recommend this setup for agent workflows: [Deploying Obsidian Sync for My AI Agents](/blog/deploying-obsidian-sync-for-my-ai-agents/).
+> **Update (2026-03-03):** Obsidian now has an official sync CLI path. I now recommend this setup for agent workflows: [Deploying Obsidian Sync for My AI Agents](/blog/deploying-obsidian-sync-for-my-ai-agents/).
 
 Obsidian Sync is great — but it assumes you're sitting at a computer with a screen. What if you want your vault synced on a headless Linux server? Maybe an AI agent needs access, maybe you want a centralized backup, or maybe you just want your notes available on a machine with no monitor.
 
