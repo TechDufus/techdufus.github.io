@@ -30,6 +30,10 @@
     --wow-aurora-speed-a: 48s;
     --wow-aurora-speed-b: 66s;
     --wow-aurora-shift: 4%;
+    --support-hero-glint-duration: 1300ms;
+    --support-hero-glint-delay: 120ms;
+    --support-card-sheen-duration: 1040ms;
+    --support-card-sheen-base-delay: 120ms;
   }
 
   html,
@@ -771,7 +775,8 @@
     );
     mix-blend-mode: screen;
     will-change: transform, opacity;
-    animation: supportHeroGlint 1300ms var(--surface-ease) 120ms 1 both;
+    animation:
+      supportHeroGlint var(--support-hero-glint-duration) var(--surface-ease) var(--support-hero-glint-delay) 1 both;
   }
 
   .support-route-card,
@@ -809,7 +814,9 @@
     );
     mix-blend-mode: screen;
     will-change: transform, opacity;
-    animation: supportCardSheen 1040ms var(--surface-ease) calc(var(--support-stagger, 0ms) + 120ms) 1 both;
+    animation:
+      supportCardSheen var(--support-card-sheen-duration) var(--surface-ease)
+      calc(var(--support-stagger, 0ms) + var(--support-card-sheen-base-delay)) 1 both;
   }
 
   .profile-frame {
@@ -1528,6 +1535,10 @@
   :root {
     --wow-aurora-a-opacity: 0.08;
     --wow-aurora-b-opacity: 0.06;
+    --support-hero-glint-duration: 1700ms;
+    --support-hero-glint-delay: 520ms;
+    --support-card-sheen-duration: 1480ms;
+    --support-card-sheen-base-delay: 620ms;
   }
 }
 
