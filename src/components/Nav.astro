@@ -24,10 +24,10 @@ const supportActive = routeMatches(supportHref);
 
       <a
         class:list={[
-          'order-2 inline-flex items-center rounded-full border border-signal/30 bg-signal/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-signal no-underline transition',
-          'hover:border-signal/55 hover:text-electric',
+          'order-2 inline-flex items-center rounded-full border border-electric/55 bg-electric/25 px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-zinc-100 no-underline transition',
+          'hover:border-electric/80 hover:bg-electric/35 hover:text-white',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-canvas',
-          supportActive && 'border-white/20 bg-white/10 text-zinc-100',
+          supportActive && 'border-electric/90 bg-electric/40 text-white',
           'sm:order-3'
         ]}
         href={supportHref}
