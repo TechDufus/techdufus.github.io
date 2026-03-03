@@ -1,4 +1,7 @@
-> **Update (2026-03-03):** Obsidian now has an official sync CLI. > I published my current recommended setup for agent workflows here: > [Deploying Obsidian Sync for My AI Agents](/blog/deploying-obsidian-sync-for-my-ai-agents/).
+> [!IMPORTANT]
+> **Update (2026-03-03):** Obsidian now has an official sync CLI path.
+> I now recommend this setup for agent workflows:
+> [Deploying Obsidian Sync for My AI Agents](/blog/deploying-obsidian-sync-for-my-ai-agents/).
 
 ---
 title: Headless Obsidian Sync on Linux (No GUI Required)
