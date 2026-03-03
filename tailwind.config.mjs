@@ -8,14 +8,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        canvas: '#03060d',
-        panel: '#0a1220',
-        line: '#1a2c46',
-        ink: '#eaf3ff',
-        muted: '#8ea3c0',
-        signal: '#8fd8ff',
+        canvas: '#000104',
+        panel: '#050a14',
+        line: '#132238',
+        ink: '#e6f2ff',
+        muted: '#839bb9',
+        signal: '#89d6ff',
         ember: '#f4a259',
-        electric: '#27c8ff'
+        electric: '#22c4ff'
       },
       fontFamily: {
         sans: ['Sora', 'ui-sans-serif', 'system-ui', 'sans-serif'],

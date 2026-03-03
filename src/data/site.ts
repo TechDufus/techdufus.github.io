@@ -15,7 +15,7 @@ export const siteMetadata = {
     favicon32: '/favicon-32x32.png',
     appleTouchIcon: '/apple-touch-icon.png',
     manifestPath: '/site.webmanifest',
-    themeColor: '#03060d',
+    themeColor: '#000104',
     defaultSocialImage: '/img/social-default.jpg',
     defaultSocialImageAlt: 'TechDufus homelab desk with terminal-first AI and Kubernetes workflows',
     defaultSocialImageWidth: 1200,
