@@ -18,7 +18,7 @@ This is my single source of truth for what I run every day. I keep it practical 
 
 Sherlock is my main desk machine. Custom build, running Ubuntu Linux.
 
-![](/img/setup/setup-sherlock-desktop.jpg)
+![](./setup/setup-sherlock-desktop.jpg)
 
 | Component | Item |
 | -- | -- |
@@ -63,11 +63,11 @@ I spend most of my time in terminal sessions:
 
 I usually hit `<prefix>-o`, fuzzy-find where I need to be, and let sesh attach/create the session.
 
-![sesh picker showing fzf interface with keybind hints and session list](/img/setup/tmux-sesh-picker.png)
+![sesh picker showing fzf interface with keybind hints and session list](./setup/tmux-sesh-picker.png)
 
 For tmux navigation I use `Ctrl+hjkl` (via vim-tmux-navigator), and I sync panes when I need to run parallel commands.
 
-![tmux status bar showing session name, directory, window tabs, Claude status, and online indicator](/img/setup/tmux-statusline-information.png)
+![tmux status bar showing session name, directory, window tabs, Claude status, and online indicator](./setup/tmux-statusline-information.png)
 
 ### Editor + shell stack
 
@@ -79,7 +79,7 @@ For tmux navigation I use `Ctrl+hjkl` (via vim-tmux-navigator), and I sync panes
 
 I use a cell-based layout with summon keys, not traditional manual tiling.
 
-![Cell-based window layout showing 5 predefined screen regions](/img/setup/window-management-cell-layout-1-5.png)
+![Cell-based window layout showing 5 predefined screen regions](./setup/window-management-cell-layout-1-5.png)
 
 On Linux this runs through AwesomeWM automation; on macOS through Hammerspoon. Same mental model across both.
 

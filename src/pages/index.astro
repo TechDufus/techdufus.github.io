@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import {
   aboutNow,
@@ -9,8 +10,8 @@ import {
   profileSpotlight,
   siteMetadata
 } from '../data/site';
+import { entrySlug, getSortedPosts } from '../lib/content';
 import { formatDate } from '../lib/formatDate';
-import { getSortedPosts } from '../lib/content';
 
 const posts = await getSortedPosts();
 const recentPosts = posts.slice(0, 4);
@@ -49,23 +50,22 @@ const recentPosts = posts.slice(0, 4);
         </div>
 
         <div class="mt-6 flex flex-wrap gap-2">
-          <a class="nav-link nav-link-active" href="/about">About Me</a>
-          <a class="nav-link" href="/blog">Read Blog</a>
-          <a class="nav-link" href="/docs/setup">Setup Docs</a>
-          <a class="nav-link" href="/contact">Contact</a>
+          <a class="nav-link nav-link-active" href="/about" data-astro-prefetch>About Me</a>
+          <a class="nav-link" href="/blog" data-astro-prefetch>Read Blog</a>
+          <a class="nav-link" href="/docs/setup" data-astro-prefetch>Setup Docs</a>
+          <a class="nav-link" href="/contact" data-astro-prefetch>Contact</a>
         </div>
       </div>
 
       <div class="grid gap-3">
         <figure class="profile-frame gentle-float mx-auto w-full max-w-[18rem] sm:max-w-sm lg:mx-0">
-          <img
+          <Image
             src={profileSpotlight.photo}
             alt={profileSpotlight.photoAlt}
             class="profile-photo"
-            width={profileSpotlight.photoWidth}
-            height={profileSpotlight.photoHeight}
+            widths={[320, 480, 640]}
+            sizes="(min-width: 1024px) 18rem, (min-width: 640px) 24rem, 18rem"
             loading="eager"
-            decoding="async"
             fetchpriority="high"
           />
           <figcaption class="border-t border-white/10 px-4 py-3 font-mono text-xs uppercase tracking-[0.12em] text-copy">
@@ -93,19 +93,20 @@ const recentPosts = posts.slice(0, 4);
               href="/blog/ai-already-took-my-job"
               data-depth="signature"
               data-pointer-halo="subtle"
+              data-astro-prefetch="viewport"
             >
               <p class="m-0 text-sm font-medium text-zinc-100">AI Already Took My Job</p>
               <p class="m-0 mt-1 text-xs text-copy">Where I break down how AI changed my day-to-day workflow.</p>
             </a>
           </li>
           <li>
-            <a class="interactive-card card-link-block px-3 py-2.5" href="/docs/setup">
+            <a class="interactive-card card-link-block px-3 py-2.5" href="/docs/setup" data-astro-prefetch="viewport">
               <p class="m-0 text-sm font-medium text-zinc-100">Setup I Actually Use</p>
               <p class="m-0 mt-1 text-xs text-copy">Terminal, tmux, tooling, and notes I really keep updated.</p>
             </a>
           </li>
           <li>
-            <a class="interactive-card card-link-block px-3 py-2.5" href="/about">
+            <a class="interactive-card card-link-block px-3 py-2.5" href="/about" data-astro-prefetch="viewport">
               <p class="m-0 text-sm font-medium text-zinc-100">About / How I Work</p>
               <p class="m-0 mt-1 text-xs text-copy">Who I am, how I work, and the repos I always come back to.</p>
             </a>
@@ -165,7 +166,12 @@ const recentPosts = posts.slice(0, 4);
     <div class="grid gap-3">
       {recentPosts.map((post) => (
         <article class="interactive-card compact-panel p-4 sm:p-5">
-          <a class="card-link-overlay" href={`/blog/${post.slug}`} aria-label={`Read post: ${post.data.title}`}></a>
+          <a
+            class="card-link-overlay"
+            href={`/blog/${entrySlug(post.id)}`}
+            aria-label={`Read post: ${post.data.title}`}
+            data-astro-prefetch="viewport"
+          ></a>
           <div class="card-content">
             <p class="mb-2 font-mono text-xs uppercase tracking-[0.12em] text-muted">
               {formatDate(post.data.pubDate)}
@@ -177,9 +183,9 @@ const recentPosts = posts.slice(0, 4);
       ))}
     </div>
     <div class="mt-4 flex flex-wrap gap-2">
-      <a class="nav-link nav-link-active" href="/blog">All Posts</a>
-      <a class="nav-link" href="/docs/setup">Setup Docs</a>
-      <a class="nav-link" href="/docs/career">Career Notes</a>
+      <a class="nav-link nav-link-active" href="/blog" data-astro-prefetch>All Posts</a>
+      <a class="nav-link" href="/docs/setup" data-astro-prefetch>Setup Docs</a>
+      <a class="nav-link" href="/docs/career" data-astro-prefetch>Career Notes</a>
     </div>
   </section>
 

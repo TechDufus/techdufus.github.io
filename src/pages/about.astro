@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import {
   aboutCopy,
@@ -24,14 +25,13 @@ const featuredReposWithStars = await Promise.all(
   <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
     <div class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
       <figure class="profile-frame gentle-float mx-auto w-full max-w-[18rem] sm:max-w-sm lg:mx-0">
-        <img
+        <Image
           src={profileSpotlight.photo}
           alt={profileSpotlight.photoAlt}
           class="profile-photo"
-          width={profileSpotlight.photoWidth}
-          height={profileSpotlight.photoHeight}
+          widths={[320, 480, 640]}
+          sizes="(min-width: 1024px) 18rem, (min-width: 640px) 24rem, 18rem"
           loading="eager"
-          decoding="async"
           fetchpriority="high"
         />
         <figcaption class="border-t border-white/10 px-4 py-3 font-mono text-xs uppercase tracking-[0.12em] text-copy">
@@ -52,8 +52,8 @@ const featuredReposWithStars = await Promise.all(
 
         <div class="mt-6 flex flex-wrap gap-2">
           <a class="nav-link nav-link-active" href="#featured-repos">See Featured Repos</a>
-          <a class="nav-link" href="/contact">Reach Out</a>
-          <a class="nav-link" href="/blog">Read Blog</a>
+          <a class="nav-link" href="/contact" data-astro-prefetch>Reach Out</a>
+          <a class="nav-link" href="/blog" data-astro-prefetch>Read Blog</a>
         </div>
       </div>
     </div>
@@ -144,6 +144,7 @@ const featuredReposWithStars = await Promise.all(
   <a
     class="content-section panel compact-panel mx-auto w-full max-w-3xl p-6 reveal reveal-delay-5 interactive-card card-link-block no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
     href="/contact"
+    data-astro-prefetch
   >
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div class="space-y-1">

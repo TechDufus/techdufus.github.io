@@ -17,7 +17,7 @@ category: tech
   }
 }
 </style>
-<img src="/img/posts/oh-my-claude-og.png" alt="oh-my-claude" class="post-img" style="float: right; max-width: 400px; margin: 0 0 1rem 1.5rem;">
+<img src="/img/posts/oh-my-claude-og.png" alt="oh-my-claude" class="post-img post-img-float-right">
 
 Hey folks. I built a thing.
 

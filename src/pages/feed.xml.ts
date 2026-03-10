@@ -1,6 +1,6 @@
 import rss from '@astrojs/rss';
 import { siteMetadata } from '../data/site';
-import { getSortedPosts } from '../lib/content';
+import { entrySlug, getSortedPosts } from '../lib/content';
 
 export async function GET() {
   const posts = await getSortedPosts();
@@ -13,7 +13,7 @@ export async function GET() {
       title: post.data.title,
       pubDate: post.data.pubDate,
       description: post.data.description,
-      link: `/blog/${post.slug}`
+      link: `/blog/${entrySlug(post.id)}`
     }))
   });
 }

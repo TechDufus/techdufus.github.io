@@ -1,6 +1,7 @@
 ---
-import { getEntry } from 'astro:content';
+import { getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/content-prose.css';
 import { careerHighlights, externalReferences } from '../../data/site';
 
 const careerDoc = await getEntry('docs', 'career');
@@ -9,7 +10,7 @@ if (!careerDoc) {
   throw new Error('Missing docs/career content source.');
 }
 
-const { Content } = await careerDoc.render();
+const { Content } = await render(careerDoc);
 
 const proofPoints = [
   {
@@ -76,9 +77,9 @@ const timeline = [
     <h1 class="hero-title">{careerDoc.data.title}</h1>
     <p class="mt-4 max-w-2xl text-copy">{careerDoc.data.description}</p>
     <div class="mt-4 flex flex-wrap gap-2">
-      <a class="nav-link nav-link-active" href="/about">About me</a>
-      <a class="nav-link" href="/docs/setup">Setup docs</a>
-      <a class="nav-link" href="/contact">Contact</a>
+      <a class="nav-link nav-link-active" href="/about" data-astro-prefetch>About me</a>
+      <a class="nav-link" href="/docs/setup" data-astro-prefetch>Setup docs</a>
+      <a class="nav-link" href="/contact" data-astro-prefetch>Contact</a>
     </div>
   </section>
 

@@ -1,3 +1,6 @@
+import profilePhoto from '../assets/profile/sl-dark-pfp.jpg';
+import defaultSocialImage from '../assets/social/social-default.jpg';
+
 export const siteMetadata = {
   siteName: '{ TechDufus }',
   title: 'TechDufus',
@@ -16,10 +19,10 @@ export const siteMetadata = {
     appleTouchIcon: '/apple-touch-icon.png',
     manifestPath: '/site.webmanifest',
     themeColor: '#000104',
-    defaultSocialImage: '/img/social-default.jpg',
+    defaultSocialImage,
     defaultSocialImageAlt: 'TechDufus homelab desk with terminal-first AI and Kubernetes workflows',
-    defaultSocialImageWidth: 1200,
-    defaultSocialImageHeight: 630
+    defaultSocialImageWidth: defaultSocialImage.width,
+    defaultSocialImageHeight: defaultSocialImage.height
   }
 };
 
@@ -254,10 +257,10 @@ export const careerHighlights = [
 ];
 
 export const profileSpotlight = {
-  photo: '/img/profile/sl-dark-pfp.jpg',
+  photo: profilePhoto,
   photoAlt: 'Stylized portrait illustration of TechDufus',
-  photoWidth: 1024,
-  photoHeight: 1025,
+  photoWidth: profilePhoto.width,
+  photoHeight: profilePhoto.height,
   nickname: 'You can call me Dufus.',
   handle: '@TechDufus',
   status: 'Status: probably fighting DNS somewhere.',

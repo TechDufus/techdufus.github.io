@@ -18,8 +18,8 @@ export default {
         electric: '#22c4ff'
       },
       fontFamily: {
-        sans: ['Sora', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        mono: ['IBM Plex Mono', 'ui-monospace', 'SFMono-Regular', 'monospace']
+        sans: ['var(--font-sora)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-plex-mono)', 'ui-monospace', 'SFMono-Regular', 'monospace']
       },
       boxShadow: {
         editor: '0 24px 60px -32px rgba(0, 0, 0, 0.72)'

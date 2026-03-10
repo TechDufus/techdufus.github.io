@@ -1,0 +1,223 @@
+@reference "./global.css";
+
+.doc-prose {
+  @apply prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-zinc-100 prose-p:text-zinc-200 prose-strong:text-zinc-100 prose-li:text-zinc-200;
+}
+
+.doc-prose > * {
+  max-width: 72ch;
+}
+
+.doc-prose :where(h1, h2, h3, h4) {
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin-bottom: 0.65em;
+}
+
+.doc-prose h1 {
+  @apply mt-1 text-3xl sm:text-4xl;
+  margin-bottom: 0.7em;
+}
+
+.doc-prose h2 {
+  @apply mt-12 text-2xl;
+}
+
+.doc-prose h3 {
+  @apply mt-9 text-xl;
+}
+
+.doc-prose h4 {
+  @apply mt-7 text-lg;
+}
+
+.doc-prose p,
+.doc-prose li {
+  line-height: 1.78;
+  color: rgba(var(--ink-body-rgb), 0.95);
+}
+
+.doc-prose p + p {
+  margin-top: 1.05em;
+}
+
+.doc-prose ul,
+.doc-prose ol {
+  margin-top: 1em;
+  margin-bottom: 1.45em;
+  padding-left: 1.25rem;
+}
+
+.doc-prose :where(pre, blockquote) {
+  margin-top: 1.55rem;
+  margin-bottom: 1.55rem;
+}
+
+.doc-prose a {
+  @apply text-signal no-underline;
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--blue-signal-rgb), 0.45);
+}
+
+.doc-prose a:hover {
+  @apply text-electric;
+  text-decoration-color: rgba(var(--blue-electric-rgb), 0.74);
+}
+
+.post-prose > p:first-of-type {
+  font-size: clamp(1.05rem, 1.1vw + 0.85rem, 1.28rem);
+  line-height: 1.82;
+  color: rgb(224, 237, 252);
+  margin-bottom: 1.35rem;
+}
+
+.post-prose :where(h2, h3) {
+  position: relative;
+  padding-left: 0.9rem;
+  margin-bottom: 0.95rem;
+}
+
+.post-prose :where(h2, h3)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.16em;
+  bottom: 0.16em;
+  width: 0.22rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(var(--blue-signal-rgb), 0.92), rgba(var(--blue-electric-rgb), 0.62));
+  box-shadow: 0 0 0 1px rgba(var(--blue-electric-rgb), 0.24);
+}
+
+.post-prose h2 {
+  font-size: clamp(1.48rem, 1.1vw + 1.24rem, 1.92rem);
+  color: rgb(237, 246, 255);
+}
+
+.post-prose h3 {
+  font-size: clamp(1.2rem, 0.62vw + 1.04rem, 1.45rem);
+  color: rgb(227, 239, 254);
+}
+
+.post-prose :where(strong) {
+  color: rgb(241, 248, 255);
+}
+
+.post-prose :where(code):not(:where(pre code)) {
+  color: rgb(234, 245, 255);
+  border: 1px solid rgba(var(--blue-electric-rgb), 0.28);
+  background-color: rgba(var(--surface-3-rgb), 0.62);
+  padding: 0.14rem 0.42rem;
+  border-radius: 0.38rem;
+  font-size: 0.84em;
+}
+
+.post-prose :where(blockquote) {
+  border-left: 3px solid rgba(var(--blue-signal-rgb), 0.56);
+  background:
+    linear-gradient(135deg, rgba(var(--blue-electric-rgb), 0.09), rgba(var(--blue-signal-rgb), 0.03) 44%, transparent 82%),
+    rgba(var(--surface-2-rgb), 0.74);
+  border-radius: 0.85rem;
+  padding: 0.85rem 1rem;
+  color: rgb(224, 236, 252);
+}
+
+.post-prose :where(blockquote p:first-of-type)::before,
+.post-prose :where(blockquote p:last-of-type)::after {
+  content: none;
+}
+
+.post-prose :where(ul > li, ol > li)::marker {
+  color: rgba(var(--blue-signal-rgb), 0.86);
+}
+
+.post-prose :where(hr) {
+  border: 0;
+  height: 1px;
+  margin: 2rem 0;
+  background: linear-gradient(90deg, transparent, rgba(var(--blue-signal-rgb), 0.42), transparent);
+}
+
+.post-prose :where(pre) {
+  border-color: rgba(var(--blue-electric-rgb), 0.28);
+  background:
+    linear-gradient(160deg, rgba(var(--surface-3-rgb), 0.9), rgba(var(--surface-2-rgb), 0.92)),
+    rgba(var(--surface-2-rgb), 0.96);
+  box-shadow: 0 18px 30px rgba(1, 5, 12, 0.32);
+}
+
+.post-prose :where(table) {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 1px solid rgba(var(--blue-signal-rgb), 0.24);
+  border-radius: 0.8rem;
+  background-color: rgba(var(--surface-2-rgb), 0.72);
+}
+
+.post-prose :where(th, td) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.68rem 0.78rem;
+}
+
+.post-prose :where(th) {
+  font-family: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--blue-signal-rgb), 0.92);
+  background-color: rgba(var(--surface-3-rgb), 0.74);
+}
+
+.post-prose :where(tbody tr:last-child td) {
+  border-bottom: 0;
+}
+
+.post-prose :where(tbody tr:nth-child(2n)) {
+  background-color: rgba(var(--surface-3-rgb), 0.34);
+}
+
+.post-prose :where(img) {
+  border: 1px solid rgba(var(--blue-signal-rgb), 0.26);
+  box-shadow: 0 20px 34px rgba(1, 5, 12, 0.4);
+}
+
+.setup-prose :where(h2, h3, h4) {
+  scroll-margin-top: 7.25rem;
+}
+
+.setup-prose h2 {
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  padding-top: 0.9rem;
+}
+
+.setup-prose h2:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.setup-prose img {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 30px rgba(1, 5, 11, 0.38);
+}
+
+.post-prose .post-img-float-right {
+  float: right;
+  width: min(100%, 400px);
+  margin: 0 0 1rem 1.5rem;
+}
+
+@media (max-width: 767px) {
+  .post-prose .post-img-float-right {
+    float: none;
+    width: 100%;
+    margin: 0 0 1rem;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .doc-prose a {
+    text-decoration-color: rgba(var(--blue-electric-rgb), 0.9);
+  }
+}

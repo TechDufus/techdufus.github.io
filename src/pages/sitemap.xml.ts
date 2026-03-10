@@ -1,4 +1,4 @@
-import { getSortedPosts } from '../lib/content';
+import { entrySlug, getSortedPosts } from '../lib/content';
 import { siteMetadata } from '../data/site';
 
 function loc(pathname: string): string {
@@ -18,7 +18,7 @@ export async function GET() {
   const staticPaths = ['/', '/blog', '/docs', '/docs/setup', '/docs/career', '/about', '/contact'];
 
   const postEntries = posts.map((post) =>
-    urlEntry(`/blog/${post.slug}`, post.data.pubDate.toISOString().slice(0, 10))
+    urlEntry(`/blog/${entrySlug(post.id)}`, post.data.pubDate.toISOString().slice(0, 10))
   );
   const staticEntries = staticPaths.map((path) => urlEntry(path));
 

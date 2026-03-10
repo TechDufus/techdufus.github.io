@@ -1,14 +1,16 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import readingTime from 'reading-time';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/content-prose.css';
+import { entrySlug } from '../../lib/content';
 import { formatDate } from '../../lib/formatDate';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
   return posts.map((post) => ({
-    params: { slug: post.slug },
+    params: { slug: entrySlug(post.id) },
     props: { post }
   }));
 }
@@ -18,8 +20,8 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content } = await post.render();
-const stats = readingTime(post.body);
+const { Content } = await render(post);
+const stats = readingTime(post.body ?? '');
 ---
 
 <BaseLayout
@@ -28,8 +30,6 @@ const stats = readingTime(post.body);
   ogType="article"
   ogImage={post.data.socialImage}
   ogImageAlt={post.data.socialImageAlt ?? `Preview image for ${post.data.title}`}
-  ogImageWidth={post.data.socialImageWidth}
-  ogImageHeight={post.data.socialImageHeight}
   publishedTime={post.data.pubDate.toISOString()}
   modifiedTime={(post.data.updatedDate ?? post.data.pubDate).toISOString()}
 >
@@ -64,7 +64,7 @@ const stats = readingTime(post.body);
     </section>
 
     <div class="mt-5">
-      <a class="nav-link nav-link-active" href="/blog">Back to blog</a>
+      <a class="nav-link nav-link-active" href="/blog" data-astro-prefetch>Back to blog</a>
     </div>
   </article>
 </BaseLayout>

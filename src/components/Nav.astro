@@ -16,8 +16,9 @@ const supportActive = routeMatches(supportHref);
   <div class="nav-shell" data-scroll-chrome="site-nav">
     <div class="flex flex-wrap items-center justify-between gap-2">
       <a
-        class="inline-flex items-center rounded-lg border border-line bg-panel px-3 py-2 font-mono text-sm text-signal no-underline transition hover:border-signal/45 hover:text-electric"
+        class="nav-brand inline-flex items-center rounded-lg border border-line bg-panel px-3 py-2 font-mono text-sm text-signal no-underline transition hover:border-signal/45 hover:text-electric"
         href="/"
+        data-astro-prefetch
       >
         {`{ TechDufus }`}
       </a>
@@ -32,6 +33,7 @@ const supportActive = routeMatches(supportHref);
         ]}
         href={supportHref}
         aria-current={supportActive ? 'page' : undefined}
+        data-astro-prefetch
       >
         Support
       </a>
@@ -47,6 +49,7 @@ const supportActive = routeMatches(supportHref);
                 ]}
                 href={item.href}
                 aria-current={routeMatches(item.href) ? 'page' : undefined}
+                data-astro-prefetch
               >
                 {item.label}
               </a>
@@ -73,6 +76,7 @@ const supportActive = routeMatches(supportHref);
                       ]}
                       href={item.href}
                       aria-current={routeMatches(item.href) ? 'page' : undefined}
+                      data-astro-prefetch
                     >
                       {item.label}
                     </a>

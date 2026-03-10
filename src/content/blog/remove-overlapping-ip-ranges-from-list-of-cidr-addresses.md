@@ -51,7 +51,7 @@ This function is meant to resolve these errors from Azure when trying to add man
 
 Simply provide your CIDR IP list to my function and poof, you will get a filtered, conflict-free list that Azure will love.
 
-```PowerShell
+```powershell
 Merge-CIDRIpRanges -CIDRAddresses (Get-AWSPublicIpAddressRange | ? IPAddressFormat -eq 'ipv4').IpPrefix
 ```
 

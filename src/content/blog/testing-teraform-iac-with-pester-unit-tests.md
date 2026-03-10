@@ -66,7 +66,7 @@ We first need to tell terraform what providers are required, and then define wha
 
 #### main.tf
 
-```terraform
+```hcl
 terraform {
     required_providers {
         #Define the azurerm minimum version and source
@@ -93,7 +93,7 @@ Next, let's add to this `main.tf` file to add the configuration for our resource
 
 #### main.tf
 
-```terraform
+```hcl
 resource "azurerm_resource_group" "rg" {
     name     = var.resource_group_name
     location = var.region
@@ -108,7 +108,7 @@ Now let's define an IP range for the virtual network that our resources will use
 
 #### main.tf
 
-```terraform
+```hcl
 resource "azurerm_virtual_network" "vnet" {
   name                = "vnet-testing-terraform"
   address_space       = var.vnet.address_space
@@ -123,7 +123,7 @@ This subnet will be a smaller IP range that lives on the Virtual Network we just
 
 #### main.tf
 
-```terraform
+```hcl
 resource "azurerm_subnet" "vms_subnet" {
   name                 = var.subnet.vms.subnet_name
   resource_group_name  = azurerm_resource_group.rg.name
@@ -138,7 +138,7 @@ Here we have a bit more configuration to provide.
 
 #### main.tf
 
-```terraform
+```hcl
 resource "azurerm_virtual_machine" "vm" {
   name                  = var.vm1_name
   location              = var.region
@@ -179,7 +179,7 @@ The IP for this NIC will live on the subnet range we just created.
 
 #### main.tf
 
-```terraform
+```hcl
 resource "azurerm_network_interface" "vm_nic" {
   name                = "${var.vm1_name}_nic"
   location            = var.region
@@ -200,7 +200,7 @@ Now let's define our variables for this `main.tf` configuration.
 
 #### variables.tf
 
-```terraform
+```hcl
 variable "region" {
     type        = string
     description = "Declare the azure region for your resources."
@@ -252,7 +252,7 @@ Lastly, we need a file that terraform automatically imports with variable values
 
 #### demo.auto.tfvars
 
-```terraform
+```hcl
 region                = "centralus"
 admin_username        = "Administrator"
 admin_password        = "Thisismysupersecretpassword1!"

@@ -1,6 +1,7 @@
 ---
-import { getEntry } from 'astro:content';
+import { getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/content-prose.css';
 
 const setupDoc = await getEntry('docs', 'setup');
 
@@ -8,7 +9,7 @@ if (!setupDoc) {
   throw new Error('Missing docs/setup content source.');
 }
 
-const { Content } = await setupDoc.render();
+const { Content } = await render(setupDoc);
 
 const anchorSections = [
   { id: 'setup-overview', label: 'Overview' },

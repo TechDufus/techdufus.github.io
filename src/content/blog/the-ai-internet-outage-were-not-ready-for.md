@@ -9,15 +9,13 @@ tags:
   - outage
   - resilience
 category: tech
-socialImage: "/img/posts/ai-internet-outage-hero.png"
+socialImage: "./the-ai-internet-outage-were-not-ready-for/ai-internet-outage-hero.png"
 socialImageAlt: "World map with connected internet nodes showing a cascading outage pattern"
-socialImageWidth: 1536
-socialImageHeight: 1024
 ---
 
 # The AI Internet Outage We're Not Ready For
 
-![World map with connected internet nodes showing a cascading outage pattern](/img/posts/ai-internet-outage-hero.png)
+![World map with connected internet nodes showing a cascading outage pattern](./the-ai-internet-outage-were-not-ready-for/ai-internet-outage-hero.png)
 
 I’ve been around infrastructure my whole career in one way or another.
 

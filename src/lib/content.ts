@@ -11,6 +11,10 @@ export function toSlug(value: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+export function entrySlug(id: string): string {
+  return id.replace(/\.(md|mdx)$/i, '');
+}
+
 export async function getSortedPosts(): Promise<BlogPost[]> {
   const posts = await getCollection('blog');
   return posts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
