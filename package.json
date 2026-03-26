@@ -15,7 +15,7 @@
     "@astrojs/mdx": "^4.0.12",
     "@astrojs/rss": "4.0.15",
     "@astrojs/tailwind": "^6.0.2",
-    "astro": "^5.14.1",
+    "astro": "^5.18.1",
     "reading-time": "^1.5.0",
     "zod": "^3.25.76"
   },
