@@ -20,7 +20,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.6",
+    "@astrojs/check": "0.9.8",
     "@tailwindcss/typography": "^0.5.19",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
