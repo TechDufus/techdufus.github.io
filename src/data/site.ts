@@ -254,10 +254,10 @@ export const careerHighlights = [
 ];
 
 export const profileSpotlight = {
-  photo: '/img/profile/sl-dark-pfp.jpg',
-  photoAlt: 'Stylized portrait illustration of TechDufus',
-  photoWidth: 1024,
-  photoHeight: 1025,
+  photo: '/img/profile/techdufus.webp',
+  photoAlt: 'Portrait of TechDufus',
+  photoWidth: 1122,
+  photoHeight: 1122,
   nickname: 'You can call me Dufus.',
   handle: '@TechDufus',
   status: 'Status: probably fighting DNS somewhere.',
