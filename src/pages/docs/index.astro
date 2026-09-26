@@ -1,29 +1,81 @@
 ---
+import { getEntry } from 'astro:content';
+import readingTime from 'reading-time';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { labSpec } from '../../data/site';
+
+const [setup, career] = await Promise.all([getEntry('docs', 'setup'), getEntry('docs', 'career')]);
+if (!setup || !career) {
+  throw new Error('Missing docs content source (setup or career).');
+}
+
+const minutes = (body: string) => Math.max(1, Math.round(readingTime(body).minutes));
+
+const docs = [
+  {
+    kind: 'Reference',
+    title: 'Setup',
+    accent: 'notes',
+    href: '/docs/setup/',
+    description: 'My workstation and homelab setup.',
+    meta: `${minutes(setup.body)} min read`
+  },
+  {
+    kind: 'Background',
+    title: 'Career',
+    accent: 'notes',
+    href: '/docs/career/',
+    description: 'PowerShell to platform engineering.',
+    meta: `${minutes(career.body)} min read`
+  },
+  {
+    kind: 'Tour',
+    title: 'The',
+    accent: 'lab',
+    href: '/lab/',
+    description: 'The homelab, with a diagram.',
+    meta: `Revised ${labSpec.lastRevised}`
+  }
+];
 ---
 
-<BaseLayout title="Docs" description="Reference docs for my setup, workflow, and career context.">
-  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
-    <p class="eyebrow">Documentation</p>
-    <h1 class="hero-title">Docs</h1>
-    <p class="mt-4 max-w-2xl text-copy">
-      These are the pages I keep reopening during real work: setup notes, workflow context, and career background behind the posts.
-    </p>
-  </section>
+<BaseLayout
+  title="Docs"
+  description="Reference docs for my setup, workflow, and career context."
+>
+  <section class="section pg-docs" aria-labelledby="docs-title">
+    <div class="wrap">
+      <div class="sec-head sec-head--split">
+        <div class="sec-head__bar" data-reveal>
+          <span class="sec-head__index">Docs</span>
+          <span class="eyebrow">Documentation</span>
+          <span class="sec-head__aside"><span class="meta">{docs.length} pages</span></span>
+        </div>
+        <h1 class="h1 sec-head__title" id="docs-title" data-reveal><em>Docs</em>.</h1>
+      </div>
 
-  <section class="content-section grid gap-3 sm:grid-cols-2 reveal reveal-delay-2">
-    <a class="interactive-card card-link-block p-6" href="/docs/setup">
-      <p class="font-mono text-xs uppercase tracking-[0.14em] text-signal">/docs/setup</p>
-      <h2 class="mt-2 text-xl font-semibold text-zinc-100">Setup</h2>
-      <p class="mt-2 text-sm text-copy">What I run, how it is wired, and what changed most recently.</p>
-      <p class="mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Open setup reference</p>
-    </a>
-
-    <a class="interactive-card card-link-block p-6" href="/docs/career">
-      <p class="font-mono text-xs uppercase tracking-[0.14em] text-signal">/docs/career</p>
-      <h2 class="mt-2 text-xl font-semibold text-zinc-100">Career</h2>
-      <p class="mt-2 text-sm text-copy">How I got from PowerShell scripts to platform and agent workflow engineering.</p>
-      <p class="mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Open career context</p>
-    </a>
+      <div class="post-list">
+        {docs.map((doc, i) => (
+          <article class="post-row" data-reveal style={`--d:${i}`}>
+            <span class="post-row__date">{String(i + 1).padStart(2, '0')} · {doc.kind}</span>
+            <div class="post-row__main">
+              <h2 class="post-row__title"><a href={doc.href}>{doc.title} <em>{doc.accent}</em></a></h2>
+              <p class="post-row__desc">{doc.description}</p>
+            </div>
+            <div class="post-row__meta">
+              <span class="post-row__mins">{doc.meta}</span>
+              <span class="docs__go" aria-hidden="true">Open <span class="arrow">→</span></span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
   </section>
 </BaseLayout>
+
+<style is:global>
+  /* Global under the .pg-docs root (no data-astro-cid attributes). */
+  .pg-docs .post-row__title em { font-style: italic; color: var(--accent); }
+  .pg-docs .docs__go { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--accent); }
+  .pg-docs .post-row:hover .arrow { transform: translateX(3px); }
+</style>

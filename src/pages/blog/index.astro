@@ -1,133 +1,369 @@
 ---
+/*
+  /blog/ — the writing archive (mockup design/pro-studio/blog.html).
+  Every row is server-rendered, so without JS this is the full list, newest first.
+  src/scripts/writing.ts adds search + tag filters with ?q=&tag= URL state.
+*/
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { formatDate } from '../../lib/formatDate';
-import { buildCategoryMap, getSortedPosts } from '../../lib/content';
+import PostFeature from '../../components/ui/PostFeature.astro';
+import PostRow from '../../components/ui/PostRow.astro';
+import { getPostMetas, groupByYear, postStats } from '../../lib/content';
+import { siteMetadata } from '../../data/site';
+import { fmtDate, fmtNum, isoDate, visibleTags } from '../../components/ui/format';
 
-const posts = await getSortedPosts();
-const totalPosts = posts.length;
-const latestPost = posts[0];
+const posts = await getPostMetas();
+const stats = postStats(posts);
+const groups = groupByYear(posts);
+const latest = posts[0];
+const feedUrl = `${siteMetadata.url}/feed.xml`;
+/* Tag buttons each archive row shows (PostRow showTags). The filter reads a row's tags from those
+   buttons plus the row wrapper's data-t, which lists only the tags past this cap. */
+const ROW_CHIPS = 4;
 
-const categoryMap = buildCategoryMap(posts);
-const categories = Array.from(categoryMap.entries())
-  .map(([slug, count]) => ({ slug, count, label: slug.replace(/-/g, ' ') }))
-  .sort((a, b) => b.count - a.count);
+/* posts per year, oldest first, zero years included (drawn dashed) */
+const firstYear = stats.years[0]?.year;
+const lastYear = stats.years[stats.years.length - 1]?.year;
+const maxPerYear = Math.max(1, ...stats.years.map((y) => y.count));
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const cadenceSr = `Posts per year: ${stats.years.map((y) => `${y.year}, ${y.count}`).join('; ')}.`;
 
-const startHereSlugs = [
-  'ai-already-took-my-job',
-  'oh-my-claude-batteries-included-enhancements-for-claude-code',
-  'i-deleted-my-cloudflare-tunnels-tailscale-operator-homelab-k8s'
-];
+/* tag chips: tags on 2+ posts up front, one-offs behind "+N more" */
+const tagCount = new Map<string, number>();
+for (const post of posts) for (const tag of visibleTags(post.tags)) tagCount.set(tag, (tagCount.get(tag) ?? 0) + 1);
+const allTags = [...tagCount.keys()].sort((a, b) => tagCount.get(b)! - tagCount.get(a)! || a.localeCompare(b));
+const topTags = allTags.filter((t) => tagCount.get(t)! >= 2);
+const restTags = allTags.filter((t) => tagCount.get(t)! < 2).sort();
 
-const startHere = startHereSlugs
-  .map((slug) => posts.find((post) => post.slug === slug))
-  .filter((post): post is NonNullable<typeof post> => Boolean(post));
+/* "A quiet year" note when the next older year with posts isn't the year before */
+const gapNote = (index: number): string | null => {
+  const older = groups[index + 1];
+  if (!older) return null;
+  const year = groups[index].year;
+  const span = year - older.year;
+  if (span <= 1) return null;
+  return span > 2
+    ? `A quiet stretch: nothing published in ${older.year + 1}–${year - 1}.`
+    : `A quiet year: nothing published in ${older.year + 1}.`;
+};
 ---
 
-<BaseLayout title="Blog" description="Posts about platform work, incidents, and agent workflow experiments.">
-  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
-    <p class="eyebrow">Archive</p>
-    <h1 class="hero-title">Blog</h1>
-    <p class="mt-4 max-w-2xl text-copy">
-      Real notes from the field: what broke, what held up, and what I changed after the smoke cleared.
-    </p>
-    <div class="mt-4 flex flex-wrap gap-2">
-      <span class="link-chip">{totalPosts} posts</span>
-      {latestPost && <span class="link-chip">Latest: {formatDate(latestPost.data.pubDate)}</span>}
-      <span class="link-chip">{categories.length} categories</span>
-    </div>
-  </section>
+<BaseLayout
+  title="Writing"
+  description="Every TechDufus post, grouped by year: postmortems, homelab rebuilds, agent workflows, and the PowerShell that started it all."
+>
+  <link slot="head" rel="alternate" type="application/rss+xml" title={siteMetadata.title} href={feedUrl} />
 
-  <section class="content-section panel compact-panel p-4 sm:p-5 reveal reveal-delay-2">
-    <div class="section-head">
-      <h2>Start Here</h2>
-      <p>Three posts that represent how I write and work.</p>
-    </div>
-
-    <div class="grid gap-2 sm:grid-cols-3">
-      {startHere.map((post) => (
-        <a class="interactive-card card-link-block p-3.5" href={`/blog/${post.slug}`}>
-          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">{formatDate(post.data.pubDate)}</p>
-          <p class="m-0 mt-1.5 text-sm font-medium text-zinc-100">{post.data.title}</p>
-          <p class="m-0 mt-1 text-xs text-copy">{post.data.description}</p>
-        </a>
-      ))}
-    </div>
-  </section>
-
-  <section class="content-section panel compact-panel p-4 sm:p-5 reveal reveal-delay-3">
-    <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-      <label class="blog-search-wrap" for="blog-search">
-        <span class="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Search posts</span>
-        <input
-          id="blog-search"
-          class="blog-search-input"
-          type="search"
-          placeholder="Try: kubernetes, powershell, homelab, agentic..."
-          autocomplete="off"
-        />
-      </label>
-      <div class="flex flex-wrap items-center gap-1.5">
-        <button class="filter-chip filter-chip-active" type="button" data-category="all">All</button>
-        {categories.map((category) => (
-          <button class="filter-chip" type="button" data-category={category.slug}>
-            {category.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <section class="content-section reveal reveal-delay-4">
-    <div class="section-head">
-      <h2>All posts</h2>
-      <p id="blog-count-label" aria-live="polite">
-        {posts.length} entries
-      </p>
-    </div>
-
-    <div class="grid gap-3" id="blog-post-list">
-      {posts.map((post) => (
-        <article
-          class="interactive-card p-5 blog-post-card"
-          data-title={post.data.title}
-          data-description={post.data.description}
-          data-category={post.data.category?.toLowerCase() ?? ''}
-          data-tags={post.data.tags.join(' ').toLowerCase()}
-        >
-          <a class="card-link-overlay" href={`/blog/${post.slug}`} aria-label={`Read post: ${post.data.title}`}></a>
-          <div class="card-content">
-            <p class="mb-2 font-mono text-xs uppercase tracking-[0.12em] text-muted">
-              {formatDate(post.data.pubDate)}
-            </p>
-            <h2 class="m-0 text-xl font-semibold text-zinc-100">{post.data.title}</h2>
-            <p class="mt-2 text-sm text-copy">{post.data.description}</p>
-            <div class="mt-3 flex flex-wrap gap-1.5">
-              {post.data.category && (
-                <span class="rounded-full border border-line bg-white/5 px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted">
-                  {post.data.category}
-                </span>
-              )}
-              {post.data.tags.map((tag) => (
-                <span class="rounded-full border border-line bg-white/5 px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted">
-                  #{tag}
-                </span>
-              ))}
+  <div class="pg-writing">
+    {/* Header */}
+    <header class="head wrap" aria-labelledby="page-title">
+      <div class="head__grid">
+        <div>
+          <p class="eyebrow head__eyebrow" data-reveal>Writing</p>
+          <h1 class="display" id="page-title" data-reveal style="--d:1">Written down while the details are <em>fresh</em>.</h1>
+          <p class="lede" data-reveal style="--d:2">Real incidents, homelab rebuilds, agent experiments, and a long tail of PowerShell.</p>
+        </div>
+        <div class="head__side" data-reveal style="--d:3">
+          <dl class="spec" aria-label="Writing at a glance">
+            <div><dt>Posts</dt><dd>{stats.count} <small>since {fmtDate(stats.first, 'short')}</small></dd></div>
+            <div><dt>Words</dt><dd>{fmtNum(stats.words)} <small>about {stats.minutes} min of reading</small></dd></div>
+            <div><dt>Latest</dt><dd><time datetime={isoDate(stats.latest)}>{fmtDate(stats.latest)}</time></dd></div>
+            <div><dt>Follow</dt><dd><a href="/feed.xml">RSS feed</a> <small>any reader works</small></dd></div>
+          </dl>
+          <figure>
+            <figcaption class="cadence__label">
+              <span class="eyebrow">Posts per year</span>
+              <span class="meta">{firstYear} – {lastYear}</span>
+            </figcaption>
+            <div class="cadence" aria-hidden="true" style={`--n:${stats.years.length}`}>
+              {
+                stats.years.map(({ year, count }, i) => {
+                  const bar = `--v:${(count / maxPerYear).toFixed(3)};--i:${i}`;
+                  return count ? (
+                    <a
+                      class:list={['cadence__col', { 'is-latest': year === lastYear }]}
+                      href={`#y${year}`}
+                      tabindex="-1"
+                      title={`${plural(count, 'post')} in ${year}`}
+                    >
+                      <span class="cadence__n">{count}</span>
+                      <span class="cadence__bar" style={bar} />
+                    </a>
+                  ) : (
+                    <span class="cadence__col is-zero" title={`Nothing published in ${year}`}>
+                      <span class="cadence__n">0</span>
+                      <span class="cadence__bar" style={bar} />
+                    </span>
+                  );
+                })
+              }
             </div>
-          </div>
-        </article>
-      ))}
+            <div class="cadence__years" aria-hidden="true" style={`--n:${stats.years.length}`}>
+              {stats.years.map(({ year }) => <span>'{String(year).slice(2)}</span>)}
+            </div>
+            <p class="sr-only">{cadenceSr}</p>
+          </figure>
+        </div>
+      </div>
+    </header>
+
+    {/* Filters (hidden without JS; writing.ts sets each chip's aria-pressed on boot) */}
+    <div class="wrap" id="archive-top">
+      <form class="filters" role="search" aria-label="Filter posts" action="/blog/">
+        <div class="search">
+          <label class="sr-only" for="q">Search posts</label>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.75" /><path d="M10.5 10.5L14 14" /></svg>
+          <input
+            class="input"
+            id="q"
+            name="q"
+            type="search"
+            placeholder="Search titles, descriptions, tags"
+            autocomplete="off"
+            spellcheck="false"
+            enterkeyhint="search"
+            maxlength="80"
+          />
+          <kbd class="search__kbd" aria-hidden="true">/</kbd>
+          <button class="search__clear" type="button" aria-label="Clear search">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+          </button>
+        </div>
+        <div class="tags" role="group" aria-label="Filter by tag">
+          <button class="chip" type="button" data-tag="" aria-pressed="true">All <small>{stats.count}</small></button>
+          {topTags.map((tag) => <button class="chip" type="button" data-tag={tag}>{tag} <small>{tagCount.get(tag)}</small></button>)}
+          <span class="tags__rest" hidden>
+            {restTags.map((tag) => <button class="chip" type="button" data-tag={tag}>{tag} <small>{tagCount.get(tag)}</small></button>)}
+          </span>
+          {restTags.length > 0 && <button class="tags__more" type="button" aria-expanded="false">+{restTags.length} more</button>}
+        </div>
+      </form>
+      <div class="summary">
+        <p class="summary__text">Showing all <strong>{stats.count}</strong> posts, newest first.</p>
+        {
+          groups.length > 1 && (
+            <nav class="summary__years" aria-label="Jump to year">
+              <span>Jump to</span>
+              {groups.map(({ year }) => <a href={`#y${year}`}>{year}</a>)}
+            </nav>
+          )
+        }
+      </div>
+      <p class="sr-only" aria-live="polite" aria-atomic="true"></p>
     </div>
 
-    <article id="blog-empty-state" class="blog-empty-state panel p-4 sm:p-5 mt-3" hidden>
-      <h3 class="m-0 text-lg font-semibold text-zinc-100">No posts matched</h3>
-      <p class="m-0 mt-2 text-sm text-copy">
-        Try another search term or switch to the <span class="font-mono text-signal">All</span> category.
-      </p>
-    </article>
-  </section>
+    {/* Latest */}
+    {
+      latest && (
+        <section class="latest wrap" aria-labelledby="latest-title">
+          <h2 class="eyebrow" id="latest-title">Latest post</h2>
+          <PostFeature post={latest} label="New" />
+        </section>
+      )
+    }
+
+    {/* Archive */}
+    <section class="archive wrap" aria-labelledby="archive-title">
+      <h2 class="sr-only" id="archive-title">All posts, by year</h2>
+      {
+        groups.map(({ year, posts: yearPosts }, gi) => {
+          const gap = gapNote(gi);
+          return (
+            <section class="year" id={`y${year}`} aria-labelledby={`yh${year}`} data-reveal style={gi === 1 ? '--d:1' : undefined}>
+              <header class="year__head">
+                <h2 class="year__num" id={`yh${year}`}>{year}</h2>
+                <p class="meta year__count"><b>{yearPosts.length}</b> {yearPosts.length === 1 ? 'post' : 'posts'}</p>
+                {gap && <p class="year__gap">{gap}</p>}
+              </header>
+              <div class="post-list">
+                {yearPosts.map((post) => (
+                  <div data-t={visibleTags(post.tags).slice(ROW_CHIPS).join(' ') || undefined}>
+                    <PostRow post={post} variant="archive" showTags={ROW_CHIPS} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        })
+      }
+      <div class="empty" hidden>
+        <span class="empty__mark" aria-hidden="true">∅</span>
+        <div>
+          <p class="empty__title">Nothing matches that.</p>
+          <p class="muted">Try a broader word. If I haven't written about it yet, the site guide will say so instead of guessing.</p>
+          <div class="empty__try"><span class="meta">Try</span><span class="chips"></span></div>
+          <div class="empty__actions">
+            <button class="btn btn--ghost btn--sm" type="button" data-clear-all>Clear filters</button>
+            <button class="btn btn--quiet btn--sm" type="button" data-guide-open="Where should I start reading?">Ask the site guide <span class="arrow" aria-hidden="true">→</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* Subscribe */}
+    <section class="wrap" aria-labelledby="sub-title">
+      <div class="sub">
+        <div>
+          <h2 class="h2" id="sub-title" data-reveal>New posts, <em>no inbox</em> required.</h2>
+          <p class="lede" data-reveal style="--d:1">Point any feed reader at the RSS feed. It updates when I publish, which is whenever something breaks in an interesting way.</p>
+        </div>
+        <div class="sub__feed" data-reveal style="--d:2">
+          <div class="sub__url">
+            <span>{feedUrl.replace(/^https?:\/\//, '')}</span>
+            <button class="btn btn--quiet btn--sm" type="button" data-copy={feedUrl} aria-label="Copy the feed URL"><span data-copy-label>Copy</span></button>
+          </div>
+          <a class="link link--quiet meta" href="/feed.xml">Open the feed <span class="arrow--ne" aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <script>
-    import { initBlogFilters } from '../../lib/client/blogFilters';
-    initBlogFilters();
+    import '../../scripts/writing';
   </script>
 </BaseLayout>
+
+<style is:global>
+  /* Page styles, scoped by the .pg-writing root (no per-element Astro cid attributes). */
+
+  /* ---------- Page head ---------- */
+  .pg-writing .head { padding-block: clamp(40px, 7vw, 104px) clamp(48px, 6vw, 88px); }
+  .pg-writing .head__grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: clamp(40px, 6vw, 112px); align-items: end; }
+  .pg-writing .head__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .pg-writing .head__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
+  .pg-writing .head .display { max-width: 12ch; }
+  .pg-writing .head .lede { margin-top: 28px; }
+  .pg-writing .head__side { display: grid; gap: 28px; }
+  .pg-writing .spec > div { grid-template-columns: 104px minmax(0, 1fr); padding: 12px 0; }
+  .pg-writing .spec dd { font-variant-numeric: tabular-nums; }
+  .pg-writing .spec a, .pg-writing .summary__clear { text-decoration: underline; text-decoration-color: var(--accent-line); text-underline-offset: 3px; }
+  .pg-writing .spec a, .pg-writing .summary__years a { transition: color var(--t-1) ease; }
+  .pg-writing .spec a:hover, .pg-writing .summary__years a:hover, .pg-writing .summary__clear:hover { color: var(--accent-hi); }
+
+  /* posts per year: a tiny honest column chart; each column jumps to its year */
+  .pg-writing .cadence__label { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+  .pg-writing .cadence, .pg-writing .cadence__years { display: grid; grid-template-columns: repeat(var(--n, 7), minmax(0, 1fr)); gap: 6px; }
+  .pg-writing .cadence { align-items: end; height: 112px; border-bottom: 1px solid var(--line-2); }
+  .pg-writing .cadence__col { position: relative; display: grid; align-content: end; justify-items: center; gap: 6px; height: 100%; }
+  .pg-writing .cadence__n, .pg-writing .cadence__years span { font-family: var(--font-mono); color: var(--faint); }
+  .pg-writing .cadence__n { font-size: 0.75rem; transition: color var(--t-1) ease; }
+  .pg-writing .cadence__bar { width: 100%; max-width: 30px; height: calc(var(--v) * 72px); min-height: 1px; border-radius: 3px 3px 0 0; background: var(--line-3); transform-origin: 50% 100%; transition: background-color var(--t-1) ease; }
+  .pg-writing .is-zero .cadence__bar { background: transparent; border-top: 1px dashed var(--line-3); border-radius: 0; }
+  .pg-writing .is-latest .cadence__bar { background: var(--accent-line); }
+  .pg-writing a.cadence__col:is(:hover, :focus-visible) .cadence__bar { background: var(--accent); }
+  .pg-writing a.cadence__col:is(:hover, :focus-visible) .cadence__n { color: var(--ink); }
+  .pg-writing .cadence__years { margin-top: 8px; }
+  .pg-writing .cadence__years span { text-align: center; font-size: 0.6875rem; }
+  @media (prefers-reduced-motion: no-preference) {
+    .js .pg-writing .cadence__bar { transform: scaleY(0); transition: transform 900ms var(--ease-out), background-color var(--t-1) ease; transition-delay: calc(var(--i) * 70ms + 250ms), 0ms; }
+    .js .pg-writing .cadence.is-in .cadence__bar { transform: none; }
+  }
+
+  /* ---------- Filters ---------- */
+  html:not(.js) .pg-writing .filters { display: none; }
+  .pg-writing .filters { display: grid; grid-template-columns: minmax(260px, 360px) minmax(0, 1fr); gap: 16px clamp(24px, 4vw, 48px); align-items: start; padding-block: 24px; border-block: 1px solid var(--line); }
+  .pg-writing .search { position: relative; }
+  .pg-writing .search svg { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+  .pg-writing .search > svg { position: absolute; left: 16px; top: 50%; width: 16px; height: 16px; margin-top: -8px; color: var(--faint); pointer-events: none; }
+  .pg-writing .search .input { padding-left: 42px; padding-right: 44px; border-radius: var(--r-pill); -webkit-appearance: none; appearance: none; }
+  .pg-writing .search .input::-webkit-search-cancel-button { display: none; }
+  .pg-writing .search__kbd, .pg-writing .search__clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); }
+  .pg-writing .search__kbd { right: 14px; min-width: 22px; height: 22px; padding: 0 6px; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 6px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--faint); pointer-events: none; }
+  .pg-writing .search__clear { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); transition: color var(--t-1) ease, background-color var(--t-1) ease; }
+  .pg-writing .search__clear:hover { color: var(--ink); background: var(--surface-2); }
+  .pg-writing .search__clear svg { width: 14px; height: 14px; stroke-width: 1.5; }
+  .pg-writing .search.has-value .search__kbd, .pg-writing .search:not(.has-value) .search__clear { display: none; }
+  @media (hover: none) { .pg-writing .search__kbd { display: none; } }
+
+  .pg-writing .tags { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 11px; }
+  .pg-writing .tags .chip { height: 30px; padding: 0 12px; font-size: 0.8125rem; }
+  .pg-writing .tags .chip small { font-size: 0.6875rem; color: var(--faint); transition: color var(--t-1) ease; }
+  .pg-writing .tags .chip[aria-pressed="true"] small { color: var(--on-accent); opacity: 0.7; }
+  .pg-writing .tags__more { height: 30px; padding: 0 6px; font-family: var(--font-mono); font-size: 0.8125rem; color: var(--muted); text-decoration: underline; text-decoration-color: var(--line-3); text-underline-offset: 4px; transition: color var(--t-1) ease; }
+  .pg-writing .tags__more:hover { color: var(--ink); text-decoration-color: var(--accent); }
+  .pg-writing .tags__rest { display: contents; }
+
+  .pg-writing .summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 64px; padding-block: 18px; }
+  .pg-writing .summary__text { font-size: 0.975rem; color: var(--muted); }
+  .pg-writing .summary__text strong { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .pg-writing .summary__text em { font-style: normal; color: var(--ink-2); }
+  .pg-writing .summary__clear { font-size: 0.875rem; color: var(--ink); margin-left: 10px; }
+  .pg-writing .summary__years { display: flex; flex-wrap: wrap; gap: 4px 14px; font-family: var(--font-mono); font-size: 0.8125rem; color: var(--faint); }
+
+  /* ---------- Latest ---------- */
+  .pg-writing .latest { padding-top: 8px; padding-bottom: clamp(48px, 6vw, 88px); }
+  .pg-writing .latest > h2 { margin-bottom: 18px; }
+
+  /* ---------- Archive ---------- */
+  .pg-writing .archive { padding-bottom: clamp(64px, 8vw, 120px); }
+  .pg-writing .year, .pg-writing .empty { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); border-top: 1px solid var(--line-2); }
+  .pg-writing .year { scroll-margin-top: calc(var(--nav-h) + 12px); }
+  .pg-writing .year:not([hidden]) ~ .year { margin-top: clamp(40px, 5vw, 64px); }
+  .pg-writing .year__head { position: sticky; top: calc(var(--nav-h) + 16px); align-self: start; padding-top: 22px; }
+  .pg-writing .year__num, .pg-writing .empty__mark { font-family: var(--font-display); font-size: clamp(2.5rem, 1.6rem + 2.4vw, 3.75rem); line-height: 1; }
+  .pg-writing .year__num { font-weight: 400; letter-spacing: -0.02em; font-variant-numeric: lining-nums; }
+  .pg-writing .year__count { margin-top: 10px; }
+  .pg-writing .year__count b { color: var(--ink-2); font-weight: 500; }
+  .pg-writing .year__gap { margin-top: 14px; font-family: var(--font-display); font-style: italic; font-size: 1.0625rem; line-height: 1.35; color: var(--muted); max-width: 16ch; }
+  .pg-writing .year .post-list { border-top: 0; }
+  /* each row sits in a display: contents wrapper that carries the filter data (data-t, data-last) */
+  .pg-writing .post-list > div { display: contents; }
+  .pg-writing .post-list > :is(:last-child, [data-last]) > .post-row { border-bottom: 0; }
+  .pg-writing .post-row { grid-template-columns: 64px minmax(0, 1fr) 96px; gap: 20px; padding: 24px 0; }
+  .pg-writing .post-row__desc { -webkit-line-clamp: 3; }
+  .pg-writing .post-row__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .pg-writing .post-row__tags .chip { height: 24px; padding: 0 9px; font-size: 0.72rem; color: var(--faint); cursor: pointer; }
+  .pg-writing .post-row__tags .chip:hover { color: var(--ink); }
+  .pg-writing .post-row__tags .chip[aria-pressed="true"] { color: var(--accent-hi); border-color: var(--accent-line); background: var(--accent-soft); }
+  .pg-writing mark { background: linear-gradient(transparent 58%, var(--accent-mark) 58%, var(--accent-mark) 92%, transparent 92%); color: var(--ink); padding: 0 1px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .pg-writing .chip mark { background: none; color: var(--accent-hi); padding: 0; }
+
+  /* ---------- Empty state ---------- */
+  .pg-writing .empty { padding-top: 28px; }
+  .pg-writing .empty__mark { color: var(--faint); }
+  .pg-writing .empty__title { font-family: var(--font-display); font-size: var(--fs-xl); line-height: 1.15; letter-spacing: -0.01em; text-wrap: balance; max-width: 24ch; overflow-wrap: anywhere; }
+  .pg-writing .empty__title em { color: var(--accent); }
+  .pg-writing .empty .muted { margin-top: 12px; max-width: 52ch; }
+  .pg-writing .empty__try { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 22px; }
+  .pg-writing .empty__try .meta { margin-right: 4px; }
+  .pg-writing .empty__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+
+  /* ---------- Subscribe ---------- */
+  .pg-writing .sub { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 48px; align-items: end; padding-block: clamp(40px, 5vw, 64px); border-top: 1px solid var(--line-2); }
+  .pg-writing .sub .h2 { max-width: 16ch; }
+  .pg-writing .sub .lede { margin-top: 16px; }
+  .pg-writing .sub__feed { display: grid; gap: 12px; justify-items: start; }
+  .pg-writing .sub__url { display: flex; align-items: center; gap: 6px; padding: 5px 5px 5px 18px; border-radius: var(--r-pill); border: 1px solid var(--line-2); background: var(--bg-deep); font-family: var(--font-mono); font-size: 0.875rem; color: var(--ink-2); max-width: 100%; }
+  .pg-writing .sub__url span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pg-writing .sub__url .btn { flex: none; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 960px) {
+    .pg-writing .head__grid { grid-template-columns: minmax(0, 1fr); align-items: start; }
+    .pg-writing .filters { grid-template-columns: minmax(0, 1fr); }
+    .pg-writing .tags { padding-top: 0; }
+    .pg-writing .year, .pg-writing .empty { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .pg-writing .year__head { position: static; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-top: 18px; padding-bottom: 4px; }
+    .pg-writing .year__count { margin-top: 0; }
+    .pg-writing .year__gap, .pg-writing .empty__mark { display: none; }
+    .pg-writing .sub { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  }
+  @media (max-width: 860px) {
+    .pg-writing .post-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "date mins" "main main"; gap: 8px 16px; padding: 22px 0; }
+    .pg-writing .post-row__date { grid-area: date; }
+    .pg-writing .post-row__meta { grid-area: mins; margin-top: 0; justify-content: end; text-align: right; }
+    .pg-writing .post-row__main { grid-area: main; }
+  }
+  @media (max-width: 640px) {
+    .pg-writing .head .display { font-size: clamp(2.5rem, 11.4vw, 3.25rem); }
+    .pg-writing .tags { flex-wrap: nowrap; overflow-x: auto; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--gutter), #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, transparent, #000 var(--gutter), #000 calc(100% - 40px), transparent); padding-bottom: 2px; }
+    .pg-writing .tags::-webkit-scrollbar { display: none; }
+    .pg-writing .tags .chip, .pg-writing .tags__more { flex: none; }
+    .pg-writing .summary__years { display: none; }
+    .pg-writing .sub__url { width: 100%; }
+    .pg-writing .sub__url span { flex: 1; min-width: 0; }
+    .pg-writing .spec { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 20px; }
+    .pg-writing .spec > div { grid-template-columns: minmax(0, 1fr); align-content: start; gap: 4px; padding: 14px 0; }
+    .pg-writing .cadence { height: 88px; }
+    .pg-writing .cadence__bar { height: calc(var(--v) * 52px); }
+  }
+</style>

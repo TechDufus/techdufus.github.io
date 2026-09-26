@@ -1,9 +1,18 @@
 ---
+/*
+  /blog/<slug>/ — one post (mockup design/pro-studio/post.html): header with meta and the
+  "Ask about this post" chip, a sticky contents rail with scroll-spy (a compact bar on narrow
+  screens), reading progress, the markdown in .prose with copy-able code blocks, author card,
+  and previous/next.
+*/
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
-import readingTime from 'reading-time';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { formatDate } from '../../lib/formatDate';
+import '../../styles/prose.css';
+import Portrait from '../../components/ui/Portrait.astro';
+import { adjacentPosts, getPostMetas, postMeta } from '../../lib/content';
+import { homeCopy, siteMetadata, socialLinks } from '../../data/site';
+import { fmtDate, fmtNum, isoDate, pad2, visibleTags } from '../../components/ui/format';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -18,8 +27,47 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content } = await post.render();
-const stats = readingTime(post.body);
+const { Content, headings } = await post.render();
+const meta = postMeta(post);
+const metas = await getPostMetas();
+const { prev, next } = adjacentPosts(metas, post.slug);
+const total = metas.length;
+const number = total - metas.findIndex((m) => m.slug === post.slug); // oldest post is No. 1
+const tags = visibleTags(meta.tags);
+const date = isoDate(meta.date);
+const updated = post.data.updatedDate;
+const category = post.data.category
+  ? ({ devops: 'DevOps' } as Record<string, string>)[post.data.category] ??
+    post.data.category.charAt(0).toUpperCase() + post.data.category.slice(1)
+  : null;
+const github = socialLinks.find((link) => link.label === 'GitHub');
+
+/* "prefix: rest" titles (e.g. "oh-my-claude: Batteries-Included …") get the mockup's small
+   package line and one gold word; everything else renders as written. */
+const split = /^([^:]{1,40}):\s+(.+)$/.exec(meta.title);
+const title = (() => {
+  if (!split || split[1].trim().split(/\s+/).length > 2) return null;
+  const words = split[2].split(/\s+/);
+  const lead = /^(the|a|an)$/i.test(words[0]) && words.length > 1 ? 1 : 0;
+  return {
+    pkg: split[1].trim(),
+    before: words.slice(0, lead).join(' '),
+    accent: words[lead],
+    after: words.slice(lead + 1).join(' ')
+  };
+})();
+
+/* Contents: h2 entries (numbered) with their h3s nested; hidden below two headings. */
+type TocEntry = { slug: string; text: string; n: string; children: { slug: string; text: string }[] };
+const toc: TocEntry[] = [];
+for (const h of headings) {
+  if (h.depth !== 2 && h.depth !== 3) continue;
+  const parent = toc[toc.length - 1];
+  if (h.depth === 3 && parent) parent.children.push({ slug: h.slug, text: h.text });
+  else toc.push({ slug: h.slug, text: h.text, n: pad2(toc.length + 1), children: [] });
+}
+const showToc = toc.reduce((count, entry) => count + 1 + entry.children.length, 0) >= 2;
+const question = `Tell me about "${meta.title}".`;
 ---
 
 <BaseLayout
@@ -33,38 +81,489 @@ const stats = readingTime(post.body);
   publishedTime={post.data.pubDate.toISOString()}
   modifiedTime={(post.data.updatedDate ?? post.data.pubDate).toISOString()}
 >
-  <article>
-    <header class="panel p-6 sm:p-8">
-      <p class="eyebrow">Post</p>
-      <h1 class="hero-title">{post.data.title}</h1>
-      <p class="mt-4 max-w-3xl text-copy">{post.data.description}</p>
+  <div class="progress" aria-hidden="true" data-progress><span></span></div>
 
-      <p class="mt-5 font-mono text-xs uppercase tracking-[0.12em] text-muted">
-        {formatDate(post.data.pubDate)} | {stats.text}
-      </p>
-
-      <div class="mt-3 flex flex-wrap gap-1.5">
-        {post.data.category && (
-          <span class="rounded-full border border-line bg-white/5 px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted">
-            {post.data.category}
-          </span>
-        )}
-        {post.data.tags.map((tag) => (
-          <span class="rounded-full border border-line bg-white/5 px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted">
-            #{tag}
-          </span>
-        ))}
+  <article class="pg-post" aria-labelledby="post-title" itemscope itemtype="https://schema.org/BlogPosting" data-minutes={meta.minutes}>
+    {/* Header */}
+    <header class="post-head">
+      <div class="wrap post-grid">
+        <div class="col-rail post-head__rail" data-reveal>
+          <span class="sec-head__index">No. {pad2(number)}</span>
+          <span class="eyebrow">{category ? `Writing · ${category}` : 'Writing'}</span>
+        </div>
+        <div class="col-main">
+          <nav class="crumbs meta" aria-label="Breadcrumb" data-reveal>
+            <a href="/blog/"><span class="arrow" aria-hidden="true">→</span> All writing</a>
+            <span class="crumbs__sep" aria-hidden="true"></span>
+            <a href={`/blog/#y${meta.date.getUTCFullYear()}`}>{meta.date.getUTCFullYear()}</a>
+          </nav>
+          <h1 class="post-title" id="post-title" itemprop="headline" data-reveal style="--d:1">
+            {
+              title ? (
+                <>
+                  <span class="pkg">{title.pkg}<i>:</i></span>
+                  {title.before && `${title.before} `}<em class="foil">{title.accent}</em>{title.after && ` ${title.after}`}
+                </>
+              ) : (
+                meta.title
+              )
+            }
+          </h1>
+          <dl class="post-meta" data-reveal style="--d:2">
+            <div><dt>Published</dt><dd><time datetime={date} itemprop="datePublished">{fmtDate(meta.date)}</time></dd></div>
+            <div><dt>Reading</dt><dd>{meta.minutes} min</dd></div>
+            <div><dt>Length</dt><dd>{fmtNum(meta.words)} <span class="muted">words</span></dd></div>
+            {
+              tags.length > 0 && (
+                <div>
+                  <dt>Filed under</dt>
+                  <dd>
+                    <div class="chips">
+                      {tags.map((tag) => <a class="chip" href={`/blog/?tag=${encodeURIComponent(tag)}`}>{tag}</a>)}
+                    </div>
+                  </dd>
+                </div>
+              )
+            }
+          </dl>
+          <div class="post-head__foot" data-reveal style="--d:3">
+            <button type="button" class="chip chip--accent ask-chip" data-guide-open={question}>
+              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                <path
+                  d="M3 4.5A2.5 2.5 0 0 1 5.5 2h9A2.5 2.5 0 0 1 17 4.5v6a2.5 2.5 0 0 1-2.5 2.5H9l-3.5 3v-3h0A2.5 2.5 0 0 1 3 10.5v-6z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linejoin="round"></path>
+              </svg>
+              Ask about this post <span class="arrow" aria-hidden="true">→</span>
+            </button>
+            {
+              updated && (
+                <span class="meta">
+                  Updated <time datetime={isoDate(updated)} itemprop="dateModified">{fmtDate(updated)}</time>
+                </span>
+              )
+            }
+          </div>
+        </div>
       </div>
     </header>
 
-    <section class="panel mt-5 p-6 sm:p-8">
-      <div class="doc-prose post-prose">
-        <Content />
-      </div>
-    </section>
+    {/* Body */}
+    <div class="post-body">
+      <div class="wrap post-grid">
+        <aside class="col-rail" aria-label="Reading aids">
+          <div class="rail">
+            {
+              showToc && (
+                <nav aria-labelledby="toc-label">
+                  <div class="rail__label">
+                    <span class="eyebrow" id="toc-label">On this page</span>
+                    <span class="rail__left" data-left aria-hidden="true">{meta.minutes} min</span>
+                  </div>
+                  <ol class="toc" data-toc>
+                    <li>
+                      <a href="#top-of-post" data-toc-link="top-of-post">
+                        <span class="n" aria-hidden="true">00</span><span>Introduction</span>
+                      </a>
+                    </li>
+                    {toc.map((entry) => (
+                      <li>
+                        <a href={`#${entry.slug}`} data-toc-link={entry.slug}>
+                          <span class="n" aria-hidden="true">{entry.n}</span><span>{entry.text}</span>
+                        </a>
+                        {entry.children.length > 0 && (
+                          <ol>
+                            {entry.children.map((child) => (
+                              <li><a class="toc__sub" href={`#${child.slug}`} data-toc-link={child.slug}><span>{child.text}</span></a></li>
+                            ))}
+                          </ol>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                </nav>
+              )
+            }
+            <a class="rail__top" href="#main" data-hidden data-to-top><span class="arrow" aria-hidden="true">→</span> Back to top</a>
+          </div>
+        </aside>
 
-    <div class="mt-5">
-      <a class="nav-link nav-link-active" href="/blog">Back to blog</a>
+        <div class="col-main">
+          {
+            showToc && (
+              <details class="toc-bar" data-toc-bar>
+                <summary>
+                  <span class="toc-bar__label">Contents</span>
+                  <span class="toc-bar__current" data-toc-current>Introduction</span>
+                  <span class="toc-bar__left" data-left aria-hidden="true">{meta.minutes} min</span>
+                  <span class="toc-bar__chev" aria-hidden="true"></span>
+                </summary>
+                <nav aria-label="Contents">
+                  <ol class="toc" data-toc>
+                    <li>
+                      <a href="#top-of-post" data-toc-link="top-of-post">
+                        <span class="n" aria-hidden="true">00</span><span>Introduction</span>
+                      </a>
+                    </li>
+                    {toc.map((entry) => (
+                      <li>
+                        <a href={`#${entry.slug}`} data-toc-link={entry.slug}>
+                          <span class="n" aria-hidden="true">{entry.n}</span><span>{entry.text}</span>
+                        </a>
+                        {entry.children.length > 0 && (
+                          <ol>
+                            {entry.children.map((child) => (
+                              <li><a class="toc__sub" href={`#${child.slug}`} data-toc-link={child.slug}><span>{child.text}</span></a></li>
+                            ))}
+                          </ol>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                </nav>
+              </details>
+            )
+          }
+
+          <div class="prose" id="top-of-post" itemprop="articleBody" data-prose>
+            <Content />
+          </div>
+
+          {/* After the post */}
+          <div class="post-after">
+            <div class="filed">
+              {
+                tags.length > 0 && (
+                  <div class="chips">
+                    {tags.map((tag) => <a class="chip" href={`/blog/?tag=${encodeURIComponent(tag)}`}>{tag}</a>)}
+                  </div>
+                )
+              }
+              <span class="meta">
+                Post {number} of {total} · Published <time datetime={date}>{fmtDate(meta.date)}</time> ·
+                <a href="#top-of-post">Back to top ↑</a>
+              </span>
+            </div>
+
+            <section class="author" aria-labelledby="author-name" data-reveal>
+              <Portrait size="avatar" px={88} alt="Matthew DeGarmo, known online as TechDufus" />
+              <div>
+                <span class="eyebrow">Written by</span>
+                <h2 class="author__name" id="author-name">Matthew, a.k.a. <em class="foil">TechDufus</em></h2>
+                <p class="author__bio">{siteMetadata.role}. {homeCopy.headline}</p>
+                <div class="author__actions">
+                  <a class="btn btn--primary btn--sm" href="/contact/">Get in touch <span class="arrow" aria-hidden="true">→</span></a>
+                  {
+                    github && (
+                      <a class="link link--quiet" href={github.href} target="_blank" rel="noopener">
+                        GitHub ↗
+                      </a>
+                    )
+                  }
+                  <a class="link link--quiet" href="/blog/">More writing</a>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
     </div>
+
+    {/* Previous / next */}
+    <nav class="pager" aria-label="More posts">
+      <div class="wrap">
+        <div class="pager__grid">
+          {
+            prev ? (
+              <div class="pager__item pager__item--prev" data-reveal>
+                <span class="pager__dir"><span class="arrow" aria-hidden="true">→</span>Previous</span>
+                <h3 class="pager__title"><a href={prev.href}>{prev.title}</a></h3>
+                <span class="pager__meta"><time datetime={isoDate(prev.date)}>{fmtDate(prev.date)}</time> · {prev.minutes} min read</span>
+              </div>
+            ) : (
+              <div class="pager__item pager__item--prev">
+                <span class="pager__dir">Previous</span>
+                <p class="pager__empty">This is the first post.</p>
+              </div>
+            )
+          }
+          {
+            next ? (
+              <div class="pager__item pager__item--next" data-reveal style="--d:1">
+                <span class="pager__dir">Next<span class="arrow" aria-hidden="true">→</span></span>
+                <h3 class="pager__title"><a href={next.href}>{next.title}</a></h3>
+                <span class="pager__meta"><time datetime={isoDate(next.date)}>{fmtDate(next.date)}</time> · {next.minutes} min read</span>
+              </div>
+            ) : (
+              <div class="pager__item pager__item--next">
+                <span class="pager__dir">Next</span>
+                <p class="pager__empty">This is the latest post.</p>
+              </div>
+            )
+          }
+        </div>
+      </div>
+    </nav>
   </article>
+
+  <script>
+    /* Reading aids: code-block chrome + copy, reading progress, contents scroll-spy. */
+    import { enhance } from '../../scripts/site';
+
+    const doc = document;
+    const prose = doc.querySelector<HTMLElement>('[data-prose]');
+    const page = doc.querySelector<HTMLElement>('.pg-post');
+
+    /* ---------- code blocks: wrap Shiki <pre> in the mockup's .code-block with a copy button ---------- */
+    const COPY_ICON =
+      '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1.3"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></g></svg>';
+    prose?.querySelectorAll<HTMLPreElement>('pre').forEach((pre) => {
+      if (pre.closest('.code-block')) return;
+      const raw = (pre.dataset.language || '').toLowerCase();
+      const lang = !raw || raw === 'plaintext' || raw === 'txt' ? 'text' : raw;
+      const block = doc.createElement('div');
+      block.className = 'code-block';
+      block.innerHTML = `<div class="code-block__bar"><span class="code-block__lang"></span><button type="button" class="code-copy" data-copy aria-label="Copy ${lang === 'text' ? 'this' : lang} code">${COPY_ICON}<span data-copy-label>Copy</span></button></div>`;
+      block.querySelector('.code-block__lang')!.textContent = lang;
+      pre.replaceWith(block);
+      block.append(pre);
+    });
+    if (prose) enhance(prose);
+
+    /* ---------- progress, minutes left, contents ---------- */
+    const minutes = Number(page?.dataset.minutes) || 1;
+    const progress = doc.querySelector<HTMLElement>('[data-progress]');
+    const tocs = [...doc.querySelectorAll<HTMLElement>('[data-toc]')];
+    const links = [...doc.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')];
+    const lefts = [...doc.querySelectorAll<HTMLElement>('[data-left]')];
+    const toTop = doc.querySelector<HTMLElement>('[data-to-top]');
+    const bar = doc.querySelector<HTMLDetailsElement>('[data-toc-bar]');
+    const current = doc.querySelector<HTMLElement>('[data-toc-current]');
+    const titles = new Map<string, string>();
+    links.forEach((a) => titles.set(a.dataset.tocLink || '', a.querySelector('span:last-child')?.textContent?.trim() || ''));
+    const targets = [...titles.keys()]
+      .map((id) => doc.getElementById(id))
+      .filter((el): el is HTMLElement => !!el);
+
+    if (bar) {
+      bar.addEventListener('click', (e) => {
+        if ((e.target as Element).closest('a')) bar.open = false;
+      });
+      doc.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && bar.open) {
+          bar.open = false;
+          bar.querySelector('summary')?.focus();
+        }
+      });
+      doc.addEventListener('click', (e) => {
+        if (bar.open && !bar.contains(e.target as Node)) bar.open = false;
+      });
+    }
+
+    let active: string | null = null;
+    function setActive(id: string): void {
+      if (id === active) return;
+      active = id;
+      links.forEach((a) => {
+        const on = a.dataset.tocLink === id;
+        a.classList.toggle('is-active', on);
+        if (on) a.setAttribute('aria-current', 'location');
+        else a.removeAttribute('aria-current');
+      });
+      if (current) current.textContent = titles.get(id) || '';
+    }
+
+    let ticking = false;
+    function update(): void {
+      ticking = false;
+      if (!prose) return;
+      const vh = window.innerHeight;
+      const r = prose.getBoundingClientRect();
+      const start = vh * 0.35;
+      const p = Math.min(1, Math.max(0, (start - r.top) / Math.max(1, r.height - vh + start)));
+      const pv = p.toFixed(4);
+      progress?.style.setProperty('--p', pv);
+      tocs.forEach((t) => t.style.setProperty('--p', pv));
+
+      const left = Math.max(1, Math.ceil(minutes * (1 - p)));
+      const txt = p >= 0.985 ? 'Done' : p <= 0.01 ? `${minutes} min` : `${left} min left`;
+      lefts.forEach((el) => (el.textContent = txt));
+      toTop?.toggleAttribute('data-hidden', p <= 0.08);
+
+      if (!targets.length) return;
+      const line = Math.min(vh * 0.3, 260) + 60;
+      let id = targets[0].id;
+      targets.forEach((el) => {
+        if (el.getBoundingClientRect().top <= line) id = el.id;
+      });
+      if (window.scrollY + vh >= doc.documentElement.scrollHeight - 4 && r.bottom < vh) id = targets[targets.length - 1].id;
+      setActive(id);
+    }
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    window.addEventListener('load', update);
+    update();
+  </script>
 </BaseLayout>
+
+<style is:global>
+  /* Page styles, scoped by the .pg-post root (no per-element Astro cid attributes). */
+  html { scroll-padding-top: calc(var(--nav-h) + 36px); }
+
+  /* ---------- Page grid: rail · reading column · breathing room ---------- */
+  .pg-post .post-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 680px) minmax(0, 1fr); column-gap: clamp(32px, 4vw, 64px); }
+  .pg-post .post-grid > .col-main { grid-column: 2; min-width: 0; }
+  .pg-post .post-grid > .col-rail { grid-column: 1; grid-row: 1; min-width: 0; }
+
+  /* ---------- Header ---------- */
+  .pg-post .post-head { padding-block: clamp(40px, 6vw, 88px) clamp(40px, 5vw, 64px); }
+  .pg-post .post-head__rail { display: grid; align-content: start; gap: 6px; padding-top: 14px; }
+  .pg-post .post-head__rail .sec-head__index { font-size: var(--fs-xs); }
+  .pg-post .crumbs { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; color: var(--faint); }
+  .pg-post .crumbs a { color: var(--muted); transition: color var(--t-1) ease; }
+  .pg-post .crumbs a:hover { color: var(--ink); }
+  .pg-post .crumbs .arrow { transform: scaleX(-1); }
+  .pg-post .crumbs a:hover .arrow { transform: scaleX(-1) translateX(3px); }
+  .pg-post .crumbs__sep { width: 18px; height: 1px; background: var(--line-3); }
+  .pg-post .post-title {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(2.5rem, 1.35rem + 3.5vw, 4.25rem); line-height: 1.02; letter-spacing: -0.02em;
+    color: var(--ink); text-wrap: balance; overflow-wrap: break-word;
+  }
+  .pg-post .post-title em { font-style: italic; color: var(--accent); }
+  .pg-post .post-title .pkg { display: block; font-size: 0.5em; line-height: 1.1; letter-spacing: -0.01em; color: var(--muted); margin-bottom: 0.3em; }
+  .pg-post .post-title .pkg i { color: var(--faint); font-style: normal; }
+
+  .pg-post .post-meta { display: grid; grid-template-columns: repeat(3, auto) minmax(0, 1fr); margin-top: clamp(32px, 4vw, 44px); border-block: 1px solid var(--line); }
+  .pg-post .post-meta > div { display: grid; gap: 4px; align-content: start; padding: 14px 24px 16px 0; }
+  .pg-post .post-meta > div + div { padding-left: 24px; border-left: 1px solid var(--line); }
+  .pg-post .post-meta dt, .pg-post .toc-bar__label { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+  .pg-post .post-meta dd { color: var(--ink); font-size: 0.975rem; font-variant-numeric: tabular-nums; }
+  .pg-post .post-meta dd .muted { font-size: 0.9rem; }
+  .pg-post .post-meta .chips { margin-top: 1px; }
+
+  .pg-post .post-head__foot { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; margin-top: 20px; }
+  .pg-post .ask-chip { height: 32px; padding: 0 14px 0 10px; gap: 8px; font-size: 0.8125rem; }
+  .pg-post .ask-chip svg { width: 15px; height: 15px; }
+  .pg-post .ask-chip:hover { color: var(--ink) !important; background: var(--accent-tint); border-color: var(--accent) !important; }
+  .pg-post .ask-chip .arrow { color: var(--accent); }
+
+  /* ---------- Body + rail ---------- */
+  .pg-post .post-body { padding-bottom: clamp(56px, 7vw, 96px); }
+  .pg-post .rail { position: sticky; top: calc(var(--nav-h) + 40px); display: grid; gap: 28px; max-width: 220px; padding-top: 6px; }
+  .pg-post .rail__label { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .pg-post .rail__label .eyebrow { color: var(--faint); }
+  .pg-post .rail__left, .pg-post .toc-bar__left { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .pg-post .toc { position: relative; }
+  .pg-post .toc::before { content: ""; position: absolute; left: -1px; top: 0; bottom: 0; width: 1px; background: var(--accent-line); transform-origin: 50% 0; transform: scaleY(var(--p, 0)); }
+  .pg-post .toc a { position: relative; display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 4px; align-items: baseline; }
+  .pg-post .toc a.toc__sub { grid-template-columns: minmax(0, 1fr); padding-left: 42px; }
+  .pg-post .toc a .n { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--faint); opacity: 0.75; }
+  .pg-post .toc a.is-active .n { color: var(--accent); opacity: 1; }
+  .pg-post .rail__top { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--faint); transition: color var(--t-1) ease, opacity var(--t-2) ease; justify-self: start; }
+  .pg-post .rail__top:hover { color: var(--ink); }
+  .pg-post .rail__top .arrow { transform: rotate(-90deg); }
+  .pg-post .rail__top[data-hidden] { opacity: 0; pointer-events: none; }
+
+  /* compact contents bar (narrow screens) */
+  .pg-post .toc-bar { display: none; }
+
+  /* ---------- Prose: markdown from the content collection ---------- */
+  .pg-post .prose { max-width: none; }
+  .pg-post .prose :is(p, li) { hanging-punctuation: first; }
+  .pg-post .prose h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.875rem, 1.5rem + 1.2vw, 2.375rem); line-height: 1.12; letter-spacing: -0.012em; color: var(--ink); margin-top: 2.2em; text-wrap: balance; }
+  .pg-post .prose > :first-child { margin-top: 0; }
+  .pg-post .prose :is(h1, h2) { clear: both; }
+  .pg-post .prose :is(h5, h6) { font-weight: 600; color: var(--ink); margin-top: 1.4em; }
+  .pg-post .prose h1 + * { margin-top: 0.6em; }
+  .pg-post .prose li > :is(ul, ol) { margin-top: 0.45em; }
+  .pg-post .prose li > p + p, .pg-post .prose blockquote > * + * { margin-top: 0.75em; }
+  .pg-post .prose .code-block { margin-block: 1.6em; }
+  .pg-post .prose .code-block__lang { display: inline-flex; align-items: center; gap: 8px; }
+  .pg-post .prose .code-block__lang::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--gold-bead); opacity: 0.9; }
+  .pg-post .prose .code-copy svg { width: 14px; height: 14px; }
+  .pg-post .prose .code-block pre code { font: inherit; background: none; border: 0; padding: 0; }
+
+  /* ---------- After the post ---------- */
+  .pg-post .post-after { display: grid; gap: clamp(40px, 5vw, 56px); margin-top: clamp(48px, 6vw, 72px); padding-top: clamp(32px, 4vw, 48px); border-top: 1px solid var(--line); }
+  .pg-post .filed { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; }
+  .pg-post .filed .meta a { color: var(--muted); }
+  .pg-post .filed .meta a:hover { color: var(--ink); }
+
+  .pg-post .author { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 24px; align-items: start; padding: clamp(24px, 3vw, 32px); border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); }
+  .pg-post .author .portrait { width: 88px; height: 88px; }
+  .pg-post .author__name { font-family: var(--font-display); font-size: 1.75rem; line-height: 1.1; color: var(--ink); margin-top: 6px; }
+  .pg-post .author__name em { color: var(--accent); }
+  .pg-post .author__bio { color: var(--muted); margin-top: 8px; max-width: 46ch; font-size: 1rem; line-height: 1.55; }
+  .pg-post .author__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 20px; }
+
+  .pg-post .pager { border-top: 1px solid var(--line); }
+  .pg-post .pager__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pg-post .pager__item { position: relative; display: grid; align-content: start; gap: 10px; padding: clamp(28px, 4vw, 48px) clamp(20px, 3vw, 40px) clamp(32px, 4vw, 56px) 0; transition: background-color var(--t-2) ease; }
+  .pg-post .pager__item + .pager__item { border-left: 1px solid var(--line); padding-left: clamp(20px, 3vw, 40px); padding-right: 0; text-align: right; justify-items: end; }
+  .pg-post .pager__dir { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+  .pg-post .pager__dir .arrow { transition: transform var(--t-2) var(--ease-out); }
+  .pg-post .pager__item--prev .pager__dir .arrow { transform: scaleX(-1); }
+  .pg-post .pager__item--prev:hover .pager__dir .arrow { transform: scaleX(-1) translateX(4px); }
+  .pg-post .pager__item--next:hover .pager__dir .arrow { transform: translateX(4px); }
+  .pg-post .pager__title { font-family: var(--font-display); font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.125rem); line-height: 1.12; letter-spacing: -0.012em; color: var(--ink); text-wrap: balance; max-width: 22ch; transition: color var(--t-1) ease; }
+  .pg-post .pager__title a::after { content: ""; position: absolute; inset: 0; }
+  .pg-post .pager__item:hover .pager__title { color: var(--accent-hi); }
+  .pg-post .pager__meta { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .pg-post .pager__item a:focus-visible { outline: none; }
+  .pg-post .pager__item:has(a:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 4px; }
+  .pg-post .pager__empty { color: var(--faint); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1119px) {
+    .pg-post .post-grid { grid-template-columns: minmax(0, 1fr); max-width: calc(720px + var(--gutter) * 2); }
+    .pg-post .post-grid > .col-main, .pg-post .post-grid > .col-rail { grid-column: 1; grid-row: auto; }
+    .pg-post .post-body .col-rail { display: none; }
+    .pg-post .post-head__rail { display: flex; align-items: center; gap: 12px; padding-top: 0; margin-bottom: 20px; }
+    .pg-post .crumbs { margin-bottom: 20px; }
+    html { scroll-padding-top: calc(var(--nav-h) + 72px); }
+
+    .pg-post .toc-bar {
+      display: block; position: sticky; top: var(--nav-h); z-index: 40;
+      margin-bottom: 36px; margin-inline: calc(var(--gutter) * -1);
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
+      -webkit-backdrop-filter: saturate(140%) blur(14px); backdrop-filter: saturate(140%) blur(14px);
+      border-block: 1px solid var(--line);
+    }
+    .pg-post .toc-bar summary { display: flex; align-items: center; gap: 12px; height: 48px; padding-inline: var(--gutter); list-style: none; cursor: pointer; font-size: 0.9375rem; }
+    .pg-post .toc-bar summary::-webkit-details-marker { display: none; }
+    .pg-post .toc-bar__label, .pg-post .toc-bar__left { flex: none; }
+    .pg-post .toc-bar__current { flex: 1; min-width: 0; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pg-post .toc-bar__chev { width: 10px; height: 10px; flex: none; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: translateY(-3px) rotate(45deg); transition: transform var(--t-2) var(--ease-out); }
+    .pg-post .toc-bar[open] .toc-bar__chev { transform: translateY(2px) rotate(-135deg); }
+    .pg-post .toc-bar > nav {
+      position: absolute; left: 0; right: 0; top: 100%; padding: 6px var(--gutter) 18px;
+      background: color-mix(in srgb, var(--bg) 97%, transparent); border-bottom: 1px solid var(--line);
+      box-shadow: 0 24px 40px -20px rgba(0, 0, 0, 0.8);
+      max-height: calc(100dvh - var(--nav-h) - 60px); overflow-y: auto;
+    }
+    .pg-post .toc-bar[open] > nav { animation: toc-drop var(--t-2) var(--ease-out); }
+    @keyframes toc-drop { from { opacity: 0; transform: translateY(-6px); } }
+    .pg-post .toc-bar .toc a { padding-block: 9px; }
+  }
+  @media (max-width: 640px) {
+    .pg-post .post-title .pkg { font-size: 0.56em; }
+    .pg-post .post-meta { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .pg-post .post-meta > div { padding: 12px 12px 14px 0; }
+    .pg-post .post-meta > div + div { padding-left: 14px; }
+    .pg-post .post-meta > div:nth-child(4) { grid-column: 1 / -1; padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
+    .pg-post .prose { font-size: 1.0625rem; }
+    .pg-post .author { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .pg-post .author .portrait { width: 72px; height: 72px; }
+    .pg-post .pager__grid { grid-template-columns: minmax(0, 1fr); }
+    .pg-post .pager__item, .pg-post .pager__item + .pager__item { padding: 28px 0; text-align: left; justify-items: start; border-left: 0; }
+    .pg-post .pager__item + .pager__item { border-top: 1px solid var(--line); }
+  }
+</style>

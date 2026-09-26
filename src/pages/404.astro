@@ -1,20 +1,46 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { profileSpotlight } from '../data/site';
 ---
 
 <BaseLayout title="404" description="Well... this page is missing." noindex>
-  <section class="panel p-6 sm:p-8 reveal reveal-delay-1">
-    <p class="eyebrow">404</p>
-    <h1 class="hero-title">Well... this link is busted.</h1>
-    <p class="mt-4 max-w-2xl text-copy">
-      That route does not exist in the current site map. It happens.
-    </p>
-
-    <div class="mt-6 flex flex-wrap gap-2">
-      <a class="nav-link nav-link-active" href="/">Home</a>
-      <a class="nav-link" href="/blog">Blog</a>
-      <a class="nav-link" href="/docs">Docs</a>
-      <a class="nav-link" href="/contact">Contact</a>
+  <section class="nf wrap" aria-labelledby="page-title">
+    <p class="nf__code" aria-hidden="true" data-reveal>4<em class="foil">0</em>4</p>
+    <div class="nf__copy">
+      <p class="eyebrow nf__eyebrow" data-reveal>404 · Not found</p>
+      <h1 class="display" id="page-title" data-reveal style="--d:1">Well... this link is <em>busted</em>.</h1>
+      <p class="lede" data-reveal style="--d:2">It happens.</p>
+      <div class="nf__ctas" data-reveal style="--d:3">
+        <a class="btn btn--primary btn--lg" href="/">Home <span class="arrow" aria-hidden="true">-&gt;</span></a>
+        <a class="btn btn--ghost btn--lg" href="/blog/">Writing</a>
+        <a class="btn btn--ghost btn--lg" href="/lab/">Lab</a>
+      </div>
+      <p class="nf__status meta" data-reveal style="--d:4"><span class="dot" aria-hidden="true"></span>{profileSpotlight.status}</p>
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .nf {
+    display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 6vw, 96px); align-items: center;
+    min-height: min(72vh, 760px); padding-block: clamp(48px, 8vw, 120px);
+  }
+  .nf__code {
+    font-family: var(--font-display); font-weight: 400; line-height: 0.85; letter-spacing: -0.04em;
+    font-size: clamp(7rem, 4rem + 14vw, 17rem); color: var(--ink); font-variant-numeric: lining-nums;
+    padding-bottom: 0.08em; border-bottom: 1px solid var(--line-2);
+  }
+  .nf__code em { font-style: italic; }
+  .nf__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .nf__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
+  .nf .display { max-width: 12ch; }
+  .nf .lede { margin-top: 28px; }
+  .nf__ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
+  .nf__status { display: inline-flex; align-items: center; gap: 8px; margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .nf__status .dot { background: var(--ok); }
+  @media (max-width: 960px) {
+    .nf { grid-template-columns: minmax(0, 1fr); min-height: 0; align-items: start; }
+    .nf__code { font-size: clamp(6rem, 30vw, 10rem); }
+  }
+  @media (max-width: 640px) { .nf__ctas .btn { width: 100%; } }
+</style>

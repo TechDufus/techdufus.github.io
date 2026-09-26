@@ -1,161 +1,156 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import {
-  aboutCopy,
-  aboutHowIOperate,
-  aboutNow,
-  featuredRepos,
-  profileSpotlight,
-  siteMetadata
-} from '../data/site';
-import { getGitHubStarsByRepoUrl } from '../lib/github';
+import SectionHead from '../components/ui/SectionHead.astro';
+import Portrait from '../components/ui/Portrait.astro';
+import ProofPoints from '../components/ui/ProofPoints.astro';
+import Timeline, { type TimelineItem } from '../components/ui/Timeline.astro';
+import Principles from '../components/ui/Principles.astro';
+import { aboutCopy, aboutNow, homeOperatingStyle, profileSpotlight, siteMetadata } from '../data/site';
 
-const formatStars = (count: number) => new Intl.NumberFormat('en-US').format(count);
+// The body copy carries the old Tailwind link classes; render its links with the Studio `.link` style.
+const bodyParagraphs = aboutCopy.body.map((paragraph) => paragraph.replace(/class="[^"]*"/g, 'class="link"'));
 
-const featuredReposWithStars = await Promise.all(
-  featuredRepos.map(async (repo) => {
-    const stars = await getGitHubStarsByRepoUrl(repo.url);
-    return { ...repo, stars };
-  })
-);
+// "Career, condensed" (mockup index.html #about), from src/content/docs/career.md.
+const career: TimelineItem[] = [
+  { when: '2024 — now', what: 'Raft', whatNote: 'Senior DevSecOps Engineer', now: true, body: 'GitOps with ArgoCD across OpenShift, AKS and RKE2, including air-gapped operations.' },
+  { when: '2022 — now', what: 'InFlux', whatNote: 'Ansible-driven scaling', body: 'Turned rigid shell installs into idempotent, fleet-oriented automation.' },
+  { when: '2022 — 2024', what: 'Lumen', whatNote: 'Full-stack DevOps → Platform', body: 'Go services, Helm on GKE, Kubewarden admission policies on large clusters.' },
+  { when: '2020 — 2022', what: 'Ansira', whatNote: 'DevOps delivery', body: 'Terraform on Azure, CI/CD pipelines, PKI automation from hours to seconds. CISSP.' },
+  { when: '2016 — 2020', what: 'Nebraska Public Power District', whatNote: 'Automation first', body: 'PowerShell tooling in a regulated, NERC-heavy environment. Security+.' }
+];
 ---
 
 <BaseLayout title="About" description={aboutCopy.intro}>
-  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
-    <div class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-      <figure class="profile-frame gentle-float mx-auto w-full max-w-[18rem] sm:max-w-sm lg:mx-0">
-        <img
-          src={profileSpotlight.photo}
-          alt={profileSpotlight.photoAlt}
-          class="profile-photo"
-          width={profileSpotlight.photoWidth}
-          height={profileSpotlight.photoHeight}
-          loading="eager"
-          decoding="async"
-          fetchpriority="high"
-        />
-        <figcaption class="border-t border-white/10 px-4 py-3 font-mono text-xs uppercase tracking-[0.12em] text-copy">
-          {siteMetadata.role}
-        </figcaption>
-      </figure>
-
+  <div class="pg-about">
+  <!-- ============ Hero ============ -->
+  <section class="hero" aria-labelledby="page-title">
+    <div class="wrap hero__grid">
       <div>
-        <p class="eyebrow">About</p>
-        <h1 class="hero-title">{profileSpotlight.introTitle}</h1>
-        <p class="mt-2 font-mono text-sm text-signal">{profileSpotlight.nickname}</p>
-        <p class="mt-4 max-w-3xl text-zinc-200 sm:text-lg">{aboutCopy.intro}</p>
-        <p class="mt-3 max-w-2xl text-copy">{profileSpotlight.intro}</p>
-        <p class="mt-4 status-pill">
-          <span class="status-dot" aria-hidden="true"></span>
-          {profileSpotlight.status}
-        </p>
+        <div class="hero__id">
+          <Portrait size="avatar" loading="eager" />
+          <div>
+            <p class="serif">{profileSpotlight.nickname}</p>
+            <p class="meta">{siteMetadata.role}</p>
+          </div>
+        </div>
+        <p class="eyebrow hero__eyebrow" data-reveal>About</p>
+        <h1 class="display" id="page-title" data-reveal style="--d:1">Hello, I'm <em>TechDufus</em>.</h1>
+        <p class="lede hero__lede" data-reveal style="--d:2">{aboutCopy.intro}</p>
+        <div class="hero__ctas" data-reveal style="--d:3">
+          <a class="btn btn--primary btn--lg" href="/contact/">Get in touch <span class="arrow" aria-hidden="true">→</span></a>
+          <a class="btn btn--ghost btn--lg" href="https://github.com/TechDufus" target="_blank" rel="noopener">GitHub <span class="arrow--ne" aria-hidden="true">↗</span></a>
+        </div>
+        <p class="meta hero__status" data-reveal style="--d:3"><span class="dot" aria-hidden="true"></span>{profileSpotlight.status}</p>
+      </div>
+      <Portrait size="hero" />
+    </div>
+  </section>
 
-        <div class="mt-6 flex flex-wrap gap-2">
-          <a class="nav-link nav-link-active" href="#featured-repos">See Featured Repos</a>
-          <a class="nav-link" href="/contact">Reach Out</a>
-          <a class="nav-link" href="/blog">Read Blog</a>
+  <!-- ============ 01 · Backstory ============ -->
+  <section id="story" class="section" aria-labelledby="story-title">
+    <div class="wrap">
+      <SectionHead index={1} label="Backstory" bare />
+      <div class="about__bio">
+        <h2 class="h2 sec-head__title" id="story-title" data-reveal>How I got <em>here</em>.</h2>
+        {bodyParagraphs.map((paragraph, i) => <p class:list={{ first: i === 0 }} data-reveal set:html={paragraph} />)}
+        <div class="about__quote" data-reveal>
+          <p class="quote">{homeOperatingStyle[0]}</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="content-section grid gap-3 lg:grid-cols-[1.05fr_0.95fr] lg:items-start reveal reveal-delay-2">
-    <article class="panel compact-panel p-5">
-      <div class="section-head">
-        <h2>The Backstory (Short Version)</h2>
-        <p>I found PowerShell, caught the automation bug, and realized I could make a career out of being lazy in the best way: automate it.</p>
-      </div>
-      <div class="grid gap-3">
-        {aboutCopy.body.map((paragraph) => (
-          <p class="m-0 max-w-4xl leading-relaxed text-copy" set:html={paragraph}></p>
-        ))}
-      </div>
-    </article>
-
-    <aside class="panel compact-panel p-5">
-      <div class="section-head">
-        <h2>Current Focus</h2>
-        <p>{aboutNow.timeframe}</p>
-      </div>
-      <p class="m-0 text-sm leading-relaxed text-zinc-200">{aboutNow.primaryFocus}</p>
-      <ul class="m-0 mt-3 grid gap-2 list-none p-0">
-        {aboutNow.activeTracks.map((track) => (
-          <li class="surface-tier-3 rounded-lg border border-line/90 px-3 py-2.5 text-sm text-copy">
-            <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{track.title}</p>
-            <p class="m-0 mt-1.5">{track.detail}</p>
-          </li>
-        ))}
-      </ul>
-    </aside>
-  </section>
-
-  <section class="content-section panel compact-panel p-5 reveal reveal-delay-3">
-    <div class="section-head">
-      <h2>How I Operate</h2>
-      <p>{aboutHowIOperate.intro}</p>
-    </div>
-    <div class="grid gap-2 sm:grid-cols-2">
-      {aboutHowIOperate.items.map((item) => (
-        <article class="story-card">
-          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{item.title}</p>
-          <p class="m-0 mt-1.5 text-sm leading-relaxed text-zinc-200">{item.detail}</p>
-        </article>
-      ))}
+  <!-- ============ 02 · Now ============ -->
+  <section id="now" class="section" aria-labelledby="now-title">
+    <div class="wrap">
+      <SectionHead index={2} label="Now" aside={aboutNow.timeframe} titleId="now-title" title="Right <em>now</em>." lede={aboutNow.primaryFocus} />
     </div>
   </section>
 
-  <section id="featured-repos" class="content-section reveal reveal-delay-4">
-    <div class="section-head">
-      <h2>Featured GitHub Repos</h2>
-      <p>The projects I keep open during real work.</p>
-    </div>
-
-    <div class="repo-rail">
-      {featuredReposWithStars.map((repo) => (
-        <article class="repo-rail-card interactive-card compact-panel p-4" data-depth="featured" data-pointer-halo="subtle">
-          <a
-            href={repo.url}
-            class="card-link-overlay"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Open ${repo.name} repository`}
-          ></a>
-          <div class="card-content">
-            <div class="flex items-center justify-between gap-3">
-              <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-signal">{repo.tag}</p>
-              <div class="flex items-center gap-1.5">
-                <span class="rounded-full border border-amber-300/30 bg-amber-300/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-amber-100">
-                  {`★ ${repo.stars !== null ? formatStars(repo.stars) : repo.starsFallback ?? 'n/a'}`}
-                </span>
-                <span class="rounded-full border border-white/15 bg-white/5 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-zinc-200">
-                  {repo.status}
-                </span>
-              </div>
-            </div>
-            <h3 class="m-0 mt-2.5 text-lg font-semibold text-zinc-100">{repo.name}</h3>
-            <p class="m-0 mt-1.5 text-sm leading-relaxed text-copy">{repo.summary}</p>
-            <p class="m-0 mt-2.5 text-xs text-muted">Why I keep it around: {repo.whyItMatters}</p>
-          </div>
-        </article>
-      ))}
+  <!-- ============ 03 · Proof ============ -->
+  <section id="proof" class="section" aria-labelledby="proof-title">
+    <div class="wrap">
+      <SectionHead index={3} label="Proof" titleId="proof-title" title="Proof." />
+      <ProofPoints />
     </div>
   </section>
 
-  <a
-    class="content-section panel compact-panel mx-auto w-full max-w-3xl p-6 reveal reveal-delay-5 interactive-card card-link-block no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
-    href="/contact"
-  >
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div class="space-y-1">
-        <h2 class="m-0 text-3xl font-semibold tracking-tight text-zinc-100">Say Hey!</h2>
-        <p class="m-0 text-zinc-200">Seriously, please talk to me.</p>
-      </div>
-      <span class="link-chip inline-flex">Open Contact Page -></span>
+  <!-- ============ 04 · Career ============ -->
+  <section id="career" class="section" aria-labelledby="career-title">
+    <div class="wrap">
+      <SectionHead index={4} label="Career" bare>
+        <a slot="aside" class="link link--quiet meta" href="/docs/career/">Full career notes <span class="arrow" aria-hidden="true">→</span></a>
+      </SectionHead>
+      <h2 class="h2 sec-head__title" id="career-title" data-reveal>Career.</h2>
+      <Timeline items={career} class="career__timeline" reveal d={1} />
     </div>
-  </a>
+  </section>
 
-  <script>
-    import { initPointerHalo } from '../lib/client/pointerHalo';
-    initPointerHalo();
-  </script>
+  <!-- ============ 05 · Principles ============ -->
+  <section id="operate" class="section" aria-labelledby="operate-title">
+    <div class="wrap">
+      <SectionHead index={5} label="Principles" titleId="operate-title" title="How I <em>work</em>." />
+      <div class="principles">
+        <Principles heading="" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Say hey ============ -->
+  <section class="section section--tight" aria-labelledby="hey-title">
+    <div class="wrap hey" data-reveal>
+      <div>
+        <h2 class="h2" id="hey-title">Say <em>hey</em>!</h2>
+        <p class="lede">Seriously, please talk to me.</p>
+      </div>
+      <a class="btn btn--primary btn--lg" href="/contact/">Open the contact page <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+  </section>
+  </div>
 </BaseLayout>
+
+<style is:global>
+  /* Global under the .pg-about root (no data-astro-cid attributes).
+     Hero (mockup index.html .hero; the figure + ring styles live in Portrait.astro) */
+  .pg-about .hero { padding-block: clamp(40px, 7vw, 104px) clamp(56px, 7vw, 96px); }
+  .pg-about .hero__grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(40px, 6vw, 96px); align-items: start; }
+  .pg-about .hero__id { display: none; }
+  .pg-about .hero__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .pg-about .hero__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
+  .pg-about .hero .display { max-width: 13ch; }
+  .pg-about .hero__lede { margin-top: 28px; color: var(--ink-2); }
+  .pg-about .hero__ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
+  .pg-about .hero__status { display: inline-flex; align-items: center; gap: 8px; margin-top: 22px; }
+  .pg-about .hero__status .dot { background: var(--ok); }
+  @media (max-width: 960px) {
+    .pg-about .hero__grid { grid-template-columns: minmax(0, 1fr); }
+    .pg-about .hero__id { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+    .pg-about .hero__id .portrait { width: 72px; height: 72px; flex: none; }
+    .pg-about .hero__id p { line-height: 1.35; }
+    .pg-about .hero__id .serif { font-size: 1.375rem; font-style: italic; }
+    .pg-about .hero__id .meta { color: var(--muted); }
+    .pg-about .hero__eyebrow { margin-bottom: 18px; }
+  }
+  @media (max-width: 640px) {
+    .pg-about .hero__ctas .btn { width: 100%; }
+    .pg-about .hero .display { font-size: clamp(2.5rem, 11.4vw, 3.25rem); }
+  }
+
+  /* Backstory (mockup #about) */
+  .pg-about .about__bio > .sec-head__title { margin-bottom: 32px; }
+  .pg-about .about__bio > p + p { margin-top: 1.1em; }
+  .pg-about .about__bio > p { color: var(--ink-2); font-size: 1.0625rem; max-width: 60ch; }
+  .pg-about .about__bio .first { font-size: var(--fs-md); color: var(--ink); }
+  .pg-about .about__quote { margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--line); }
+
+  /* Career */
+  .pg-about .career__timeline { margin-top: 32px; }
+
+  /* Proof and principles sit right under the section title */
+  .pg-about #proof .proof { margin-top: 0; }
+
+  .pg-about .principles .operate__h { margin-top: 0; }
+
+  .pg-about .hey { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 24px 40px; }
+  .pg-about .hey .lede { margin-top: 12px; }
+</style>

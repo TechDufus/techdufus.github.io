@@ -1,25 +1,28 @@
-import { getSortedPosts } from '../lib/content';
-import { siteMetadata } from '../data/site';
-
-function loc(pathname: string): string {
-  return new URL(pathname, siteMetadata.url).toString();
-}
+import { getPostMetas } from '../lib/content';
+import { business, siteMetadata } from '../data/site';
 
 function urlEntry(pathname: string, lastmod?: string): string {
-  if (!lastmod) {
-    return `<url><loc>${loc(pathname)}</loc></url>`;
-  }
-
-  return `<url><loc>${loc(pathname)}</loc><lastmod>${lastmod}</lastmod></url>`;
+  const loc = new URL(pathname, siteMetadata.url).toString();
+  return lastmod ? `<url><loc>${loc}</loc><lastmod>${lastmod}</lastmod></url>` : `<url><loc>${loc}</loc></url>`;
 }
 
 export async function GET() {
-  const posts = await getSortedPosts();
-  const staticPaths = ['/', '/blog', '/docs', '/docs/setup', '/docs/career', '/about', '/contact'];
+  const posts = await getPostMetas();
+  // Trailing slashes match the site's own links (and the directory-style build output).
+  const staticPaths = [
+    '/',
+    '/blog/',
+    '/lab/',
+    ...(business.enabled ? [business.appHref] : []),
+    '/docs/',
+    '/docs/setup/',
+    '/docs/career/',
+    '/about/',
+    '/contact/',
+    '/support/'
+  ];
 
-  const postEntries = posts.map((post) =>
-    urlEntry(`/blog/${post.slug}`, post.data.pubDate.toISOString().slice(0, 10))
-  );
+  const postEntries = posts.map((post) => urlEntry(post.href, post.date.toISOString().slice(0, 10)));
   const staticEntries = staticPaths.map((path) => urlEntry(path));
 
   const xml = [

@@ -1,0 +1,73 @@
+---
+/*
+  Proof points with numbered sources (mockup index.html #about .proof + ol.sources).
+  Points with a sourceHref get a footnote link "[n]" → #{idPrefix}-n; the sources list resolves each href
+  to its externalReferences title + host. Footnotes labelled "Related …" are listed as related coverage.
+*/
+import { externalReferences, homeProofPoints } from '../../data/site';
+import { delay, hostOf } from './format';
+
+type ProofPoint = { label: string; value: string; note?: string; sourceLabel?: string; sourceHref?: string };
+
+interface Props {
+  points?: readonly ProofPoint[];
+  /** Footnote id prefix; the home hero stat links to #src-1. */
+  idPrefix?: string;
+}
+
+const { points = homeProofPoints, idPrefix = 'src' } = Astro.props;
+
+const sources: { id: string; href: string; text: string }[] = [];
+const items = points.map((point) => {
+  if (!point.sourceHref) return { point, fn: 0 };
+  const n = sources.length + 1;
+  const title = externalReferences.find((ref) => ref.href === point.sourceHref)?.title ?? point.sourceLabel ?? point.sourceHref;
+  const related = /^related\b/i.test(point.sourceLabel ?? '') ? 'Related coverage: ' : '';
+  const host = hostOf(point.sourceHref);
+  sources.push({ id: `${idPrefix}-${n}`, href: point.sourceHref, text: `${related}${title}${host ? ` — ${host}` : ''} ↗` });
+  return { point, fn: n };
+});
+---
+<div class="proof">
+  {
+    items.map(({ point, fn }, i) => (
+      <div class="proof__item" data-reveal style={delay(i || null)}>
+        <span class="proof__label">{point.label}</span>
+        <p class="proof__value">{point.value}{fn > 0 && <a class="fn" href={`#${idPrefix}-${fn}`} aria-label={`Source ${fn}`}>[{fn}]</a>}</p>
+        {point.note && <p class="proof__note">{point.note}</p>}
+      </div>
+    ))
+  }
+</div>
+{
+  sources.length > 0 && (
+    <ol class="sources">
+      {sources.map((src) => (
+        <li id={src.id}>
+          <a class="link link--quiet" href={src.href} target="_blank" rel="noopener">{src.text}</a>
+        </li>
+      ))}
+    </ol>
+  )
+}
+
+<style is:global>
+  /* Mockup index.html #about proof points + footnoted sources. */
+  .proof { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: clamp(56px, 7vw, 96px); border-top: 1px solid var(--line-2); }
+  .proof__item { padding: 26px 28px 26px 0; display: grid; gap: 10px; align-content: start; }
+  .proof__item + .proof__item { padding-left: 28px; border-left: 1px solid var(--line); }
+  .proof__label { font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .proof__value { font-family: var(--font-display); font-size: 1.75rem; line-height: 1.15; }
+  .proof__note { color: var(--muted); font-size: 0.95rem; }
+  .fn { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); margin-left: 6px; white-space: nowrap; vertical-align: 0.35em; text-decoration: none; }
+  .fn:hover { color: var(--accent-hi); text-decoration: underline; }
+  .sources { margin-top: 18px; display: grid; gap: 6px; font-size: 0.875rem; color: var(--faint); counter-reset: src; }
+  .sources li { display: grid; grid-template-columns: 28px minmax(0, 1fr); counter-increment: src; }
+  .sources li::before { content: "[" counter(src) "]"; font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); }
+  .sources li:target a { color: var(--ink); }
+  @media (max-width: 960px) {
+    .proof { grid-template-columns: minmax(0, 1fr); }
+    .proof__item, .proof__item + .proof__item { padding: 22px 0; border-left: 0; }
+    .proof__item + .proof__item { border-top: 1px solid var(--line); }
+  }
+</style>

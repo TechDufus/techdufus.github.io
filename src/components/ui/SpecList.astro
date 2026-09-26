@@ -1,0 +1,29 @@
+---
+/*
+  Mockup .spec readout: <dl class="spec"><div><dt>k</dt><dd>v<small>note</small></dd></div>…</dl>
+  `href` links the value (external links open in a new tab); `note` renders as the muted <small>.
+*/
+import { delay, linkProps } from './format';
+
+export type SpecRow = { k: string; v: string; href?: string; note?: string };
+
+interface Props {
+  rows: readonly SpecRow[];
+  label?: string;
+  class?: string;
+  reveal?: boolean;
+  d?: number;
+}
+
+const { rows, label, class: className, reveal = false, d } = Astro.props;
+---
+<dl class:list={['spec', className]} aria-label={label} data-reveal={reveal ? '' : undefined} style={delay(d)}>
+  {
+    rows.map((row) => (
+      <div>
+        <dt>{row.k}</dt>
+        <dd>{row.href ? <a {...linkProps(row.href)}>{row.v}</a> : row.v}{row.note && <small>{row.note}</small>}</dd>
+      </div>
+    ))
+  }
+</dl>

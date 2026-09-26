@@ -1,6 +1,8 @@
 ---
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import SiteGuide from '../components/SiteGuide.astro';
+import SvgDefs from '../components/ui/SvgDefs.astro';
 import { siteMetadata } from '../data/site';
 import '../styles/global.css';
 
@@ -43,23 +45,25 @@ const socialImage = resolveAbsolute(ogImage ?? siteMetadata.media.defaultSocialI
 ---
 
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en" class="has-duo">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark" />
     <title>{pageTitle}</title>
+    <script is:inline>document.documentElement.classList.add('js')</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Sora:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap"
     />
     <meta name="description" content={description} />
     <meta name="author" content={siteMetadata.author} />
     <meta name="theme-color" content={siteMetadata.media.themeColor} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href={siteMetadata.media.faviconIco} sizes="any" />
+    <link rel="icon" type="image/svg+xml" href={siteMetadata.media.faviconSvg} />
     <link rel="icon" type="image/png" sizes="16x16" href={siteMetadata.media.favicon16} />
     <link rel="icon" type="image/png" sizes="32x32" href={siteMetadata.media.favicon32} />
     <link rel="apple-touch-icon" sizes="180x180" href={siteMetadata.media.appleTouchIcon} />
@@ -82,18 +86,18 @@ const socialImage = resolveAbsolute(ogImage ?? siteMetadata.media.defaultSocialI
     <meta name="twitter:image" content={socialImage} />
     <meta name="twitter:image:alt" content={ogImageAlt} />
     {noindex && <meta name="robots" content="noindex,nofollow" />}
+    <slot name="head" />
   </head>
-  <body class="bg-canvas text-ink antialiased">
-    <div class="site-bg" aria-hidden="true">
-      <span class="site-bg-aurora site-bg-aurora-a"></span>
-      <span class="site-bg-aurora site-bg-aurora-b"></span>
-    </div>
-    <div class="site-shell">
-      <Nav />
-      <main class="site-main">
-        <slot />
-      </main>
-      <Footer />
-    </div>
+  <body>
+    <SvgDefs />
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <SiteGuide />
+    <script>
+      import '../scripts/site';
+    </script>
   </body>
 </html>

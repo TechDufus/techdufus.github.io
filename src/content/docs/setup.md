@@ -108,7 +108,7 @@ My homelab is built for repeatability, not hand-tuned snowflakes.
 
 - Proxmox VE hosts a 3-node Talos Kubernetes cluster.
 - GitOps via ArgoCD.
-- Traefik ingress + HA Cloudflare tunnels.
+- Traefik ingress + Tailscale Kubernetes Operator for access (replaced HA Cloudflare tunnels in Feb 2026).
 - MetalLB, Pi-hole DNS, local + NFS-backed storage patterns.
 
 ### Workloads + rebuild path

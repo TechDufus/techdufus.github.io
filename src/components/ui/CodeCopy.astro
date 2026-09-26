@@ -1,0 +1,14 @@
+---
+/*
+  Copy button for a .code-block bar (mockup post.html/lab.html):
+    <button type="button" class="code-copy" data-copy aria-label="Copy code"><span data-copy-label>Copy</span></button>
+  An empty data-copy makes site.ts copy the closest .code-block's <pre>; pass `text` to copy something else.
+*/
+interface Props {
+  text?: string;
+  label?: string;
+}
+
+const { text = '', label = 'Copy code' } = Astro.props;
+---
+<button type="button" class="code-copy" data-copy={text} aria-label={label}><span data-copy-label>Copy</span></button>

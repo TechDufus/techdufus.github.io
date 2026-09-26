@@ -1,0 +1,40 @@
+---
+/*
+  Support links as cards (mockup index.html #contact .support):
+    <div class="support"><a href target=_blank><strong>Buy Me a Coffee <span aria-hidden="true">↗</span></strong><small>details</small></a>…</div>
+*/
+import { supportLinks } from '../../data/site';
+import { delay } from './format';
+
+type SupportLink = { label: string; href: string; details: string };
+
+interface Props {
+  links?: readonly SupportLink[];
+  reveal?: boolean;
+  d?: number;
+}
+
+const { links = supportLinks, reveal = true, d } = Astro.props;
+---
+<div class="support" data-reveal={reveal ? '' : undefined} style={delay(d)}>
+  {
+    links.map((link) => (
+      <a href={link.href} target="_blank" rel="noopener">
+        <strong>{link.label} <span aria-hidden="true">↗</span></strong>
+        <small>{link.details}</small>
+      </a>
+    ))
+  }
+</div>
+
+<style is:global>
+  /* Mockup index.html #contact support cards. */
+  .support { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 40px; }
+  .support a { position: relative; display: grid; gap: 6px; padding: 20px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); transition: border-color var(--t-2) ease; }
+  .support a:hover { border-color: var(--accent-line); }
+  .support strong { font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+  .support strong span { color: var(--faint); font-weight: 400; transition: color var(--t-1) ease, transform var(--t-2) var(--ease-out); }
+  .support a:hover strong span { color: var(--accent-hi); transform: translate(2px, -2px); }
+  .support small { color: var(--muted); font-size: 0.875rem; line-height: 1.5; }
+  @media (max-width: 640px) { .support { grid-template-columns: minmax(0, 1fr); } }
+</style>

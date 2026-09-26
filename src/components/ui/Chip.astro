@@ -1,0 +1,31 @@
+---
+/*
+  Mockup .chip. Element follows the props:
+    href           → <a class="chip"> (external links open in a new tab)
+    pressed (bool) → <button class="chip" type="button" aria-pressed> (filter toggles)
+    otherwise      → <span class="chip">
+  Extra attributes (data-tag, aria-label, …) pass through.
+*/
+import type { HTMLAttributes } from 'astro/types';
+import { linkProps } from './format';
+
+interface Props extends Omit<HTMLAttributes<'span'>, 'class'> {
+  href?: string;
+  pressed?: boolean;
+  accent?: boolean;
+  quiet?: boolean;
+  class?: string;
+}
+
+const { href, pressed, accent = false, quiet = false, class: className, ...rest } = Astro.props;
+const classes = ['chip', { 'chip--accent': accent, 'chip--quiet': quiet }, className];
+---
+{
+  href ? (
+    <a class:list={classes} {...rest} {...linkProps(href)}><slot /></a>
+  ) : pressed !== undefined ? (
+    <button class:list={classes} type="button" aria-pressed={pressed ? 'true' : 'false'} {...rest}><slot /></button>
+  ) : (
+    <span class:list={classes} {...rest}><slot /></span>
+  )
+}

@@ -1,184 +1,97 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHead from '../components/ui/SectionHead.astro';
+import EmailCopy from '../components/ui/EmailCopy.astro';
+import { linkProps } from '../components/ui/format';
 import { socialLinks } from '../data/site';
 
-type ChannelTone = 'core' | 'social' | 'community' | 'support';
-type ChannelPriority = 'primary' | 'secondary';
-
-type ChannelMeta = {
-  lane: string;
-  bestFor: string;
-  command: string;
-  tone: ChannelTone;
-  priority: ChannelPriority;
-  spotlight?: boolean;
-};
-
 const toDisplayValue = (href: string) => {
-  if (href.startsWith('mailto:')) return href.replace('mailto:', '');
   try {
     const url = new URL(href);
-    return url.hostname.replace(/^www\./, '');
+    return url.hostname.replace(/^www\./, '') + url.pathname.replace(/\/$/, '');
   } catch {
     return href;
   }
 };
 
-const channelMetaByLabel: Record<string, ChannelMeta> = {
-  Email: {
-    lane: 'Project + client',
-    bestFor: 'Long-form project details and client conversations.',
-    command: 'email',
-    tone: 'core',
-    priority: 'secondary'
-  },
-  GitHub: {
-    lane: 'Open source',
-    bestFor: 'Issues, PRs, and anything code-first.',
-    command: 'github',
-    tone: 'core',
-    priority: 'primary',
-    spotlight: true
-  },
-  LinkedIn: {
-    lane: 'Professional',
-    bestFor: 'Network intros and business conversations.',
-    command: 'linkedin',
-    tone: 'core',
-    priority: 'primary',
-    spotlight: true
-  },
-  X: {
-    lane: 'Quick updates',
-    bestFor: 'Short questions and day-to-day tech chatter.',
-    command: 'x',
-    tone: 'social',
-    priority: 'primary',
-    spotlight: true
-  },
-  YouTube: {
-    lane: 'Video',
-    bestFor: 'Walkthroughs, demos, and longer explainer content.',
-    command: 'youtube',
-    tone: 'social',
-    priority: 'secondary'
-  },
-  Discord: {
-    lane: 'Community',
-    bestFor: 'Ongoing conversations about tooling and experiments.',
-    command: 'discord',
-    tone: 'community',
-    priority: 'secondary'
-  }
-};
+const channelUses = [
+  { label: 'GitHub', use: 'Code, issues, PRs' },
+  { label: 'LinkedIn', use: 'Work and intros' },
+  { label: 'X', use: 'Quick questions' },
+  { label: 'Discord', use: 'Hang out' },
+  { label: 'YouTube', use: 'Videos' }
+];
 
-const defaultChannelMeta: ChannelMeta = {
-  lane: 'General',
-  bestFor: 'General conversations and follow-ups.',
-  command: 'ping',
-  tone: 'core',
-  priority: 'secondary'
-};
-
-const channels = socialLinks
-  .map((link) => ({
-    ...link,
-    ...(channelMetaByLabel[link.label] ?? defaultChannelMeta),
-    displayValue: toDisplayValue(link.href),
-    external: link.href.startsWith('http')
-  }))
-  .sort((a, b) => {
-  if ((a.spotlight ?? false) !== (b.spotlight ?? false)) {
-    return a.spotlight ? -1 : 1;
-  }
-  if (a.priority !== b.priority) {
-    return a.priority === 'primary' ? -1 : 1;
-  }
-  return a.label.localeCompare(b.label);
-  });
-
-const channelByLabel = new Map(channels.map((channel) => [channel.label, channel]));
-
-const quickRoutes = [
-  { label: 'Open source', channel: 'GitHub' },
-  { label: 'Professional', channel: 'LinkedIn' },
-  { label: 'Quick updates', channel: 'X' }
-] as const;
+const channels = channelUses.flatMap(({ label, use }) => {
+  const link = socialLinks.find((item) => item.label === label);
+  return link ? [{ label, use, href: link.href, displayValue: toDisplayValue(link.href) }] : [];
+});
 ---
 
-<BaseLayout title="Contact" description="Pick a channel and reach out.">
-  <section class="hero-surface hero-grid-lines reveal reveal-delay-1">
-    <p class="eyebrow">Contact</p>
-    <h1 class="hero-title">No forms. Just direct routes.</h1>
-    <p class="mt-4 max-w-2xl text-copy">
-      Pick the channel that matches your intent. GitHub, LinkedIn, and X are the fastest lanes; email is best for longer client/project threads.
-    </p>
-    <div class="mt-5 flex flex-wrap gap-2">
-      {quickRoutes.map((route) => {
-        const channel = channelByLabel.get(route.channel);
-        if (!channel) return null;
-        return (
-          <a
-            class="contact-quick-link"
-            href={channel.href}
-            target={channel.external ? '_blank' : undefined}
-            rel={channel.external ? 'noopener noreferrer' : undefined}
-          >
-            {route.label} -> {channel.label}
-          </a>
-        );
-      })}
+<BaseLayout title="Contact" description="Email's the fastest way to reach me.">
+  <div class="pg-contact">
+  <!-- ============ Header ============ -->
+  <header class="head wrap" aria-labelledby="page-title">
+    <p class="eyebrow head__eyebrow" data-reveal>Contact</p>
+    <h1 class="display" id="page-title" data-reveal style="--d:1">Say <em>hey</em>.</h1>
+    <p class="lede" data-reveal style="--d:2">Email's the fastest way to reach me. For code stuff, open an issue on GitHub.</p>
+    <EmailCopy d={3} />
+  </header>
+
+  <!-- ============ 01 · Elsewhere ============ -->
+  <section id="channels" class="section" aria-label="Elsewhere">
+    <div class="wrap">
+      <SectionHead index={1} label="Elsewhere" aside={`${channels.length} links`} bare />
+      <ul class="routes" data-reveal>
+        {channels.map((channel) => (
+          <li>
+            <a class="route" {...linkProps(channel.href)}>
+              <span class="route__main">
+                <strong>{channel.label}</strong>
+                <span class="meta">{channel.displayValue}</span>
+              </span>
+              <span class="route__for">{channel.use}</span>
+              <span class="route__arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="support__foot" data-reveal>
+        <a class="link link--quiet" href="/support/">Support the notes →</a>
+      </p>
     </div>
   </section>
-
-  <section class="content-section reveal reveal-delay-2">
-    <div class="section-head">
-      <h2>Channels</h2>
-      <p>Primary routes first, then everything else.</p>
-    </div>
-
-    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {channels.map((channel) => (
-        <a
-          class:list={[
-            'interactive-card card-link-block p-4 contact-grid-card',
-            `contact-card-${channel.tone}`,
-            channel.spotlight && 'contact-grid-card-spotlight'
-          ]}
-          href={channel.href}
-          target={channel.external ? '_blank' : undefined}
-          rel={channel.external ? 'noopener noreferrer' : undefined}
-        >
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <p class="font-mono text-xs uppercase tracking-[0.14em] text-muted">{channel.label}</p>
-              <p class="mt-1.5 text-sm font-semibold text-zinc-100">{channel.displayValue}</p>
-            </div>
-            <span class:list={['contact-priority', channel.priority === 'primary' && 'contact-priority-primary']}>
-              {channel.priority}
-            </span>
-          </div>
-          <p class="mt-2.5 text-sm text-copy">{channel.bestFor}</p>
-          <div class="mt-3 flex flex-wrap gap-1.5">
-            <span class="contact-pill">{channel.lane}</span>
-            <span class="contact-pill">/{channel.command}</span>
-          </div>
-        </a>
-      ))}
-    </div>
-  </section>
-
-  <a
-    class="content-section panel compact-panel p-5 reveal reveal-delay-3 interactive-card card-link-block no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
-    href="/support"
-  >
-    <div class="section-head">
-      <h2>Support (optional)</h2>
-      <p>Everything on this site stays free.</p>
-    </div>
-    <p class="m-0 max-w-3xl text-sm leading-relaxed text-copy">
-      If you want to support the work, there is a dedicated support page. No paywall and no premium tier.
-    </p>
-    <span class="contact-quick-link mt-4 inline-flex">Open support options -></span>
-  </a>
+  </div>
 </BaseLayout>
+
+<style is:global>
+  /* Global under the .pg-contact root (no data-astro-cid attributes). Page head (mockup blog.html .head) */
+  .pg-contact .head { padding-block: clamp(40px, 7vw, 104px) clamp(48px, 6vw, 88px); }
+  .pg-contact .head__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .pg-contact .head__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
+  .pg-contact .head .display { max-width: 12ch; }
+  .pg-contact .head .lede { margin-top: 28px; }
+
+  /* Channel rows (post-row rhythm: name | what it's for | arrow) */
+  .pg-contact .routes { border-top: 1px solid var(--line); }
+  .pg-contact .route {
+    display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 4fr) 20px; gap: 12px 28px; align-items: baseline;
+    padding: 22px 4px; border-bottom: 1px solid var(--line); color: var(--ink);
+    transition: background-color var(--t-2) ease;
+  }
+  .pg-contact .route:hover { background: var(--surface); }
+  .pg-contact .route__main { display: grid; gap: 2px; min-width: 0; }
+  .pg-contact .route__main strong { font-family: var(--font-display); font-size: 1.5rem; font-weight: 400; line-height: 1.15; transition: color var(--t-1) ease; }
+  .pg-contact .route:hover .route__main strong { color: var(--accent-hi); }
+  .pg-contact .route__main .meta { overflow-wrap: anywhere; }
+  .pg-contact .route__for { color: var(--muted); font-size: 0.975rem; line-height: 1.55; }
+  .pg-contact .route__arrow { color: var(--faint); transition: color var(--t-1) ease, transform var(--t-2) var(--ease-out); }
+  .pg-contact .route:hover .route__arrow { color: var(--accent-hi); transform: translate(2px, -2px); }
+  @media (max-width: 960px) {
+    .pg-contact .route { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; }
+    .pg-contact .route__main, .pg-contact .route__for { grid-column: 1; }
+    .pg-contact .route__arrow { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+  }
+
+  .pg-contact .support__foot { margin-top: 28px; }
+</style>

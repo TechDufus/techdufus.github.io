@@ -11,11 +11,12 @@ export const siteMetadata = {
   xHandle: '@TechDufus',
   media: {
     faviconIco: '/favicon.ico',
+    faviconSvg: '/favicon.svg',
     favicon16: '/favicon-16x16.png',
     favicon32: '/favicon-32x32.png',
     appleTouchIcon: '/apple-touch-icon.png',
     manifestPath: '/site.webmanifest',
-    themeColor: '#000104',
+    themeColor: '#0a1122',
     defaultSocialImage: '/img/social-default.jpg',
     defaultSocialImageAlt: 'TechDufus homelab desk with terminal-first AI and Kubernetes workflows',
     defaultSocialImageWidth: 1200,
@@ -23,17 +24,260 @@ export const siteMetadata = {
   }
 };
 
-export const primaryNavigation = [
-  { label: 'Home', href: '/' },
-  { label: 'Blog', href: '/blog' },
-  { label: 'About', href: '/about' },
-  { label: 'Contact', href: '/contact' }
+export type Service = {
+  index: string;
+  title: string;
+  who: string;
+  items: string[];
+  price: string;
+  priceUnit: string;
+  ctaLabel: string;
+  ctaHref: string;
+  draft: boolean;
+};
+
+export type Tier = {
+  tier: string;
+  name: string;
+  who: string;
+  amount: string;
+  period: string;
+  items: string[];
+  ctaLabel: string;
+  ctaHref: string;
+  featured: boolean;
+  badge?: string;
+  draft: boolean;
+};
+
+export type Faq = {
+  question: string;
+  /** Paragraphs of trusted HTML. Placeholder copy is wrapped in `<span class="ph">`. */
+  answer: string[];
+  draft: boolean;
+};
+
+/** Values rendered as `.ph` placeholders in the mockup: `[Bracketed copy]` and the `$—` price stubs. */
+export const isPlaceholder = (value: string): boolean => /^\[.*\]$/s.test(value) || /^\$[-—]$/.test(value);
+
+const businessCompanyName = '[Company] LLC';
+const businessAppName = '[App name]';
+const businessEmail = 'hey@techdufus.com';
+const ph = (value: string) => `<span class="ph">${value}</span>`;
+
+export const business: {
+  enabled: boolean;
+  companyName: string;
+  appName: string;
+  appHref: '/app/';
+  waitlistHref: string;
+  services: Service[];
+  pricing: Tier[];
+  faq: Faq[];
+  legal: { termsHref: string; privacyHref: string };
+} = {
+  enabled: false,
+  companyName: businessCompanyName,
+  appName: businessAppName,
+  appHref: '/app/',
+  waitlistHref: `mailto:${businessEmail}?subject=Waitlist`,
+  services: [
+    {
+      index: '01',
+      title: 'Platform engineering advisory',
+      who: 'teams running Kubernetes who want a second set of eyes on GitOps, RBAC and delivery guardrails.',
+      items: [
+        'Review of cluster, ArgoCD and Terraform/Terragrunt setup',
+        'RBAC and multi-team guardrails that scale',
+        'Written findings with a prioritised runbook'
+      ],
+      price: '$-',
+      priceUnit: '[per engagement]',
+      ctaLabel: 'Book an intro call',
+      ctaHref: `mailto:${businessEmail}?subject=${encodeURIComponent('Intro call: platform engineering advisory')}`,
+      draft: true
+    },
+    {
+      index: '02',
+      title: 'Kubernetes & homelab build-outs',
+      who: 'people who want a reproducible cluster they can rebuild from git, not a snowflake.',
+      items: [
+        'Proxmox + Talos cluster declared in Terraform',
+        'ArgoCD GitOps with your first services',
+        'Handover docs so you can rebuild without me'
+      ],
+      price: '$-',
+      priceUnit: '[per build]',
+      ctaLabel: 'Book an intro call',
+      ctaHref: `mailto:${businessEmail}?subject=${encodeURIComponent('Intro call: Kubernetes build-out')}`,
+      draft: true
+    },
+    {
+      index: '03',
+      title: 'Agentic workflow setup',
+      who: 'engineers adopting AI coding agents who want the speed without giving up ownership.',
+      items: [
+        'Claude Code / Codex setup with sane defaults',
+        'A phased flow: gather context, implement, verify',
+        'Review and rollback rails for risky changes'
+      ],
+      price: '$-',
+      priceUnit: '[per team]',
+      ctaLabel: 'Book an intro call',
+      ctaHref: `mailto:${businessEmail}?subject=${encodeURIComponent('Intro call: agentic workflow setup')}`,
+      draft: true
+    }
+  ],
+  pricing: [
+    {
+      tier: 'Tier 01',
+      name: '[Tier name]',
+      who: '[Who this tier is for]',
+      amount: '$—',
+      period: '[period]',
+      items: ["[What's included]", '[Usage limit]', '[Support level]'],
+      ctaLabel: 'Join the waitlist',
+      ctaHref: '#waitlist',
+      featured: false,
+      draft: true
+    },
+    {
+      tier: 'Tier 02',
+      name: '[Tier name]',
+      who: '[Who this tier is for]',
+      amount: '$—',
+      period: '[period]',
+      items: ['[Everything in Tier 01, plus]', "[What's included]", '[Usage limit]', '[Support level]'],
+      ctaLabel: 'Join the waitlist',
+      ctaHref: '#waitlist',
+      featured: true,
+      badge: '[Recommended?]',
+      draft: true
+    },
+    {
+      tier: 'Tier 03',
+      name: '[Tier name]',
+      who: '[Who this tier is for]',
+      amount: '$—',
+      period: '[period]',
+      items: ['[Everything in Tier 02, plus]', "[What's included]", '[Support level]'],
+      ctaLabel: 'Talk to me',
+      ctaHref: `mailto:${businessEmail}?subject=${encodeURIComponent(`${businessAppName} pricing`)}`,
+      featured: false,
+      draft: true
+    }
+  ],
+  faq: [
+    {
+      question: "Who's behind it?",
+      answer: [
+        "Me. I'm Matthew, better known as <a href=\"/\">TechDufus</a>: a platform engineer who builds Kubernetes platforms for high-security environments and writes about what actually worked.",
+        `${ph(businessAppName)} is being built and sold under ${ph(businessCompanyName)}.`
+      ],
+      draft: false
+    },
+    {
+      question: 'Can I try it before it launches?',
+      answer: [
+        "Yes, a demo of it. The <a href=\"#demo\">assistant above</a> and the one in the corner of every page run on this site's real posts and repos. It's scripted and keyword-matched, not the finished product, and it tells you when it doesn't know."
+      ],
+      draft: false
+    },
+    {
+      question: '[When does it launch?]',
+      answer: [ph('[Launch timing, or "when it\'s ready" plus the waitlist.]')],
+      draft: true
+    },
+    {
+      question: '[What happens to my data?]',
+      answer: [ph('[Where data lives, who can see it, and how to delete it. Link the Privacy page.]')],
+      draft: true
+    },
+    {
+      question: '[How does billing work?]',
+      answer: [ph('[Trial, billing period, cancellation. Link the Terms.]')],
+      draft: true
+    },
+    {
+      question: '[Can I use it for my team?]',
+      answer: [ph('[Seats, roles, and what changes for teams.]')],
+      draft: true
+    }
+  ],
+  legal: {
+    termsHref: '#',
+    privacyHref: '#'
+  }
+};
+
+/** Section copy around the business data (mockup `index.html#services`, `app.html#pricing`/`#faq`). Only rendered when `business.enabled`. */
+export const businessCopy = {
+  services: {
+    eyebrow: 'Services',
+    title: 'The work I already do, <em>for your team</em>.',
+    lede: `Paid services are launching under ${ph(businessCompanyName)}. These three slots are drafts: scope and pricing aren't final, so treat them as a conversation starter.`,
+    stepsTitle: 'How engagements work',
+    steps: [
+      {
+        title: 'Intro call',
+        detail: "Email me what you're working on. We find thirty minutes and figure out if I'm the right person."
+      },
+      {
+        title: 'Scope in writing',
+        detail: "A short plan: what's in, what's out, and how we'll both know it's done."
+      },
+      {
+        title: 'Build, verify, hand over',
+        detail: 'The work lives in git, goes through review, and ships with a runbook you keep.'
+      }
+    ]
+  },
+  pricing: {
+    title: 'What it <em>costs</em>.',
+    lede: "Prices aren't set yet. These cards show the shape, not the numbers. When the numbers exist, they'll be right here.",
+    foot: `All prices in USD once set · billed by ${ph(businessCompanyName)}`
+  },
+  faq: {
+    title: 'Fair <em>questions</em>.',
+    lede: "Two are answered. The rest are marked draft until there's a real answer to give.",
+    mailLabel: 'Not here? Ask me directly.'
+  }
+};
+
+/** `business: true` items render only when `business.enabled`. */
+export type NavItem = { label: string; href: string; business?: boolean };
+
+export const primaryNavigation: NavItem[] = [
+  { label: 'Writing', href: '/blog/' },
+  { label: 'Lab', href: '/lab/' },
+  { label: business.appName, href: business.appHref, business: true },
+  { label: 'Services', href: '/#services', business: true },
+  { label: 'About', href: '/about/' }
 ];
 
-export const docsNavigation = [
-  { label: 'Setup', href: '/docs/setup' },
-  { label: 'Career', href: '/docs/career' }
-];
+export const primaryCta: { label: 'Get in touch'; href: '/contact/' } = {
+  label: 'Get in touch',
+  href: '/contact/'
+};
+
+export const footerNavigation: { site: NavItem[] } = {
+  site: [
+    { label: 'Home', href: '/' },
+    { label: 'Writing', href: '/blog/' },
+    { label: 'Lab', href: '/lab/' },
+    { label: business.appName, href: business.appHref, business: true },
+    { label: 'Services', href: '/#services', business: true },
+    { label: 'About', href: '/about/' },
+    { label: 'Setup', href: '/docs/setup/' },
+    { label: 'Career', href: '/docs/career/' },
+    { label: 'Contact', href: '/contact/' },
+    { label: 'Support', href: '/support/' }
+  ]
+};
+
+/** Filters out business-only items while `business.enabled` is false. */
+export const visibleNav = (items: NavItem[]): NavItem[] =>
+  items.filter((item) => !item.business || business.enabled);
 
 export const socialLinks = [
   { label: 'GitHub', href: 'https://github.com/TechDufus' },
@@ -48,99 +292,71 @@ export const supportLinks = [
   {
     label: 'Buy Me a Coffee',
     href: 'https://buymeacoffee.com/techdufus',
-    details: 'One-time or monthly support for writing and tooling.',
-    lane: '/coffee'
+    details: 'One-time or monthly.'
   },
   {
     label: 'GitHub Sponsors',
     href: 'https://github.com/sponsors/techdufus',
-    details: 'Monthly support while I publish open source and platform notes.',
-    lane: '/sponsors'
+    details: 'Monthly, through GitHub.'
   }
 ];
 
 export const homeCopy = {
-  eyebrow: 'Hello from the command line',
   headline: 'I break things, fix them, and write down what actually worked.',
   metaDescription:
-    'TechDufus writes about platform engineering, homelab rebuilds, and agent workflows that hold up in the real world.',
-  description:
-    'This is my digital garden for incident fallout, homelab experiments, setup docs, and AI workflow lessons that survived real use.',
-  highlights: [
-    'Postmortems without the victory-lap fluff',
-    'Setup docs I keep updating whenever I break my own stack',
-    'Agent workflows with explicit ownership, review, and rollback'
-  ]
+    'TechDufus writes about platform engineering, homelab rebuilds, and agent workflows that hold up in the real world.'
 };
 
 export const aboutCopy = {
   intro:
-    "I'm Matthew, but most people online know me as TechDufus. I started in PowerShell, then moved into Kubernetes platform work, and now I spend a lot of time sharpening agentic workflows.",
+    "I'm Matthew, but most people online know me as TechDufus. I started in PowerShell, moved into Kubernetes platform work, and now spend most of my time on agentic workflows.",
   body: [
-    'When I found PowerShell, I got bit by the automation bug and realized I could make a career out of being lazy in the best way: automate it once and stop doing it by hand. <a href="https://github.com/matthewjdegarmo/AdminToolkit" target="_blank" rel="noopener noreferrer" class="font-medium text-signal underline decoration-signal/60 underline-offset-2 hover:text-electric">AdminToolkit</a> and <a href="https://github.com/matthewjdegarmo/HelpDesk" target="_blank" rel="noopener noreferrer" class="font-medium text-signal underline decoration-signal/60 underline-offset-2 hover:text-electric">HelpDesk</a> were two of the first tools I built for day-to-day work.',
-    'That push toward automation pulled me into the DevOps world, which came with a whole new toolchain and a whole new set of problems to solve across Terraform, GitOps, and Kubernetes.',
-    'As a DevOps engineer, I realized one of my biggest gaps was empathy for the developer workflows I was shaping. I was blessed to step into a full-stack role where we owned the entire microservices stack end to end: app code, tests, CI/CD, container registry, cloud Kubernetes, security controls, firewalls, backups, and VPN.',
-    'As I grew, that pulled me into platform engineering, where I do not just own CI/CD, I own the platform it deploys to. That means large Kubernetes clusters, RBAC at scale, and high-security air-gapped environments, while pushing AI at the edge of what agentic engineering can do.',
-    'This site is where I keep notes while details are fresh: what broke, what held, and what I would change next round.'
+    'When I found PowerShell, I got bit by the automation bug and realized I could make a career out of being lazy the right way: automate it once and stop doing it by hand. <a href="https://github.com/matthewjdegarmo/AdminToolkit" target="_blank" rel="noopener noreferrer" class="link">AdminToolkit</a> and <a href="https://github.com/matthewjdegarmo/HelpDesk" target="_blank" rel="noopener noreferrer" class="link">HelpDesk</a> were some of the first tools I built.',
+    "That pulled me into DevOps, then a full-stack role where we owned everything from app code to firewalls. That's where I learned to care about the developers using what I build.",
+    'Now I do platform engineering: big Kubernetes clusters, RBAC at scale, air-gapped environments, and a lot of AI agents. This site is where I write down what broke and what held.'
   ]
 };
 
 export const aboutNow = {
   timeframe: 'Updated February 26, 2026',
   primaryFocus:
-    'Right now I split my cycles between AI inference and GPU workload operations in Kubernetes, plus pushing Codex and agentic workflows until the rough edges show up.',
-  activeTracks: [
-    {
-      title: 'Pushing Agentic Limits',
-      detail:
-        'I keep pushing agentic engineering to the edge to ship high-quality outcomes.'
-    },
-    {
-      title: 'Homelab Proving Ground',
-      detail:
-        'I test limits in my homelab because I like learning, tinkering, and figuring things out as I go.'
-    },
-    {
-      title: 'Build Notes In Public',
-      detail:
-        'If something breaks, I write the runbook before I forget.'
-    },
-    {
-      title: 'AI Infra Feedback Loops',
-      detail:
-        'I am researching safer AI-assisted infrastructure workflows with pre-commit risk checks and stronger delivery guardrails.'
-    }
-  ]
+    'AI inference and GPU workloads on Kubernetes, and pushing Codex and Claude Code until the rough edges show.'
 };
 
 export const aboutHowIOperate = {
-  intro:
-    'How I keep speed without losing control.',
   items: [
-    {
-      title: 'Reproducible By Default',
-      detail:
-        'I treat environments as code. If I can hand Terraform a fresh Proxmox box and rebuild the stack, I trust it.'
-    },
-    {
-      title: 'Automate Early',
-      detail:
-        'If I cannot automate something from the start, I usually do not keep investing in it. One-off steps drift fast.'
-    },
-    {
-      title: 'Fast Feedback, Guardrails On',
-      detail:
-        'I move fast with short loops, but risky changes still go through review rails, rollback planning, and verification.'
-    },
-    {
-      title: 'No Tribal-Knowledge Ops',
-      detail:
-        "Any change that only lives in someone's memory is high risk. I prefer scripted workflows and written runbooks that survive handoffs."
-    }
+    { title: 'Reproducible by default', detail: 'If Terraform can rebuild it from a fresh box, I trust it.' },
+    { title: 'Automate early', detail: 'One-off steps drift fast.' },
+    { title: 'Fast, with guardrails', detail: 'Risky changes still get review and a rollback plan.' },
+    { title: 'Write it down', detail: "If it only lives in someone's head, it's a risk." }
   ]
 };
 
-export const featuredRepos = [
+/** GitHub values as of Sep 25, 2026 (design/pro-data.js), used when the build can't reach the API. */
+export type RepoFallback = {
+  description: string | null;
+  language: string | null;
+  license: string | null;
+  stars: number;
+  forks: number;
+  pushedAt: string | null;
+  topics: string[];
+};
+
+export type FeaturedRepo = {
+  name: string;
+  url: string;
+  tag: string;
+  status: string;
+  starsFallback: string;
+  summary: string;
+  whyItMatters: string;
+  fallback?: RepoFallback;
+};
+
+export const featuredReposAsOf = '2026-09-25';
+
+export const featuredRepos: FeaturedRepo[] = [
   {
     name: 'openkanban',
     url: 'https://github.com/TechDufus/openkanban',
@@ -150,7 +366,16 @@ export const featuredRepos = [
     summary:
       'Terminal-native Kanban for tracking parallel agent tasks without leaving tmux.',
     whyItMatters:
-      'This keeps multi-agent work from turning into tab chaos and missing context.'
+      'This keeps multi-agent work from turning into tab chaos and missing context.',
+    fallback: {
+      description: 'TUI kanban board for orchestrating AI coding agents',
+      language: 'Go',
+      license: 'AGPL-3.0',
+      stars: 146,
+      forks: 15,
+      pushedAt: '2026-06-12',
+      topics: []
+    }
   },
   {
     name: 'oh-my-claude',
@@ -161,7 +386,16 @@ export const featuredRepos = [
     summary:
       'I built this after hitting the same Claude Code friction over and over. Opinionated defaults, still fully hackable.',
     whyItMatters:
-      'I open a session and get to work instead of rebuilding my environment every time.'
+      'I open a session and get to work instead of rebuilding my environment every time.',
+    fallback: {
+      description: 'Add ultrawork to any prompt for maximum parallel execution',
+      language: 'Python',
+      license: 'MIT',
+      stars: 175,
+      forks: 9,
+      pushedAt: '2026-07-13',
+      topics: ['ai', 'automation', 'claude', 'claude-code', 'plugin', 'productivity']
+    }
   },
   {
     name: 'dotfiles',
@@ -172,7 +406,16 @@ export const featuredRepos = [
     summary:
       'My terminal-first environment: tmux, Neovim, shell tooling, and scripts that keep my daily workflow fast.',
     whyItMatters:
-      'This is the setup that powers almost everything I build.'
+      'This is the setup that powers almost everything I build.',
+    fallback: {
+      description: 'Fully automated development environment for TechDufus using ansible.',
+      language: 'Shell',
+      license: 'Apache-2.0',
+      stars: 413,
+      forks: 64,
+      pushedAt: '2026-09-26',
+      topics: ['ansible', 'archlinux', 'bash', 'dotfiles', 'neovim', 'ubuntu']
+    }
   },
   {
     name: 'home.io',
@@ -183,14 +426,17 @@ export const featuredRepos = [
     summary:
       'Homelab infrastructure-as-code with Terraform + GitOps patterns for repeatable rebuilds and low-drama operations.',
     whyItMatters:
-      'I test ideas here first so production gets a cleaner version.'
+      'I test ideas here first so production gets a cleaner version.',
+    fallback: {
+      description: 'Home automation.',
+      language: 'Shell',
+      license: 'MIT',
+      stars: 38,
+      forks: 5,
+      pushedAt: '2026-02-20',
+      topics: []
+    }
   }
-];
-
-export const homeRepoLinks = [
-  { name: 'oh-my-claude', url: 'https://github.com/TechDufus/oh-my-claude' },
-  { name: 'openkanban', url: 'https://github.com/TechDufus/openkanban' },
-  { name: 'dotfiles', url: 'https://github.com/TechDufus/dotfiles' }
 ];
 
 export const homeProofPoints = [
@@ -228,40 +474,160 @@ export const externalReferences = [
   }
 ];
 
-export const homeOperatingStyle = [
-  'If I repeat something twice, I script it on the third pass.',
-  'I like workflows that still make sense when I am tired.',
-  'AI helps me move faster, but I still own every risky change.'
-];
-
-export const careerHighlights = [
-  {
-    title: 'Current lane',
-    body: 'Senior DevSecOps Engineer at Raft. Shipping secure platform capabilities across high-security environments.'
-  },
-  {
-    title: 'Platform depth',
-    body: 'Kubernetes across OpenShift, AKS, EKS, GKE, RKE2, plus local Kind/k3s for fast validation before bigger rollouts.'
-  },
-  {
-    title: 'Delivery style',
-    body: 'GitOps-first delivery with ArgoCD, Terraform/Terragrunt automation, and review rails that keep ownership clear.'
-  },
-  {
-    title: 'Where it started',
-    body: 'PowerShell roots: AdminToolkit, HelpDesk, and a lot of script-driven cleanup in regulated environments.'
-  }
-];
+export const homeOperatingStyle = ['If I repeat something twice, I script it on the third pass.'];
 
 export const profileSpotlight = {
   photo: '/img/profile/techdufus.webp',
-  photoAlt: 'Portrait of TechDufus',
-  photoWidth: 1122,
-  photoHeight: 1122,
   nickname: 'You can call me Dufus.',
-  handle: '@TechDufus',
-  status: 'Status: probably fighting DNS somewhere.',
-  introTitle: "Hello, I'm TechDufus.",
-  intro:
-    'I build platform systems, tinker in my homelab, and share what actually worked.'
+  status: 'Status: probably fighting DNS somewhere.'
+};
+
+export type TrustItem = { value: string; label: string; href?: string; accent?: string };
+
+/** Replaces `{token}` placeholders in copy (e.g. heroCopy.trust) with values computed at build time. */
+export const fillCopy = (template: string, values: Record<string, string | number>): string =>
+  template.replace(/\{(\w+)\}/g, (match, key: string) => (key in values ? String(values[key]) : match));
+
+export const heroCopy: {
+  eyebrow: string;
+  headline: string;
+  accentWord: 'actually';
+  lede: string;
+  trust: TrustItem[];
+  ctas: {
+    primary: { label: string; href: string };
+    /** Secondary CTA while business.enabled is false. */
+    lab: { label: string; href: string };
+    /** Secondary CTA while business.enabled is true. */
+    waitlist: { label: string; href: string };
+  };
+} = {
+  eyebrow: 'Hello from the command line',
+  headline: 'I break things, fix them, and write down what actually worked.',
+  accentWord: 'actually',
+  lede: 'Platform engineering notes from a guy who lives in tmux. Real incidents, homelab rebuilds, and AI agent experiments.',
+  // Values in {braces} are computed by the page (post count, first year, live stars); fill them with fillCopy().
+  trust: [
+    { value: '{posts}', label: 'posts since {firstYear}' },
+    { value: '{stars}', accent: '★', label: 'across {repos} repos' },
+    {
+      value: '200-node',
+      label: 'AKS in production',
+      href: 'https://teamraft.com/resources/insights/secure-low-latency-queries-at-scale-with-raft-data-platform-rdp/'
+    }
+  ],
+  ctas: {
+    primary: { label: 'Read the writing', href: '/blog/' },
+    lab: { label: 'See the lab', href: '/lab/' },
+    waitlist: { label: `${business.appName} · join the waitlist`, href: '/#app' }
+  }
+};
+
+/** Ticker topics: things I actually write about. */
+export const topics: string[] = [
+  'Kubernetes',
+  'Homelab',
+  'AI agents',
+  'GitOps',
+  'Talos',
+  'Terraform',
+  'PowerShell',
+  'Incident notes'
+];
+
+type LabSpecRow = { k: string; v: string; href?: string; note?: string };
+
+type LabPhoto = { src: string; alt: string; width: number; height: number; caption?: string };
+
+/**
+ * The /lab/ page. Every fact comes from src/content/docs/setup.md, plus the
+ * Tailscale Operator (Feb 2026) and Talos (Jun 2025) posts for the changelog.
+ */
+export const labSpec: {
+  lastRevised: 'Feb 2026';
+  lastRevisedIso: string;
+  status: 'Rebuild in progress';
+  headline: string;
+  lede: string;
+  setupHref: string;
+  hardware: { role: string; name: string; spec?: string; href?: string }[];
+  services: { name: string; note: string }[];
+  servicesCount: '25+';
+  changelog: { date: string; title: string; href?: string; note?: string }[];
+  workstation: {
+    host: string;
+    role: string;
+    specs: LabSpecRow[];
+    keyboard: { name: string; layout: string; configHref: string };
+    terminalStack: string[];
+    photo: LabPhoto;
+  };
+  gitops: {
+    repo: 'TechDufus/home.io';
+    href: string;
+    tools: string[];
+    motto: 'If I lose a node, I rebuild from git.';
+  };
+} = {
+  lastRevised: 'Feb 2026',
+  lastRevisedIso: '2026-02',
+  status: 'Rebuild in progress',
+  headline: 'The <em>lab</em>.',
+  lede: "What's running at home right now. It's mid-rebuild, so expect this to change.",
+  setupHref: '/docs/setup/',
+  hardware: [
+    { role: 'Compute', name: 'Dell PowerEdge R720xd', spec: '40 threads · 256GB ECC RAM' },
+    { role: 'Network', name: 'UniFi UDM Pro + U7 AP' },
+    { role: 'Storage', name: 'UNAS Pro 8' },
+    { role: 'Edge', name: 'Raspberry Pi 4B', spec: '8GB' }
+  ],
+  services: [
+    { name: 'Immich', note: 'Self-hosted photo and video library.' },
+    { name: 'Dashboards', note: 'Lab dashboards, private to my tailnet.' },
+    { name: 'Self-hosted runners', note: 'CI runners on my own hardware.' },
+    { name: 'Observability stack', note: 'So I can see what broke before I start guessing.' }
+  ],
+  servicesCount: '25+',
+  changelog: [
+    {
+      date: '2026-02-20',
+      title: 'Cloudflare Tunnels → Tailscale Operator',
+      href: '/blog/i-deleted-my-cloudflare-tunnels-tailscale-operator-homelab-k8s/',
+      note: 'Swapped Cloudflare Tunnels for the Tailscale Kubernetes Operator, so a new service is one YAML file in git.'
+    },
+    {
+      date: '2025-06-30',
+      title: 'Talos Kubernetes on Proxmox, with Terraform',
+      href: '/blog/building-a-talos-kubernetes-homelab-on-proxmox-with-terraform/',
+      note: 'An immutable, Kubernetes-only OS on Proxmox, built end to end with Terraform.'
+    }
+  ],
+  workstation: {
+    host: 'Sherlock',
+    role: 'custom build, Ubuntu',
+    specs: [
+      { k: 'CPU', v: 'Ryzen 9 5950X', href: 'https://a.co/d/4pwKHpI' },
+      { k: 'GPU', v: 'RTX 3080', href: 'https://www.gigabyte.com/Graphics-Card/GV-N3080AORUS-M-10GD-rev-30#kf' },
+      { k: 'RAM', v: '64GB', href: 'https://a.co/d/iHfLS4z' }
+    ],
+    keyboard: {
+      name: 'ZSA Moonlander',
+      layout: 'Dvorak',
+      configHref: 'https://configure.zsa.io/moonlander/layouts/j6X5Z/latest/0'
+    },
+    terminalStack: ['Ghostty', 'sesh', 'tmux', 'Neovim'],
+    photo: {
+      src: '/img/setup/setup-sherlock-desktop.jpg',
+      alt: "Sherlock's desk: a wide monitor full of terminal and editor panes, a RØDE microphone on a boom arm, and the ZSA Moonlander split keyboard with a Logitech mouse between the halves.",
+      width: 2400,
+      height: 1639,
+      caption: 'Sherlock at the desk · Moonlander front and centre'
+    }
+  },
+  gitops: {
+    repo: 'TechDufus/home.io',
+    href: 'https://github.com/TechDufus/home.io',
+    tools: ['Terraform', 'Ansible', 'ArgoCD'],
+    motto: 'If I lose a node, I rebuild from git.'
+  }
 };

@@ -1,0 +1,45 @@
+---
+/*
+  Mockup .stat, one row of a <dl class="stats">:
+    <div class="stat"><dt class="sr-only">term</dt><dd class="stat__value num">25<span class="accent">★</span></dd><dd class="stat__label">label</dd></div>
+  href: with `linkText` a trailing link after the label (footnote "[1]" → #src-1, or "home.io"),
+        otherwise the whole label is the link. A "label" slot overrides the label HTML.
+*/
+import { fmtNum, linkProps } from './format';
+
+interface Props {
+  value: string | number;
+  label: string;
+  href?: string;
+  /** Text of a trailing link after the label; without it the label itself links. */
+  linkText?: string;
+  /** aria-label for the trailing link (e.g. "Source 1"). */
+  linkLabel?: string;
+  /** Gold suffix after the value (★, +, GB). */
+  accent?: string;
+  /** Screen-reader term (<dt>). Defaults to the label. */
+  term?: string;
+  /** Tabular numerals; defaults to true for numbers. */
+  num?: boolean;
+}
+
+const { value, label, href, linkText, linkLabel, accent, term = label, num = typeof value === 'number' } = Astro.props;
+---
+<div class="stat">
+  <dt class="sr-only">{term}</dt>
+  <dd class:list={['stat__value', { num }]}>{typeof value === 'number' ? fmtNum(value) : value}{accent && <span class="accent">{accent}</span>}</dd>
+  <dd class="stat__label">
+    <slot name="label">
+      {
+        href && !linkText ? (
+          <a {...linkProps(href)}>{label}</a>
+        ) : (
+          <>
+            {label}
+            {href && linkText && <>{' '}<a {...linkProps(href)} aria-label={linkLabel}>{linkText}</a></>}
+          </>
+        )
+      }
+    </slot>
+  </dd>
+</div>

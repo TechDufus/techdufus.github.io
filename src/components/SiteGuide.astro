@@ -1,0 +1,34 @@
+---
+// Corner launcher for the scripted site guide. The dock panel is built by guide.ts on first
+// open, and its answers load lazily from /guide.json (never inlined into the page).
+import { profileSpotlight, siteMetadata } from '../data/site';
+import '../styles/guide.css';
+---
+
+<button
+  class="chat-launcher"
+  type="button"
+  data-guide-launcher
+  data-avatar={profileSpotlight.photo}
+  data-email={siteMetadata.email}
+  aria-haspopup="dialog"
+  aria-expanded="false"
+  aria-label="Ask about my work: open the scripted site guide"
+  hidden
+>
+  <span class="chat-launcher__icon"
+    ><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"
+      ><path
+        d="M3 4.5A2.5 2.5 0 0 1 5.5 2h9A2.5 2.5 0 0 1 17 4.5v6a2.5 2.5 0 0 1-2.5 2.5H9l-4 3.5V13h.5-.5A2.5 2.5 0 0 1 3 10.5v-6z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linejoin="round"
+        transform="translate(0 1)"></path></svg
+    ></span
+  ><span class="chat-launcher__label" aria-hidden="true">Ask about my work</span>
+</button>
+
+<script>
+  import '../scripts/guide';
+</script>

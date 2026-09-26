@@ -10,7 +10,8 @@ const TOP_LEVEL_PAGES = [
   'about/index.html',
   'blog/index.html',
   'docs/index.html',
-  'contact/index.html'
+  'contact/index.html',
+  'lab/index.html'
 ];
 
 const BUDGETS = {
@@ -20,8 +21,9 @@ const BUDGETS = {
   totalInlineJsGzipKb: 7,
   totalCssRawKb: 90,
   totalCssGzipKb: 24,
-  topLevelHtmlRawKb: 125,
-  topLevelHtmlGzipKb: 30
+  // Per page: the tracked page set grows over time, so a single HTML total stops meaning anything.
+  pageHtmlRawKb: 48,
+  pageHtmlGzipKb: 14
 };
 
 const toKb = (bytes) => bytes / 1024;
@@ -37,8 +39,7 @@ const readFileSafe = async (filePath) => {
 
 const run = async () => {
   const assetPaths = new Set();
-  let totalHtmlRawBytes = 0;
-  let totalHtmlGzipBytes = 0;
+  const pageHtml = [];
   let totalInlineJsRawBytes = 0;
   let totalInlineJsGzipBytes = 0;
 
@@ -50,8 +51,11 @@ const run = async () => {
     }
 
     const htmlBuffer = Buffer.from(html, 'utf8');
-    totalHtmlRawBytes += htmlBuffer.length;
-    totalHtmlGzipBytes += gzipSync(htmlBuffer).length;
+    pageHtml.push({
+      page,
+      rawKb: roundKb(htmlBuffer.length),
+      gzipKb: roundKb(gzipSync(htmlBuffer).length)
+    });
 
     const inlineScripts = html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g);
     for (const scriptMatch of inlineScripts) {
@@ -97,8 +101,8 @@ const run = async () => {
     inlineJsGzipKb: roundKb(totalInlineJsGzipBytes),
     cssRawKb: roundKb(totalCssRawBytes),
     cssGzipKb: roundKb(totalCssGzipBytes),
-    htmlRawKb: roundKb(totalHtmlRawBytes),
-    htmlGzipKb: roundKb(totalHtmlGzipBytes)
+    largestHtmlRawKb: Math.max(...pageHtml.map((p) => p.rawKb)),
+    largestHtmlGzipKb: Math.max(...pageHtml.map((p) => p.gzipKb))
   };
 
   console.log('Performance budget summary:');
@@ -112,8 +116,12 @@ const run = async () => {
   );
   console.log(`  CSS (raw): ${summary.cssRawKb} KB (budget ${BUDGETS.totalCssRawKb} KB)`);
   console.log(`  CSS (gzip):${summary.cssGzipKb} KB (budget ${BUDGETS.totalCssGzipKb} KB)`);
-  console.log(`  HTML (raw): ${summary.htmlRawKb} KB (budget ${BUDGETS.topLevelHtmlRawKb} KB)`);
-  console.log(`  HTML (gzip):${summary.htmlGzipKb} KB (budget ${BUDGETS.topLevelHtmlGzipKb} KB)`);
+  console.log(
+    `  HTML per page (largest raw):  ${summary.largestHtmlRawKb} KB (budget ${BUDGETS.pageHtmlRawKb} KB)`
+  );
+  console.log(
+    `  HTML per page (largest gzip): ${summary.largestHtmlGzipKb} KB (budget ${BUDGETS.pageHtmlGzipKb} KB)`
+  );
 
   const violations = [
     summary.jsRawKb > BUDGETS.totalJsRawKb
@@ -134,12 +142,14 @@ const run = async () => {
     summary.cssGzipKb > BUDGETS.totalCssGzipKb
       ? `CSS gzip size exceeded: ${summary.cssGzipKb} KB > ${BUDGETS.totalCssGzipKb} KB`
       : null,
-    summary.htmlRawKb > BUDGETS.topLevelHtmlRawKb
-      ? `Top-level HTML raw size exceeded: ${summary.htmlRawKb} KB > ${BUDGETS.topLevelHtmlRawKb} KB`
-      : null,
-    summary.htmlGzipKb > BUDGETS.topLevelHtmlGzipKb
-      ? `Top-level HTML gzip size exceeded: ${summary.htmlGzipKb} KB > ${BUDGETS.topLevelHtmlGzipKb} KB`
-      : null
+    ...pageHtml.flatMap(({ page, rawKb, gzipKb }) => [
+      rawKb > BUDGETS.pageHtmlRawKb
+        ? `HTML raw size exceeded for dist/${page}: ${rawKb} KB > ${BUDGETS.pageHtmlRawKb} KB`
+        : null,
+      gzipKb > BUDGETS.pageHtmlGzipKb
+        ? `HTML gzip size exceeded for dist/${page}: ${gzipKb} KB > ${BUDGETS.pageHtmlGzipKb} KB`
+        : null
+    ])
   ].filter(Boolean);
 
   if (violations.length > 0) {

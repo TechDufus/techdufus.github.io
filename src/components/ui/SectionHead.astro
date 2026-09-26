@@ -1,0 +1,60 @@
+---
+/*
+  Section head (mockup .sec-head):
+    <div class="sec-head sec-head--split">
+      <div class="sec-head__bar" data-reveal>index · eyebrow · aside</div>
+      <h2 class="h2 sec-head__title" data-reveal>…<em>accent</em>.</h2>
+      <p class="lede" data-reveal style="--d:1">…</p>
+    </div>
+  `title` and `lede` are trusted HTML (use <em> for the one gold word).
+  `bare`: just the .sec-head__bar (home #about/#contact put the title inside their own .split).
+  Aside: `aside` text renders as <span class="meta">, or pass a named slot "aside".
+*/
+import { pad2 } from './format';
+
+interface Props {
+  index: number | string;
+  label: string;
+  title?: string;
+  titleId?: string;
+  lede?: string;
+  aside?: string;
+  /** 2-column head: title left, lede right. Defaults to true when both title and lede are set. */
+  split?: boolean;
+  bare?: boolean;
+  headingLevel?: 'h1' | 'h2';
+  class?: string;
+}
+
+const { index, label, title, titleId, lede, aside, split, bare = false, headingLevel: Heading = 'h2', class: className } = Astro.props;
+const isSplit = split ?? Boolean(title && lede);
+const hasAside = Boolean(aside) || Astro.slots.has('aside');
+const indexText = typeof index === 'number' ? pad2(index) : index;
+---
+{
+  bare ? (
+    <div class:list={['sec-head__bar', className]} data-reveal>
+      <span class="sec-head__index">{indexText}</span>
+      <span class="eyebrow">{label}</span>
+      {hasAside && (
+        <span class="sec-head__aside">
+          <slot name="aside">{aside && <span class="meta">{aside}</span>}</slot>
+        </span>
+      )}
+    </div>
+  ) : (
+    <div class:list={['sec-head', { 'sec-head--split': isSplit }, className]}>
+      <div class="sec-head__bar" data-reveal>
+        <span class="sec-head__index">{indexText}</span>
+        <span class="eyebrow">{label}</span>
+        {hasAside && (
+          <span class="sec-head__aside">
+            <slot name="aside">{aside && <span class="meta">{aside}</span>}</slot>
+          </span>
+        )}
+      </div>
+      {title && <Heading class="h2 sec-head__title" id={titleId} data-reveal="" set:html={title} />}
+      {lede && <p class="lede" data-reveal style="--d:1" set:html={lede} />}
+    </div>
+  )
+}

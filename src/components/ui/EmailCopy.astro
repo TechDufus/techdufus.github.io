@@ -1,0 +1,29 @@
+---
+/*
+  Email address + copy button (mockup index.html #contact .contact__email). The [data-copy] button is wired by
+  src/scripts/site.ts: it copies the address and flips [data-copy-label] to "Copied".
+*/
+import { siteMetadata } from '../../data/site';
+import Icon from './Icon.astro';
+import { delay } from './format';
+
+interface Props {
+  email?: string;
+  reveal?: boolean;
+  d?: number;
+}
+
+const { email = siteMetadata.email, reveal = true, d } = Astro.props;
+---
+<div class="contact__email" data-reveal={reveal ? '' : undefined} style={delay(d)}>
+  <a class="serif" href={`mailto:${email}`}>{email}</a>
+  <button class="btn btn--quiet btn--sm" type="button" data-copy={email}>
+    <Icon name="copy" width={15} height={15} /><span data-copy-label>Copy</span>
+  </button>
+</div>
+
+<style is:global>
+  .contact__email { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 36px; }
+  .contact__email a.serif { font-size: clamp(1.9rem, 1.2rem + 2.6vw, 3.25rem); line-height: 1.05; letter-spacing: -0.015em; color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-line); text-decoration-thickness: 1px; text-underline-offset: 0.14em; transition: color var(--t-1) ease; overflow-wrap: anywhere; }
+  .contact__email a.serif:hover { color: var(--accent-hi); }
+</style>

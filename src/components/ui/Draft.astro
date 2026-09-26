@@ -1,0 +1,5 @@
+---
+/* Mockup <span class="draft">Draft</span>. Renders nothing unless business.enabled: drafts never ship on the live site. */
+import { business } from '../../data/site';
+---
+{business.enabled && <span class="draft">Draft</span>}
