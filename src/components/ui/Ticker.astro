@@ -1,7 +1,8 @@
 ---
 /*
   Topic ticker (mockup index.html .marquee.ticker). The group is rendered twice for a seamless loop;
-  the copy is aria-hidden. site.ts pauses the marquee; CSS stops it under reduced motion.
+  the copy is aria-hidden. Items are bare <span>s and separators bare <i>s (styled via
+  .marquee__group>span / >i in global.css). site.ts pauses the marquee; CSS stops it under reduced motion.
 */
 interface Props {
   items: readonly string[];
@@ -15,10 +16,10 @@ const { items, label = 'Topics I write about', duration = '90s' } = Astro.props;
 <div class="marquee ticker" role="region" aria-label={label} style={`--marquee-dur:${duration}`}>
   <div class="marquee__track">
     <div class="marquee__group" role="list">
-      {items.map((item) => <><span class="marquee__item" role="listitem">{item}</span><i class="marquee__sep" aria-hidden="true"></i></>)}
+      {items.map((item) => <><span role="listitem">{item}</span><i></i></>)}
     </div>
     <div class="marquee__group" aria-hidden="true">
-      {items.map((item) => <><span class="marquee__item">{item}</span><i class="marquee__sep" aria-hidden="true"></i></>)}
+      {items.map((item) => <><span>{item}</span><i></i></>)}
     </div>
   </div>
 </div>

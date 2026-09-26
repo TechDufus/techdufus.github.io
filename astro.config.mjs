@@ -67,6 +67,10 @@ export default defineConfig({
   site: 'https://techdufus.com',
   output: 'static',
   integrations: [mdx(), tailwind({ applyBaseStyles: false })],
+  build: {
+    // Keep component/page CSS in cacheable files instead of repeating it inside every page's HTML.
+    inlineStylesheets: 'never'
+  },
   markdown: {
     syntaxHighlight: 'shiki',
     shikiConfig: {

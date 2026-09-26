@@ -12,8 +12,8 @@ Creates a new source blog post in `src/content/blog/`.
 ```
 
 ### `check-performance.mjs`
-Checks the built top-level pages for JS/CSS size budget regressions.
+Checks total JS, inline JS and CSS budgets plus a per-page HTML budget across the built top-level pages (home, about, blog, docs, contact, lab). Run after `npm run build`.
 
 ```bash
-node scripts/check-performance.mjs
+npm run check:perf
 ```

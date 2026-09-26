@@ -1,0 +1,714 @@
+---
+/*
+  /app/: the product page (mockup design/pro-studio/app.html).
+  Gated on business.enabled: with the flag off, getStaticPaths returns no paths, so the build emits
+  no /app/ page at all (no stub, no redirect). A dynamic route is the only way to skip a static page.
+  Bracketed copy is unwritten: it renders as .ph placeholders next to Draft chips.
+*/
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Draft from '../components/ui/Draft.astro';
+import Portrait from '../components/ui/Portrait.astro';
+import SectionHead from '../components/ui/SectionHead.astro';
+import { fmtDate, fmtNum, isoDate } from '../components/ui/format';
+import { business, businessCopy, isPlaceholder, siteMetadata } from '../data/site';
+import { getPostMetas, postStats } from '../lib/content';
+import { getFeaturedRepos } from '../lib/github';
+
+export function getStaticPaths() {
+  return business.enabled ? [{ params: { app: 'app' } }] : [];
+}
+
+const [metas, repos] = await Promise.all([getPostMetas(), getFeaturedRepos()]);
+const stats = postStats(metas);
+const stars = repos.reduce((sum, repo) => sum + repo.stars, 0);
+const whoStats = `${fmtNum(stars)}★ across ${repos.length} repos · ${stats.count} posts since ${stats.first.getUTCFullYear()}`;
+
+// Hero mock: the real latest posts behind the docked assistant, and the posts its answer cites.
+const mockPosts = metas.slice(0, 4);
+const mockCards = ['building-a-talos-kubernetes-homelab-on-proxmox-with-terraform', 'i-deleted-my-cloudflare-tunnels-tailscale-operator-homelab-k8s']
+  .flatMap((slug) => metas.filter((post) => post.slug === slug));
+
+/** Trusted copy from site.ts; bracketed/`$—` values render as .ph placeholders. */
+const ph = (value: string) => (isPlaceholder(value) ? `<span class="ph">${value}</span>` : value);
+const appName = ph(business.appName);
+const companyName = ph(business.companyName);
+const email = siteMetadata.email;
+---
+
+<BaseLayout
+  title={business.appName}
+  description={`${business.appName}: the assistant from TechDufus, launching soon under ${business.companyName}. Try the live demo and join the waitlist.`}
+>
+  <!-- ============ HERO ============ -->
+  <section id="top" class="hero" aria-labelledby="hero-title">
+    <div class="wrap">
+      <div class="hero__top">
+        <div>
+          <p class="eyebrow hero__eyebrow" data-reveal>
+            <span><Fragment set:html={appName} /> <span aria-hidden="true">·</span> Launching soon</span>
+            <Draft />
+          </p>
+          <h1 class="display" id="hero-title" data-reveal style="--d:1"><span class="ph">[The promise, in one <em>line</em>]</span></h1>
+        </div>
+        <div class="hero__side" data-reveal style="--d:2">
+          <p class="lede"><span class="ph">[One-line pitch: who it's for, and what it saves them.]</span></p>
+          <div class="hero__ctas">
+            <a class="btn btn--primary btn--lg" href="#waitlist">Join the waitlist <span class="arrow" aria-hidden="true">→</span></a>
+            <a class="btn btn--ghost btn--lg" href="#demo">Try the live demo</a>
+          </div>
+          <p class="meta hero__honest">
+            Built by TechDufus under <Fragment set:html={companyName} />. The demo is real. Anything in brackets is still being written.
+          </p>
+        </div>
+      </div>
+
+      <figure class="mock" data-reveal style="--d:3">
+        <div class="mock__window" aria-hidden="true" inert>
+          <div class="mock__bar">
+            <span class="mock__dots"><i></i><i></i><i></i></span>
+            <span class="mock__url">
+              <svg viewBox="0 0 16 16"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"></rect><path d="M5.5 7V5.2a2.5 2.5 0 0 1 5 0V7" fill="none" stroke="currentColor" stroke-width="1.3"></path></svg>techdufus.com
+            </span>
+            <span></span>
+          </div>
+          <div class="mock__body">
+            <div class="mock__site">
+              <div class="mock__nav"><b>TechDufus<i>.</i></b><span>Writing</span><span>Lab</span><span>App</span><span>Services</span><span>About</span></div>
+              <p class="mock__kicker">Hello from the command line</p>
+              <p class="mock__h">I break things, fix them, and write down what <em class="foil">actually</em> worked.</p>
+              <ul class="mock__rows">
+                {mockPosts.map((post) => (
+                  <li><time datetime={isoDate(post.date)}>{fmtDate(post.date, 'short')}</time><span>{post.title}</span></li>
+                ))}
+              </ul>
+            </div>
+
+            <div class="chat mock__chat">
+              <div class="chat__head">
+                <span class="chat__avatar"><img src="/img/profile/techdufus.webp" alt="" width="34" height="34" loading="lazy" decoding="async" /></span>
+                <div class="chat__titles">
+                  <p class="chat__title"><Fragment set:html={appName} /> demo</p>
+                  <p class="chat__sub">answers from techdufus.com</p>
+                </div>
+                <span class="icon-btn"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></span>
+              </div>
+              <div class="chat__log">
+                <div class="chat__msg chat__msg--user" data-at style="--at:500"><div class="chat__bubble">What's running in your homelab?</div></div>
+                <div class="mock__slot">
+                  <div class="chat__msg chat__msg--bot mock__typing"><div class="chat__bubble"><span class="chat__typing"><i></i><i></i><i></i></span></div></div>
+                  <div class="chat__msg chat__msg--bot" data-at style="--at:2650">
+                    <div class="chat__bubble">
+                      <p>One Dell PowerEdge R720xd (40 threads, 256GB ECC) running Proxmox, which hosts a 3-node Talos Kubernetes cluster.</p>
+                      <p>ArgoCD does the GitOps, and everything is declared in <a>home.io</a> with Terraform + Ansible.</p>
+                    </div>
+                    <div class="chat__cards">
+                      {mockCards.map((post, i) => (
+                        <span class="chat__card" data-at style={`--at:${3150 + i * 180}`}>
+                          <span class="chat__card-title">{post.title}</span>
+                          <span class="chat__card-meta">{fmtDate(post.date)} · {post.minutes} min</span>
+                          <span class="chat__card-go">→</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="chat__form">
+                <span class="mock__input">Ask about posts, the lab, or my work…</span>
+                <span class="chat__send"><svg viewBox="0 0 16 16"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption class="mock__cap">
+          <span class="meta">Product preview · the assistant, docked on techdufus.com. Real answer, real posts.</span>
+          <span class="draft">UI may change</span>
+        </figcaption>
+      </figure>
+
+      <dl class="facts" data-reveal>
+        <div><dt>Status</dt><dd>Pre-launch</dd></div>
+        <div><dt>Demo</dt><dd><a href="#demo">Live on this page</a></dd></div>
+        <div><dt>Pricing</dt><dd><span class="ph">$—</span> <small>not set yet</small></dd></div>
+        <div><dt>Launch</dt><dd><span class="ph">[Launch date]</span></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============ 01 · WHY ============ -->
+  <section id="why" class="section" aria-labelledby="why-title">
+    <div class="wrap">
+      <SectionHead index={1} label="Why it exists" title="The problem, and the <em>promise</em>." titleId="why-title">
+        <Draft slot="aside" />
+      </SectionHead>
+
+      <div class="why">
+        <div class="why__col why__col--problem" data-reveal>
+          <p class="why__label">The problem</p>
+          <p class="why__statement"><span class="ph">[The problem, in the customer's own words: what's slow, noisy, or expensive today.]</span></p>
+          <p class="muted"><span class="ph">[Two sentences of context: who feels it, how often, and what it costs them.]</span></p>
+        </div>
+        <div class="why__turn" aria-hidden="true">
+          <span><svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+        </div>
+        <div class="why__col why__col--promise" data-reveal style="--d:2">
+          <p class="why__label">The promise</p>
+          <p class="why__statement"><span class="ph">[What changes with {business.appName}. One sentence, no adjectives.]</span></p>
+          <p class="muted"><span class="ph">[How they'll know it worked: one result they can point at.]</span></p>
+        </div>
+      </div>
+
+      <aside class="why__real" data-reveal aria-label="What's real today">
+        <span class="badge badge--live"><i class="dot" aria-hidden="true"></i>Real today</span>
+        <p>The assistant in the corner of every page, and in the demo below. It answers only from what's published on techdufus.com, and it shows the posts it used.</p>
+        <a class="link" href="#demo">Try it <span class="arrow" aria-hidden="true">→</span></a>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ 02 · HOW ============ -->
+  <section id="how" class="section" aria-labelledby="how-title">
+    <div class="wrap">
+      <SectionHead
+        index={2}
+        label="How it works"
+        title="Three steps. <em>That's</em> the whole thing."
+        titleId="how-title"
+        lede={`From sign-up to <span class="ph">[the first useful result]</span>. The steps below are placeholders until the setup flow is final.`}
+      >
+        <Draft slot="aside" />
+      </SectionHead>
+      <ol class="steps how__steps" data-reveal>
+        <li><h4><span class="ph">[Step one: getting started]</span></h4><p><span class="ph">[What the customer does in the first five minutes.]</span></p></li>
+        <li><h4><span class="ph">[Step two: the everyday loop]</span></h4><p><span class="ph">[What happens each time they use it.]</span></p></li>
+        <li><h4><span class="ph">[Step three: the payoff]</span></h4><p><span class="ph">[What they get back, and how soon.]</span></p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ 03 · FEATURES ============ -->
+  <section id="features" class="section" aria-labelledby="features-title">
+    <div class="wrap">
+      <SectionHead
+        index={3}
+        label="Features"
+        title="What's <em>inside</em>."
+        titleId="features-title"
+        lede="The feature list isn't final, so nothing here is a promise yet. Each tile is a slot waiting for the real thing."
+      >
+        <Draft slot="aside" />
+      </SectionHead>
+
+      <div class="bento">
+        <article class="tile tile--lead" data-reveal>
+          <p class="tile__idx"><span><b>01</b> · The headline feature</span><Draft /></p>
+          <h3><span class="ph">[The feature that sells it, named plainly]</span></h3>
+          <p><span class="ph">[One or two sentences: what it does and why that matters to the customer.]</span></p>
+          <div class="tile__media"><span class="ph">[Screenshot or short loop]</span></div>
+        </article>
+        {
+          [
+            { label: 'Saves time', detail: '[The minutes or steps it removes.]' },
+            { label: 'Builds trust', detail: "[How the customer can check it's right.]" },
+            { label: 'Fits in', detail: '[Where it lives in their existing setup.]' },
+            { label: 'Stays out of the way', detail: "[What it deliberately doesn't do.]" }
+          ].map((tile, i) => (
+            <article class="tile" data-reveal style={(i + 1) % 3 ? `--d:${(i + 1) % 3}` : undefined}>
+              <p class="tile__idx"><span><b>{`0${i + 2}`}</b> · {tile.label}</span></p>
+              <h3><span class="ph">[Feature name]</span></h3>
+              <p><span class="ph">{tile.detail}</span></p>
+              <span class="tile__num" aria-hidden="true">{`0${i + 2}`}</span>
+            </article>
+          ))
+        }
+        <article class="tile tile--who" data-reveal style="--d:2">
+          <Portrait px={64} alt="Portrait of Matthew, aka TechDufus" />
+          <div>
+            <p class="tile__idx"><span>Not a feature. A fact.</span></p>
+            <h3>Built by an engineer who ships.</h3>
+            <p><a href="/#about">TechDufus</a>, platform engineer. <span>{whoStats}</span>.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 04 · DEMO ============ -->
+  <section id="demo" class="section" aria-labelledby="demo-title">
+    <div class="wrap">
+      <SectionHead
+        index={4}
+        label="Live demo"
+        title="Don't take my word for it. <em>Ask it.</em>"
+        titleId="demo-title"
+        lede="This is the same engine as the assistant in the corner, running on real content from this site. It won't make things up; if it doesn't know, it says so."
+      >
+        <span slot="aside" class="badge badge--live"><i class="dot" aria-hidden="true"></i>Live</span>
+      </SectionHead>
+
+      <div class="demo">
+        <div class="demo__side" data-reveal>
+          <div class="demo__try-wrap" data-demo-try hidden>
+            <h3 class="demo__h">Try asking</h3>
+            <div class="demo__try" data-demo-prompts></div>
+          </div>
+          <div>
+            <h3 class="demo__h">How this demo answers</h3>
+            <dl class="spec demo__spec">
+              <div><dt>Suggested</dt><dd>Scripted answers, written from real posts and repos.</dd></div>
+              <div><dt>Anything else</dt><dd>A plain keyword match over {stats.count} post titles, tags, and descriptions.</dd></div>
+              <div><dt>No match</dt><dd>It says so, and points you at a human.</dd></div>
+              <div><dt>The product</dt><dd><span class="ph">[How the real assistant answers, once it's built]</span></dd></div>
+            </dl>
+          </div>
+          <div class="cluster">
+            <button class="btn btn--quiet btn--sm" type="button" data-demo-reset>Start over</button>
+            <button class="btn btn--ghost btn--sm" type="button" data-guide-open="">Open the docked version</button>
+          </div>
+        </div>
+
+        <div class="demo__panel" data-reveal style="--d:1">
+          <div class="demo__cap">
+            <span class="meta">Demo · answers from techdufus.com</span>
+            <span class="meta hide-sm">Same engine as the launcher, bottom right</span>
+          </div>
+          <div id="demo-chat"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 · PRICING ============ -->
+  <section id="pricing" class="section" aria-labelledby="pricing-title">
+    <div class="wrap">
+      <SectionHead index={5} label="Pricing" title={businessCopy.pricing.title} titleId="pricing-title" lede={businessCopy.pricing.lede}>
+        <Draft slot="aside" />
+      </SectionHead>
+
+      <div class="grid grid--3 pricing">
+        {
+          business.pricing.map((tier, i) => (
+            <article class:list={['price-card', { 'price-card--featured': tier.featured }]} data-reveal style={i ? `--d:${i}` : undefined}>
+              <p class="price-card__tier">
+                <span>{tier.tier}</span>
+                {tier.badge ? <span class="chip chip--accent" set:html={ph(tier.badge)} /> : tier.draft && <Draft />}
+              </p>
+              <h3 set:html={ph(tier.name)} />
+              <p class="price-card__who" set:html={ph(tier.who)} />
+              <p class="price-card__amount">
+                <Fragment set:html={ph(tier.amount)} /><small>/ <Fragment set:html={ph(tier.period)} /></small>
+              </p>
+              <ul class="price-card__list">
+                {tier.items.map((item) => <li set:html={ph(item)} />)}
+              </ul>
+              <a class:list={['btn btn--block', tier.featured ? 'btn--primary' : 'btn--ghost']} href={tier.ctaHref}>
+                {tier.ctaLabel}
+                {tier.featured && <span class="arrow" aria-hidden="true">→</span>}
+              </a>
+            </article>
+          ))
+        }
+      </div>
+      <div class="pricing__foot" data-reveal>
+        <p class="meta" set:html={businessCopy.pricing.foot} />
+        <a class="link link--quiet" href="#faq">Questions about pricing? See the FAQ</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 06 · FAQ ============ -->
+  <section id="faq" class="section" aria-labelledby="faq-title">
+    <div class="wrap">
+      <div class="split">
+        <div class="faq__intro">
+          <SectionHead bare index={6} label="FAQ" />
+          <h2 class="h2" id="faq-title" data-reveal style="--d:1;margin-top:28px" set:html={businessCopy.faq.title} />
+          <p class="lede" data-reveal style="--d:2">{businessCopy.faq.lede}</p>
+          <div class="faq__mail" data-reveal style="--d:3">
+            <span class="meta">{businessCopy.faq.mailLabel}</span>
+            <a class="link" href={`mailto:${email}`}>{email}</a>
+          </div>
+        </div>
+
+        <div class="faq__list" data-reveal style="--d:1">
+          {
+            business.faq.map((item, i) => (
+              <details class="faq__item" name="faq" open={i === 0}>
+                <summary>
+                  <span set:html={ph(item.question)} />
+                  {item.draft && <Draft />}
+                  <i class="faq__plus" aria-hidden="true" />
+                </summary>
+                <div class="faq__a">
+                  {item.answer.map((paragraph) => <p set:html={paragraph} />)}
+                </div>
+              </details>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WAITLIST ============ -->
+  <section id="waitlist" class="section" aria-labelledby="waitlist-title">
+    <div class="wrap">
+      <div class="cta" data-reveal>
+        <svg class="cta__ring" viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="49.5" vector-effect="non-scaling-stroke"></circle>
+          <circle class="r-draw" cx="50" cy="50" r="49.5" pathLength="1" vector-effect="non-scaling-stroke"></circle>
+        </svg>
+        <div class="cta__copy">
+          <p class="eyebrow">Waitlist</p>
+          <h2 class="display" id="waitlist-title" style="margin-top:20px" set:html={`Be first to try <em>${appName}</em>.`} />
+          <p class="lede">One email when it launches. That's the whole list.</p>
+          <div class="cta__sig">
+            <Portrait px={44} ring={false} alt="" />
+            <div>
+              <p class="serif">I'll write when it's ready.</p>
+              <p class="meta">Matthew · TechDufus</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta__join">
+          <p class="label" id="waitlist-how">No form, just email</p>
+          <a class="btn btn--primary btn--lg btn--block" href={business.waitlistHref} aria-describedby="waitlist-how waitlist-note">
+            Join the waitlist <span class="arrow" aria-hidden="true">→</span>
+          </a>
+          <p class="form-note" id="waitlist-note">Opens your email app with a note to {email}. Send it and you're on the list.</p>
+          <p class="cta__alt">Rather talk first? <a class="link" href={`mailto:${email}`}>{email}</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Live demo (mockup app.html #demo): a full-size inline site-guide panel, driven by the "Try asking" list too.
+  // Importing the guide module (shared with SiteGuide.astro, evaluated once) guarantees window.SiteGuide exists.
+  import '../scripts/guide';
+
+  const panel = document.querySelector<HTMLElement>('#demo-chat');
+  const tryWrap = document.querySelector<HTMLElement>('[data-demo-try]');
+  const tryList = document.querySelector<HTMLElement>('[data-demo-prompts]');
+
+  if (panel && tryWrap && tryList) {
+    const demo = window.SiteGuide.mount(panel, { inline: true });
+
+    // The prompts live in /guide.json (the panel fetches the same file); the list stays hidden until they load.
+    fetch('/guide.json')
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
+      .then(({ prompts }: { prompts: { q: string }[] }) => {
+        tryList.replaceChildren(
+          ...prompts.map(({ q }) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.dataset.q = q;
+            button.innerHTML = '<span></span><span class="arrow" aria-hidden="true">→</span>';
+            button.firstElementChild!.textContent = q;
+            return button;
+          })
+        );
+        tryWrap.hidden = false;
+      })
+      .catch(() => {});
+
+    tryList.addEventListener('click', (event) => {
+      const button = (event.target as Element).closest<HTMLElement>('button[data-q]');
+      if (!button) return;
+      button.setAttribute('data-asked', '');
+      demo.ask(button.dataset.q!);
+    });
+    // Prompts asked (or a reset) from inside the panel tick the list too.
+    panel.addEventListener('click', (event) => {
+      const target = event.target as Element;
+      const prompt = target.closest<HTMLElement>('[data-q]');
+      if (prompt) {
+        tryList.querySelectorAll<HTMLElement>('button[data-q]').forEach((button) => {
+          if (button.dataset.q === prompt.dataset.q) button.setAttribute('data-asked', '');
+        });
+      } else if (target.closest('[data-guide-reset]')) {
+        tryList.querySelectorAll('[data-asked]').forEach((button) => button.removeAttribute('data-asked'));
+      }
+    });
+    document.querySelector('[data-demo-reset]')?.addEventListener('click', () => {
+      demo.reset();
+      tryList.querySelectorAll('[data-asked]').forEach((button) => button.removeAttribute('data-asked'));
+      demo.focus();
+    });
+  }
+</script>
+
+<style is:global>
+  /* Page styles from design/pro-studio/app.html (global: the demo's try-list and chat panel are rendered by JS). */
+  /* Pricing cards and numbered steps (moved out of global.css: only this page and the flag-on home #services use them;
+     the home copy of .steps lives in index.astro's businessCss). */
+  .price-card { display: flex; flex-direction: column; gap: 18px; padding: 32px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); }
+  .price-card--featured { border-color: var(--accent-line); background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 7%, transparent), var(--surface) 42%); }
+  .price-card__tier { font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .price-card__amount { font-family: var(--font-display); font-size: 3.25rem; line-height: 1; }
+  .price-card__amount small { font-family: var(--font-sans); font-size: 0.9375rem; color: var(--faint); margin-left: 4px; }
+  .price-card__list { display: grid; gap: 10px; color: var(--ink-2); font-size: 0.95rem; padding-top: 18px; border-top: 1px solid var(--line); }
+  .price-card__list li { display: grid; grid-template-columns: 16px 1fr; gap: 10px; }
+  .price-card__list li::before { content: "✓"; color: var(--accent); font-size: 0.85rem; }
+  .price-card .btn { margin-top: auto; }
+  .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 40px); counter-reset: step; }
+  .steps > li { counter-increment: step; padding-top: 20px; border-top: 1px solid var(--line-2); display: grid; gap: 8px; align-content: start; }
+  .steps > li::before { content: counter(step, decimal-leading-zero); font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--accent); letter-spacing: 0.08em; }
+  .steps h4, .steps .h4 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 400; line-height: 1.15; letter-spacing: -0.01em; }
+  .steps p { color: var(--muted); font-size: 0.975rem; }
+  @media (max-width: 760px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+
+  /* ---------- Hero ---------- */
+  .hero { padding-block: clamp(40px, 6vw, 88px) clamp(24px, 3vw, 40px); }
+  .hero__top { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(32px, 5vw, 80px); align-items: end; }
+  .hero__eyebrow { display: flex; align-items: center; gap: 10px 12px; margin-bottom: 28px; flex-wrap: wrap; }
+  .hero__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
+  .hero .display { max-width: 11ch; }
+  .hero__side { padding-bottom: 10px; }
+  .hero__ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+  .hero__honest { margin-top: 22px; color: var(--muted); line-height: 1.6; max-width: 44ch; }
+
+  /* product mock: the assistant docked on the real site */
+  .mock { margin-top: clamp(48px, 6vw, 80px); }
+  .mock__window { position: relative; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--bg-deep); box-shadow: var(--shadow-2); overflow: hidden; }
+  .mock__bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 44px; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--surface); }
+  .mock__dots { display: inline-flex; gap: 7px; }
+  .mock__dots i { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--line-3); }
+  .mock__url { display: inline-flex; align-items: center; gap: 8px; height: 26px; padding: 0 14px; border-radius: var(--r-pill); background: var(--bg-deep); border: 1px solid var(--line); font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); }
+  .mock__url svg { width: 11px; height: 11px; color: var(--faint); }
+  .mock__body { position: relative; height: 620px; overflow: hidden; }
+  .mock__site { position: absolute; inset: 0; padding: 26px 40px; padding-right: 480px; background: var(--bg); }
+  .mock__site::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--bg-deep) 0%, transparent) 40%, color-mix(in srgb, var(--bg-deep) 55%, transparent)); pointer-events: none; }
+  .mock__nav { display: flex; align-items: baseline; gap: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); font-size: 0.8125rem; color: var(--faint); }
+  .mock__nav b { font-family: var(--font-display); font-size: 1.25rem; font-weight: 400; color: var(--ink); margin-right: auto; }
+  .mock__nav b i { color: var(--accent); font-style: normal; }
+  .mock__kicker { margin-top: 44px; font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+  .mock__h { margin-top: 14px; font-family: var(--font-display); font-size: 2.75rem; line-height: 1.02; letter-spacing: -0.02em; max-width: 13ch; color: var(--ink-2); }
+  .mock__h em { color: var(--accent); }
+  .mock__rows { margin-top: 36px; border-top: 1px solid var(--line); }
+  .mock__rows li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 0.875rem; color: var(--muted); }
+  .mock__rows time { font-family: var(--font-mono); font-size: 0.75rem; color: var(--faint); padding-top: 2px; }
+  .mock__rows span { font-family: var(--font-display); font-size: 1.125rem; color: var(--ink-2); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .mock__chat { position: absolute; top: 24px; right: 24px; bottom: 24px; width: 420px; }
+  .mock__chat .chat__msg { animation: none; }
+  .mock__chat .chat__log { overflow: hidden; }
+  .mock__slot { display: grid; }
+  .mock__slot > * { grid-area: 1 / 1; }
+  .mock__chat .chat__card { cursor: default; }
+  .mock__input { flex: 1; min-width: 0; height: 46px; display: flex; align-items: center; padding: 0 16px; border-radius: var(--r-pill); background: var(--bg-deep); border: 1px solid var(--line-2); color: var(--faint); font-size: 0.95rem; white-space: nowrap; overflow: hidden; }
+  .mock__chat .chat__send { opacity: 0.45; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .js .mock [data-at] { opacity: 0; }
+    .js .mock.is-in [data-at] { animation: mock-in 520ms var(--ease-out) calc(var(--at) * 1ms) both; }
+    .js .mock .mock__typing { opacity: 0; }
+    .js .mock.is-in .mock__typing { animation: mock-typing 1500ms var(--ease-out) 1250ms both; }
+    @keyframes mock-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes mock-typing { 0% { opacity: 0; } 12%, 82% { opacity: 1; } 100% { opacity: 0; } }
+  }
+  @media (prefers-reduced-motion: reduce) { .mock .mock__typing { visibility: hidden; } }
+  html:not(.js) .mock .mock__typing { visibility: hidden; }
+
+  .mock__cap { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+  .mock__cap .meta { color: var(--faint); }
+
+  .facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: clamp(40px, 5vw, 64px); border-top: 1px solid var(--line-2); }
+  .facts > div { display: grid; gap: 6px; padding: 20px 24px 4px 0; }
+  .facts > div + div { padding-left: 24px; border-left: 1px solid var(--line); }
+  .facts dt { font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+  .facts dd { font-family: var(--font-display); font-size: 1.5rem; line-height: 1.15; color: var(--ink); }
+  .facts dd a { text-decoration: underline; text-decoration-color: var(--accent-line); text-underline-offset: 0.16em; text-decoration-thickness: 1px; }
+  .facts dd a:hover { color: var(--accent-hi); }
+  .facts dd small { font-family: var(--font-sans); font-size: 0.875rem; color: var(--muted); margin-left: 4px; }
+
+  @media (max-width: 1100px) {
+    .mock__site { padding-right: 440px; }
+    .mock__chat { width: 390px; }
+  }
+  @media (max-width: 960px) {
+    .hero__top { grid-template-columns: minmax(0, 1fr); align-items: start; gap: 24px; }
+    .mock__site { display: none; }
+    .mock__body { height: auto; padding: 16px; background: var(--bg); }
+    .mock__chat { position: relative; inset: auto; width: 100%; height: auto; }
+    .mock__chat .chat__log { overflow: visible; }
+    .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .facts > div:nth-child(3) { padding-left: 0; border-left: 0; }
+    .facts > div:nth-child(n+3) { border-top: 1px solid var(--line); margin-top: 16px; }
+  }
+  @media (max-width: 640px) {
+    .hero .display { font-size: clamp(2.5rem, 11.4vw, 3.25rem); }
+    .hero__ctas .btn { width: 100%; }
+    .mock__bar { grid-template-columns: auto 1fr; gap: 12px; }
+    .mock__bar > span:last-child { display: none; }
+    .mock__url { justify-self: end; }
+    .mock__body { padding: 10px; }
+    .mock__chat { --chat-pad: 16px; }
+    .mock__chat .chat__head .icon-btn { display: none; }
+    .facts > div { padding-right: 12px; }
+    .facts > div + div { padding-left: 16px; }
+    .facts dd { font-size: 1.25rem; }
+    .facts dd small { display: block; margin: 2px 0 0; }
+  }
+
+  /* ---------- 01 · Why ---------- */
+  .why { display: grid; grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr); align-items: stretch; }
+  .why__col { display: grid; gap: 18px; align-content: start; }
+  .why__label { font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+  .why__label::before { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--line-3); }
+  .why__col--promise .why__label { color: var(--accent-hi); }
+  .why__col--promise .why__label::before { background: var(--gold-bead); border-color: var(--gold); }
+  .why__statement { font-family: var(--font-display); font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.625rem); line-height: 1.12; letter-spacing: -0.015em; text-wrap: balance; }
+  .why__col--problem .why__statement { color: var(--ink-2); }
+  .why__col p.muted { max-width: 46ch; }
+  .why__turn { position: relative; display: grid; place-items: center; }
+  .why__turn::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: var(--line); }
+  .why__turn span { position: relative; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--bg); border: 1px solid var(--accent-line); color: var(--accent); }
+  .why__turn svg { width: 16px; height: 16px; }
+  .why__real { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px 28px; align-items: center; margin-top: clamp(48px, 6vw, 80px); padding: 22px 26px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); }
+  .why__real .badge { justify-self: start; }
+  .why__real p { color: var(--ink-2); max-width: 66ch; }
+  @media (max-width: 860px) {
+    .why { grid-template-columns: minmax(0, 1fr); }
+    .why__turn { height: 72px; }
+    .why__turn span { transform: rotate(90deg); }
+    .why__real { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  /* ---------- 02 · How ---------- */
+  .how__steps { position: relative; }
+  .how__steps::before { content: ""; position: absolute; top: -1px; left: 0; right: 0; height: 1px; background: var(--gold-line); transform-origin: 0 50%; transform: scaleX(0); z-index: 1; }
+  .how__steps.is-in::before { transform: scaleX(1); transition: transform 1.6s var(--ease-io) 0.25s; }
+  html:not(.js) .how__steps::before { transform: scaleX(1); }
+  .how__steps li { padding-top: 26px; gap: 10px; }
+  .how__steps h4 { font-size: 1.625rem; }
+  @media (prefers-reduced-motion: reduce) { .how__steps::before { transform: scaleX(1); } }
+
+  /* ---------- 03 · Features bento ---------- */
+  .bento { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+  .tile { position: relative; display: flex; flex-direction: column; gap: 12px; padding: clamp(22px, 2.4vw, 30px); border-radius: var(--r-lg); border: 1px solid var(--line); background: var(--surface); overflow: hidden; grid-column: span 2; transition: border-color var(--t-2) ease; }
+  .tile:hover { border-color: var(--line-2); }
+  .tile--lead { grid-column: span 4; grid-row: span 2; background: linear-gradient(180deg, var(--surface-2), var(--surface) 55%); }
+  .tile .tile__idx { font-family: var(--font-mono); font-size: var(--fs-xs); line-height: 1.4; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0; }
+  .tile__idx b { color: var(--accent); font-weight: 500; }
+  .tile h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.625rem; line-height: 1.15; letter-spacing: -0.01em; color: var(--ink); }
+  .tile--lead h3 { font-size: clamp(1.875rem, 1.3rem + 1.4vw, 2.5rem); max-width: 16ch; }
+  .tile p { color: var(--muted); font-size: 0.975rem; }
+  .tile__num { position: absolute; right: 18px; bottom: -22px; font-family: var(--font-display); font-style: italic; font-size: 7.5rem; line-height: 1; color: color-mix(in srgb, var(--ink) 4%, transparent); pointer-events: none; user-select: none; transition: color var(--t-2) ease; }
+  .tile:hover .tile__num { color: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .tile__media { position: relative; margin-top: auto; min-height: 230px; flex: 1; display: grid; place-items: center; border-radius: var(--r); border: 1px dashed var(--line-3); background-color: var(--bg-deep); background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 28px 28px; background-position: -1px -1px; }
+  .tile__media span { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--muted); padding: 6px 12px; background: var(--bg-deep); border-radius: var(--r-xs); }
+  .tile--who { flex-direction: row; align-items: center; gap: 18px; }
+  .tile--who .portrait { width: 64px; height: 64px; flex: none; }
+  .tile--who h3 { font-size: 1.375rem; margin-top: 8px; }
+  .tile--who p { font-size: 0.9rem; margin-top: 4px; }
+  .tile--who a { color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--line-3); text-underline-offset: 3px; }
+  .tile--who a:hover { color: var(--accent-hi); text-decoration-color: var(--accent); }
+  @media (max-width: 960px) {
+    .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tile { grid-column: span 1; }
+    .tile--lead, .tile--who { grid-column: 1 / -1; grid-row: auto; }
+  }
+  @media (max-width: 640px) {
+    .bento { grid-template-columns: minmax(0, 1fr); }
+    .tile--lead .tile__media { min-height: 180px; }
+  }
+
+  /* ---------- 04 · Demo ---------- */
+  .demo { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
+  .demo__side { position: sticky; top: calc(var(--nav-h) + 24px); display: grid; gap: 32px; }
+  .demo__h { font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-bottom: 14px; font-weight: 500; }
+  .demo__try { display: grid; border-top: 1px solid var(--line); }
+  .demo__try button { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 14px 2px; text-align: left; border-bottom: 1px solid var(--line); font-family: var(--font-display); font-size: 1.3125rem; line-height: 1.2; color: var(--ink-2); transition: color var(--t-1) ease, padding var(--t-2) var(--ease-out); }
+  .demo__try button:hover { color: var(--ink); padding-left: 8px; }
+  .demo__try button .arrow { color: var(--faint); font-family: var(--font-sans); font-size: 1rem; }
+  .demo__try button:hover .arrow { color: var(--accent); }
+  .demo__try button[data-asked] { color: var(--faint); }
+  .demo__try button[data-asked] .arrow::before { content: "✓"; }
+  .demo__try button[data-asked] .arrow { font-size: 0; }
+  .demo__try button[data-asked] .arrow::before { font-size: 0.875rem; color: var(--accent); }
+  .demo__spec > div { grid-template-columns: 124px minmax(0, 1fr); }
+  .demo__spec dd { font-size: 0.925rem; color: var(--ink-2); }
+  .demo__panel .chat--inline { height: 700px; }
+  .demo__cap { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+  @media (max-width: 960px) {
+    .demo { grid-template-columns: minmax(0, 1fr); }
+    .demo__side { position: static; order: 2; }
+    .demo__try { display: none; }
+    .demo__try-wrap { display: none; }
+  }
+  @media (max-width: 640px) {
+    .demo__panel .chat--inline { height: 580px; }
+    .demo__spec > div { grid-template-columns: 92px minmax(0, 1fr); }
+  }
+
+  /* ---------- 05 · Pricing ---------- */
+  .pricing { align-items: stretch; gap: 14px; }
+  .price-card { position: relative; }
+  .price-card h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.75rem; line-height: 1.1; }
+  .price-card__who { color: var(--muted); font-size: 0.95rem; margin-top: -8px; }
+  .price-card__amount { display: flex; align-items: baseline; gap: 2px; }
+  .price-card--featured { box-shadow: var(--shadow-2); }
+  .price-card--featured::before { content: ""; position: absolute; top: -1px; left: 32px; right: 32px; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+  .pricing__foot { display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; flex-wrap: wrap; margin-top: 24px; }
+  @media (max-width: 960px) { .pricing { grid-template-columns: minmax(0, 1fr); max-width: 560px; } }
+
+  /* ---------- 06 · FAQ ---------- */
+  .faq__intro { position: sticky; top: calc(var(--nav-h) + 24px); }
+  .faq__intro .lede { margin-top: 20px; }
+  .faq__mail { margin-top: 28px; display: grid; gap: 6px; }
+  .faq__mail a { font-family: var(--font-display); font-size: 1.5rem; }
+  .faq__list { border-top: 1px solid var(--line-2); }
+  .faq__item { border-bottom: 1px solid var(--line); }
+  .faq__item summary { list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) auto 28px; gap: 16px; align-items: center; padding: 22px 0; cursor: pointer; font-family: var(--font-display); font-size: clamp(1.3125rem, 1.1rem + 0.6vw, 1.625rem); line-height: 1.2; color: var(--ink); transition: color var(--t-1) ease; }
+  .faq__item summary::-webkit-details-marker { display: none; }
+  .faq__item summary:hover { color: var(--accent-hi); }
+  .faq__item summary:focus-visible { outline-offset: 4px; }
+  .faq__plus { position: relative; grid-column: -2; grid-row: 1; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line-2); transition: border-color var(--t-1) ease, transform var(--t-2) var(--ease-out); }
+  .faq__plus::before, .faq__plus::after { content: ""; position: absolute; left: 50%; top: 50%; width: 10px; height: 1.5px; margin: -0.75px 0 0 -5px; background: var(--ink-2); border-radius: 1px; transition: transform var(--t-2) var(--ease-out); }
+  .faq__plus::after { transform: rotate(90deg); }
+  .faq__item[open] .faq__plus { border-color: var(--accent-line); transform: rotate(180deg); }
+  .faq__item[open] .faq__plus::after { transform: rotate(0deg); }
+  .faq__item[open] .faq__plus::before, .faq__item[open] .faq__plus::after { background: var(--accent); }
+  .faq__a { padding: 0 60px 26px 0; color: var(--ink-2); display: grid; gap: 0.7em; max-width: 64ch; }
+  .faq__a a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent-line); text-underline-offset: 3px; }
+  .faq__a a:hover { color: var(--accent-hi); }
+  @supports (interpolate-size: allow-keywords) {
+    .faq__item { interpolate-size: allow-keywords; }
+    .faq__item::details-content { height: 0; overflow: clip; transition: height var(--t-2) var(--ease-out), content-visibility var(--t-2) allow-discrete; }
+    .faq__item[open]::details-content { height: auto; }
+  }
+  @media (max-width: 960px) { .faq__intro { position: static; } }
+  @media (max-width: 640px) {
+    .faq__item summary { grid-template-columns: minmax(0, 1fr) 28px; }
+    .faq__item summary .draft { grid-row: 2; grid-column: 1; justify-self: start; margin-top: -4px; }
+    .faq__a { padding-right: 0; }
+  }
+
+  /* ---------- Waitlist CTA ---------- */
+  .cta { position: relative; padding: clamp(36px, 6vw, 88px); border-radius: var(--r-lg); border: 1px solid var(--line-2); background: var(--bg-deep); overflow: hidden; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(32px, 5vw, 80px); align-items: end; }
+  .cta__ring { position: absolute; right: -200px; top: -250px; width: 440px; height: 440px; pointer-events: none; overflow: visible; }
+  .cta__ring circle { fill: none; stroke: var(--line); stroke-width: 1; }
+  .cta__ring .r-draw { stroke: url(#studio-gold) var(--accent-line); stroke-width: 1.25; opacity: 0.75; stroke-dasharray: 1; stroke-dashoffset: 0.66; transform: rotate(100deg); transform-origin: 50% 50%; }
+  @media (prefers-reduced-motion: no-preference) {
+    .js .cta .r-draw { stroke-dashoffset: 1; }
+    .js .cta.is-in .r-draw { transition: stroke-dashoffset 2.4s var(--ease-io) 0.3s; stroke-dashoffset: 0.66; }
+  }
+  .cta__copy { position: relative; }
+  .cta .display { font-size: clamp(2.5rem, 1.4rem + 3.6vw, 4.5rem); max-width: 12ch; }
+  .cta__copy .lede { margin-top: 22px; }
+  .cta__sig { display: flex; align-items: center; gap: 14px; margin-top: 32px; }
+  .cta__sig .portrait { width: 44px; height: 44px; }
+  .cta__sig p { line-height: 1.35; }
+  .cta__sig .serif { font-style: italic; font-size: 1.1875rem; }
+  .cta__join { position: relative; }
+  .cta__join .label { display: block; margin-bottom: 10px; color: var(--ink-2); }
+  .cta__alt { margin-top: 22px; font-size: 0.9375rem; color: var(--muted); }
+  @media (max-width: 960px) { .cta { grid-template-columns: minmax(0, 1fr); align-items: start; } }
+  @media (max-width: 640px) {
+    .cta { padding: 32px 22px; }
+    .cta__ring { right: -300px; top: -330px; }
+  }
+</style>

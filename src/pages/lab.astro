@@ -1,0 +1,787 @@
+---
+/*
+  /lab/: the homelab + workstation page (mockup design/pro-studio/lab.html).
+  Every fact comes from labSpec (src/data/site.ts, itself from src/content/docs/setup.md),
+  the Tailscale/Talos posts, and live repo metadata. The diagram is server-rendered; a small
+  bundled script adds selection, the phone layout and the hardware "In diagram" jumps.
+*/
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/lab.css';
+import CodeCopy from '../components/ui/CodeCopy.astro';
+import RepoCard from '../components/ui/RepoCard.astro';
+import SpecList from '../components/ui/SpecList.astro';
+import Stat from '../components/ui/Stat.astro';
+import { fmtDate, linkProps } from '../components/ui/format';
+import { labSpec, type LabSpecRow } from '../data/site';
+import { getPostMetas } from '../lib/content';
+import { getFeaturedRepos } from '../lib/github';
+
+const [metas, repos] = await Promise.all([getPostMetas(), getFeaturedRepos()]);
+const postByHref = (href?: string) => (href ? metas.find((meta) => meta.href === href) : undefined);
+
+const HOMEIO = labSpec.gitops.href;
+const homeio = repos.find((repo) => repo.url.toLowerCase() === HOMEIO.toLowerCase() || repo.name === 'home.io');
+const dotfilesHref = repos.find((repo) => repo.name === 'dotfiles')?.url ?? 'https://github.com/TechDufus/dotfiles';
+const ws = labSpec.workstation;
+
+const [tsEntry, talosEntry] = labSpec.changelog;
+const tsHref = tsEntry?.href ?? '/blog/';
+const talosHref = talosEntry?.href ?? '/blog/';
+const omcPost = metas.find((meta) => meta.slug === 'oh-my-claude-batteries-included-enhancements-for-claude-code');
+
+/* ---------- Architecture: metal up to access (facts from setup.md + the Feb 2026 post) ---------- */
+/** [term, value, href?]: the detail card renders an optional href as a link (external ones open in a new tab). */
+type Fact = [string, string, string?];
+const SETUP: Fact = ['Source', 'setup notes', labSpec.setupHref];
+const hw = Object.fromEntries(labSpec.hardware.map((row) => [row.role, row]));
+
+type ArchNode = {
+  id: string;
+  label: string;
+  kind?: 'new' | 'gone' | 'more';
+  /** Talos VMs: decorative buttons that select their group node. */
+  group?: string;
+  title?: string;
+  text?: string;
+  facts?: Fact[];
+};
+type ArchLayer = { id: string; n: string; name: string; git: boolean; nodes: ArchNode[] };
+
+const SERVICE_TEXT: Record<string, string> = {
+  Immich: 'Self-hosted photo and video library.',
+  Dashboards: 'Dashboards for the lab, running as ordinary cluster workloads.',
+  'Self-hosted runners': 'Self-hosted runners, living in the same cluster as everything else.',
+  'Observability stack': 'An observability stack, so I can see what broke before I start guessing.'
+};
+
+const LAYERS: ArchLayer[] = [
+  {
+    id: 'access', n: 'L5', name: 'Access', git: true,
+    nodes: [
+      { id: 'tailscale', label: 'Tailscale Operator', kind: 'new', title: 'Tailscale Operator',
+        text: 'How services get reached now. It replaced the Cloudflare tunnels in Feb 2026: from dashboard-heavy setup to GitOps-native service exposure.',
+        facts: [['Since', 'Feb 2026'], ['Replaced', 'HA Cloudflare tunnels'], ['Write-up', 'I deleted my Cloudflare tunnels', tsHref]] },
+      { id: 'traefik', label: 'Traefik ingress', title: 'Traefik',
+        text: 'The cluster’s ingress controller.',
+        facts: [['Role', 'Ingress'], SETUP] },
+      { id: 'cloudflare', label: '<span>HA Cloudflare tunnels</span>', kind: 'gone', title: 'HA Cloudflare tunnels',
+        text: 'Still listed in the setup notes, but retired. Every new service meant another tunnel, route, and access policy.',
+        facts: [['Status', 'Replaced, Feb 2026'], ['By', 'Tailscale Operator'], ['Why', 'Read the post', tsHref]] }
+    ]
+  },
+  {
+    id: 'apps', n: 'L4', name: 'Services', git: true,
+    nodes: [
+      ...labSpec.services.map((service) => ({
+        id: service.name.toLowerCase().split(' ')[0].replace(/[^a-z]/g, ''),
+        label: service.name,
+        title: service.name,
+        text: SERVICE_TEXT[service.name] ?? service.note ?? '',
+        facts: [['Layer', `${labSpec.servicesCount} services`], SETUP] as Fact[]
+      })),
+      { id: 'more', label: `+${Number.parseInt(labSpec.servicesCount, 10) - labSpec.services.length} more`, kind: 'more', title: `${labSpec.servicesCount} services`,
+        text: `The setup notes name ${labSpec.services.length === 4 ? 'four' : labSpec.services.length}. The rest are declared in home.io alongside everything else.`,
+        facts: [['Total', labSpec.servicesCount], ['Where', 'TechDufus/home.io ↗', HOMEIO]] }
+    ]
+  },
+  {
+    id: 'platform', n: 'L3', name: 'Platform', git: true,
+    nodes: [
+      { id: 'argocd', label: 'ArgoCD', title: 'ArgoCD',
+        text: 'GitOps. ArgoCD reconciles the cluster from home.io, so the repo is the source of truth, not the dashboard.',
+        facts: [['Pattern', 'GitOps'], ['Repo', 'home.io ↗', HOMEIO]] },
+      { id: 'metallb', label: 'MetalLB', title: 'MetalLB',
+        text: 'Load-balancer IPs for a bare-metal cluster.',
+        facts: [['Role', 'Load balancing'], SETUP] },
+      { id: 'pihole', label: 'Pi-hole DNS', title: 'Pi-hole',
+        text: 'DNS for the network.',
+        facts: [['Role', 'DNS'], SETUP] },
+      { id: 'storage', label: 'Local + NFS storage', title: 'Storage patterns',
+        text: 'Local and NFS-backed storage patterns for workloads.',
+        facts: [['Pattern', 'Local + NFS-backed'], SETUP] }
+    ]
+  },
+  {
+    id: 'cluster', n: 'L2', name: 'Cluster', git: true,
+    nodes: [
+      { id: 'talos1', label: 'talos', group: 'talos' },
+      { id: 'talos2', label: 'talos', group: 'talos' },
+      { id: 'talos3', label: 'talos', group: 'talos' },
+      { id: 'talos', label: 'Talos Kubernetes <small>×3</small>', title: 'Talos Kubernetes',
+        text: 'A 3-node Kubernetes cluster on Talos, an immutable OS built only to run Kubernetes. Hosted on Proxmox VE.',
+        facts: [['Nodes', '3'], ['Host', 'Proxmox VE'], ['Build log', 'Talos on Proxmox with Terraform', talosHref]] }
+    ]
+  },
+  {
+    id: 'hv', n: 'L1', name: 'Hypervisor', git: true,
+    nodes: [
+      { id: 'proxmox', label: 'Proxmox VE', title: 'Proxmox VE',
+        text: 'The hypervisor. It hosts the 3-node Talos Kubernetes cluster.',
+        facts: [['Hosts', 'Talos ×3'], ['Declared', 'Terraform + Ansible, in home.io']] }
+    ]
+  },
+  {
+    id: 'metal', n: 'L0', name: 'Metal', git: false,
+    nodes: [
+      { id: 'r720', label: 'PowerEdge R720xd', title: hw.Compute?.name ?? 'Dell PowerEdge R720xd',
+        text: 'The compute. Everything above this line runs on it.',
+        facts: [['Threads', '40'], ['RAM', '256GB ECC']] },
+      { id: 'unas', label: hw.Storage?.name ?? 'UNAS Pro 8', title: hw.Storage?.name ?? 'UNAS Pro 8',
+        text: 'Storage.',
+        facts: [['Role', 'Storage'], SETUP] },
+      { id: 'unifi', label: 'UDM Pro + U7 AP', title: hw.Network?.name ?? 'UniFi UDM Pro + U7 AP',
+        text: 'The network: a UniFi Dream Machine Pro and a U7 access point.',
+        facts: [['Role', 'Network'], ['Vendor', 'UniFi']] },
+      { id: 'pi', label: hw.Edge?.name ?? 'Raspberry Pi 4B', title: hw.Edge?.name ?? 'Raspberry Pi 4B',
+        text: 'The edge box.',
+        facts: [['Role', 'Edge'], ['RAM', hw.Edge?.spec ?? '8GB']] }
+    ]
+  }
+];
+
+const DEFAULT_NODE = 'argocd';
+const defaultLayer = LAYERS.find((layer) => layer.nodes.some((node) => node.id === DEFAULT_NODE));
+const defaultPane = defaultLayer?.nodes.find((node) => node.id === DEFAULT_NODE);
+const layerLabel = (layer: ArchLayer) => `${layer.n} · ${layer.name}${layer.git ? ' · in git' : ''}`;
+/* Detail cards for the client script, as lean JSON: id → [text, facts, title?]. The layer line comes from the
+   node's layer row, and the title is left out when it matches the button text. */
+const plain = (html: string) => html.replace(/<[^>]*>/g, '');
+const archData = JSON.stringify(
+  Object.fromEntries(
+    LAYERS.flatMap((layer) => layer.nodes)
+      .filter((node) => !node.group)
+      .map((node) => [node.id, [node.text, node.facts, ...(node.title === plain(node.label) ? [] : [node.title])]])
+  )
+).replace(/</g, '\\u003c');
+
+/* ---------- Hardware table ---------- */
+const HW_LOCATE: Record<string, string> = { Compute: 'r720', Network: 'unifi', Storage: 'unas', Edge: 'pi' };
+const HW_SPEC: Record<string, string> = { Network: 'Gateway + access point', Storage: 'UniFi NAS' };
+const numify = (text: string) => text.replace(/\b(\d+(?:GB)?)\b/g, '<span class="num">$1</span>');
+
+/* ---------- Services field: 25 cells + a "plus", the named ones lit ---------- */
+const svcTotal = Number.parseInt(labSpec.servicesCount, 10);
+const svcNamed = labSpec.services.length;
+const cells = Array.from({ length: svcTotal + 1 }, (_, i) => (i < svcNamed ? 'is-named' : i === svcTotal ? 'is-plus' : undefined));
+const numberWords = ['zero', 'one', 'two', 'three', 'four', 'five', 'six'];
+
+/* ---------- Changelog ---------- */
+const splitTitle = (title: string): [string, string, boolean] => {
+  const arrow = title.split(/\s*->\s*|\s*→\s*/);
+  if (arrow.length === 2) return [arrow[0], arrow[1], true];
+  const comma = title.lastIndexOf(', ');
+  return comma > 0 ? [title.slice(0, comma + 1), title.slice(comma + 2), false] : [title, '', false];
+};
+const changelog = labSpec.changelog.map((item, index) => {
+  const post = postByHref(item.href);
+  const [from, to, isArrow] = splitTitle(item.title);
+  return { ...item, post, from, to, isArrow, index, month: item.date.slice(0, 7), when: fmtDate(item.date, 'short') };
+});
+const latestChange = changelog[0];
+
+/* ---------- Workstation ---------- */
+const [photo] = ws.photos;
+const [photoLead, photoRest] = (photo?.caption ?? '').split(' · ');
+const peripherals = ws.peripherals.reduce<{ k: string; items: { v: string; href?: string }[] }[]>((rows, row) => {
+  const last = rows[rows.length - 1];
+  if (last && last.k === row.k) last.items.push({ v: row.v, href: row.href });
+  else rows.push({ k: row.k, items: [{ v: row.v, href: row.href }] });
+  return rows;
+}, []);
+const toolOrder = ['Editor', 'Shell', 'Terminal', 'Infra'];
+const stackTools = toolOrder
+  .map((k) => ws.tools.find((row) => row.k === k))
+  .filter((row): row is LabSpecRow => row !== undefined);
+const sessionTool = ws.tools.find((row) => row.k === 'Session manager');
+const [shotPicker, shotStatus, shotCells] = ws.screenshots;
+const [pickerKey, pickerRest] = (shotPicker?.caption ?? '').split(' · ');
+const [cellsLead, cellsRest] = (shotCells?.caption ?? '').split(' · ');
+---
+
+<BaseLayout
+  title="The lab"
+  description={`The homelab and workstation I run every day: Proxmox, Talos Kubernetes, ArgoCD, ${labSpec.servicesCount} services, and a terminal-first desk. Last revised ${labSpec.lastRevised}.`}
+>
+  <div class="pg-lab">
+  <!-- ============ HERO ============ -->
+  <section id="top" class="lhero" aria-labelledby="lab-title">
+    <div class="wrap">
+      <div class="lhero__grid">
+        <div>
+          <p class="eyebrow lhero__eyebrow" data-reveal>Homelab + workstation</p>
+          <h1 class="display" id="lab-title" data-reveal style="--d:1" set:html={labSpec.headline} />
+          <p class="lede lhero__lede" data-reveal style="--d:2">{labSpec.lede}</p>
+          <p class="lhero__note" data-reveal style="--d:3">
+            <span class="badge badge--live"><i class="dot" aria-hidden="true"></i>Last revised <time datetime={labSpec.lastRevisedIso}>{labSpec.lastRevised}</time> · {labSpec.status.toLowerCase()}</span>
+            <a class="link link--quiet" href="#changelog">What changed</a>
+            <a class="link link--quiet" href={labSpec.setupHref}>Full setup notes</a>
+          </p>
+        </div>
+
+        <nav class="onpage" aria-label="On this page" data-reveal style="--d:2">
+          <p class="onpage__h">On this page</p>
+          <ol>
+            <li><a href="#architecture"><span>01</span><span>Architecture</span><span>diagram</span></a></li>
+            <li><a href="#hardware"><span>02</span><span>Hardware</span><span>{labSpec.hardware.length} boxes</span></a></li>
+            <li><a href="#platform"><span>03</span><span>Network, cluster, GitOps</span><span>home.io</span></a></li>
+            <li><a href="#services"><span>04</span><span>Services</span><span>{labSpec.servicesCount}</span></a></li>
+            <li><a href="#changelog"><span>05</span><span>Changelog</span><span>{latestChange?.when}</span></a></li>
+            <li><a href="#workstation"><span>06</span><span>Workstation</span><span>{ws.host.toLowerCase()}</span></a></li>
+          </ol>
+        </nav>
+      </div>
+
+      <dl class="stats lhero__stats" data-reveal style="--d:3">
+        <Stat value={3} term="Cluster" label="Talos Kubernetes nodes on Proxmox VE" />
+        <Stat value={256} accent="GB" term="Compute" label="ECC RAM, 40 threads, one R720xd" />
+        <Stat value={svcTotal} accent="+" term="Workloads" label="services, including Immich" />
+        <Stat value={1} term="Source of truth" label="repo to rebuild it:" href={HOMEIO} linkText="home.io" />
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============ 01 · ARCHITECTURE ============ -->
+  <section id="architecture" class="section" aria-labelledby="arch-title">
+    <div class="wrap">
+      <div class="sec-head sec-head--split">
+        <div class="sec-head__bar" data-reveal>
+          <span class="sec-head__index">01</span>
+          <span class="eyebrow">Architecture</span>
+          <span class="sec-head__aside"><span class="meta">Metal up to access</span></span>
+        </div>
+        <h2 class="h2 sec-head__title" id="arch-title" data-reveal>Built for repeatability, not hand-tuned <em>snowflakes</em>.</h2>
+        <p class="lede" data-reveal style="--d:1">Proxmox VE hosts a 3-node Talos Kubernetes cluster. ArgoCD keeps it in sync with git. Pick any part to see what it does.</p>
+      </div>
+
+      <figure class="arch" data-arch data-reveal aria-labelledby="arch-cap">
+        <div class="arch__board">
+          <div class="arch__grid" data-arch-grid>
+            <div class="arch__rail" data-arch-rail>
+              <div class="arch__src"><a {...linkProps(HOMEIO)}><strong>home.io</strong> <span class="sr-sm">git repo</span></a></div>
+              <div class="arch__body" aria-hidden="true"><span class="arch__line"><span class="arch__pulse"></span></span><span class="arch__label"><b>Declared</b>{labSpec.gitops.tools.map((tool, i) => (<>{i > 0 && <br />}{tool}</>))}</span></div>
+            </div>
+            {LAYERS.map((layer) => (
+              <div class:list={['arch__layer', { 'is-active': layer === defaultLayer }]} data-layer={layer.id} data-git={layer.git ? '' : undefined}>
+                <span class="arch__k"><i>{layer.n}</i>{layer.name}</span>
+                <div class="arch__nodes">
+                  {layer.nodes.map((node) =>
+                    node.group ? (
+                      <button type="button" class="node node--vm" data-node={node.group} tabindex="-1" aria-hidden="true">{node.label}</button>
+                    ) : (
+                      <button type="button" class:list={['node', node.kind && `node--${node.kind}`]} data-node={node.id} aria-pressed={node.id === DEFAULT_NODE ? 'true' : undefined} set:html={node.label} />
+                    )
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <figcaption class="arch__foot" id="arch-cap">
+            <span>Homelab architecture, top to bottom</span>
+            <span class="arch__legend" aria-hidden="true">
+              <span><i class="sw sw--git"></i>declared in home.io</span>
+              <span><i class="sw sw--new"></i>new Feb 2026</span>
+              <span><i class="sw sw--gone"></i>replaced</span>
+            </span>
+          </figcaption>
+        </div>
+
+        <script type="application/json" is:inline data-arch-data set:html={archData} />
+
+        <aside class="arch__detail" data-arch-detail aria-live="polite" aria-label="Selected component">
+          <p class="arch__hint"><span class="hide-sm">Hover, focus, or tap a part</span><span class="show-sm">Tap any part</span></p>
+          {defaultLayer && defaultPane && (
+            <>
+              <p class="arch__dlayer">{layerLabel(defaultLayer)}</p>
+              <h3 class="arch__dtitle">{defaultPane.title}</h3>
+              <p class="arch__dtext">{defaultPane.text}</p>
+              <dl class="arch__dfacts">{defaultPane.facts?.map(([k, v, href]) => <div><dt>{k}</dt><dd>{href ? <a {...linkProps(href)}>{v}</a> : v}</dd></div>)}</dl>
+            </>
+          )}
+        </aside>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ 02 · HARDWARE ============ -->
+  <section id="hardware" class="section" aria-labelledby="hw-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-head__bar" data-reveal>
+          <span class="sec-head__index">02</span>
+          <span class="eyebrow">Hardware</span>
+          <span class="sec-head__aside"><span class="meta">At a glance</span></span>
+        </div>
+      </div>
+      <div class="hw">
+        <div class="hw__intro" data-reveal>
+          <h2 class="h3" id="hw-title">Four boxes. Everything else is <em>software</em>.</h2>
+          <p>The one layer git can’t rebuild for me. A single server does the compute; the rest covers network, storage, and the edge.</p>
+        </div>
+        <table class="hw__table" data-reveal style="--d:1">
+          <caption class="sr-only">Homelab hardware</caption>
+          <thead><tr><th scope="col">Role</th><th scope="col">Hardware</th><th scope="col">Specs</th><th scope="col"><span class="sr-only">Diagram</span></th></tr></thead>
+          <tbody>
+            {labSpec.hardware.map((row) => (
+              <tr>
+                <th scope="row">{row.role}</th>
+                <td class="hw__name">{row.name}</td>
+                <td class="hw__spec" set:html={numify(row.spec ?? HW_SPEC[row.role] ?? '')} />
+                <td>{HW_LOCATE[row.role] && <button type="button" class="hw__locate" data-locate={HW_LOCATE[row.role]} aria-label={`Show the ${row.name} in the diagram`}>In diagram <span aria-hidden="true">↑</span></button>}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 03 · NETWORK, CLUSTER, GITOPS ============ -->
+  <section id="platform" class="section" aria-labelledby="platform-title">
+    <div class="wrap">
+      <div class="sec-head sec-head--split">
+        <div class="sec-head__bar" data-reveal>
+          <span class="sec-head__index">03</span>
+          <span class="eyebrow">Network, cluster, GitOps</span>
+          <span class="sec-head__aside"><a class="meta link link--quiet" {...linkProps(HOMEIO)}>{labSpec.gitops.repo} ↗</a></span>
+        </div>
+        <h2 class="h2 sec-head__title" id="platform-title" data-reveal>Three layers, one <em>repo</em>.</h2>
+        <p class="lede" data-reveal style="--d:1">Everything is declarative through home.io using Terraform, Ansible and ArgoCD. Write YAML, push to git, done.</p>
+      </div>
+
+      <div class="pillars">
+        <article class="pillar" data-reveal>
+          <span class="pillar__n">A · Network</span>
+          <h3>Private by default, reachable on purpose.</h3>
+          <ul>
+            <li>{hw.Network?.name ?? 'UniFi UDM Pro + U7 AP'} <small>hardware</small></li>
+            <li>Traefik <small>ingress</small></li>
+            <li>MetalLB <small>load balancer</small></li>
+            <li>Pi-hole <small>DNS</small></li>
+            <li>Tailscale Operator <span class="accent">new · Feb 2026</span></li>
+            <li><s>HA Cloudflare tunnels</s> <small>replaced</small></li>
+          </ul>
+        </article>
+        <article class="pillar" data-reveal style="--d:1">
+          <span class="pillar__n">B · Cluster</span>
+          <h3>Three Talos nodes on one Proxmox host.</h3>
+          <ul>
+            <li>Proxmox VE <small>hypervisor</small></li>
+            <li>Talos Kubernetes <small>3 nodes</small></li>
+            <li>Local storage <small>pattern</small></li>
+            <li>NFS-backed storage <small>pattern</small></li>
+          </ul>
+        </article>
+        <article class="pillar" data-reveal style="--d:2">
+          <span class="pillar__n">C · GitOps</span>
+          <h3>Push to git; the cluster catches up.</h3>
+          <ul>
+            <li>Terraform <small>declared</small></li>
+            <li>Ansible <small>declared</small></li>
+            <li>ArgoCD <small>GitOps</small></li>
+            <li>home.io <small>source of truth</small></li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="rebuild">
+        <div data-reveal>
+          <p class="quote">{labSpec.gitops.motto}</p>
+          <p class="rebuild__by">Not a slogan, the recovery plan. No hand-tuned snowflakes means there’s nothing to remember when something dies.</p>
+          <p class="rebuild__stack" aria-label={`Rebuild path: ${labSpec.gitops.rebuildPath.join(', then ')}`}>
+            {labSpec.gitops.rebuildPath.map((step, i) => (
+              <>
+                {i > 0 && <span class="to" aria-hidden="true">→</span>}
+                <span class:list={[{ muted: i === labSpec.gitops.rebuildPath.length - 1 }]}>{step}</span>
+              </>
+            ))}
+          </p>
+        </div>
+        {homeio && <div><RepoCard repo={homeio} /></div>}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 04 · SERVICES ============ -->
+  <section id="services" class="section" aria-labelledby="svc-title">
+    <div class="wrap">
+      <div class="sec-head sec-head--split">
+        <div class="sec-head__bar" data-reveal>
+          <span class="sec-head__index">04</span>
+          <span class="eyebrow">Services</span>
+          <span class="sec-head__aside"><span class="meta">What the cluster is for</span></span>
+        </div>
+        <h2 class="h2 sec-head__title" id="svc-title" data-reveal>The reason any of this <em>exists</em>.</h2>
+        <p class="lede" data-reveal style="--d:1">All of the platform above is there to run these, reliably, without babysitting.</p>
+      </div>
+
+      <div class="svc">
+        <div class="svc__count" data-reveal>
+          <p class="svc__num" aria-label={`${svcTotal} plus services`}>{svcTotal}<em class="foil">+</em></p>
+          <p>Services on the Talos cluster, declared in home.io like everything else. {numberWords[svcNamed] ? `${numberWords[svcNamed][0].toUpperCase()}${numberWords[svcNamed].slice(1)}` : svcNamed} of them get a name on this page.</p>
+          <div class="svc__field" data-reveal aria-hidden="true">
+            {cells.map((cls) => <i class={cls}></i>)}
+          </div>
+        </div>
+        <div data-reveal style="--d:1">
+          <ol class="svc__list">
+            {labSpec.services.map((service) => (
+              <li><h3>{service.name}</h3>{service.note && <p>{service.note}</p>}</li>
+            ))}
+            <li class="svc__rest"><h3>…and {svcTotal - svcNamed}+ more</h3><p>Declared in <a class="link" {...linkProps(HOMEIO)}>home.io</a> alongside everything else.</p></li>
+          </ol>
+          <div class="svc__foot">
+            <button type="button" class="btn btn--ghost btn--sm" data-guide-open="What's running in your homelab?">Ask what’s running <span class="arrow" aria-hidden="true">→</span></button>
+            <span class="meta">Opens the site guide (scripted answers)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 · CHANGELOG ============ -->
+  <section id="changelog" class="section" aria-labelledby="log-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-head__bar" data-reveal>
+          <span class="sec-head__index">05</span>
+          <span class="eyebrow">Changelog</span>
+          <span class="sec-head__aside"><span class="badge badge--live"><i class="dot" aria-hidden="true"></i>{labSpec.status}</span></span>
+        </div>
+      </div>
+      <div class="log">
+        <div class="log__intro" data-reveal>
+          <h2 class="h2" id="log-title">What <em>changed</em>, and when.</h2>
+          <p>I update this when I actually change something, and write it up when the change is worth it.</p>
+        </div>
+        <ol class="timeline" data-reveal style="--d:1">
+          {changelog.map((item) => (
+            <li class:list={['timeline__item', 'log__item', { 'is-now': item.index === 0 }]}>
+              <span class="timeline__when"><time datetime={item.month}>{item.when}</time>{item.index === 0 && ' · latest'}</span>
+              <h3 class="log__what">
+                {item.href ? (
+                  <a href={item.href}>{item.from}{item.to && ' '}{item.to && (item.isArrow ? <><span class="to">→</span> {item.to}</> : <span class="to">{item.to}</span>)}</a>
+                ) : (
+                  <>{item.from}{item.to && <> <span class="to">{item.isArrow ? `→ ${item.to}` : item.to}</span></>}</>
+                )}
+              </h3>
+              {item.note && <p>{item.note}</p>}
+              {item.before && item.after && (
+                <div class="ba">
+                  <div>
+                    <h4>Before · {item.from}</h4>
+                    <ul>{item.before.map((line) => <li>{line}</li>)}</ul>
+                  </div>
+                  <div>
+                    <h4>After · {item.to}</h4>
+                    <ul>{item.after.map((line) => <li>{line}</li>)}</ul>
+                  </div>
+                </div>
+              )}
+              {item.href === tsHref && (
+                <div class="code-block">
+                  <div class="code-block__bar"><span>Exposing Immich · from the post</span><CodeCopy /></div>
+                  <pre><code><span class="tok-k">apiVersion</span>: v1
+<span class="tok-k">kind</span>: Service
+<span class="tok-k">metadata</span>:
+  <span class="tok-k">name</span>: immich-tailscale
+  <span class="tok-k">namespace</span>: immich
+  <span class="tok-k">annotations</span>:
+    <span class="tok-k">tailscale.com/hostname</span>: <span class="tok-s">"immich"</span>
+<span class="tok-k">spec</span>:
+  <span class="tok-k">type</span>: LoadBalancer
+  <span class="tok-k">loadBalancerClass</span>: tailscale
+  <span class="tok-k">ports</span>:
+    - <span class="tok-k">port</span>: <span class="tok-n">80</span>
+      <span class="tok-k">targetPort</span>: <span class="tok-n">2283</span>
+      <span class="tok-k">protocol</span>: TCP
+      <span class="tok-k">name</span>: http
+  <span class="tok-k">selector</span>:
+    <span class="tok-k">app.kubernetes.io/name</span>: server
+    <span class="tok-k">app.kubernetes.io/instance</span>: immich</code></pre>
+                </div>
+              )}
+              {item.href && (
+                <p class="log__links">
+                  <a class="link" href={item.href}>{item.href === tsHref ? 'Read the write-up' : item.href === talosHref ? 'Read the build log' : 'Read the post'} <span class="arrow" aria-hidden="true">→</span></a>
+                  {item.post && <span class="meta">{fmtDate(item.post.date)} · {item.post.minutes} min</span>}
+                </p>
+              )}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 06 · WORKSTATION ============ -->
+  <section id="workstation" class="section" aria-labelledby="ws-title">
+    <div class="wrap">
+      <div class="sec-head sec-head--split">
+        <div class="sec-head__bar" data-reveal>
+          <span class="sec-head__index">06</span>
+          <span class="eyebrow">Workstation</span>
+          <span class="sec-head__aside"><a class="meta link link--quiet" {...linkProps(dotfilesHref)}>TechDufus/dotfiles ↗</a></span>
+        </div>
+        <h2 class="h2 sec-head__title" id="ws-title" data-reveal>The desk, and the terminal I <em>live</em> in.</h2>
+        <p class="lede" data-reveal style="--d:1">Workstation automation lives in dotfiles. Same idea as the lab: if the machine dies, the setup doesn’t.</p>
+      </div>
+
+      <div class="ws">
+        {photo && (
+          <figure class="photo" data-reveal>
+            <div class="photo__img">
+              <img data-lazy src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} loading="lazy" decoding="async" />
+            </div>
+            {photo.caption && <figcaption><span>{photoLead}</span>{photoRest && <span>{photoRest}</span>}</figcaption>}
+          </figure>
+        )}
+        <div data-reveal style="--d:1">
+          <div class="ws__name">
+            <h3><em>{ws.host}</em></h3>
+            <span class="meta">{ws.role}</span>
+          </div>
+          <SpecList rows={ws.specs} label={`${ws.host} specs`} />
+        </div>
+      </div>
+
+      <div class="desk">
+        <div class="kb" data-reveal>
+          <span class="eyebrow">Keyboard</span>
+          <h3>{ws.keyboard.name}, custom <em class="accent">{ws.keyboard.layout}</em>.</h3>
+          <div class="kb__keys" role="img" aria-label={`${ws.keyboard.layout} home row across the split: A O E U I, D H T N S`}>
+            <span class="kb__half">{['a', 'o', 'e', 'u'].map((key) => <kbd class="is-home">{key}</kbd>)}<kbd>i</kbd></span>
+            <span class="kb__half"><kbd>d</kbd>{['h', 't', 'n', 's'].map((key) => <kbd class="is-home">{key}</kbd>)}</span>
+          </div>
+          <p>{ws.keyboard.note}</p>
+          <p class="cluster">
+            <a class="link" {...linkProps(ws.keyboard.configHref)}>ORYX config <span class="arrow--ne" aria-hidden="true">↗</span></a>
+            <a class="link link--quiet" {...linkProps(ws.keyboard.href)}>{ws.keyboard.name.replace(/^ZSA\s+/, '')} <span class="arrow--ne" aria-hidden="true">↗</span></a>
+          </p>
+        </div>
+
+        <div class="periph" data-reveal style="--d:1">
+          <div class="periph__col">
+            <p class="periph__h">Peripherals</p>
+            <dl class="spec">
+              {peripherals.map((row) => (
+                <div>
+                  <dt>{row.k}</dt>
+                  <dd>{row.items.map((item, i) => (
+                    <>{i > 0 && ' + '}{item.href ? <a {...linkProps(item.href)}>{i > 0 ? item.v.replace(/^Logitech\s+/, '') : item.v}</a> : item.v}</>
+                  ))}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <div class="periph__col">
+            <p class="periph__h">Laptops</p>
+            <ul>
+              {ws.laptops.map((laptop) => (
+                <li>{laptop.href ? <a {...linkProps(laptop.href)}>{laptop.name}</a> : laptop.name}{laptop.detail && <> <span class="faint">{laptop.detail}</span></>}</li>
+              ))}
+            </ul>
+            <p class="periph__h periph__display">Display</p>
+            <ul><li>{ws.display}</li></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="term">
+        <p class="term__line" data-reveal aria-label={`Terminal flow: ${ws.terminalStack.join(', then ')}`}>
+          {ws.terminalStack.map((step, i) => (
+            <>{i > 0 && <span class="to" aria-hidden="true">→</span>}<span>{step}</span></>
+          ))}
+          <small>terminal-first, all day</small>
+        </p>
+
+        <div class="term__grid">
+          <div class="term__notes" data-reveal>
+            <div>
+              <h3>Sessions, not windows.</h3>
+              <p>I usually hit <kbd>&lt;prefix&gt;-o</kbd>, fuzzy-find where I need to be, and let {sessionTool?.href ? <a {...linkProps(sessionTool.href)}>sesh</a> : 'sesh'} attach or create the session.</p>
+              <p>For tmux navigation I use <kbd>Ctrl+hjkl</kbd> (via vim-tmux-navigator), and I sync panes when I need to run parallel commands. Resurrect + continuum keep sessions across restarts.</p>
+            </div>
+            <div>
+              <h3>Editor + shell.</h3>
+              <ul>
+                {stackTools.map((row) => (
+                  <li><strong>{row.k}:</strong> {row.href ? <a {...linkProps(row.href)}>{row.v}</a> : row.v}{row.note && ` ${row.k === 'Shell' ? '+' : 'with'} ${row.note}`}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3>Windows by cell, not by hand.</h3>
+              <p>{ws.windowing}</p>
+            </div>
+            <div>
+              <h3>Agents in the loop.</h3>
+              <ul>
+                {ws.agents.map((row) => (
+                  <li>
+                    <strong>{row.href ? <a {...linkProps(row.href)}>{row.v}</a> : row.v}</strong>
+                    {row.note && ` ${row.k === 'Claude Code' ? 'with' : 'for'} ${row.note}`}
+                    {row.k === 'oh-my-claude' && omcPost && <> (<a href={omcPost.href}>the post</a>)</>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div class="shots" data-reveal style="--d:1">
+            {shotPicker && (
+              <figure class="shot">
+                <div class="shot__img"><img src={shotPicker.src} alt={shotPicker.alt} width={shotPicker.width} height={shotPicker.height} loading="lazy" decoding="async" /></div>
+                {shotPicker.caption && <figcaption>{pickerRest ? <><kbd>{pickerKey}</kbd> · {pickerRest}</> : shotPicker.caption}</figcaption>}
+              </figure>
+            )}
+            {shotStatus && (
+              <figure class="shot">
+                <div class="shot__img shot__img--strip" tabindex="0" role="region" aria-label="tmux status bar screenshot, scrollable"><img src={shotStatus.src} alt={shotStatus.alt} width={shotStatus.width} height={shotStatus.height} loading="lazy" decoding="async" /></div>
+                {shotStatus.caption && <figcaption>{shotStatus.caption}</figcaption>}
+              </figure>
+            )}
+            {shotCells && (
+              <figure class="shot shots__pair">
+                <div class="shot__img"><img src={shotCells.src} alt={shotCells.alt} width={shotCells.width} height={shotCells.height} loading="lazy" decoding="async" /></div>
+                {shotCells.caption && <figcaption><b>{cellsLead}.</b>{cellsRest && <span>{cellsRest}.</span>}</figcaption>}
+              </figure>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div class="ws__foot" data-reveal>
+        <p>Workstation in <a class="link" {...linkProps(dotfilesHref)}>dotfiles</a>. Homelab in <a class="link" {...linkProps(HOMEIO)}>home.io</a>. Both rebuildable. The long version lives in the <a class="link" href={labSpec.setupHref}>setup notes</a>.</p>
+        <a class="btn btn--ghost" href={labSpec.setupHref}>Read the full setup <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+  </div>
+</BaseLayout>
+
+<script>
+  // Architecture diagram: select a part (click, focus, mouse hover) to swap the detail card,
+  // which follows the tapped layer on phones. Hardware rows jump to their node. Cards other than
+  // the server-rendered default are built from the [data-arch-data] JSON (id → [text, facts, title?]).
+  const arch = document.querySelector<HTMLElement>('[data-arch]');
+  const grid = arch?.querySelector<HTMLElement>('[data-arch-grid]');
+  const detail = arch?.querySelector<HTMLElement>('[data-arch-detail]');
+
+  if (arch && grid && detail) {
+    type Fact = [string, string, string?];
+    const data: Record<string, [string, Fact[]?, string?]> = JSON.parse(arch.querySelector('[data-arch-data]')?.textContent || '{}');
+    const narrow = window.matchMedia('(max-width: 760px)');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const layerOf = (id: string) => grid.querySelector(`[data-node="${id}"]`)?.closest<HTMLElement>('.arch__layer') ?? null;
+    let current = grid.querySelector<HTMLElement>('[data-node][aria-pressed="true"]')?.dataset.node ?? null;
+    // Toggle state lives on the real parts; the Talos VM chips are decorative (is-on).
+    grid.querySelectorAll('.node:not(.node--vm)').forEach((button) => {
+      if (!button.hasAttribute('aria-pressed')) button.setAttribute('aria-pressed', 'false');
+    });
+
+    const el = (tag: string, cls = '', text = '') => {
+      const node = document.createElement(tag);
+      if (cls) node.className = cls;
+      if (text) node.textContent = text;
+      return node;
+    };
+    const card = (id: string, layer: HTMLElement) => {
+      const entry = data[id];
+      if (!entry) return null;
+      const [text, facts = [], title = grid.querySelector(`[data-node="${id}"]`)?.textContent ?? ''] = entry;
+      const k = layer.querySelector('.arch__k');
+      const dl = el('dl', 'arch__dfacts');
+      for (const [term, value, href] of facts) {
+        const dd = el('dd', '', href ? '' : value);
+        if (href) {
+          const a = el('a', '', value) as HTMLAnchorElement;
+          a.href = href;
+          if (/^https?:/.test(href)) Object.assign(a, { target: '_blank', rel: 'noopener' });
+          dd.append(a);
+        }
+        const row = el('div');
+        row.append(el('dt', '', term), dd);
+        dl.append(row);
+      }
+      const where = `${k?.firstChild?.textContent} · ${k?.lastChild?.textContent}${layer.hasAttribute('data-git') ? ' · in git' : ''}`;
+      return [el('p', 'arch__dlayer', where), el('h3', 'arch__dtitle', title), el('p', 'arch__dtext', text), dl];
+    };
+
+    // On phones the detail card travels to sit right under the selected layer.
+    const place = () => {
+      const layer = narrow.matches && current ? layerOf(current) : null;
+      if (layer) {
+        if (detail.parentElement !== layer) layer.appendChild(detail);
+      } else if (detail.parentElement !== arch) {
+        arch.appendChild(detail);
+      }
+    };
+
+    const select = (id: string) => {
+      const layer = layerOf(id);
+      const parts = layer && id !== current ? card(id, layer) : null;
+      if (!layer || !parts) return;
+      current = id;
+      // keep the tapped layer still on phones while the card moves
+      const before = narrow.matches ? layer.getBoundingClientRect().top : null;
+      grid.querySelectorAll<HTMLElement>('[data-node]').forEach((button) => {
+        const on = button.dataset.node === id;
+        if (button.hasAttribute('aria-pressed')) button.setAttribute('aria-pressed', String(on));
+        else button.classList.toggle('is-on', on);
+      });
+      grid.querySelectorAll('.arch__layer').forEach((row) => row.classList.toggle('is-active', row === layer));
+      detail.querySelectorAll(':scope > :not(.arch__hint)').forEach((node) => node.remove());
+      detail.append(...parts);
+      detail.classList.remove('is-swap');
+      void detail.offsetWidth;
+      detail.classList.add('is-swap');
+      place();
+      if (before !== null) {
+        const shift = layer.getBoundingClientRect().top - before;
+        if (Math.abs(shift) > 1) window.scrollBy({ top: shift, behavior: 'instant' });
+      }
+    };
+
+    const nodeFrom = (event: Event) => (event.target as Element | null)?.closest<HTMLElement>('[data-node]')?.dataset.node;
+    grid.addEventListener('click', (event) => { const id = nodeFrom(event); if (id) select(id); });
+    grid.addEventListener('focusin', (event) => { const id = nodeFrom(event); if (id) select(id); });
+    // Mouse hover previews; touch relies on the click above (no layout jumps mid-scroll).
+    grid.addEventListener('pointerover', (event) => {
+      if (event.pointerType !== 'mouse' || narrow.matches) return;
+      const id = nodeFrom(event);
+      if (id) select(id);
+    });
+
+    const rail = arch.querySelector('[data-arch-rail]');
+    rail?.addEventListener('mouseenter', () => arch.classList.add('is-rail'));
+    rail?.addEventListener('mouseleave', () => arch.classList.remove('is-rail'));
+
+    document.querySelectorAll<HTMLElement>('[data-locate]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const id = button.dataset.locate ?? '';
+        select(id);
+        arch.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' });
+        const node = grid.querySelector<HTMLElement>(`[data-node="${id}"][aria-pressed]`);
+        if (node) window.setTimeout(() => node.focus({ preventScroll: true }), reduced.matches ? 0 : 500);
+      });
+    });
+
+    narrow.addEventListener('change', place);
+    place();
+  }
+
+  // Big JPEGs: lazy, then fade in once decoded.
+  document.querySelectorAll<HTMLImageElement>('img[data-lazy]').forEach((img) => {
+    const box = img.parentElement;
+    if (!box) return;
+    const done = () => box.classList.add('is-loaded');
+    if (img.complete && img.naturalWidth) done();
+    else {
+      img.addEventListener('load', done, { once: true });
+      img.addEventListener('error', done, { once: true });
+    }
+  });
+
+  // Services field: stagger step per cell for the reveal (motion only, so it can wait for JS).
+  document.querySelectorAll<HTMLElement>('.svc__field i').forEach((cell, i) => cell.style.setProperty('--i', String(i)));
+</script>
