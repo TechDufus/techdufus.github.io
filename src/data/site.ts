@@ -11,6 +11,7 @@ export const siteMetadata = {
   xHandle: '@TechDufus',
   media: {
     faviconIco: '/favicon.ico',
+    faviconSvg: '/favicon.svg',
     favicon16: '/favicon-16x16.png',
     favicon32: '/favicon-32x32.png',
     appleTouchIcon: '/apple-touch-icon.png',
