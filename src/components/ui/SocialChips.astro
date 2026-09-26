@@ -1,0 +1,27 @@
+---
+/*
+  Social links as chips (mockup index.html #contact nav.socials): <a class="chip" target=_blank>GitHub ↗</a>…
+  mailto links are left out (EmailCopy shows the address).
+*/
+import { socialLinks } from '../../data/site';
+import { delay, isExternal } from './format';
+
+type SocialLink = { label: string; href: string };
+
+interface Props {
+  links?: readonly SocialLink[];
+  label?: string;
+  reveal?: boolean;
+  d?: number;
+}
+
+const { links = socialLinks, label = 'Elsewhere', reveal = true, d } = Astro.props;
+const shown = links.filter((link) => isExternal(link.href));
+---
+<nav class="socials" aria-label={label} data-reveal={reveal ? '' : undefined} style={delay(d)}>
+  {shown.map((link) => <a class="chip" href={link.href} target="_blank" rel="noopener">{link.label} ↗</a>)}
+</nav>
+
+<style is:global>
+  .socials { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+</style>

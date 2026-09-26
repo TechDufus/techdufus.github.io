@@ -1,39 +1,76 @@
 ---
-import { siteMetadata, socialLinks } from '../data/site';
+import { business, footerNavigation, isPlaceholder, siteMetadata, socialLinks, supportLinks, visibleNav } from '../data/site';
 
-const featuredChannels = new Set(['GitHub', 'LinkedIn', 'X']);
 const year = new Date().getFullYear();
-
-const orderedSocialLinks = [...socialLinks].sort((a, b) => {
-  if (featuredChannels.has(a.label) !== featuredChannels.has(b.label)) {
-    return featuredChannels.has(a.label) ? -1 : 1;
-  }
-  return a.label.localeCompare(b.label);
-});
+const siteLinks = visibleNav(footerNavigation.site);
+const elsewhere = socialLinks.filter((link) => link.href.startsWith('http'));
+const legal = [
+  { label: 'Terms', href: business.legal.termsHref },
+  { label: 'Privacy', href: business.legal.privacyHref }
+];
 ---
 
-<footer class="mt-8 border-t border-white/10 pt-6 sm:pt-7">
-  <div class="footer-shell footer-shell-minimal">
-    <div class="footer-minimal-row">
-      <div class="footer-minimal-copy">
-        <p class="footer-wordmark">{siteMetadata.siteName}</p>
-        <p class="footer-note">Made with coffee, tokens, and neovim.</p>
-        <p class="footer-copyright">© {year} {siteMetadata.siteName}</p>
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__top">
+      <div class="foot__brand">
+        <a class="wordmark" href="/">TechDufus<i>.</i></a>
+        <p>Platform engineering, homelab rebuilds and agent workflows, written down while the details are fresh.</p>
       </div>
-      <ul class="footer-social-list" aria-label="Social links">
-        {orderedSocialLinks.map((link) => (
-          <li>
-            <a
-              class:list={['footer-social-link', featuredChannels.has(link.label) && 'footer-social-link-featured']}
-              href={link.href}
-              target={link.href.startsWith('http') ? '_blank' : undefined}
-              rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-            >
+      <div class="foot__col">
+        <h2>Site</h2>
+        <ul>
+          {siteLinks.map((link) => (
+            <li>
+              <a href={link.href}>
+                {isPlaceholder(link.label) ? <span class="ph" title="Placeholder">{link.label}</span> : link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div class="foot__col">
+        <h2>Elsewhere</h2>
+        <ul>
+          {elsewhere.map((link) => (
+            <li><a href={link.href} target="_blank" rel="noopener">{link.label}</a></li>
+          ))}
+        </ul>
+      </div>
+      <div class="foot__col">
+        <h2>Support</h2>
+        <ul>
+          {supportLinks.map((link) => (
+            <li><a href={link.href} target="_blank" rel="noopener">{link.label}</a></li>
+          ))}
+          <li><a href={`mailto:${siteMetadata.email}`}>{siteMetadata.email}</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot__bottom">
+      {business.enabled ? (
+        <span>
+          © {year}{' '}
+          {isPlaceholder(business.companyName) ? (
+            <span class="ph" title="Placeholder">{business.companyName}</span>
+          ) : (
+            business.companyName
+          )}{' '}
+          · TechDufus
+        </span>
+      ) : (
+        <span>© {year} TechDufus</span>
+      )}
+      <nav class="foot__legal" aria-label="Legal">
+        {business.enabled &&
+          legal.map((link) => (
+            <a href={link.href} class={link.href === '#' ? 'ph' : undefined} title={link.href === '#' ? 'Placeholder' : undefined}>
               {link.label}
             </a>
-          </li>
-        ))}
-      </ul>
+          ))}
+        <a href="/feed.xml">RSS</a>
+      </nav>
+      <span class="foot__status" title="Some things never change."><i class="dot" aria-hidden="true"></i>Status: probably fighting DNS somewhere.</span>
     </div>
   </div>
 </footer>

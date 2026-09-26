@@ -1,0 +1,46 @@
+---
+/*
+  Mockup .timeline (home "Career, condensed"):
+    <ol class="timeline"><li class="timeline__item is-now">
+      <span class="timeline__when">2024 — now</span>
+      <span class="timeline__what">Raft <span>· Senior DevSecOps Engineer</span></span>
+      <p>…</p>
+    </li></ol>
+  `datetime` wraps `when` in <time>; `href` links `what`.
+*/
+import { delay, linkProps } from './format';
+
+export type TimelineItem = {
+  when: string;
+  datetime?: string;
+  what: string;
+  /** Muted suffix after `what`, rendered as "· note". */
+  whatNote?: string;
+  href?: string;
+  body?: string;
+  now?: boolean;
+};
+
+interface Props {
+  items: readonly TimelineItem[];
+  class?: string;
+  reveal?: boolean;
+  d?: number;
+}
+
+const { items, class: className, reveal = false, d } = Astro.props;
+---
+<ol class:list={['timeline', className]} data-reveal={reveal ? '' : undefined} style={delay(d)}>
+  {
+    items.map((item) => (
+      <li class:list={['timeline__item', { 'is-now': item.now }]}>
+        <span class="timeline__when">{item.datetime ? <time datetime={item.datetime}>{item.when}</time> : item.when}</span>
+        <span class="timeline__what">
+          {item.href ? <a {...linkProps(item.href)}>{item.what}</a> : item.what}
+          {item.whatNote && <span>· {item.whatNote}</span>}
+        </span>
+        {item.body && <p>{item.body}</p>}
+      </li>
+    ))
+  }
+</ol>

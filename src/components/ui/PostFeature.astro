@@ -1,0 +1,28 @@
+---
+/* Mockup Pro.render.postFeature() → <article class="post-feature"> (featured/latest post card). */
+import type { PostMeta } from '../../lib/content';
+import Chips from './Chips.astro';
+import { fmtDate, fmtNum, isoDate, visibleTags } from './format';
+
+interface Props {
+  post: PostMeta;
+  label?: string;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { post, label = 'Latest', headingLevel: Title = 'h3' } = Astro.props;
+const date = isoDate(post.date);
+---
+<article class="post-feature" data-reveal>
+  <div class="post-feature__body">
+    <span class="chip chip--accent">{label}</span>
+    <Title class="post-feature__title"><a href={post.href}>{post.title}</a></Title>
+    <p class="post-feature__desc">{post.description}</p>
+    <span class="btn btn--ghost btn--sm" aria-hidden="true">Read the post <span class="arrow">→</span></span>
+  </div>
+  <dl class="post-feature__meta">
+    <div><dt>Published</dt><dd><time datetime={date}>{fmtDate(date)}</time></dd></div>
+    <div><dt>Reading</dt><dd>{post.minutes} min · {fmtNum(post.words)} words</dd></div>
+    <div><dt>Tags</dt><dd><Chips tags={visibleTags(post.tags, 6)} /></dd></div>
+  </dl>
+</article>

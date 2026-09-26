@@ -1,0 +1,94 @@
+---
+/*
+  Portrait with the Midnight duotone (global .portrait rules + #studio-duo from SvgDefs) and the gold ring.
+    size 'hero'   → <figure class="hero__figure"> with the drawn gold ring SVG (.hero__ring, living-gold glint)
+                    around a circular portrait, plus the caption. Eager + fetchpriority=high (LCP image).
+                    Desktop only; below 960px the home hero shows the 'avatar' size in .hero__id instead.
+    size 'avatar' → .portrait--circle.portrait--ring (default 72px; set `px` for 44/64/88).
+    size 'sm'     → .portrait--circle.portrait--sm (56px).
+  `caption` (hero only): trusted HTML for the serif line; the "caption" slot replaces the whole figcaption.
+*/
+import { siteMetadata } from '../../data/site';
+
+interface Props {
+  size?: 'hero' | 'avatar' | 'sm';
+  caption?: string;
+  alt?: string;
+  /** Rendered width/height for 'avatar'. */
+  px?: number;
+  ring?: boolean;
+  loading?: 'eager' | 'lazy';
+  /** Unique id for the hero ring mask. */
+  id?: string;
+  class?: string;
+}
+
+const SRC = '/img/profile/techdufus.webp';
+const NATIVE = 1122;
+
+const {
+  size = 'avatar',
+  caption = 'You can call me <em class="foil">Dufus.</em>',
+  alt = 'Portrait of Matthew, aka TechDufus',
+  px,
+  ring = size === 'avatar',
+  loading,
+  id = 'hero-ring-arcs',
+  class: className
+} = Astro.props;
+
+const hero = size === 'hero';
+const dim = hero ? NATIVE : size === 'sm' ? 56 : (px ?? 72);
+---
+{
+  hero ? (
+    <figure class:list={['hero__figure', className]} data-reveal style="--d:2">
+      <div class="hero__photo">
+        <svg class="hero__ring" viewBox="0 0 100 100" aria-hidden="true">
+          <circle class="r-base" cx="50" cy="50" r="49.5" vector-effect="non-scaling-stroke" />
+          <circle class="r-draw" cx="50" cy="50" r="49.5" pathLength="1" vector-effect="non-scaling-stroke" />
+          <mask id={id}>
+            <circle class="r-draw r-mask" cx="50" cy="50" r="49.5" pathLength="1" vector-effect="non-scaling-stroke" />
+          </mask>
+          <circle class="r-glint" cx="50" cy="50" r="49.5" mask={`url(#${id})`} />
+        </svg>
+        <div class="portrait portrait--circle">
+          <img src={SRC} alt={alt} width={dim} height={dim} loading={loading ?? 'eager'} decoding="async" fetchpriority="high" />
+        </div>
+      </div>
+      <figcaption class="hero__caption">
+        <slot name="caption">
+          <span class="serif" set:html={caption} />
+          <span class="meta">Matthew · {siteMetadata.xHandle}</span>
+          <span class="meta">{siteMetadata.role}</span>
+        </slot>
+      </figcaption>
+    </figure>
+  ) : (
+    <div class:list={['portrait portrait--circle', { 'portrait--sm': size === 'sm', 'portrait--ring': ring }, className]}>
+      <img src={SRC} alt={alt} width={dim} height={dim} loading={loading ?? 'lazy'} decoding="async" />
+    </div>
+  )
+}
+
+<style is:global>
+  /* Hero portrait figure + drawn gold ring (mockup index.html). The ring glint lives in global.css §17. */
+  .hero__figure { position: relative; justify-self: end; width: min(100%, 420px); margin-top: 18px; }
+  .hero__photo { position: relative; aspect-ratio: 1; }
+  .hero__photo .portrait { position: absolute; inset: 16px; }
+  .hero__ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  .hero__ring circle { fill: none; }
+  .hero__ring .r-base { stroke: var(--line-2); stroke-width: 1; }
+  .hero__ring .r-draw { stroke: url(#studio-gold) var(--gold-flat); stroke-width: 1.5; stroke-linecap: round; stroke-dasharray: 1 1; transform: rotate(-90deg); transform-origin: 50% 50%; }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__ring .r-draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: ring 2.2s var(--ease-io) 0.35s forwards; }
+    @keyframes ring { to { stroke-dashoffset: 0.72; } }
+  }
+  @media (prefers-reduced-motion: reduce) { .hero__ring .r-draw { stroke-dasharray: 0.28 1; } }
+  .hero__caption { margin-top: 26px; display: grid; gap: 4px; padding-left: 16px; }
+  .hero__caption .serif { font-size: 1.625rem; line-height: 1.15; font-style: italic; color: var(--ink); margin-bottom: 6px; }
+  .hero__caption .serif em { color: var(--accent); }
+  .hero__caption .meta { color: var(--muted); }
+  .hero__caption .meta + .meta { color: var(--faint); }
+  @media (max-width: 960px) { .hero__figure { display: none; } }
+</style>

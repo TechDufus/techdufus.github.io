@@ -1,0 +1,49 @@
+---
+/*
+  Mockup Pro.render.repoCard() → <article class="repo-card">: reads as a GitHub repo at a glance.
+  Head: repo octicon + "owner / name" (stretched link to GitHub) + status chip.
+  Body: summary (or the GitHub description) + optional "why" line.
+  Stats: language dot, stars, forks, license. Foot: "Updated <date>" + "View on GitHub ↗".
+  Accepts a plain RepoMeta or a featured repo (getFeaturedRepos() adds tag/status/summary/why).
+*/
+import { getLanguageColor, type FeaturedRepoMeta, type RepoMeta } from '../../lib/github';
+import Icon from './Icon.astro';
+import { fmtDate, fmtNum } from './format';
+
+type Repo = RepoMeta & Partial<Pick<FeaturedRepoMeta, 'tag' | 'status' | 'summary' | 'why'>>;
+
+interface Props {
+  repo: Repo;
+  /** Show the italic "why I use it" line when the repo has one. */
+  why?: boolean;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { repo, why = true, headingLevel: Title = 'h3' } = Astro.props;
+const description = repo.summary || repo.description;
+---
+<article class="repo-card" data-reveal>
+  <div class="repo-card__head">
+    <Icon name="repo" />
+    <Title class="repo-card__name">
+      <a href={repo.url} target="_blank" rel="noopener"><span class="repo-card__owner">{repo.owner} / </span><strong>{repo.name}</strong></a>
+    </Title>
+    {repo.status && <span class="chip">{repo.status}</span>}
+  </div>
+  {description && <p class="repo-card__desc">{description}</p>}
+  {why && repo.why && <p class="repo-card__why">{repo.why}</p>}
+  <div class="repo-card__stats">
+    {
+      repo.language && (
+        <span><i class="lang-dot" style={`--c:${repo.languageColor ?? getLanguageColor(repo.language) ?? 'var(--faint)'}`} />{repo.language}</span>
+      )
+    }
+    <span title="Stars"><Icon name="star" /><span class="num">{fmtNum(repo.stars)}</span></span>
+    <span title="Forks"><Icon name="fork" /><span class="num">{fmtNum(repo.forks)}</span></span>
+    {repo.license && <span title="License"><Icon name="law" />{repo.license}</span>}
+  </div>
+  <div class="repo-card__foot">
+    <span>{repo.pushedAt ? `Updated ${fmtDate(repo.pushedAt)}` : 'On GitHub'}</span>
+    <span aria-hidden="true">View on GitHub <span class="arrow--ne">↗</span></span>
+  </div>
+</article>

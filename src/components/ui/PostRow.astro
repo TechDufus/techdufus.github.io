@@ -1,0 +1,47 @@
+---
+/*
+  Mockup Pro.render.postRow() → <article class="post-row">. Must sit inside a .post-list.
+  variant 'list' (home/related): long date, tag chips + minutes in __meta.
+  variant 'archive' (blog year groups): day date, filter tag buttons (.post-row__tags > button.chip[data-tag])
+  under the description, minutes only in __meta. The blog page wires the buttons.
+*/
+import type { PostMeta } from '../../lib/content';
+import Chips from './Chips.astro';
+import { delay, fmtDate, isoDate, visibleTags } from './format';
+
+interface Props {
+  post: PostMeta;
+  /** Tag chips to show: false hides them, true = 3, or a count. */
+  showTags?: boolean | number;
+  variant?: 'list' | 'archive';
+  reveal?: boolean;
+  /** Reveal stagger step (--d). */
+  d?: number;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { post, showTags = true, variant = 'list', reveal = variant === 'list', d, headingLevel: Title = 'h3' } = Astro.props;
+const archive = variant === 'archive';
+const tagCount = showTags === false ? 0 : showTags === true ? (archive ? 4 : 3) : showTags;
+const tags = visibleTags(post.tags, tagCount);
+---
+<article class="post-row" data-reveal={reveal ? '' : undefined} style={delay(d)}>
+  <time class="post-row__date" datetime={isoDate(post.date)}>{fmtDate(post.date, archive ? 'day' : 'long')}</time>
+  <div class="post-row__main">
+    <Title class="post-row__title"><a href={post.href}>{post.title}</a></Title>
+    <p class="post-row__desc">{post.description}</p>
+    {
+      archive && tags.length > 0 && (
+        <div class="post-row__tags">
+          {tags.map((tag) => (
+            <button class="chip" type="button" data-tag={tag} aria-pressed="false" aria-label={`Show posts tagged ${tag}`}>{tag}</button>
+          ))}
+        </div>
+      )
+    }
+  </div>
+  <div class="post-row__meta">
+    {!archive && tags.length > 0 && <Chips tags={tags} />}
+    <span class="post-row__mins">{post.minutes} min read</span>
+  </div>
+</article>

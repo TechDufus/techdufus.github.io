@@ -1,0 +1,31 @@
+---
+/*
+  Page-wide SVG paint servers, rendered once by BaseLayout (first child of <body>; <html class="has-duo">).
+  #studio-duo  portrait duotone: a true gradient map, shadows → --duo-dark (#0b1630), highlights → --duo-light (#f4d9a2).
+               Midnight only, so the 9-step, 1.45-gamma tables that the mockup computes at runtime are baked in.
+  #studio-gold the foil gradient for SVG strokes (portrait ring); stops read the --gold-* tokens.
+*/
+const goldStops: [number, string][] = [
+  [0, '--gold-shadow'],
+  [0.16, '--gold-deep'],
+  [0.34, '--gold-light'],
+  [0.45, '--gold-pale'],
+  [0.55, '--gold'],
+  [0.72, '--gold-deep'],
+  [0.86, '--gold-light'],
+  [1, '--gold-deep']
+];
+---
+<svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+  <filter id="studio-duo" color-interpolation-filters="sRGB">
+    <feColorMatrix type="saturate" values="0" />
+    <feComponentTransfer>
+      <feFuncR type="table" tableValues="0.043 0.088 0.166 0.264 0.378 0.505 0.645 0.796 0.957" />
+      <feFuncG type="table" tableValues="0.086 0.124 0.189 0.271 0.366 0.473 0.590 0.716 0.851" />
+      <feFuncB type="table" tableValues="0.188 0.210 0.248 0.296 0.352 0.414 0.483 0.557 0.635" />
+    </feComponentTransfer>
+  </filter>
+  <linearGradient id="studio-gold" x1="0" y1="0" x2="1" y2="1">
+    {goldStops.map(([offset, token]) => <stop offset={offset} style={`stop-color:var(${token})`} />)}
+  </linearGradient>
+</svg>

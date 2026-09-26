@@ -1,95 +1,77 @@
 ---
-import { docsNavigation, primaryNavigation } from '../data/site';
+import { isPlaceholder, primaryCta, primaryNavigation, siteMetadata, visibleNav } from '../data/site';
 
-const pathname = Astro.url.pathname;
+const pathname = Astro.url.pathname.replace(/\/?$/, '/');
+const isActive = (href: string) => {
+  if (href.includes('#')) return false;
+  return href === '/' ? pathname === '/' : pathname.startsWith(href.replace(/\/?$/, '/'));
+};
 
-const routeMatches = (href: string) =>
-  href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
+// Home section each nav item scroll-spies on the homepage (site.ts toggles .is-active).
+const homeSection: Record<string, string> = {
+  '/blog/': 'writing',
+  '/lab/': 'lab',
+  '/app/': 'app',
+  '/#services': 'services',
+  '/about/': 'about'
+};
 
-const docsActive = docsNavigation.some((item) => routeMatches(item.href));
-const docsMenuId = 'docs-menu-popover';
-const supportHref = '/support';
-const supportActive = routeMatches(supportHref);
+const links = visibleNav(primaryNavigation).map((item) => ({
+  ...item,
+  current: isActive(item.href),
+  placeholder: isPlaceholder(item.label),
+  section: homeSection[item.href]
+}));
+const homeCurrent = pathname === '/';
 ---
 
-<header class="sticky top-4 z-40 mb-8 sm:mb-10">
-  <div class="nav-shell" data-scroll-chrome="site-nav">
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <a
-        class="inline-flex items-center rounded-lg border border-line bg-panel px-3 py-2 font-mono text-sm text-signal no-underline transition hover:border-signal/45 hover:text-electric"
-        href="/"
-      >
-        {`{ TechDufus }`}
-      </a>
-
-      <a
-        class:list={[
-          'order-2 inline-flex items-center rounded-full border border-electric/55 bg-electric/25 px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-zinc-100 no-underline transition',
-          'hover:border-electric/80 hover:bg-electric/35 hover:text-white',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-canvas',
-          supportActive && 'border-electric/90 bg-electric/40 text-white',
-          'sm:order-3'
-        ]}
-        href={supportHref}
-        aria-current={supportActive ? 'page' : undefined}
-      >
-        Support
-      </a>
-
-      <nav aria-label="Primary" class="order-3 w-full sm:order-2 sm:w-auto">
-        <ul class="flex flex-wrap items-center gap-1.5 text-sm">
-          {primaryNavigation.map((item) => (
-            <li>
-              <a
-                class:list={[
-                  'nav-link',
-                  routeMatches(item.href) && 'nav-link-active'
-                ]}
-                href={item.href}
-                aria-current={routeMatches(item.href) ? 'page' : undefined}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))}
-
-          <li>
-            <details class="docs-menu">
-              <summary
-                class:list={['nav-link docs-summary', docsActive && 'nav-link-active']}
-                aria-controls={docsMenuId}
-                aria-expanded="false"
-              >
-                Docs
-                <span class="docs-caret" aria-hidden="true">▾</span>
-              </summary>
-              <ul class="docs-popover" id={docsMenuId}>
-                {docsNavigation.map((item) => (
-                  <li>
-                    <a
-                      class:list={[
-                        'docs-popover-link',
-                        routeMatches(item.href) && 'docs-popover-link-active'
-                      ]}
-                      href={item.href}
-                      aria-current={routeMatches(item.href) ? 'page' : undefined}
-                    >
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          </li>
-        </ul>
-      </nav>
+<header data-site-nav>
+  <a class="skip" href="#main">Skip to content</a>
+  <nav class="nav" aria-label="Primary">
+    <div class="wrap nav__inner">
+      <a class="wordmark" href="/" aria-label="TechDufus, home">TechDufus<i>.</i></a>
+      <div class="nav__links">
+        {links.map((item) => (
+          <a
+            class="nav__link"
+            href={item.href}
+            data-section={item.section}
+            aria-current={item.current ? 'page' : undefined}
+          >
+            {item.placeholder ? <span class="ph" title="Placeholder">{item.label}</span> : item.label}
+          </a>
+        ))}
+      </div>
+      <a class="btn btn--primary btn--sm nav__cta" href={primaryCta.href}>{primaryCta.label}</a>
+      <button class="nav__menu" type="button" aria-expanded="false" aria-controls="site-sheet">
+        Menu <span class="bars" aria-hidden="true"></span>
+      </button>
+    </div>
+  </nav>
+  <div class="sheet" id="site-sheet" role="dialog" aria-modal="true" aria-label="Site menu">
+    <div class="sheet__scrim" data-sheet-close></div>
+    <div class="sheet__panel">
+      <div class="sheet__top">
+        <a class="wordmark" href="/" data-sheet-close>TechDufus<i>.</i></a>
+        <button class="icon-btn" type="button" data-sheet-close aria-label="Close menu">
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="sheet__links">
+        <a href="/" aria-current={homeCurrent ? 'page' : undefined} data-sheet-close>Home <small>01</small></a>
+        {links.map((item, i) => (
+          <a href={item.href} aria-current={item.current ? 'page' : undefined} data-sheet-close>
+            {item.placeholder ? <span class="ph" title="Placeholder">{item.label}</span> : item.label}{' '}
+            <small>{String(i + 2).padStart(2, '0')}</small>
+          </a>
+        ))}
+      </div>
+      <div class="sheet__foot">
+        <a class="btn btn--primary btn--lg btn--block" href={primaryCta.href} data-sheet-close>{primaryCta.label}</a>
+        <p class="meta">{siteMetadata.email}</p>
+      </div>
     </div>
   </div>
 </header>
-
-<script>
-  import { initDocsMenus } from '../lib/client/docsMenu';
-  import { initScrollChrome } from '../lib/client/scrollChrome';
-  initDocsMenus();
-  initScrollChrome();
-</script>
