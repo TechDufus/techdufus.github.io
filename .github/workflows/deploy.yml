@@ -12,6 +12,8 @@ on:
       - '.github/**'
       - '!.github/workflows/deploy.yml'
       - 'docker-compose.yml'
+  pull_request:
+    branches: ["master"]
   workflow_dispatch:
 
 permissions:
@@ -41,6 +43,7 @@ jobs:
 
       - name: Setup Pages
         id: pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
 
       - name: Install dependencies
@@ -48,17 +51,22 @@ jobs:
 
       - name: Build Astro site
         run: npm run build
+        env:
+          # Lets src/lib/github.ts read repo stats at build time without hitting anonymous rate limits.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check performance budgets
         run: npm run check:perf
 
       - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
 
   deploy:
     needs: build
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
