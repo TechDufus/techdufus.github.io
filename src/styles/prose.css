@@ -1,5 +1,5 @@
 /* TechDufus · Studio (Midnight) — long-form reading styles, split out of global.css so only the
-   pages that render Markdown load them: blog/[slug].astro, docs/career.astro, docs/setup.astro.
+   pages that render Markdown load them: blog/[slug].astro, docs/setup.astro.
    .prose (post body: headings, lists, quotes, tables, figures, code)  .toc (+ a.is-active)
    .progress (reading progress bar). The .code-block chrome and .tok-* colours stay in global.css
    (the lab page uses them too). */

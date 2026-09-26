@@ -26,7 +26,6 @@
 ## Content locations
 - Blog posts: `src/content/blog/*.md`
 - Setup docs: `src/content/docs/setup.md`
-- Career docs: `src/content/docs/career.md`
 - Site-wide metadata/copy/nav: `src/data/site.ts`
   - `business`: `enabled` flag plus services, pricing, FAQ and legal data
   - `heroCopy` and `topics` (home hero and ticker)

@@ -16,7 +16,6 @@ export async function GET() {
     ...(business.enabled ? [business.appHref] : []),
     '/docs/',
     '/docs/setup/',
-    '/docs/career/',
     '/about/',
     '/contact/',
     '/support/'

@@ -269,7 +269,6 @@ export const footerNavigation: { site: NavItem[] } = {
     { label: 'Services', href: '/#services', business: true },
     { label: 'About', href: '/about/' },
     { label: 'Setup', href: '/docs/setup/' },
-    { label: 'Career', href: '/docs/career/' },
     { label: 'Contact', href: '/contact/' },
     { label: 'Support', href: '/support/' }
   ]
@@ -309,11 +308,9 @@ export const homeCopy = {
 
 export const aboutCopy = {
   intro:
-    "I'm Matthew, but most people online know me as TechDufus. I started in PowerShell, moved into Kubernetes platform work, and now spend most of my time on agentic workflows.",
+    "I'm Matthew, but most people online know me as TechDufus. I started in PowerShell, worked my way through DevOps, full-stack and platform engineering, and now I build with AI and teach others to.",
   body: [
-    'When I found PowerShell, I got bit by the automation bug and realized I could make a career out of being lazy the right way: automate it once and stop doing it by hand. <a href="https://github.com/matthewjdegarmo/AdminToolkit" target="_blank" rel="noopener noreferrer" class="link">AdminToolkit</a> and <a href="https://github.com/matthewjdegarmo/HelpDesk" target="_blank" rel="noopener noreferrer" class="link">HelpDesk</a> were some of the first tools I built.',
-    "That pulled me into DevOps, then a full-stack role where we owned everything from app code to firewalls. That's where I learned to care about the developers using what I build.",
-    'Now I do platform engineering: big Kubernetes clusters, RBAC at scale, air-gapped environments, and a lot of AI agents. This site is where I write down what broke and what held.'
+    'Nobody handed me a career path. Every time I ran out of new things to learn, I found the area I had the least exposure to and switched into it.'
   ]
 };
 
@@ -443,8 +440,8 @@ export const homeProofPoints = [
   {
     label: 'Production Scale',
     value: '200-node AKS + 100TB+ data platform',
-    note: 'Published architecture at Raft Data Platform.',
-    sourceLabel: 'Read the Raft write-up',
+    note: 'The architecture is written up publicly.',
+    sourceLabel: 'Read the write-up',
     sourceHref:
       'https://teamraft.com/resources/insights/secure-low-latency-queries-at-scale-with-raft-data-platform-rdp/'
   },
