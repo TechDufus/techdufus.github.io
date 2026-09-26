@@ -3,18 +3,19 @@
   Page-wide SVG paint servers, rendered once by BaseLayout (first child of <body>; <html class="has-duo">).
   #studio-duo  portrait duotone: a true gradient map, shadows → --duo-dark (#0b1630), highlights → --duo-light (#f4d9a2).
                Midnight only, so the 9-step, 1.45-gamma tables that the mockup computes at runtime are baked in.
-  #studio-gold the foil gradient for SVG strokes (portrait ring); stops read the --gold-* tokens.
+  #studio-gold the gold gradient for SVG strokes (portrait ring): --gold-sheen's warm shape, twice round
+               the ring, so the drawn arc reads lamp-lit; stops read the --gold-* tokens.
   #i-star #i-fork #i-repo #i-law  repeated repo-card icons; Icon.astro renders these as <use href="#i-…">.
 */
 const goldStops: [number, string][] = [
   [0, '--gold-shadow'],
-  [0.16, '--gold-deep'],
-  [0.34, '--gold-light'],
-  [0.45, '--gold-pale'],
-  [0.55, '--gold'],
-  [0.72, '--gold-deep'],
+  [0.14, '--gold-deep'],
+  [0.3, '--gold-light'],
+  [0.4, '--gold-pale'],
+  [0.52, '--gold'],
+  [0.7, '--gold-deep'],
   [0.86, '--gold-light'],
-  [1, '--gold-deep']
+  [1, '--gold']
 ];
 ---
 <svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
