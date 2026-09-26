@@ -9,15 +9,12 @@ import { profileSpotlight } from '../data/site';
     <div class="nf__copy">
       <p class="eyebrow nf__eyebrow" data-reveal>404 · Not found</p>
       <h1 class="display" id="page-title" data-reveal style="--d:1">Well... this link is <em>busted</em>.</h1>
-      <p class="lede" data-reveal style="--d:2">That route does not exist in the current site map. It happens.</p>
+      <p class="lede" data-reveal style="--d:2">It happens.</p>
       <div class="nf__ctas" data-reveal style="--d:3">
         <a class="btn btn--primary btn--lg" href="/">Home <span class="arrow" aria-hidden="true">-&gt;</span></a>
         <a class="btn btn--ghost btn--lg" href="/blog/">Writing</a>
         <a class="btn btn--ghost btn--lg" href="/lab/">Lab</a>
       </div>
-      <p class="nf__more meta" data-reveal style="--d:3">
-        Or try <a class="link link--quiet" href="/docs/">the docs</a> or <a class="link link--quiet" href="/contact/">get in touch</a>.
-      </p>
       <p class="nf__status meta" data-reveal style="--d:4"><span class="dot" aria-hidden="true"></span>{profileSpotlight.status}</p>
     </div>
   </section>
@@ -39,7 +36,6 @@ import { profileSpotlight } from '../data/site';
   .nf .display { max-width: 12ch; }
   .nf .lede { margin-top: 28px; }
   .nf__ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
-  .nf__more { margin-top: 24px; color: var(--muted); }
   .nf__status { display: inline-flex; align-items: center; gap: 8px; margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); }
   .nf__status .dot { background: var(--ok); }
   @media (max-width: 960px) {

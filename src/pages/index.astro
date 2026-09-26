@@ -10,14 +10,11 @@ import SpecList from '../components/ui/SpecList.astro';
 import RepoCard from '../components/ui/RepoCard.astro';
 import Draft from '../components/ui/Draft.astro';
 import ProofPoints from '../components/ui/ProofPoints.astro';
-import Principles from '../components/ui/Principles.astro';
 import EmailCopy from '../components/ui/EmailCopy.astro';
 import SocialChips from '../components/ui/SocialChips.astro';
-import SupportCards from '../components/ui/SupportCards.astro';
 import { delay, fmtDate, fmtNum, isoDate } from '../components/ui/format';
 import {
   aboutCopy,
-  aboutNow,
   business,
   businessCopy,
   featuredReposAsOf,
@@ -84,22 +81,12 @@ const trust = heroCopy.trust.map((item, i) => {
 });
 const secondaryCta = business.enabled ? heroCopy.ctas.waitlist : heroCopy.ctas.lab;
 
-// Lab: the layer diagram's right-hand readouts and which layers home.io declares (lit while the rail is hovered).
-const layerMeta: Record<string, { x?: string; nodes?: number; git?: boolean }> = {
-  Access: { x: 'tailnet' },
-  Services: { x: labSpec.servicesCount },
-  GitOps: { x: 'sync', git: true },
-  Cluster: { nodes: 3, git: true },
-  Hypervisor: { x: 'VMs', git: true },
-  Metal: { x: 'rack' }
-};
 const gitopsName = labSpec.gitops.repo.split('/').pop() ?? labSpec.gitops.repo;
 const hardwareRows = labSpec.hardware.map((row) => ({ k: row.role, v: row.name, note: row.spec, href: row.href }));
 const latestChange = labSpec.changelog[0];
 const [changeFrom, changeTo] = latestChange ? latestChange.title.split(/\s*->\s*/) : [];
 
 const aboutQuote = homeOperatingStyle[0];
-const aboutUpdated = aboutNow.timeframe;
 
 // #app / #services styles, emitted only when the business flag renders those sections.
 const businessCss = [
@@ -241,8 +228,7 @@ const businessCss = [
         index={sectionIndex('writing')}
         label="Writing"
         titleId="writing-title"
-        title="What broke, what held, and what I'd <em>change</em>."
-        lede="Postmortems without the victory-lap fluff, setup docs I keep updating whenever I break my own stack, and agent workflows with explicit ownership, review and rollback."
+        title="Latest <em>writing</em>."
       >
         <a slot="aside" class="link link--quiet" href="/blog/">All {stats.count} posts</a>
       </SectionHead>
@@ -264,8 +250,8 @@ const businessCss = [
         index={sectionIndex('lab')}
         label="The lab"
         titleId="lab-title"
-        title="If I lose a node, I rebuild it <em>from git</em>."
-        lede="My homelab is built for repeatability, not hand-tuned snowflakes. I test ideas here first so production gets a cleaner version."
+        title="The <em>lab</em>."
+        lede="One server, three Talos nodes, all of it in git. Mid-rebuild."
       >
         <span slot="aside" class="badge badge--live"><i class="dot" aria-hidden="true"></i>{labSpec.status}</span>
       </SectionHead>
@@ -284,11 +270,11 @@ const businessCss = [
       </p>
 
       <div class="lab__grid">
+        <div data-reveal>
+          <h3 class="about__h">Hardware readout</h3>
+          <SpecList rows={hardwareRows} />
+        </div>
         <div class="lab__side">
-          <div data-reveal>
-            <h3 class="about__h">Hardware readout</h3>
-            <SpecList rows={hardwareRows} />
-          </div>
           {
             latestChange && (
               <div class="changelog" data-reveal style="--d:1">
@@ -306,46 +292,11 @@ const businessCss = [
                     </>
                   )}
                 </p>
-                <p class="changelog__note">Latest change.{latestChange.note && ` ${latestChange.note}`}</p>
               </div>
             )
           }
           <a class="btn btn--ghost" href="/lab/" data-reveal style="--d:2">Full lab <span class="arrow" aria-hidden="true">→</span></a>
         </div>
-
-        <figure class="diagram" data-reveal style="--d:1" aria-labelledby="diagram-cap">
-          <div class="diagram__layers">
-            {
-              labSpec.stack.map((layer) => {
-                const meta = layerMeta[layer.layer] ?? {};
-                return (
-                  <div class="layer" data-git={meta.git ? '' : undefined}>
-                    <span class="layer__k">{layer.layer}</span>
-                    <span class="layer__v">{layer.name}<small>{layer.note}</small></span>
-                    {meta.nodes ? (
-                      <span class="layer__x nodes" role="img" aria-label={`${meta.nodes} nodes`}>
-                        {Array.from({ length: meta.nodes }, () => <i />)}
-                      </span>
-                    ) : (
-                      meta.x && <span class="layer__x">{meta.x}</span>
-                    )}
-                  </div>
-                );
-              })
-            }
-          </div>
-          <div class="diagram__rail" aria-hidden="true">
-            <div class="rail__src"><strong>{gitopsName}</strong>git repo</div>
-            <div class="rail__body">
-              <span class="rail__line"><span class="rail__pulse"></span></span>
-              <span class="rail__label"><b>Declared</b>{labSpec.gitops.tools.map((tool, i) => <>{i > 0 && <br />}{tool}</>)}</span>
-            </div>
-          </div>
-          <figcaption class="diagram__foot" id="diagram-cap">
-            <span>Homelab architecture, top to bottom</span>
-            <a class="link link--quiet" href={labSpec.gitops.href} target="_blank" rel="noopener">{labSpec.gitops.repo} ↗</a>
-          </figcaption>
-        </figure>
       </div>
     </div>
   </section>
@@ -358,11 +309,10 @@ const businessCss = [
         label="Open source"
         aside={reposNote}
         titleId="work-title"
-        title="Tools I use every day, <em>in public</em>."
-        lede={`Open-source tooling tied directly to my workflow. <strong>${fmtNum(totalStars)} stars across ${repos.length} repos</strong>, and every one of them is part of how I actually work.`}
+        title="Open <em>source</em>."
       />
       <div class="grid grid--2">
-        {repos.map((repo) => <RepoCard repo={repo} />)}
+        {repos.map((repo) => <RepoCard repo={repo} why={false} />)}
       </div>
       <div class="work__foot">
         <a class="link link--quiet" href="https://github.com/TechDufus" target="_blank" rel="noopener">More on github.com/TechDufus ↗</a>
@@ -437,51 +387,36 @@ const businessCss = [
   <!-- ============ ABOUT ============ -->
   <section id="about" class="section" aria-labelledby="about-title">
     <div class="wrap">
-      <SectionHead bare index={sectionIndex('about')} label="About">
-        <span slot="aside" class="meta hide-sm">{aboutUpdated}</span>
-      </SectionHead>
+      <SectionHead bare index={sectionIndex('about')} label="About" />
       <div class="split">
         <div class="about__bio">
-          <h2 class="h2 sec-head__title" id="about-title" data-reveal style="margin-bottom:32px">Automate it once, then <em>stop</em> doing it by hand.</h2>
+          <h2 class="h2 sec-head__title" id="about-title" data-reveal style="margin-bottom:32px">Hello, I'm <em>TechDufus</em>.</h2>
           <p class="first" data-reveal>{aboutCopy.intro}</p>
-          <p data-reveal>When I found PowerShell, I got bit by the automation bug and realized I could make a career out of being lazy in the best way. That pulled me into DevOps, then a full-stack role where we owned everything from app code to firewalls, and then into platform engineering.</p>
-          <p data-reveal>Now I don't just own CI/CD, I own the platform it deploys to: large Kubernetes clusters, RBAC at scale, and high-security air-gapped environments, while pushing AI at the edge of what agentic engineering can do.</p>
         </div>
         <div class="about__side">
           {
             aboutQuote && (
               <div class="about__quote" data-reveal style="--d:1">
                 <p class="quote">{aboutQuote}</p>
-                <p class="meta">The rule I keep coming back to.</p>
               </div>
             )
           }
-          <a class="btn btn--ghost" href="/about/" data-reveal style="--d:2">The long version <span class="arrow" aria-hidden="true">→</span></a>
+          <a class="btn btn--ghost" href="/about/" data-reveal style="--d:2">More about me <span class="arrow" aria-hidden="true">→</span></a>
         </div>
       </div>
       <ProofPoints />
-      <Principles />
     </div>
   </section>
 
   <!-- ============ CONTACT ============ -->
   <section id="contact" class="section" aria-labelledby="contact-title">
     <div class="wrap">
-      <SectionHead bare index={sectionIndex('contact')} label="Support & contact" />
-      <div class="split">
-        <div>
-          <h2 class="h2 sec-head__title" id="contact-title" data-reveal>Say <em>hey</em>.</h2>
-          <p class="lede" style="margin-top:20px;--d:1" data-reveal>Questions, ideas, work, or a good DNS horror story. Email is the fastest way to reach me.</p>
-          <EmailCopy d={2} />
-          <SocialChips d={3} />
-          <SupportCards d={4} />
-        </div>
-        <aside class="card card--pad contact__more" data-reveal style="--d:2" aria-labelledby="contact-more-title">
-          <h3 class="h4" id="contact-more-title">Everything in one place</h3>
-          <p>The contact page has the email, every place I post, and the ways to support the writing and the open-source work.</p>
-          <a class="btn btn--ghost" href="/contact/">Contact page <span class="arrow" aria-hidden="true">→</span></a>
-        </aside>
-      </div>
+      <SectionHead bare index={sectionIndex('contact')} label="Contact" />
+      <h2 class="h2 sec-head__title" id="contact-title" data-reveal>Say <em>hey</em>.</h2>
+      <p class="lede" style="margin-top:20px;--d:1" data-reveal>Questions, ideas, work, or a good DNS horror story. Email's fastest.</p>
+      <EmailCopy d={2} />
+      <SocialChips d={3} />
+      <p class="contact__support" data-reveal style="--d:4">Like the notes? <a class="link link--quiet" href="/support/">You can support them <span class="arrow" aria-hidden="true">→</span></a></p>
     </div>
   </section>
 
@@ -489,7 +424,7 @@ const businessCss = [
 
   <style is:global>
     /* Page styles from design/pro-studio/index.html, global under the .pg-home root (no data-astro-cid attributes).
-       The hero figure/ring, proof points, principles and contact pieces ship with their components.
+       The hero figure/ring, proof points and contact pieces ship with their components.
        #app / #services styles are `businessCss` above, emitted only with the business flag. */
 
     /* ---------- Hero ---------- */
@@ -535,54 +470,20 @@ const businessCss = [
     .pg-home .changelog__what { font-family: var(--font-display); font-size: 1.375rem; line-height: 1.2; }
     .pg-home .changelog__what a::after { content: ""; position: absolute; inset: 0; }
     .pg-home .changelog__what .to { color: var(--accent); font-style: italic; }
-    .pg-home .changelog__note { color: var(--muted); font-size: 0.9rem; }
-
-    .pg-home .diagram { position: relative; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); padding: clamp(18px, 2.4vw, 28px); display: grid; grid-template-columns: minmax(0, 1fr) 132px; gap: 0 20px; }
-    .pg-home .diagram__layers { display: grid; gap: 8px; }
-    .pg-home .layer { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg-deep); transition: border-color var(--t-2) ease, background-color var(--t-2) ease; }
-    /* Hovering the home.io rail lights the layers it declares (mockup index.html). */
-    .pg-home .layer:hover, .pg-home .diagram:has(.diagram__rail:hover) [data-git] { border-color: var(--accent-line); background: var(--surface-lit); }
-    .pg-home .layer__k { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
-    .pg-home .layer__v { color: var(--ink); font-size: 0.975rem; line-height: 1.35; }
-    .pg-home .layer__v small { display: block; color: var(--muted); font-size: 0.84rem; margin-top: 2px; }
-    .pg-home .layer__x { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
-    .pg-home .nodes { display: inline-flex; gap: 6px; }
-    .pg-home .nodes i { width: 10px; height: 10px; border-radius: 3px; border: 1px solid var(--accent-line); background: var(--accent-soft); }
-    .pg-home .diagram__rail { position: relative; display: grid; grid-template-rows: auto 1fr; padding-top: 4px; }
-    .pg-home .rail__src { width: 100%; text-align: center; padding: 10px 8px; border-radius: 10px; border: 1px dashed var(--line-3); font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-2); line-height: 1.4; }
-    .pg-home .rail__src strong { color: var(--accent-hi); font-weight: 500; display: block; }
-    .pg-home .rail__body { display: flex; align-items: center; gap: 14px; margin-top: 8px; padding-left: 22px; }
-    .pg-home .rail__line { position: relative; align-self: stretch; width: 1px; flex: none; background: linear-gradient(var(--accent-line), var(--line)); overflow: hidden; }
-    .pg-home .rail__label { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--muted); line-height: 1.7; }
-    .pg-home .rail__label b { display: block; font-weight: 500; color: var(--faint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; font-size: 0.625rem; }
-    @media (prefers-reduced-motion: no-preference) {
-      .pg-home .rail__pulse { position: absolute; left: 0; width: 1px; height: 36px; background: linear-gradient(transparent, var(--accent)); animation: flow 3.6s var(--ease-io) infinite; }
-      @keyframes flow { 0% { top: -28px; opacity: 0; } 20% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-    }
-    .pg-home .diagram__foot { grid-column: 1 / -1; margin-top: 16px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 0.75rem; color: var(--faint); }
     @media (max-width: 960px) { .pg-home .lab__grid { grid-template-columns: minmax(0, 1fr); } }
-    @media (max-width: 640px) {
-      .pg-home .diagram { grid-template-columns: minmax(0, 1fr); }
-      .pg-home .diagram__rail { display: none; }
-      .pg-home .layer { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; }
-      .pg-home .layer__k { grid-column: 1 / -1; }
-      .pg-home .lab__side .spec > div { grid-template-columns: 92px minmax(0, 1fr); }
-    }
+    @media (max-width: 640px) { .pg-home .lab__grid .spec > div { grid-template-columns: 92px minmax(0, 1fr); } }
 
     /* ---------- Work ---------- */
     .pg-home .work__foot { margin-top: 28px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 
     /* ---------- About ---------- */
-    .pg-home .about__bio > p + p { margin-top: 1.1em; }
     .pg-home .about__bio > p { color: var(--ink-2); font-size: 1.0625rem; max-width: 60ch; }
     .pg-home .about__bio .first { font-size: var(--fs-md); color: var(--ink); }
     .pg-home .about__side { display: grid; gap: 28px; justify-items: start; }
     .pg-home .about__quote { padding-top: 28px; border-top: 1px solid var(--line); }
-    .pg-home .about__quote .meta { margin-top: 12px; }
     @media (max-width: 960px) { .pg-home .about__side { margin-top: 40px; } }
 
     /* ---------- Contact ---------- */
-    .pg-home .contact__more { display: grid; gap: 14px; justify-items: start; }
-    .pg-home .contact__more p { color: var(--muted); }
+    .pg-home .contact__support { margin-top: 28px; color: var(--muted); }
   </style>
 </BaseLayout>

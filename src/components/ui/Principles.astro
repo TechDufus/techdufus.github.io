@@ -25,7 +25,7 @@ const {
 } = Astro.props;
 const Item = Heading === 'h2' ? 'h3' : 'h4';
 ---
-<Heading class="about__h operate__h" data-reveal="">{heading}{sub && <>{' '}<span>· {sub}</span></>}</Heading>
+{heading && <Heading class="about__h operate__h" data-reveal="">{heading}{sub && <>{' '}<span>· {sub}</span></>}</Heading>}
 <ul class="operate">
   {
     items.map((item, i) => (

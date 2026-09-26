@@ -278,11 +278,6 @@ export const footerNavigation: { site: NavItem[] } = {
 export const visibleNav = (items: NavItem[]): NavItem[] =>
   items.filter((item) => !item.business || business.enabled);
 
-export const docsNavigation = [
-  { label: 'Setup', href: '/docs/setup' },
-  { label: 'Career', href: '/docs/career' }
-];
-
 export const socialLinks = [
   { label: 'GitHub', href: 'https://github.com/TechDufus' },
   { label: 'LinkedIn', href: 'https://linkedin.com/in/techdufus' },
@@ -296,95 +291,43 @@ export const supportLinks = [
   {
     label: 'Buy Me a Coffee',
     href: 'https://buymeacoffee.com/techdufus',
-    details: 'One-time or monthly support for writing and tooling.',
-    lane: '/coffee'
+    details: 'One-time or monthly.'
   },
   {
     label: 'GitHub Sponsors',
     href: 'https://github.com/sponsors/techdufus',
-    details: 'Monthly support while I publish open source and platform notes.',
-    lane: '/sponsors'
+    details: 'Monthly, through GitHub.'
   }
 ];
 
 export const homeCopy = {
-  eyebrow: 'Hello from the command line',
   headline: 'I break things, fix them, and write down what actually worked.',
   metaDescription:
-    'TechDufus writes about platform engineering, homelab rebuilds, and agent workflows that hold up in the real world.',
-  description:
-    'This is my digital garden for incident fallout, homelab experiments, setup docs, and AI workflow lessons that survived real use.',
-  highlights: [
-    'Postmortems without the victory-lap fluff',
-    'Setup docs I keep updating whenever I break my own stack',
-    'Agent workflows with explicit ownership, review, and rollback'
-  ]
+    'TechDufus writes about platform engineering, homelab rebuilds, and agent workflows that hold up in the real world.'
 };
 
 export const aboutCopy = {
   intro:
-    "I'm Matthew, but most people online know me as TechDufus. I started in PowerShell, then moved into Kubernetes platform work, and now I spend a lot of time sharpening agentic workflows.",
+    "I'm Matthew, but most people online know me as TechDufus. I started in PowerShell, moved into Kubernetes platform work, and now spend most of my time on agentic workflows.",
   body: [
-    'When I found PowerShell, I got bit by the automation bug and realized I could make a career out of being lazy in the best way: automate it once and stop doing it by hand. <a href="https://github.com/matthewjdegarmo/AdminToolkit" target="_blank" rel="noopener noreferrer" class="font-medium text-signal underline decoration-signal/60 underline-offset-2 hover:text-electric">AdminToolkit</a> and <a href="https://github.com/matthewjdegarmo/HelpDesk" target="_blank" rel="noopener noreferrer" class="font-medium text-signal underline decoration-signal/60 underline-offset-2 hover:text-electric">HelpDesk</a> were two of the first tools I built for day-to-day work.',
-    'That push toward automation pulled me into the DevOps world, which came with a whole new toolchain and a whole new set of problems to solve across Terraform, GitOps, and Kubernetes.',
-    'As a DevOps engineer, I realized one of my biggest gaps was empathy for the developer workflows I was shaping. I was blessed to step into a full-stack role where we owned the entire microservices stack end to end: app code, tests, CI/CD, container registry, cloud Kubernetes, security controls, firewalls, backups, and VPN.',
-    'As I grew, that pulled me into platform engineering, where I do not just own CI/CD, I own the platform it deploys to. That means large Kubernetes clusters, RBAC at scale, and high-security air-gapped environments, while pushing AI at the edge of what agentic engineering can do.',
-    'This site is where I keep notes while details are fresh: what broke, what held, and what I would change next round.'
+    'When I found PowerShell, I got bit by the automation bug and realized I could make a career out of being lazy the right way: automate it once and stop doing it by hand. <a href="https://github.com/matthewjdegarmo/AdminToolkit" target="_blank" rel="noopener noreferrer" class="link">AdminToolkit</a> and <a href="https://github.com/matthewjdegarmo/HelpDesk" target="_blank" rel="noopener noreferrer" class="link">HelpDesk</a> were some of the first tools I built.',
+    "That pulled me into DevOps, then a full-stack role where we owned everything from app code to firewalls. That's where I learned to care about the developers using what I build.",
+    'Now I do platform engineering: big Kubernetes clusters, RBAC at scale, air-gapped environments, and a lot of AI agents. This site is where I write down what broke and what held.'
   ]
 };
 
 export const aboutNow = {
   timeframe: 'Updated February 26, 2026',
   primaryFocus:
-    'Right now I split my cycles between AI inference and GPU workload operations in Kubernetes, plus pushing Codex and agentic workflows until the rough edges show up.',
-  activeTracks: [
-    {
-      title: 'Pushing Agentic Limits',
-      detail:
-        'I keep pushing agentic engineering to the edge to ship high-quality outcomes.'
-    },
-    {
-      title: 'Homelab Proving Ground',
-      detail:
-        'I test limits in my homelab because I like learning, tinkering, and figuring things out as I go.'
-    },
-    {
-      title: 'Build Notes In Public',
-      detail:
-        'If something breaks, I write the runbook before I forget.'
-    },
-    {
-      title: 'AI Infra Feedback Loops',
-      detail:
-        'I am researching safer AI-assisted infrastructure workflows with pre-commit risk checks and stronger delivery guardrails.'
-    }
-  ]
+    'AI inference and GPU workloads on Kubernetes, and pushing Codex and Claude Code until the rough edges show.'
 };
 
 export const aboutHowIOperate = {
-  intro:
-    'How I keep speed without losing control.',
   items: [
-    {
-      title: 'Reproducible By Default',
-      detail:
-        'I treat environments as code. If I can hand Terraform a fresh Proxmox box and rebuild the stack, I trust it.'
-    },
-    {
-      title: 'Automate Early',
-      detail:
-        'If I cannot automate something from the start, I usually do not keep investing in it. One-off steps drift fast.'
-    },
-    {
-      title: 'Fast Feedback, Guardrails On',
-      detail:
-        'I move fast with short loops, but risky changes still go through review rails, rollback planning, and verification.'
-    },
-    {
-      title: 'No Tribal-Knowledge Ops',
-      detail:
-        "Any change that only lives in someone's memory is high risk. I prefer scripted workflows and written runbooks that survive handoffs."
-    }
+    { title: 'Reproducible by default', detail: 'If Terraform can rebuild it from a fresh box, I trust it.' },
+    { title: 'Automate early', detail: 'One-off steps drift fast.' },
+    { title: 'Fast, with guardrails', detail: 'Risky changes still get review and a rollback plan.' },
+    { title: 'Write it down', detail: "If it only lives in someone's head, it's a risk." }
   ]
 };
 
@@ -495,12 +438,6 @@ export const featuredRepos: FeaturedRepo[] = [
   }
 ];
 
-export const homeRepoLinks = [
-  { name: 'oh-my-claude', url: 'https://github.com/TechDufus/oh-my-claude' },
-  { name: 'openkanban', url: 'https://github.com/TechDufus/openkanban' },
-  { name: 'dotfiles', url: 'https://github.com/TechDufus/dotfiles' }
-];
-
 export const homeProofPoints = [
   {
     label: 'Production Scale',
@@ -536,42 +473,12 @@ export const externalReferences = [
   }
 ];
 
-export const homeOperatingStyle = [
-  'If I repeat something twice, I script it on the third pass.',
-  'I like workflows that still make sense when I am tired.',
-  'AI helps me move faster, but I still own every risky change.'
-];
-
-export const careerHighlights = [
-  {
-    title: 'Current lane',
-    body: 'Senior DevSecOps Engineer at Raft. Shipping secure platform capabilities across high-security environments.'
-  },
-  {
-    title: 'Platform depth',
-    body: 'Kubernetes across OpenShift, AKS, EKS, GKE, RKE2, plus local Kind/k3s for fast validation before bigger rollouts.'
-  },
-  {
-    title: 'Delivery style',
-    body: 'GitOps-first delivery with ArgoCD, Terraform/Terragrunt automation, and review rails that keep ownership clear.'
-  },
-  {
-    title: 'Where it started',
-    body: 'PowerShell roots: AdminToolkit, HelpDesk, and a lot of script-driven cleanup in regulated environments.'
-  }
-];
+export const homeOperatingStyle = ['If I repeat something twice, I script it on the third pass.'];
 
 export const profileSpotlight = {
   photo: '/img/profile/techdufus.webp',
-  photoAlt: 'Portrait of TechDufus',
-  photoWidth: 1122,
-  photoHeight: 1122,
   nickname: 'You can call me Dufus.',
-  handle: '@TechDufus',
-  status: 'Status: probably fighting DNS somewhere.',
-  introTitle: "Hello, I'm TechDufus.",
-  intro:
-    'I build platform systems, tinker in my homelab, and share what actually worked.'
+  status: 'Status: probably fighting DNS somewhere.'
 };
 
 export type TrustItem = { value: string; label: string; href?: string; accent?: string };
@@ -597,7 +504,7 @@ export const heroCopy: {
   eyebrow: 'Hello from the command line',
   headline: 'I break things, fix them, and write down what actually worked.',
   accentWord: 'actually',
-  lede: 'Platform engineer by day, homelab tinkerer by night. I build Kubernetes platforms for high-security environments, push agentic workflows until the rough edges show, and keep the notes here.',
+  lede: 'Platform engineering notes from a guy who lives in tmux. Real incidents, homelab rebuilds, and AI agent experiments.',
   // Values in {braces} are computed by the page (post count, first year, live stars); fill them with fillCopy().
   trust: [
     { value: '{posts}', label: 'posts since {firstYear}' },
@@ -618,22 +525,18 @@ export const heroCopy: {
 /** Ticker topics: things I actually write about. */
 export const topics: string[] = [
   'Kubernetes',
-  'Homelab rebuilds',
-  'Agent workflows',
+  'Homelab',
+  'AI agents',
   'GitOps',
   'Talos',
-  'Claude Code',
   'Terraform',
-  'Tailscale',
-  'Incident notes',
   'PowerShell',
-  'Obsidian',
-  'Go'
+  'Incident notes'
 ];
 
-export type LabSpecRow = { k: string; v: string; href?: string; note?: string };
+type LabSpecRow = { k: string; v: string; href?: string; note?: string };
 
-export type LabPhoto = { src: string; alt: string; width: number; height: number; caption?: string };
+type LabPhoto = { src: string; alt: string; width: number; height: number; caption?: string };
 
 /**
  * The /lab/ page. Every fact comes from src/content/docs/setup.md, plus the
@@ -647,45 +550,29 @@ export const labSpec: {
   lede: string;
   setupHref: string;
   hardware: { role: string; name: string; spec?: string; href?: string }[];
-  stack: { layer: string; name: string; note: string }[];
-  services: { name: string; note?: string }[];
+  services: { name: string; note: string }[];
   servicesCount: '25+';
-  changelog: {
-    date: string;
-    title: string;
-    href?: string;
-    note?: string;
-    before?: string[];
-    after?: string[];
-  }[];
+  changelog: { date: string; title: string; href?: string; note?: string }[];
   workstation: {
     host: string;
     role: string;
     specs: LabSpecRow[];
-    keyboard: { name: string; layout: string; href: string; configHref: string; note: string };
+    keyboard: { name: string; layout: string; configHref: string };
     terminalStack: string[];
-    photos: LabPhoto[];
-    display: string;
-    peripherals: LabSpecRow[];
-    laptops: { name: string; detail?: string; href: string }[];
-    tools: LabSpecRow[];
-    windowing: string;
-    agents: LabSpecRow[];
-    screenshots: LabPhoto[];
+    photo: LabPhoto;
   };
   gitops: {
     repo: 'TechDufus/home.io';
     href: string;
     tools: string[];
     motto: 'If I lose a node, I rebuild from git.';
-    rebuildPath: string[];
   };
 } = {
   lastRevised: 'Feb 2026',
   lastRevisedIso: '2026-02',
   status: 'Rebuild in progress',
-  headline: 'The <em>lab</em>, in full.',
-  lede: 'My single source of truth for what I run every day. I keep it practical and update it when I actually change something. The goal: fast workflow, repeatable rebuilds, and less guesswork when things break.',
+  headline: 'The <em>lab</em>.',
+  lede: "What's running at home right now. It's mid-rebuild, so expect this to change.",
   setupHref: '/docs/setup/',
   hardware: [
     { role: 'Compute', name: 'Dell PowerEdge R720xd', spec: '40 threads · 256GB ECC RAM' },
@@ -693,19 +580,11 @@ export const labSpec: {
     { role: 'Storage', name: 'UNAS Pro 8' },
     { role: 'Edge', name: 'Raspberry Pi 4B', spec: '8GB' }
   ],
-  stack: [
-    { layer: 'Access', name: 'Tailscale Operator', note: 'Services exposed to the tailnet, declared in git' },
-    { layer: 'Services', name: 'Immich · dashboards · runners', note: 'Self-hosted runners and an observability stack' },
-    { layer: 'GitOps', name: 'ArgoCD', note: 'Reconciles the cluster from home.io' },
-    { layer: 'Cluster', name: 'Talos Kubernetes', note: '3 nodes, immutable OS' },
-    { layer: 'Hypervisor', name: 'Proxmox VE', note: 'Provisioned with Terraform + Ansible' },
-    { layer: 'Metal', name: 'R720xd · UNAS Pro 8 · UniFi', note: 'Plus a Raspberry Pi 4B at the edge' }
-  ],
   services: [
-    { name: 'Immich', note: 'Self-hosted photo and video library, private to my tailnet.' },
-    { name: 'Dashboards', note: 'Also private to the tailnet. Nothing here is public unless I say so.' },
-    { name: 'Self-hosted runners', note: 'Runners on my own hardware, declared like every other workload.' },
-    { name: 'Observability stack', note: "So when something breaks, I'm reading data instead of guessing." }
+    { name: 'Immich', note: 'Self-hosted photo and video library.' },
+    { name: 'Dashboards', note: 'Lab dashboards, private to my tailnet.' },
+    { name: 'Self-hosted runners', note: 'CI runners on my own hardware.' },
+    { name: 'Observability stack', note: 'So I can see what broke before I start guessing.' }
   ],
   servicesCount: '25+',
   changelog: [
@@ -713,143 +592,41 @@ export const labSpec: {
       date: '2026-02-20',
       title: 'Cloudflare Tunnels → Tailscale Operator',
       href: '/blog/i-deleted-my-cloudflare-tunnels-tailscale-operator-homelab-k8s/',
-      note: 'I replaced Cloudflare Tunnels with the Tailscale Kubernetes Operator and went from dashboard-heavy setup to GitOps-native service exposure.',
-      before: [
-        'Manual tunnel configuration per service',
-        'GitHub OAuth + email filtering for access',
-        'Every new service: 15+ minutes of clicking'
-      ],
-      after: [
-        'One LoadBalancer Service manifest per service',
-        'User-based ACLs through Tailscale',
-        'Every new service: one YAML file, push to git, done'
-      ]
+      note: 'Swapped Cloudflare Tunnels for the Tailscale Kubernetes Operator, so a new service is one YAML file in git.'
     },
     {
       date: '2025-06-30',
       title: 'Talos Kubernetes on Proxmox, with Terraform',
       href: '/blog/building-a-talos-kubernetes-homelab-on-proxmox-with-terraform/',
-      note: 'An immutable, Kubernetes-only OS on the Proxmox host, provisioned end to end with Terraform. The cluster layer on this page.'
+      note: 'An immutable, Kubernetes-only OS on Proxmox, built end to end with Terraform.'
     }
   ],
   workstation: {
     host: 'Sherlock',
-    role: 'primary desktop · custom build · Ubuntu Linux',
+    role: 'custom build, Ubuntu',
     specs: [
-      { k: 'CPU', v: 'AMD Ryzen 9 5950X', note: '16-core', href: 'https://a.co/d/4pwKHpI' },
-      {
-        k: 'GPU',
-        v: 'AORUS GeForce RTX 3080 MASTER',
-        note: '10G',
-        href: 'https://www.gigabyte.com/Graphics-Card/GV-N3080AORUS-M-10GD-rev-30#kf'
-      },
-      { k: 'RAM', v: 'G.SKILL Trident Z Neo', note: '64GB', href: 'https://a.co/d/iHfLS4z' },
-      { k: 'Board', v: 'ASUS ROG Crosshair VIII Dark Hero', href: 'https://a.co/d/hjINQ4h' },
-      { k: 'Cooler', v: 'ASUS ROG Ryujin 240 AIO', href: 'https://a.co/d/fmJkpsk' },
-      { k: 'Case', v: 'Lian Li O11D Mini', href: 'https://a.co/d/fEGMYYr' },
-      { k: 'Fans', v: 'Lian Li UNI Fan SL 120', href: 'https://a.co/d/5ZA5JIP' },
-      { k: 'Storage', v: 'Samsung 980 PRO NVMe', note: '1TB + 500GB', href: 'https://a.co/d/6b3r6GJ' },
-      { k: 'PSU', v: 'Cooler Master V850 SFX Gold', href: 'https://a.co/d/7YxFnKy' }
+      { k: 'CPU', v: 'Ryzen 9 5950X', href: 'https://a.co/d/4pwKHpI' },
+      { k: 'GPU', v: 'RTX 3080', href: 'https://www.gigabyte.com/Graphics-Card/GV-N3080AORUS-M-10GD-rev-30#kf' },
+      { k: 'RAM', v: '64GB', href: 'https://a.co/d/iHfLS4z' }
     ],
     keyboard: {
       name: 'ZSA Moonlander',
       layout: 'Dvorak',
-      href: 'https://www.zsa.io/moonlander',
-      configHref: 'https://configure.zsa.io/moonlander/layouts/j6X5Z/latest/0',
-      note: "Split, columnar, and on a layout most people can't type on. The full layout is public if you want to steal it."
+      configHref: 'https://configure.zsa.io/moonlander/layouts/j6X5Z/latest/0'
     },
     terminalStack: ['Ghostty', 'sesh', 'tmux', 'Neovim'],
-    photos: [
-      {
-        src: '/img/setup/setup-sherlock-desktop.jpg',
-        alt: "Sherlock's desk: a wide monitor full of terminal and editor panes, a RØDE microphone on a boom arm, and the ZSA Moonlander split keyboard with a Logitech mouse between the halves.",
-        width: 2400,
-        height: 1639,
-        caption: 'Sherlock at the desk · Moonlander front and centre'
-      }
-    ],
-    display: 'A single 4K 60Hz monitor',
-    peripherals: [
-      { k: 'Mouse', v: 'Logitech MX Master 3' },
-      { k: 'Mic', v: 'Rode NT-USB+', href: 'https://rode.com/en-us/microphones/usb/nt-usb-plus' },
-      {
-        k: 'Webcams',
-        v: 'Logitech C925E',
-        href: 'https://www.logitech.com/en-us/products/webcams/c925e-business-webcam.960-001075.html'
-      },
-      {
-        k: 'Webcams',
-        v: 'Logitech C922',
-        href: 'https://www.logitech.com/en-us/products/webcams/c922-pro-stream-webcam.html'
-      },
-      {
-        k: 'Headphones',
-        v: 'Sony WH-1000XM5',
-        href: 'https://electronics.sony.com/audio/headphones/headband/p/wh1000xm5-b'
-      },
-      { k: 'Speakers', v: 'Creative T100', href: 'https://us.creative.com/p/speakers/creative-t100' }
-    ],
-    laptops: [
-      { name: 'M3 MacBook Pro', detail: '14-inch, Nov 2023', href: 'https://support.apple.com/en-us/117735' },
-      { name: 'Intel MacBook Pro', detail: 'Retina, 15-inch, Mid 2015', href: 'https://support.apple.com/en-us/111955' },
-      { name: 'HP mt46 Mobile Thin Client', href: 'https://www.productindetail.com/pn/hp-mobile-thin-client-mt46' }
-    ],
-    tools: [
-      { k: 'Terminal', v: 'Ghostty', href: 'https://ghostty.org/' },
-      { k: 'Session manager', v: 'sesh', href: 'https://github.com/joshmedeski/sesh' },
-      { k: 'Multiplexer', v: 'tmux', note: 'resurrect + continuum' },
-      { k: 'Editor', v: 'Neovim', note: 'LSP, Treesitter, Telescope', href: 'https://neovim.io/' },
-      { k: 'Shell', v: 'zsh + powerlevel10k', note: 'custom functions for git/k8s/remote edit workflows' },
-      { k: 'Infra', v: 'Terraform, Terragrunt, Helm, kubectl, cloud CLIs' }
-    ],
-    windowing:
-      'A cell-based layout with summon keys, not traditional manual tiling. AwesomeWM on Linux, Hammerspoon on macOS. Same mental model across both.',
-    agents: [
-      { k: 'Codex', v: 'Codex' },
-      { k: 'Claude Code', v: 'Claude Code', note: 'custom hooks and status integration in tmux' },
-      {
-        k: 'oh-my-claude',
-        v: 'oh-my-claude',
-        note: 'sane defaults and repeatable workflows',
-        href: 'https://github.com/TechDufus/oh-my-claude'
-      },
-      {
-        k: 'openkanban',
-        v: 'openkanban',
-        note: 'tracking parallel agent sessions',
-        href: 'https://github.com/TechDufus/openkanban'
-      },
-      { k: 'MCP servers', v: 'MCP servers', note: 'browser checks, docs, context plumbing' }
-    ],
-    screenshots: [
-      {
-        src: '/img/setup/tmux-sesh-picker.png',
-        alt: 'sesh picker: an fzf interface with keybind hints and a list of sessions',
-        width: 937,
-        height: 241,
-        caption: '<prefix>-o · the sesh picker'
-      },
-      {
-        src: '/img/setup/tmux-statusline-information.png',
-        alt: 'tmux status bar showing session name, directory, window tabs, Claude status, and an online indicator',
-        width: 1431,
-        height: 83,
-        caption: 'tmux status line · session, directory, windows, Claude status'
-      },
-      {
-        src: '/img/setup/window-management-cell-layout-1-5.png',
-        alt: 'Cell-based window layout showing five predefined screen regions',
-        width: 724,
-        height: 572,
-        caption: 'Cells 1-5, with summon keys · AwesomeWM on Linux, Hammerspoon on macOS'
-      }
-    ]
+    photo: {
+      src: '/img/setup/setup-sherlock-desktop.jpg',
+      alt: "Sherlock's desk: a wide monitor full of terminal and editor panes, a RØDE microphone on a boom arm, and the ZSA Moonlander split keyboard with a Logitech mouse between the halves.",
+      width: 2400,
+      height: 1639,
+      caption: 'Sherlock at the desk · Moonlander front and centre'
+    }
   },
   gitops: {
     repo: 'TechDufus/home.io',
     href: 'https://github.com/TechDufus/home.io',
     tools: ['Terraform', 'Ansible', 'ArgoCD'],
-    motto: 'If I lose a node, I rebuild from git.',
-    rebuildPath: ['home.io', 'Terraform + Ansible', 'ArgoCD', 'back']
+    motto: 'If I lose a node, I rebuild from git.'
   }
 };
