@@ -1,7 +1,7 @@
 ---
 /*
   Portrait with the Midnight duotone (global .portrait rules + #studio-duo from SvgDefs) and the gold ring.
-    size 'hero'   → <figure class="hero__figure"> with the drawn gold ring SVG (.hero__ring, living-gold glint)
+    size 'hero'   → <figure class="hero__figure"> with the drawn gold ring SVG (.hero__ring, travelling glint)
                     around a circular portrait, plus the caption. Eager + fetchpriority=high (LCP image).
                     Desktop only; below 960px the home hero shows the 'avatar' size in .hero__id instead.
     size 'avatar' → .portrait--circle.portrait--ring (default 72px; set `px` for 44/64/88).
@@ -50,7 +50,7 @@ const dim = hero ? NATIVE : size === 'sm' ? 56 : (px ?? 72);
           <mask id={id}>
             <circle class="r-draw r-mask" cx="50" cy="50" r="49.5" pathLength="1" vector-effect="non-scaling-stroke" />
           </mask>
-          <circle class="r-glint" cx="50" cy="50" r="49.5" mask={`url(#${id})`} />
+          <g mask={`url(#${id})`}><circle class="r-glint" cx="50" cy="50" r="49.5" /></g>
         </svg>
         <div class="portrait portrait--circle">
           <img src={SRC} alt={alt} width={dim} height={dim} loading={loading ?? 'eager'} decoding="async" fetchpriority="high" />

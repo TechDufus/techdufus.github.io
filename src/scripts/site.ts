@@ -7,12 +7,11 @@
  *   reveal   [data-reveal] fades/rises in once when scrolled into view (stagger: style="--d:N").
  *   copy     [data-copy="text"] copies text; an empty value inside a .code-block copies its <pre>.
  *            A [data-copy-label] child flips to "Copied" for 1.6s.
- *   gold     living gold (global.css §17): on-screen foil gets .gold-live plus a staggered
- *            --glint-delay; headline words tilt toward a fine pointer; a hidden tab sets
- *            html.gold-paused.
+ *   gold     ongoing gold motion (global.css §17: the hero ring glint and the home hero ambience)
+ *            gets .gold-idle while off screen; a hidden tab sets html.gold-paused. Both pause it.
  *   marquee  .marquee__track pauses while off screen or while the tab is hidden.
  *
- * Reduced motion: reveal shows everything at once and the tilt is off (CSS stops the rest).
+ * Reduced motion: reveal shows everything at once (CSS stops the rest).
  * Content rendered after load can be wired with `enhance(root)`, exported below.
  */
 
@@ -196,55 +195,19 @@ function initCopy(scope: ParentNode): void {
   });
 }
 
-/* ---------- living gold (global.css §17) ---------- */
-const GOLD_LIVE = ':is(.display, .h1, .h2, .h3) em, .foil, .stat__value .accent, .btn--primary, .chat-launcher__icon, .r-glint';
-const GOLD_TILT = ':is(.display, .h1) em, .post-title .foil';
-const GOLD_PERIOD = 8.4; // s, keep in step with the gold-glint animation
+/* ---------- gold motion: pause while off screen (global.css §17) ---------- */
+const GOLD_MOTION = '.r-glint, .amb';
 const goldSeen = new WeakSet<Element>();
-const goldTilt: HTMLElement[] = [];
 let goldIO: IntersectionObserver | null = null;
-let goldCount = 0;
-
-function initGoldTilt(): void {
-  let x = 0;
-  let raf = 0;
-  const frame = () => {
-    raf = 0;
-    if (reducedMotion()) return;
-    const live = goldTilt.filter((el) => el.classList.contains('gold-live'));
-    const rects = live.map((el) => el.getBoundingClientRect()); // read all, then write
-    live.forEach((el, i) => {
-      const center = rects[i].left + rects[i].width / 2;
-      const dx = Math.max(-1, Math.min(1, (x - center) / (window.innerWidth / 2)));
-      el.style.setProperty('--foil-angle', `${(105 + dx * 24).toFixed(1)}deg`);
-    });
-  };
-  doc.addEventListener(
-    'pointermove',
-    (event) => {
-      if (event.pointerType !== 'mouse') return;
-      x = event.clientX;
-      if (!raf) raf = requestAnimationFrame(frame);
-    },
-    { passive: true }
-  );
-}
 
 function initGold(scope: ParentNode): void {
-  // Without @property or IntersectionObserver the foil stays static.
-  if (!(window.CSS && 'registerProperty' in CSS) || !hasIO) return;
-  if (!goldIO) {
-    goldIO = new IntersectionObserver((entries) =>
-      entries.forEach((en) => en.target.classList.toggle('gold-live', en.isIntersecting))
-    );
-    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) initGoldTilt();
-  }
-  scope.querySelectorAll<HTMLElement | SVGElement>(GOLD_LIVE).forEach((el) => {
+  if (!hasIO) return;
+  goldIO ??= new IntersectionObserver((entries) =>
+    entries.forEach((en) => en.target.classList.toggle('gold-idle', !en.isIntersecting))
+  );
+  scope.querySelectorAll(GOLD_MOTION).forEach((el) => {
     if (goldSeen.has(el)) return;
     goldSeen.add(el);
-    // Phases step 3.1s through the 8.4s cycle, so foil on screen together never glints together.
-    el.style.setProperty('--glint-delay', `${-((goldCount++ * 3.1) % GOLD_PERIOD).toFixed(2)}s`);
-    if (el instanceof HTMLElement && el.matches(GOLD_TILT)) goldTilt.push(el);
     goldIO?.observe(el);
   });
 }
@@ -285,7 +248,7 @@ function onVisibility(): void {
 }
 
 /* ---------- enhance ---------- */
-/** Wires reveal, copy, living gold and marquees inside `scope` (safe to call repeatedly). */
+/** Wires reveal, copy, gold motion and marquees inside `scope` (safe to call repeatedly). */
 export function enhance(scope: ParentNode = doc): void {
   initReveal(scope);
   initCopy(scope);

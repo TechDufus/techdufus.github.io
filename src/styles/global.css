@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TechDufus · Studio (Midnight + living gold) — global.css
+   TechDufus · Studio (Midnight + lamp-lit gold) — global.css
    Ported from design/pro-studio/shared.css. Class names match the mockup exactly, so
    page and component markup can be copied across. Midnight only; the site guide's
    styles live in src/styles/guide.css.
@@ -33,8 +33,8 @@
    Elsewhere ..... .prose / .toc / .progress: src/styles/prose.css (post + doc pages only);
                    .price-card / .steps: [app].astro (and index.astro's flag-gated businessCss)
    Nav/footer .... .nav .wordmark .sheet (Nav.astro)  .foot (Footer.astro)
-   Gold .......... living foil (§17): .foil (opt-in foil text), ring glint (.r-glint + mask > .r-draw.r-mask),
-                   .gold-live / .gold-paused (state classes set by src/scripts/site.ts)
+   Gold .......... §17: .foil (opt-in static sheen text + warm glow), ring glint (.r-glint + mask > .r-draw.r-mask),
+                   .gold-idle / .gold-paused (pause state classes set by src/scripts/site.ts)
    Utilities ..... .sr-only .hide-sm .show-sm
    ========================================================================== */
 
@@ -59,18 +59,23 @@
   --danger-ink: #eb8c77;
   --ok: #8fb573;
 
-  /* living gold — see §17. Stops come from §1b (--gold-shadow … --gold-pale).
+  /* gold — see §17. Stops come from §1b (--gold-shadow … --gold-pale).
      --gold-fill      deep → pale only, for fills that carry --on-accent labels (every stop ≥ 4.5:1)
      --gold-line      a 1–2px rule that brightens in the middle
      --gold-bead      a lit sphere, for dots
-     Angle-tilted text foil is written out in §17 (a var() inside a :root token resolves at :root). */
-  --gold-fill: linear-gradient(100deg, var(--gold-deep) 0%, var(--gold) 22%, var(--gold-light) 44%, var(--gold-pale) 52%, var(--gold-light) 60%, var(--gold) 78%, var(--gold-deep) 100%);
-  --gold-line: linear-gradient(90deg, var(--gold-deep), var(--gold-light) 42%, var(--gold-pale) 52%, var(--gold) 72%, var(--gold-deep));
-  --gold-bead: radial-gradient(circle at 34% 30%, var(--gold-pale) 0%, var(--gold-light) 28%, var(--gold) 58%, var(--gold-deep) 100%);
+     --gold-glow      the warm, lit-from-within halo behind gold display words (a filter: text-shadow
+                      would paint over background-clipped text); --gold-glow-sm for h2/h3 and small foil;
+                      --ink-glow the faint warm glow on the white hero headline. All in em, so they scale. */
+  --gold-fill: linear-gradient(100deg, var(--gold-deep) 0%, var(--gold) 24%, var(--gold-light) 42%, var(--gold-pale) 50%, var(--gold-light) 58%, var(--gold) 76%, var(--gold-deep) 100%);
+  --gold-line: linear-gradient(90deg, var(--gold-shadow), var(--gold-light) 42%, var(--gold-pale) 52%, var(--gold) 72%, var(--gold-shadow));
+  --gold-bead: radial-gradient(circle at 34% 30%, var(--gold-pale) 0%, var(--gold-light) 30%, var(--gold) 60%, var(--gold-deep) 100%);
   --gold-edge: color-mix(in srgb, var(--gold-pale) 70%, transparent);
   --gold-under: color-mix(in srgb, var(--gold-shadow) 45%, transparent);
   --gold-halo: color-mix(in srgb, var(--gold) 40%, transparent);
-  --gold-gloss: color-mix(in srgb, var(--gold-pale) 38%, transparent);
+  --gold-gloss: color-mix(in srgb, var(--gold-pale) 42%, transparent);
+  --gold-glow: drop-shadow(0.025em 0.005em 0 rgba(255, 206, 128, 0.8)) drop-shadow(0 0 0.1em rgba(255, 190, 100, 0.44)) drop-shadow(0 0 0.42em rgba(255, 168, 70, 0.44));
+  --gold-glow-sm: drop-shadow(0.022em 0.005em 0 rgba(255, 206, 128, 0.6)) drop-shadow(0 0 0.1em rgba(255, 190, 100, 0.3)) drop-shadow(0 0 0.34em rgba(255, 168, 70, 0.26));
+  --ink-glow: 0.025em 0.005em 0 rgba(255, 206, 128, 0.26), 0 0 0.1em rgba(255, 190, 100, 0.14), 0 0 0.42em rgba(255, 168, 70, 0.14);
 
   /* type */
   --font-display: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
@@ -119,13 +124,16 @@
 }
 
 /* ---------- 1b. Midnight ----------
-   Deep navy, bright pure gold, warm ivory ink. Base colours; derived tints live in :root above.
+   Deep navy, warm lamp-lit gold, warm ivory ink. Base colours;
+   derived tints live in :root above.
    --duo-*: the portrait duotone (shadows → --duo-dark, highlights → --duo-light); the SVG filter
    #studio-duo (SvgDefs.astro) bakes these two values in, so keep them in step.
    Contrast (WCAG): ink/muted/faint ≥ 4.5:1 on --bg and --surface-2; --accent (= --gold-flat) ≥ 4.5:1
-   on --bg and --surface-2 (it is used for small mono labels); --on-accent ≥ 4.5:1 on --accent and on
-   every --gold-fill stop (--gold-deep … --gold-pale); --gold-shadow ≥ 3:1 on --bg (large foil text).
-   --gold-glint: the travelling highlight. --tok-*: code token colours (also the Shiki theme). */
+   on --bg and --surface-2 (it is used for small mono labels; 9.5 / 8.2); --on-accent ≥ 4.5:1 on
+   --accent and on every --gold-fill stop (--gold-deep 6.8 … --gold-pale 16.8); --gold-sheen's darkest
+   stop (#c29448) ≥ 4.5:1 on --bg (6.8), so foil text stays AA; --gold-shadow ≥ 3:1 on --bg (5.3).
+   --gold-sheen: the static text foil. --gold-glint: the hover light sweep and the ring's travelling
+   point. --tok-*: code token colours (also the Shiki theme). */
 :root {
   --bg: #0a1122;
   --bg-deep: #070c19;
@@ -138,15 +146,16 @@
   --ink-hi: #fffaf0;
   --muted: #9ba5ba;
   --faint: #8490a8;
-  --gold-shadow: #8a6422;
-  --gold-deep: #b5852f;
-  --gold: #dcae4e;
-  --gold-light: #f2d386;
-  --gold-pale: #fff4d6;
-  --gold-glint: rgba(255, 251, 238, 0.92);
-  --gold-flat: #dcae4e;
+  --gold-shadow: #a98141;
+  --gold-deep: #c29448;
+  --gold: #d8b36a;
+  --gold-light: #e7c888;
+  --gold-pale: #fff1cc;
+  --gold-sheen: linear-gradient(100deg, #c9a05a 0%, #e7c888 28%, #fff1cc 44%, #e2bd74 58%, #c29448 100%);
+  --gold-glint: rgba(255, 244, 218, 0.8);
+  --gold-flat: #d8b36a;
   --accent: var(--gold-flat);
-  --accent-hi: #ebc46c;
+  --accent-hi: #e4c282;
   --on-accent: #0a1122;
   --tok-s: #a9c4e6;
   --tok-n: #f0a986;
@@ -238,7 +247,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
 .h2 { font-size: var(--fs-2xl); line-height: 1.06; letter-spacing: -0.018em; text-wrap: balance; }
 .h3 { font-size: var(--fs-xl); line-height: var(--lh-snug); text-wrap: balance; }
 .h4 { font-family: var(--font-sans); font-size: var(--fs-md); font-weight: 600; line-height: 1.35; letter-spacing: -0.01em; }
-.display em, .h1 em, .h2 em, .h3 em { font-style: italic; color: var(--accent); } /* + living foil, §17 */
+.display em, .h1 em, .h2 em, .h3 em { font-style: italic; color: var(--accent); } /* + sheen and glow, §17 */
 .lede { font-size: var(--fs-md); line-height: 1.6; color: var(--muted); max-width: 58ch; text-wrap: pretty; }
 .lede strong { color: var(--ink); font-weight: 500; }
 .eyebrow {
@@ -289,21 +298,19 @@ p { text-wrap: pretty; }
   transition: background-color var(--t-1) ease, border-color var(--t-1) ease, color var(--t-1) ease, transform var(--t-1) ease;
 }
 .btn:active { transform: translateY(1px); }
-/* Gold bar: travelling glint (§17) over a top-lit gloss over the foil fill. Label ≥ 4.5:1 on every stop. */
+/* Gold bar: a top-lit gloss over the static foil fill; one light sweep on hover/focus (§17).
+   Label ≥ 4.5:1 on every stop. */
 .btn--primary {
+  position: relative; isolation: isolate; overflow: hidden;
   color: var(--on-accent);
   background-color: var(--gold);
-  background-image:
-    linear-gradient(105deg, transparent 41.5%, var(--gold-glint) 50%, transparent 58.5%),
-    linear-gradient(180deg, var(--gold-gloss), transparent 48%, var(--gold-under)),
-    var(--gold-fill);
-  background-size: 250% 100%, 100% 100%, 190% 100%;
-  background-position: var(--glint-x, 120%) 0, 0 0, 30% 0;
-  background-repeat: no-repeat;
+  background-image: linear-gradient(180deg, var(--gold-gloss), transparent 48%, var(--gold-under)), var(--gold-fill);
+  background-size: 100% 100%, 190% 100%;
+  background-position: 0 0, 30% 0;
   box-shadow: inset 0 1px 0 var(--gold-edge), 0 10px 26px -14px var(--gold-halo);
   transition: filter var(--t-2) ease, box-shadow var(--t-2) ease, transform var(--t-1) ease;
 }
-.btn--primary:hover, .btn--primary:focus-visible { filter: brightness(1.07) saturate(1.05); box-shadow: inset 0 1px 0 var(--gold-edge), 0 14px 30px -12px var(--gold-halo); }
+.btn--primary:hover, .btn--primary:focus-visible { filter: brightness(1.05); box-shadow: inset 0 1px 0 var(--gold-edge), 0 14px 32px -12px var(--gold-halo); }
 .btn--ghost { border-color: var(--line-2); color: var(--ink); background: transparent; }
 .btn--ghost:hover { border-color: var(--line-3); background: var(--surface); }
 .btn--quiet { background: var(--surface-2); color: var(--ink); }
@@ -607,7 +614,7 @@ a.chip:hover, button.chip:hover { color: var(--ink); border-color: var(--line-3)
 .nav.is-scrolled { border-bottom-color: var(--line); background: color-mix(in srgb, var(--bg) 88%, transparent); }
 .nav__inner { height: 100%; display: flex; align-items: center; gap: var(--s-6); }
 .wordmark { font-family: var(--font-display); font-size: 1.625rem; line-height: 1; letter-spacing: -0.01em; color: var(--ink); display: inline-flex; align-items: baseline; }
-.wordmark i { color: var(--accent); font-style: normal; } /* + foil, §17 */
+.wordmark i { color: var(--accent); font-style: normal; } /* + sheen, §17 */
 .nav__links { display: flex; align-items: center; gap: 4px; margin-left: auto; }
 .nav__link {
   position: relative; display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: var(--r-pill);
@@ -668,85 +675,64 @@ a.chip:hover, button.chip:hover { color: var(--ink); border-color: var(--line-3)
 @media (max-width: 860px) { .foot__top { grid-template-columns: repeat(2, minmax(0, 1fr)); } .foot__brand { grid-column: 1 / -1; } }
 
 
-/* ---------- 17. Living gold ----------
-   Gold is a material, not a colour: foil gradients with a highlight that travels across them,
-   like light catching a metal edge. Tokens and Midnight stops: §1 and §1b.
+/* ---------- 17. Gold ----------
+   Gold is lamplight, not paint: a static sheen (warm, softer than foil) that seems lit from within by
+   a layered amber glow. Tokens and Midnight stops: §1 and §1b.
 
-   FOIL (gradient)  italic accent words in .display/.h1/.h2/.h3 · .foil (page opt-in: hero caption,
-                    post title, author name, lab "25+") · stat accents (772★, GB, +) · wordmark dot ·
-                    .btn--primary · site guide coins (guide.css) · pressed chips · beads (.dot, nav
-                    indicator, timeline "now", marquee separators) · rules/progress (--gold-line) ·
-                    portrait rings (SVG gradient #studio-gold, SvgDefs.astro)
+   SHEEN (text)   italic accent words in .display/.h1/.h2/.h3 · .foil (page opt-in: hero caption,
+                  post title, author name, lab "25+") · stat accents (772★, GB, +) · wordmark dot.
+                  --gold-sheen clipped to the glyphs + --gold-glow (display/h1) or --gold-glow-sm.
+   FILL           .btn--primary · site guide coins (guide.css) · pressed chips · beads (.dot, nav
+                  indicator, timeline "now", marquee separators) · rules/progress (--gold-line) ·
+                  portrait rings (SVG gradient #studio-gold, SvgDefs.astro)
    FLAT (--gold-flat = --accent)  every small label: eyebrows, mono indices, links at rest, footnotes
 
-   MOTION  site.ts adds .gold-live to foil elements while they are on screen (IntersectionObserver)
-   and gives each a --glint-delay so neighbours never flash together.
-     glint  a highlight band crosses in ~1.4s, then rests; one cycle every 8.4s
-     drift  large foil words slowly shift their bands (18s, alternate), like turning a gold leaf
-     sweep  hover/focus on buttons, coins and links: one quick 0.9s pass
-     tilt   on a fine pointer, headline words turn their foil angle toward the cursor
-   Only custom properties and background positions animate (no layout). Reduced motion: static foil.
-   A hidden tab pauses everything (html.gold-paused). Without @property: static foil. */
-@property --glint-x { syntax: "<percentage>"; inherits: false; initial-value: 120%; }
-@property --drift-x { syntax: "<percentage>"; inherits: false; initial-value: 35%; }
-@property --foil-angle { syntax: "<angle>"; inherits: false; initial-value: 105deg; }
-
+   MOTION  Text is still. Gold fills (buttons, coins) get one light sweep on hover/focus (0.9s,
+   transform only). The hero ring's point of light runs round every 9s (transform + opacity).
+   site.ts marks ongoing animations .gold-idle while off screen and sets html.gold-paused while the
+   tab is hidden; both pause them. Reduced motion: all static. */
 :is(.display, .h1, .h2, .h3) em, .foil, .stat__value .accent {
   color: var(--gold-flat);
-  background-image:
-    linear-gradient(var(--foil-angle, 105deg), transparent 43%, var(--gold-glint) 50%, transparent 57%),
-    linear-gradient(var(--foil-angle, 105deg), var(--gold-shadow) 0%, var(--gold-deep) 12%, var(--gold-light) 30%, var(--gold) 42%, var(--gold-pale) 50%, var(--gold) 58%, var(--gold-deep) 74%, var(--gold-light) 88%, var(--gold-deep) 100%);
-  background-size: 250% 100%, 200% 100%;
-  background-position: var(--glint-x, 120%) 0, var(--drift-x, 35%) 0;
-  background-repeat: no-repeat;
+  background: var(--gold-sheen);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: var(--gold-glow-sm);
   /* Italic overhang: room for the clip, net width unchanged. (No box-decoration-break: clone,
      it switches off text-wrap: balance on the heading in Chrome.) */
   padding-inline: 0.1em; margin-inline: -0.1em;
-  transition: --foil-angle 900ms var(--ease-out);
 }
+:is(.display, .h1) em { filter: var(--gold-glow); }
 .wordmark i {
   background: linear-gradient(180deg, var(--gold-pale) 50%, var(--gold-light) 66%, var(--gold) 76%, var(--gold-deep) 86%);
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
 
-/* Links: flat ink at rest; hover/focus turns them to bright foil (fill range, so small text stays AA) with one sweep. */
-:is(.link, .prose a):is(:hover, :focus-visible) {
-  background-image:
-    linear-gradient(105deg, transparent 40%, var(--gold-glint) 50%, transparent 60%),
-    linear-gradient(105deg, var(--gold-light), var(--gold) 45%, var(--gold-light) 70%, var(--gold));
-  background-size: 300% 100%, 100% 100%;
-  background-position: var(--glint-x, 120%) 0, 0 0;
-  background-repeat: no-repeat;
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Sweep: one band of light crosses a gold fill, under its label (isolation + z-index -1). */
+.btn--primary::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(105deg, transparent 30%, var(--gold-glint) 50%, transparent 70%);
+  transform: translateX(-120%);
 }
+@keyframes gold-sweep { from { transform: translateX(-120%); } to { transform: translateX(120%); } }
 
-@keyframes gold-glint { 0% { --glint-x: 120%; } 17%, 100% { --glint-x: -20%; } }
 /* Ring glint: a point of light that runs round a gold ring every 9s (after it has drawn in).
    Markup: next to the ring's dashed .r-draw circle, add
      <mask id="…"><circle class="r-draw r-mask" …same attrs as .r-draw…/></mask>
-     <circle class="r-glint" cx cy r mask="url(#…)"/>
-   The mask is a copy of the dashed arc, so the light only shows on the gold. Units: user space
-   of a viewBox="0 0 100 100" ring with r = 49.5 (2πr ≈ 311). */
+     <g mask="url(#…)"><circle class="r-glint" cx cy r/></g>
+   The mask is a copy of the dashed arc, so the light only shows on the gold; the circle turns
+   inside the unturned mask. Units: user space of a viewBox="0 0 100 100" ring (r = 49.5). */
 mask > .r-draw.r-mask { fill: none; stroke: white; stroke-width: 6; }
-.r-glint { fill: none; stroke: var(--gold-glint); stroke-width: 0.7; stroke-linecap: round; stroke-dasharray: 9 400; stroke-dashoffset: 12; opacity: 0; filter: drop-shadow(0 0 1px var(--gold-light)); }
+.r-glint { fill: none; stroke: var(--gold-glint); stroke-width: 0.7; stroke-linecap: round; stroke-dasharray: 9 400; opacity: 0; transform-origin: 50% 50%; filter: drop-shadow(0 0 1px var(--gold-light)); }
 @keyframes ring-glint {
-  0% { stroke-dashoffset: 12; opacity: 1; }
-  30% { stroke-dashoffset: -320; opacity: 1; }
-  30.1%, 100% { stroke-dashoffset: -320; opacity: 0; }
+  0% { transform: rotate(-14deg); opacity: 1; }
+  30% { transform: rotate(370deg); opacity: 1; }
+  30.1%, 100% { transform: rotate(370deg); opacity: 0; }
 }
-@keyframes gold-drift { from { --drift-x: 12%; } to { --drift-x: 88%; } }
-@keyframes gold-sweep { from { --glint-x: 120%; } to { --glint-x: -20%; } }
 
 @media (prefers-reduced-motion: no-preference) {
-  .gold-live:is(:is(.display, .h1, .h2, .h3) em, .foil, .stat__value .accent) {
-    animation: gold-glint 8.4s var(--ease-io) var(--glint-delay, 0s) infinite, gold-drift 18s ease-in-out var(--glint-delay, 0s) infinite alternate;
-  }
-  .gold-live.btn--primary { animation: gold-glint 8.4s var(--ease-io) var(--glint-delay, 0s) infinite; }
-  .r-glint.gold-live { animation: ring-glint 9s var(--ease-io) 3s infinite; }
-  .btn--primary:is(:hover, :focus-visible), :is(.link, .prose a):is(:hover, :focus-visible) { animation: gold-sweep 900ms var(--ease-out) both; }
+  .btn--primary:is(:hover, :focus-visible)::after { animation: gold-sweep 900ms var(--ease-io) both; }
+  .r-glint { animation: ring-glint 9s var(--ease-io) 3s infinite; }
   /* !important: the animation shorthands above (and page rules) reset play-state with higher specificity. */
-  .gold-paused .gold-live { animation-play-state: paused !important; }
+  .gold-paused :is(.r-glint, .amb, .amb *), .gold-idle, .gold-idle * { animation-play-state: paused !important; }
 }
