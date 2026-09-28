@@ -49,6 +49,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check images for location data
+        run: npm run check:images
+
       - name: Build Astro site
         run: npm run build
         env:

@@ -249,6 +249,7 @@ export type NavItem = { label: string; href: string; business?: boolean };
 
 export const primaryNavigation: NavItem[] = [
   { label: 'Writing', href: '/blog/' },
+  { label: 'Projects', href: '/projects/' },
   { label: 'Lab', href: '/lab/' },
   { label: business.appName, href: business.appHref, business: true },
   { label: 'Services', href: '/#services', business: true },
@@ -264,12 +265,12 @@ export const footerNavigation: { site: NavItem[] } = {
   site: [
     { label: 'Home', href: '/' },
     { label: 'Writing', href: '/blog/' },
+    { label: 'Projects', href: '/projects/' },
     { label: 'Lab', href: '/lab/' },
     { label: business.appName, href: business.appHref, business: true },
     { label: 'Services', href: '/#services', business: true },
     { label: 'About', href: '/about/' },
     { label: 'Setup', href: '/docs/setup/' },
-    { label: 'Career', href: '/docs/career/' },
     { label: 'Contact', href: '/contact/' },
     { label: 'Support', href: '/support/' }
   ]
@@ -309,11 +310,9 @@ export const homeCopy = {
 
 export const aboutCopy = {
   intro:
-    "I'm Matthew, but most people online know me as TechDufus. I started in PowerShell, moved into Kubernetes platform work, and now spend most of my time on agentic workflows.",
+    "I'm Matthew, but most people online know me as TechDufus. I started in PowerShell, worked my way through DevOps, full-stack and platform engineering, and now I build with AI and teach others to.",
   body: [
-    'When I found PowerShell, I got bit by the automation bug and realized I could make a career out of being lazy the right way: automate it once and stop doing it by hand. <a href="https://github.com/matthewjdegarmo/AdminToolkit" target="_blank" rel="noopener noreferrer" class="link">AdminToolkit</a> and <a href="https://github.com/matthewjdegarmo/HelpDesk" target="_blank" rel="noopener noreferrer" class="link">HelpDesk</a> were some of the first tools I built.',
-    "That pulled me into DevOps, then a full-stack role where we owned everything from app code to firewalls. That's where I learned to care about the developers using what I build.",
-    'Now I do platform engineering: big Kubernetes clusters, RBAC at scale, air-gapped environments, and a lot of AI agents. This site is where I write down what broke and what held.'
+    'Nobody handed me a career path. Every time I ran out of new things to learn, I found the area I had the least exposure to and switched into it.'
   ]
 };
 
@@ -439,12 +438,80 @@ export const featuredRepos: FeaturedRepo[] = [
   }
 ];
 
+export type FeaturedProject = {
+  name: string;
+  href: string;
+  status: string;
+  tagline: string;
+  description: string;
+  image: { src: string; alt: string; width: number; height: number };
+  facts: { k: string; v: string }[];
+};
+
+/**
+ * YahwAI, on /projects/ and the home Projects section. Tagline, description, image and facts
+ * all come from yahwai.com itself (meta description, og:image, the "will and won't" list).
+ */
+export const featuredProject: FeaturedProject = {
+  name: 'YahwAI',
+  href: 'https://yahwai.com/',
+  status: 'Opening soon',
+  tagline: 'Search the Scriptures. Keep your eyes fixed on Jesus.',
+  description:
+    'An AI Bible-study tool for personal study and for preparing questions to bring to church or a small group. It answers in plain words and shows you the passages, so you can read them for yourself.',
+  image: {
+    src: '/img/projects/yahwai.webp',
+    alt: 'The YahwAI share card: an open book with a gold flame, the name YahwAI, and the words "Search the Scriptures. Keep your eyes fixed on Jesus."',
+    width: 1200,
+    height: 630
+  },
+  facts: [
+    { k: 'Shows', v: 'The passages behind a reply, from the Berean Standard Bible' },
+    { k: "Won't", v: "Speak for God. Replies aren't Scripture." }
+  ]
+};
+
+export type EarlierWork = {
+  name: string;
+  href: string;
+  year: number;
+  description: string;
+  kind: string;
+  post?: { label: string; href: string };
+};
+
+/** Older public work on /projects/. Descriptions come from each repo's README / Marketplace listing. */
+export const earlierWork: EarlierWork[] = [
+  {
+    name: 'AdminToolkit',
+    href: 'https://github.com/TechDufus/AdminToolkit',
+    year: 2020,
+    description: 'A PowerShell module of administration and utility functions for Windows admins.',
+    kind: 'PowerShell Gallery'
+  },
+  {
+    name: 'HelpDesk',
+    href: 'https://github.com/TechDufus/HelpDesk',
+    year: 2020,
+    description: 'Active Directory and other admin-type utilities typical in a HelpDesk role.',
+    kind: 'PowerShell Gallery'
+  },
+  {
+    name: 'BlogQueue',
+    href: 'https://github.com/marketplace/actions/blog-queue-workflow',
+    year: 2021,
+    description: 'A GitHub Action that publishes blog posts from a queue on a schedule.',
+    kind: 'GitHub Action',
+    post: { label: 'Read the post', href: '/blog/introducing-the-blogqueue-github-action/' }
+  }
+];
+
 export const homeProofPoints = [
   {
     label: 'Production Scale',
     value: '200-node AKS + 100TB+ data platform',
-    note: 'Published architecture at Raft Data Platform.',
-    sourceLabel: 'Read the Raft write-up',
+    note: 'The architecture is written up publicly.',
+    sourceLabel: 'Read the write-up',
     sourceHref:
       'https://teamraft.com/resources/insights/secure-low-latency-queries-at-scale-with-raft-data-platform-rdp/'
   },

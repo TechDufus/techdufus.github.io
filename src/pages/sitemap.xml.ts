@@ -12,11 +12,11 @@ export async function GET() {
   const staticPaths = [
     '/',
     '/blog/',
+    '/projects/',
     '/lab/',
     ...(business.enabled ? [business.appHref] : []),
     '/docs/',
     '/docs/setup/',
-    '/docs/career/',
     '/about/',
     '/contact/',
     '/support/'

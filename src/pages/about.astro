@@ -5,18 +5,19 @@ import Portrait from '../components/ui/Portrait.astro';
 import ProofPoints from '../components/ui/ProofPoints.astro';
 import Timeline, { type TimelineItem } from '../components/ui/Timeline.astro';
 import Principles from '../components/ui/Principles.astro';
-import { aboutCopy, aboutNow, homeOperatingStyle, profileSpotlight, siteMetadata } from '../data/site';
+import { aboutCopy, aboutNow, featuredProject, homeOperatingStyle, profileSpotlight, siteMetadata } from '../data/site';
 
 // The body copy carries the old Tailwind link classes; render its links with the Studio `.link` style.
 const bodyParagraphs = aboutCopy.body.map((paragraph) => paragraph.replace(/class="[^"]*"/g, 'class="link"'));
 
-// "Career, condensed" (mockup index.html #about), from src/content/docs/career.md.
-const career: TimelineItem[] = [
-  { when: '2024 — now', what: 'Raft', whatNote: 'Senior DevSecOps Engineer', now: true, body: 'GitOps with ArgoCD across OpenShift, AKS and RKE2, including air-gapped operations.' },
-  { when: '2022 — now', what: 'InFlux', whatNote: 'Ansible-driven scaling', body: 'Turned rigid shell installs into idempotent, fleet-oriented automation.' },
-  { when: '2022 — 2024', what: 'Lumen', whatNote: 'Full-stack DevOps → Platform', body: 'Go services, Helm on GKE, Kubewarden admission policies on large clusters.' },
-  { when: '2020 — 2022', what: 'Ansira', whatNote: 'DevOps delivery', body: 'Terraform on Azure, CI/CD pipelines, PKI automation from hours to seconds. CISSP.' },
-  { when: '2016 — 2020', what: 'Nebraska Public Power District', whatNote: 'Automation first', body: 'PowerShell tooling in a regulated, NERC-heavy environment. Security+.' }
+// The path by focus area, not employer or year. `when` carries the transition: why I switched.
+const toolkit = (name: string) => `<a href="https://github.com/TechDufus/${name}" target="_blank" rel="noopener noreferrer" class="link">${name}</a>`;
+const path: TimelineItem[] = [
+  { when: 'Where it started', what: 'PowerShell automation', bodyHtml: `Got bit by the automation bug in a heavily regulated shop. Built ${toolkit('AdminToolkit')} and ${toolkit('HelpDesk')}, stopped clicking through runbooks, and picked up Security+.` },
+  { when: 'Wanted the whole pipeline', what: 'DevOps', body: 'Scripts only covered my corner. I wanted to see how software actually ships, so I moved into DevOps: Terraform on Azure, CI/CD, PKI automation that went from hours to seconds. CISSP along the way.' },
+  { when: 'Wanted the app side too', what: 'Full-stack', body: 'I wanted to understand the apps I was deploying, so I joined a team that owned everything from app code to firewalls. Go services, Helm on GKE. Learned to care about the people using what I build.' },
+  { when: 'Wanted the platform underneath', what: 'Platform engineering', body: 'Big Kubernetes clusters, RBAC at scale, GitOps with ArgoCD, air-gapped environments, Ansible across whole fleets. Fast only counts if you can roll it back.' },
+  { when: 'Now', what: 'AI everything engineer', whatNote: 'Team lead, solutions architect', now: true, bodyHtml: `AI means one person can finally work across the whole stack, so I do: infra, code, and the agents that write it. I lead a team now, and most of that job is mentoring and training people to use AI well. I'm also building <a href="${featuredProject.href}" target="_blank" rel="noopener noreferrer" class="link">${featuredProject.name}</a>, an AI Bible-study tool, on the side.` }
 ];
 ---
 
@@ -53,6 +54,7 @@ const career: TimelineItem[] = [
       <div class="about__bio">
         <h2 class="h2 sec-head__title" id="story-title" data-reveal>How I got <em>here</em>.</h2>
         {bodyParagraphs.map((paragraph, i) => <p class:list={{ first: i === 0 }} data-reveal set:html={paragraph} />)}
+        <Timeline items={path} class="about__path" reveal d={1} />
         <div class="about__quote" data-reveal>
           <p class="quote">{homeOperatingStyle[0]}</p>
         </div>
@@ -75,21 +77,10 @@ const career: TimelineItem[] = [
     </div>
   </section>
 
-  <!-- ============ 04 · Career ============ -->
-  <section id="career" class="section" aria-labelledby="career-title">
-    <div class="wrap">
-      <SectionHead index={4} label="Career" bare>
-        <a slot="aside" class="link link--quiet meta" href="/docs/career/">Full career notes <span class="arrow" aria-hidden="true">→</span></a>
-      </SectionHead>
-      <h2 class="h2 sec-head__title" id="career-title" data-reveal>Career.</h2>
-      <Timeline items={career} class="career__timeline" reveal d={1} />
-    </div>
-  </section>
-
-  <!-- ============ 05 · Principles ============ -->
+  <!-- ============ 04 · Principles ============ -->
   <section id="operate" class="section" aria-labelledby="operate-title">
     <div class="wrap">
-      <SectionHead index={5} label="Principles" titleId="operate-title" title="How I <em>work</em>." />
+      <SectionHead index={4} label="Principles" titleId="operate-title" title="How I <em>work</em>." />
       <div class="principles">
         <Principles heading="" />
       </div>
@@ -143,8 +134,14 @@ const career: TimelineItem[] = [
   .pg-about .about__bio .first { font-size: var(--fs-md); color: var(--ink); }
   .pg-about .about__quote { margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--line); }
 
-  /* Career */
-  .pg-about .career__timeline { margin-top: 32px; }
+  /* The path (eras by focus area) */
+  .pg-about .about__path { margin-top: 36px; max-width: 64ch; }
+  .pg-about .about__path .timeline__what { font-family: var(--font-display); font-size: 1.5rem; font-weight: 400; line-height: 1.2; }
+  .pg-about .about__path .timeline__what span { font-family: var(--font-sans); font-size: 0.95rem; }
+  .pg-about .about__path .timeline__item { padding-bottom: 32px; }
+  .pg-about .about__path .timeline__item:last-child { padding-bottom: 0; }
+  .pg-about .about__path .timeline__item::before { top: 6px; }
+  .pg-about .about__path .timeline__item p { color: var(--ink-2); font-size: 1rem; }
 
   /* Proof and principles sit right under the section title */
   .pg-about #proof .proof { margin-top: 0; }

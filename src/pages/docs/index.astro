@@ -4,9 +4,9 @@ import readingTime from 'reading-time';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { labSpec } from '../../data/site';
 
-const [setup, career] = await Promise.all([getEntry('docs', 'setup'), getEntry('docs', 'career')]);
-if (!setup || !career) {
-  throw new Error('Missing docs content source (setup or career).');
+const setup = await getEntry('docs', 'setup');
+if (!setup) {
+  throw new Error('Missing docs content source (setup).');
 }
 
 const minutes = (body: string) => Math.max(1, Math.round(readingTime(body).minutes));
@@ -21,14 +21,6 @@ const docs = [
     meta: `${minutes(setup.body)} min read`
   },
   {
-    kind: 'Background',
-    title: 'Career',
-    accent: 'notes',
-    href: '/docs/career/',
-    description: 'PowerShell to platform engineering.',
-    meta: `${minutes(career.body)} min read`
-  },
-  {
     kind: 'Tour',
     title: 'The',
     accent: 'lab',
@@ -41,7 +33,7 @@ const docs = [
 
 <BaseLayout
   title="Docs"
-  description="Reference docs for my setup, workflow, and career context."
+  description="Reference docs for my setup and the homelab."
 >
   <section class="section pg-docs" aria-labelledby="docs-title">
     <div class="wrap">

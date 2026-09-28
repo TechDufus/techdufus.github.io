@@ -1,0 +1,24 @@
+---
+/*
+  .frame: browser chrome (dots, padlock + host pill) around a product shot or mock.
+  The bar is decoration and hidden from assistive tech; the slot carries the content.
+  Extra attributes (aria-hidden, inert, style) land on the .frame element.
+*/
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+  host: string;
+}
+
+const { host, class: className, ...attrs } = Astro.props;
+---
+<div class:list={['frame', className]} {...attrs}>
+  <div class="frame__bar" aria-hidden="true">
+    <span class="frame__dots"><i></i><i></i><i></i></span>
+    <span class="frame__url">
+      <svg viewBox="0 0 16 16"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"></rect><path d="M5.5 7V5.2a2.5 2.5 0 0 1 5 0V7" fill="none" stroke="currentColor" stroke-width="1.3"></path></svg>{host}
+    </span>
+    <span></span>
+  </div>
+  <slot />
+</div>

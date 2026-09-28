@@ -21,17 +21,19 @@
 - Dev server: `npm run dev`
 - Type/content checks: `npm run check`
 - Production build: `npm run build`
-- Bundle budget check: `npm run check:perf` (after a build; JS/CSS/HTML budgets across home, about, blog, docs, contact, lab)
+- Bundle budget check: `npm run check:perf` (after a build; JS/CSS/HTML budgets across home, about, blog, docs, contact, lab, projects)
+- Image privacy check: `npm run check:images` (fails if any tracked image has EXIF/XMP location data; strip with `exiftool -all= -overwrite_original <file>`)
 
 ## Content locations
 - Blog posts: `src/content/blog/*.md`
 - Setup docs: `src/content/docs/setup.md`
-- Career docs: `src/content/docs/career.md`
 - Site-wide metadata/copy/nav: `src/data/site.ts`
   - `business`: `enabled` flag plus services, pricing, FAQ and legal data
   - `heroCopy` and `topics` (home hero and ticker)
   - `labSpec`: homelab spec rendered on `/lab/`
+  - `featuredRepos`, `featuredProject` (YahwAI) and `earlierWork`: rendered on `/projects/` (repos and YahwAI also on the home Projects section)
 - Lab page: `src/pages/lab.astro`
+- Projects page: `src/pages/projects.astro`
 - Global layout + metadata tags: `src/layouts/BaseLayout.astro`
 - Public icons/manifest: `public/*`
 
@@ -47,6 +49,7 @@
 ## Definition of done for changes
 - `npm run check` passes.
 - `npm run build` passes.
+- `npm run check:images` passes (runs in CI before the build).
 - For UI/content-impacting work, verify key routes:
   - `/`
   - `/about`
@@ -55,3 +58,4 @@
   - `/docs`
   - `/contact`
   - `/lab`
+  - `/projects`

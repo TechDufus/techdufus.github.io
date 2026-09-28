@@ -5,7 +5,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import '../../styles/prose.css';
 import { labSpec } from '../../data/site';
 
-const [doc, career] = await Promise.all([getEntry('docs', 'setup'), getEntry('docs', 'career')]);
+const doc = await getEntry('docs', 'setup');
 if (!doc) {
   throw new Error('Missing docs/setup content source.');
 }
@@ -113,9 +113,9 @@ const dotfilesHref = 'https://github.com/TechDufus/dotfiles';
               <p>Interactive architecture diagram, hardware, the {labSpec.servicesCount} services and what changed. Revised {labSpec.lastRevised}.</p>
             </div>
             <div class="doc-link">
-              <span class="doc-link__k">Docs · 02 <span class="arrow" aria-hidden="true">→</span></span>
-              <p class="doc-link__t"><a href="/docs/career/">Career <em>notes</em></a></p>
-              {career && <p>{career.data.description}</p>}
+              <span class="doc-link__k">About <span class="arrow" aria-hidden="true">→</span></span>
+              <p class="doc-link__t"><a href="/about/#story">How I got <em>here</em></a></p>
+              <p>PowerShell to platform engineering to AI, and why I kept switching.</p>
             </div>
           </nav>
         </div>

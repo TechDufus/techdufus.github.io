@@ -1,0 +1,166 @@
+---
+/*
+  /projects/: YahwAI (featuredProject), the featured repos with live GitHub metadata, and earlierWork.
+  Every line of copy comes from src/data/site.ts, yahwai.com, or the repos themselves.
+*/
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BrowserFrame from '../components/ui/BrowserFrame.astro';
+import RepoCard from '../components/ui/RepoCard.astro';
+import SectionHead from '../components/ui/SectionHead.astro';
+import Stat from '../components/ui/Stat.astro';
+import { hostOf, linkProps } from '../components/ui/format';
+import { earlierWork, featuredProject as yw, siteMetadata } from '../data/site';
+import { featuredReposNote, getFeaturedRepos } from '../lib/github';
+
+const repos = await getFeaturedRepos();
+const firstYear = Math.min(...earlierWork.map((item) => item.year));
+---
+
+<BaseLayout
+  title="Projects"
+  description={`${yw.name}, an AI Bible-study tool opening soon, plus the open-source tools I maintain (${repos.map((repo) => repo.name).join(', ')}) and the PowerShell modules where it started.`}
+>
+  <div class="pg-projects">
+  <!-- ============ HERO ============ -->
+  <section id="top" class="phero" aria-labelledby="page-title">
+    <div class="wrap">
+      <p class="eyebrow phero__eyebrow" data-reveal>Projects</p>
+      <h1 class="display" id="page-title" data-reveal style="--d:1">Things I've <em>built</em>.</h1>
+      <p class="lede phero__lede" data-reveal style="--d:2">One I'm still building, the open-source tools I lean on, and some old PowerShell.</p>
+
+      <dl class="stats phero__stats" data-reveal style="--d:3">
+        <Stat value={1} term="Opening soon" label={`opening soon: ${yw.name}`} href="#featured" />
+        <Stat value={repos.length} term="Open source" label="open-source repos I maintain" href="#open-source" />
+        <Stat value={String(firstYear)} num term="Earlier work" label="my first PowerShell module" href="#earlier" />
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============ 01 · FEATURED ============ -->
+  <section id="featured" class="section" aria-labelledby="featured-title">
+    <div class="wrap">
+      <SectionHead index={1} label="Featured" bare />
+      <article class="feat">
+        <div class="feat__body">
+          <span class="chip chip--accent" data-reveal>{yw.status}</span>
+          <h2 class="h1 feat__name" id="featured-title" data-reveal style="--d:1">{yw.name}</h2>
+          <p class="feat__tagline" data-reveal style="--d:1">{yw.tagline}</p>
+          <p class="feat__desc" data-reveal style="--d:2">{yw.description}</p>
+          <dl class="spec feat__facts" data-reveal style="--d:2">
+            {yw.facts.map((fact) => (
+              <div><dt>{fact.k}</dt><dd>{fact.v}</dd></div>
+            ))}
+          </dl>
+          <div class="feat__cta" data-reveal style="--d:3">
+            <a class="btn btn--primary btn--lg" href={yw.href} target="_blank" rel="noopener">Visit {hostOf(yw.href)} <span class="arrow--ne" aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <figure class="feat__shot" data-reveal style="--d:2">
+          <BrowserFrame host={hostOf(yw.href)}>
+            <img src={yw.image.src} alt={yw.image.alt} width={yw.image.width} height={yw.image.height} decoding="async" />
+          </BrowserFrame>
+        </figure>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ 02 · OPEN SOURCE ============ -->
+  <section id="open-source" class="section" aria-labelledby="oss-title">
+    <div class="wrap">
+      <SectionHead index={2} label="Open source" aside={featuredReposNote(repos)} titleId="oss-title" title="Open <em>source</em>." lede="Built for my own work, left out in the open." />
+      <div class="grid grid--2">
+        {repos.map((repo) => <RepoCard repo={repo} />)}
+      </div>
+      <div class="oss__foot">
+        <a class="link link--quiet" href="https://github.com/TechDufus" target="_blank" rel="noopener">More on github.com/TechDufus <span class="arrow--ne" aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 03 · EARLIER WORK ============ -->
+  <section id="earlier" class="section" aria-labelledby="earlier-title">
+    <div class="wrap">
+      <SectionHead index={3} label="Earlier work" titleId="earlier-title" title="Where it <em>started</em>." lede="PowerShell, mostly." />
+      <div class="post-list">
+        {earlierWork.map((item, i) => (
+          <article class="post-row" data-reveal style={`--d:${i}`}>
+            <time class="post-row__date" datetime={String(item.year)}>{item.year}</time>
+            <div class="post-row__main">
+              <h3 class="post-row__title"><a {...linkProps(item.href)}>{item.name}</a></h3>
+              <p class="post-row__desc">{item.description}</p>
+              {item.post && <a class="link link--quiet earlier__post" href={item.post.href}>{item.post.label} <span class="arrow" aria-hidden="true">→</span></a>}
+            </div>
+            <div class="post-row__meta">
+              <span class="chip">{item.kind}</span>
+              <span class="post-row__mins" aria-hidden="true">{hostOf(item.href)} <span class="arrow--ne">↗</span></span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Closing ============ -->
+  <section class="section section--tight" aria-labelledby="stuck-title">
+    <div class="wrap stuck" data-reveal>
+      <h2 class="h2" id="stuck-title">Building something like this and <em>stuck</em>?</h2>
+      <a class="btn btn--primary btn--lg" href={`mailto:${siteMetadata.email}`}>Email me <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+  </section>
+  </div>
+</BaseLayout>
+
+<style is:global>
+  /* Global under the .pg-projects root (no data-astro-cid attributes). Hero matches /lab/'s .lhero. */
+  .pg-projects .phero { padding-block: clamp(40px, 7vw, 104px) clamp(56px, 7vw, 96px); }
+  .pg-projects .phero__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .pg-projects .phero__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
+  .pg-projects .phero .display { max-width: 12ch; }
+  .pg-projects .phero__lede { margin-top: 28px; }
+  .pg-projects .phero__stats { margin-top: clamp(48px, 6vw, 80px); }
+  .pg-projects .phero__stats .stat__label a { text-decoration: underline; text-decoration-color: var(--line-3); text-underline-offset: 3px; transition: color var(--t-1) ease, text-decoration-color var(--t-1) ease; }
+  .pg-projects .phero__stats .stat__label a:hover { color: var(--ink); text-decoration-color: var(--accent); }
+
+  /* Featured: one lit card, copy left, the product shot right */
+  .pg-projects .feat {
+    --feat-pad: clamp(24px, 4vw, 56px);
+    position: relative; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 8fr); gap: clamp(32px, 5vw, 72px); align-items: center;
+    padding: var(--feat-pad); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  }
+  /* a lamplit top edge */
+  .pg-projects .feat::before { content: ""; position: absolute; inset: 0 var(--feat-pad) auto; height: 1px; background: var(--gold-line); opacity: 0.7; }
+  /* the shot runs off the card's right edge, like a window left open behind it */
+  .pg-projects .feat__shot { margin-right: calc(-1 * var(--feat-pad)); }
+  .pg-projects .feat__shot .frame { border-right: 0; border-radius: var(--r-lg) 0 0 var(--r-lg); }
+  .pg-projects .feat__name { margin-top: 20px; }
+  .pg-projects .feat__tagline { margin-top: 14px; font-family: var(--font-display); font-style: italic; font-size: clamp(1.375rem, 1.1rem + 0.8vw, 1.75rem); line-height: 1.25; color: var(--ink-2); text-wrap: balance; }
+  .pg-projects .feat__desc { margin-top: 20px; color: var(--muted); max-width: 52ch; }
+  .pg-projects .feat__facts { margin-top: 28px; }
+  .pg-projects .feat__facts > div { grid-template-columns: 76px minmax(0, 1fr); }
+  .pg-projects .feat__facts dd { font-size: 0.9375rem; color: var(--ink-2); }
+  .pg-projects .feat__cta { margin-top: 32px; }
+  .pg-projects .feat__shot img { display: block; width: 100%; height: auto; }
+  /* the shot settles as it arrives, like a camera finding focus (no-op under reduced motion, §11) */
+  .js .pg-projects .feat__shot img { transform: scale(1.035); transition: transform 1600ms var(--ease-out) 240ms; }
+  .js .pg-projects .feat__shot.is-in img { transform: none; }
+
+  .pg-projects .oss__foot { margin-top: 28px; display: flex; justify-content: flex-end; }
+
+  /* Earlier work: .post-row with a year, a kind chip and an optional post link above the stretched title link */
+  .pg-projects .earlier__post { position: relative; z-index: 1; display: inline-flex; gap: 6px; margin-top: 10px; font-size: var(--fs-sm); }
+
+  .pg-projects .stuck { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px 40px; }
+
+  @media (max-width: 960px) {
+    .pg-projects .feat { grid-template-columns: minmax(0, 1fr); }
+    /* stacked: the shot becomes the card's header, edge to edge */
+    .pg-projects .feat__shot { order: -1; margin: calc(-1 * var(--feat-pad)) calc(-1 * var(--feat-pad)) 0; }
+    .pg-projects .feat__shot .frame { border-width: 0 0 1px; border-radius: 0; box-shadow: none; }
+    .pg-projects .feat::before { z-index: 1; }
+  }
+  @media (max-width: 640px) {
+    .pg-projects .phero .display { font-size: clamp(3rem, 14vw, 4.25rem); }
+    .pg-projects .feat__cta .btn, .pg-projects .stuck .btn { width: 100%; }
+  }
+</style>
