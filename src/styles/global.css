@@ -28,6 +28,7 @@
                    .timeline (+ __item __when __what)  .quote (large serif pull line)
    Media ......... .portrait (.portrait--circle .portrait--sm .portrait--ring) — duotone
                    (the duotone filter lives in SvgDefs.astro)
+                   .frame (+ __bar __dots __url): browser chrome around a product shot
    Motion ........ [data-reveal] (+ style="--d:2" stagger step) .marquee > .marquee__track
    Code .......... .code-block (+ .code-block__bar .code-copy) .tok-k/-s/-n
    Elsewhere ..... .prose / .toc / .progress: src/styles/prose.css (post + doc pages only);
@@ -556,6 +557,20 @@ a.chip:hover, button.chip:hover { color: var(--ink); border-color: var(--line-3)
 .portrait--circle { border-radius: 50%; aspect-ratio: 1; }
 .portrait--sm { width: 56px; height: 56px; flex: none; }
 .portrait--ring { box-shadow: 0 0 0 1px var(--line-2), 0 0 0 6px var(--bg), 0 0 0 7px var(--accent-line); }
+
+/* Browser frame around a product shot (/projects/, home, /app/): dots, a centred address pill, a spacer.
+   Phones drop the spacer and push the pill right. */
+.frame { position: relative; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--bg-deep); box-shadow: var(--shadow-2); overflow: hidden; }
+.frame__bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 44px; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.frame__dots { display: inline-flex; gap: 7px; }
+.frame__dots i { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--line-3); }
+.frame__url { display: inline-flex; align-items: center; gap: 8px; height: 26px; padding: 0 14px; border-radius: var(--r-pill); background: var(--bg-deep); border: 1px solid var(--line); font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); }
+.frame__url svg { width: 11px; height: 11px; color: var(--faint); }
+@media (max-width: 640px) {
+  .frame__bar { grid-template-columns: auto 1fr; gap: 12px; }
+  .frame__bar > span:last-child { display: none; }
+  .frame__url { justify-self: end; }
+}
 
 /* ---------- 11. Motion ---------- */
 .js [data-reveal] {

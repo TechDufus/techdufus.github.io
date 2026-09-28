@@ -67,6 +67,7 @@ function intentOf(q: string, d: GuideData): string | undefined {
   if (/\b(homelab|home lab|lab)\b/.test(s) && /\b(run|running|hardware|stack|server|what'?s in|inside)\b/.test(s)) return 'homelab';
   if (/\b(start|begin|first|recommend\w*|best post)\b/.test(s) && /\b(read|reading|post|posts|blog)\b/.test(s)) return 'start';
   if (/\bhow\b/.test(s) && /\b(ai|agents?|agentic|claude|codex)\b/.test(s) && /\b(work|use|workflow)\b/.test(s)) return 'agents';
+  if (/\b(yahwai|projects?)\b/.test(s) || /\byou\b.*\b(building|built|working on)\b/.test(s)) return 'building';
 }
 
 function search(q: string, posts: Post[]) {

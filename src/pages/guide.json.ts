@@ -1,6 +1,6 @@
 // Build-time data for the scripted site guide (src/scripts/guide.ts fetches it on first open).
 // Every answer is written from real site content. Mini-markup: [label](href) links, blank line = paragraph.
-import { business, featuredReposAsOf, labSpec, siteMetadata } from '../data/site';
+import { business, featuredProject, featuredReposAsOf, labSpec, siteMetadata } from '../data/site';
 import { getPostMetas, postStats } from '../lib/content';
 import { getFeaturedRepos } from '../lib/github';
 
@@ -55,6 +55,12 @@ export async function GET() {
         `AI helps with speed, but I still own the final decision and the release. I prefer git-first, reproducible workflows because they are easier to review and easier to recover. Same pattern in my public tooling ([oh-my-claude](${omcUrl}), [openkanban](${kanbanUrl})) and in my homelab GitOps flow.`,
       cards: cards(SLUG.aijob, SLUG.omc, SLUG.obsidian)
     },
+    building: {
+      text:
+        `[${featuredProject.name}](${featuredProject.href}), mostly. It's an AI Bible-study tool, still in pre-release. It answers in plain words and shows you the passages, so you can read them for yourself.\n\n` +
+        `The rest is open source: ${featured.map((r) => `[${r.name}](${r.url})`).join(', ')}. Everything, plus the old PowerShell, is on the [projects page](/projects/).`,
+      cards: []
+    },
     hire: {
       text: business.enabled
         ? `I take on work through ${business.companyName}. The [services](/#services) section has the details, and the best way to reach me is ${mail}.`
@@ -94,6 +100,7 @@ export async function GET() {
       { q: 'What is oh-my-claude?', a: 'omc' },
       { q: 'Where should I start reading?', a: 'start' },
       { q: 'How do you work with AI agents?', a: 'agents' },
+      { q: 'What are you building?', a: 'building' },
       { q: business.enabled ? 'Can I hire you?' : 'How do I reach you?', a: 'hire' }
     ],
     answers

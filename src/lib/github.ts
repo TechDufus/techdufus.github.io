@@ -1,4 +1,5 @@
-import { featuredRepos } from '../data/site';
+import { featuredRepos, featuredReposAsOf } from '../data/site';
+import { fmtDate } from '../components/ui/format';
 
 const GITHUB_TIMEOUT_MS = 2600;
 
@@ -190,3 +191,9 @@ export async function getFeaturedRepos(): Promise<FeaturedRepoMeta[]> {
   );
   return repos.sort((a, b) => b.stars - a.stars);
 }
+
+/** Section aside: "Live from GitHub · built <date>" when every repo came from the API, else the snapshot date. */
+export const featuredReposNote = (repos: readonly RepoMeta[]): string =>
+  repos.length > 0 && repos.every((repo) => repo.live)
+    ? `Live from GitHub · built ${fmtDate(new Date())}`
+    : `GitHub data as of ${fmtDate(featuredReposAsOf)}`;

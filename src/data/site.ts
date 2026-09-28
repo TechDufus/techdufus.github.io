@@ -249,6 +249,7 @@ export type NavItem = { label: string; href: string; business?: boolean };
 
 export const primaryNavigation: NavItem[] = [
   { label: 'Writing', href: '/blog/' },
+  { label: 'Projects', href: '/projects/' },
   { label: 'Lab', href: '/lab/' },
   { label: business.appName, href: business.appHref, business: true },
   { label: 'Services', href: '/#services', business: true },
@@ -264,6 +265,7 @@ export const footerNavigation: { site: NavItem[] } = {
   site: [
     { label: 'Home', href: '/' },
     { label: 'Writing', href: '/blog/' },
+    { label: 'Projects', href: '/projects/' },
     { label: 'Lab', href: '/lab/' },
     { label: business.appName, href: business.appHref, business: true },
     { label: 'Services', href: '/#services', business: true },
@@ -433,6 +435,75 @@ export const featuredRepos: FeaturedRepo[] = [
       pushedAt: '2026-02-20',
       topics: []
     }
+  }
+];
+
+export type FeaturedProject = {
+  name: string;
+  href: string;
+  status: string;
+  tagline: string;
+  description: string;
+  image: { src: string; alt: string; width: number; height: number };
+  facts: { k: string; v: string }[];
+};
+
+/**
+ * YahwAI, on /projects/ and the home Projects section. Tagline, description, image and facts
+ * all come from yahwai.com itself (meta description, og:image, the "will and won't" list).
+ */
+export const featuredProject: FeaturedProject = {
+  name: 'YahwAI',
+  href: 'https://yahwai.com/',
+  status: 'Pre-release',
+  tagline: 'Search the Scriptures. Keep your eyes fixed on Jesus.',
+  description:
+    'An AI Bible-study tool for personal study and for preparing questions to bring to church or a small group. It answers in plain words and shows you the passages, so you can read them for yourself.',
+  image: {
+    src: '/img/projects/yahwai.webp',
+    alt: 'The YahwAI share card: an open book with a gold flame, the name YahwAI, and the words "Search the Scriptures. Keep your eyes fixed on Jesus."',
+    width: 1200,
+    height: 630
+  },
+  facts: [
+    { k: 'Status', v: 'Opening soon' },
+    { k: 'Shows', v: 'The passages behind a reply, from the Berean Standard Bible' },
+    { k: "Won't", v: "Speak for God. Replies aren't Scripture." }
+  ]
+};
+
+export type EarlierWork = {
+  name: string;
+  href: string;
+  year: number;
+  description: string;
+  kind: string;
+  post?: { label: string; href: string };
+};
+
+/** Older public work on /projects/. Descriptions come from each repo's README / Marketplace listing. */
+export const earlierWork: EarlierWork[] = [
+  {
+    name: 'AdminToolkit',
+    href: 'https://github.com/TechDufus/AdminToolkit',
+    year: 2020,
+    description: 'A PowerShell module of administration and utility functions for Windows admins.',
+    kind: 'PowerShell Gallery'
+  },
+  {
+    name: 'HelpDesk',
+    href: 'https://github.com/TechDufus/HelpDesk',
+    year: 2020,
+    description: 'Active Directory and other admin-type utilities typical in a HelpDesk role.',
+    kind: 'PowerShell Gallery'
+  },
+  {
+    name: 'BlogQueue',
+    href: 'https://github.com/marketplace/actions/blog-queue-workflow',
+    year: 2021,
+    description: 'A GitHub Action that publishes blog posts from a queue on a schedule.',
+    kind: 'GitHub Action',
+    post: { label: 'Read the post', href: '/blog/introducing-the-blogqueue-github-action/' }
   }
 ];
 

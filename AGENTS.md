@@ -21,7 +21,7 @@
 - Dev server: `npm run dev`
 - Type/content checks: `npm run check`
 - Production build: `npm run build`
-- Bundle budget check: `npm run check:perf` (after a build; JS/CSS/HTML budgets across home, about, blog, docs, contact, lab)
+- Bundle budget check: `npm run check:perf` (after a build; JS/CSS/HTML budgets across home, about, blog, docs, contact, lab, projects)
 
 ## Content locations
 - Blog posts: `src/content/blog/*.md`
@@ -30,7 +30,9 @@
   - `business`: `enabled` flag plus services, pricing, FAQ and legal data
   - `heroCopy` and `topics` (home hero and ticker)
   - `labSpec`: homelab spec rendered on `/lab/`
+  - `featuredRepos`, `featuredProject` (YahwAI) and `earlierWork`: rendered on `/projects/` (repos and YahwAI also on the home Projects section)
 - Lab page: `src/pages/lab.astro`
+- Projects page: `src/pages/projects.astro`
 - Global layout + metadata tags: `src/layouts/BaseLayout.astro`
 - Public icons/manifest: `public/*`
 
@@ -54,3 +56,4 @@
   - `/docs`
   - `/contact`
   - `/lab`
+  - `/projects`

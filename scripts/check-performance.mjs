@@ -11,7 +11,8 @@ const TOP_LEVEL_PAGES = [
   'blog/index.html',
   'docs/index.html',
   'contact/index.html',
-  'lab/index.html'
+  'lab/index.html',
+  'projects/index.html'
 ];
 
 const BUDGETS = {

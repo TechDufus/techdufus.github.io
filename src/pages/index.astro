@@ -13,12 +13,12 @@ import Draft from '../components/ui/Draft.astro';
 import ProofPoints from '../components/ui/ProofPoints.astro';
 import EmailCopy from '../components/ui/EmailCopy.astro';
 import SocialChips from '../components/ui/SocialChips.astro';
-import { delay, fmtDate, fmtNum, isoDate } from '../components/ui/format';
+import { delay, fmtDate, fmtNum, hostOf, isoDate } from '../components/ui/format';
 import {
   aboutCopy,
   business,
   businessCopy,
-  featuredReposAsOf,
+  featuredProject,
   fillCopy,
   heroCopy,
   homeCopy,
@@ -31,7 +31,7 @@ import {
   topics
 } from '../data/site';
 import { getPostMetas, postStats } from '../lib/content';
-import { getFeaturedRepos } from '../lib/github';
+import { featuredReposNote, getFeaturedRepos } from '../lib/github';
 
 const posts = await getPostMetas();
 const stats = postStats(posts);
@@ -40,10 +40,6 @@ const listPosts = olderPosts.slice(0, 5);
 
 const repos = await getFeaturedRepos();
 const totalStars = repos.reduce((sum, repo) => sum + repo.stars, 0);
-const reposLive = repos.length > 0 && repos.every((repo) => repo.live);
-const reposNote = reposLive
-  ? `Live from GitHub · built ${fmtDate(new Date())}`
-  : `GitHub data as of ${fmtDate(featuredReposAsOf)}`;
 
 // Section numbering follows what actually renders, so the flag never leaves gaps.
 const sectionOrder = ['app', 'writing', 'lab', 'work', 'services', 'about', 'contact'].filter(
@@ -307,20 +303,32 @@ const businessCss = [
     </div>
   </section>
 
-  <!-- ============ OPEN SOURCE ============ -->
+  <!-- ============ PROJECTS ============ -->
   <section id="work" class="section" aria-labelledby="work-title">
     <div class="wrap">
       <SectionHead
         index={sectionIndex('work')}
-        label="Open source"
-        aside={reposNote}
+        label="Projects"
+        aside={featuredReposNote(repos)}
         titleId="work-title"
-        title="Open <em>source</em>."
+        title="Things I <em>build</em>."
       />
+      <article class="yw-card" data-reveal>
+        <img class="yw-card__shot" src={featuredProject.image.src} alt="" width={featuredProject.image.width} height={featuredProject.image.height} loading="lazy" decoding="async" />
+        <div class="yw-card__body">
+          <div class="yw-card__head">
+            <h3 class="yw-card__name"><a href={featuredProject.href} target="_blank" rel="noopener">{featuredProject.name}</a></h3>
+            <span class="chip chip--accent">{featuredProject.status}</span>
+          </div>
+          <p class="yw-card__tagline">{featuredProject.tagline}</p>
+        </div>
+        <span class="yw-card__go" aria-hidden="true">{hostOf(featuredProject.href)} <span class="arrow--ne">↗</span></span>
+      </article>
       <div class="grid grid--2">
         {repos.map((repo) => <RepoCard repo={repo} why={false} />)}
       </div>
       <div class="work__foot">
+        <a class="btn btn--ghost" href="/projects/">All projects <span class="arrow" aria-hidden="true">→</span></a>
         <a class="link link--quiet" href="https://github.com/TechDufus" target="_blank" rel="noopener">More on github.com/TechDufus ↗</a>
       </div>
     </div>
@@ -486,8 +494,28 @@ const businessCss = [
     @media (max-width: 960px) { .pg-home .lab__grid { grid-template-columns: minmax(0, 1fr); } }
     @media (max-width: 640px) { .pg-home .lab__grid .spec > div { grid-template-columns: 92px minmax(0, 1fr); } }
 
-    /* ---------- Work ---------- */
-    .pg-home .work__foot { margin-top: 28px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    /* ---------- Projects ---------- */
+    .pg-home .work__foot { margin-top: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px 24px; }
+    /* YahwAI: a wide, compact card above the repo grid; the name link covers the card */
+    .pg-home .yw-card {
+      position: relative; display: grid; grid-template-columns: 216px minmax(0, 1fr) auto; align-items: center; gap: 28px;
+      margin-bottom: var(--s-5); padding: 16px 28px 16px 16px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line);
+      transition: border-color var(--t-2) ease, background-color var(--t-2) ease;
+    }
+    .pg-home .yw-card:hover { border-color: var(--line-2); background: var(--surface-hover); }
+    .pg-home .yw-card__shot { width: 100%; height: auto; border-radius: calc(var(--r) - 6px); border: 1px solid var(--line); }
+    .pg-home .yw-card__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+    .pg-home .yw-card__name { font-family: var(--font-display); font-weight: 400; font-size: 1.75rem; line-height: 1.1; }
+    .pg-home .yw-card__name a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+    .pg-home .yw-card:hover .yw-card__name a { color: var(--accent-hi); }
+    .pg-home .yw-card__tagline { margin-top: 8px; font-family: var(--font-display); font-style: italic; font-size: 1.125rem; line-height: 1.35; color: var(--muted); }
+    .pg-home .yw-card__go { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--faint); white-space: nowrap; }
+    @media (max-width: 640px) {
+      .pg-home .yw-card { grid-template-columns: 96px minmax(0, 1fr); gap: 16px; padding: 12px 16px 12px 12px; }
+      .pg-home .yw-card__shot { aspect-ratio: 1; object-fit: cover; object-position: 50% 30%; }
+      .pg-home .yw-card__name { font-size: 1.5rem; }
+      .pg-home .yw-card__go { display: none; }
+    }
 
     /* ---------- About ---------- */
     .pg-home .about__bio > p { color: var(--ink-2); font-size: 1.0625rem; max-width: 60ch; }
