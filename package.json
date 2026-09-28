@@ -9,7 +9,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "check:perf": "node scripts/check-performance.mjs"
+    "check:perf": "node scripts/check-performance.mjs",
+    "check:images": "node scripts/check-image-privacy.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.12",

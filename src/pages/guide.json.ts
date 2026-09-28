@@ -57,7 +57,7 @@ export async function GET() {
     },
     building: {
       text:
-        `[${featuredProject.name}](${featuredProject.href}), mostly. It's an AI Bible-study tool, still in pre-release. It answers in plain words and shows you the passages, so you can read them for yourself.\n\n` +
+        `[${featuredProject.name}](${featuredProject.href}), mostly. It's an AI Bible-study tool, opening soon. It answers in plain words and shows you the passages, so you can read them for yourself.\n\n` +
         `The rest is open source: ${featured.map((r) => `[${r.name}](${r.url})`).join(', ')}. Everything, plus the old PowerShell, is on the [projects page](/projects/).`,
       cards: []
     },

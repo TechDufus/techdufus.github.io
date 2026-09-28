@@ -455,7 +455,7 @@ export type FeaturedProject = {
 export const featuredProject: FeaturedProject = {
   name: 'YahwAI',
   href: 'https://yahwai.com/',
-  status: 'Pre-release',
+  status: 'Opening soon',
   tagline: 'Search the Scriptures. Keep your eyes fixed on Jesus.',
   description:
     'An AI Bible-study tool for personal study and for preparing questions to bring to church or a small group. It answers in plain words and shows you the passages, so you can read them for yourself.',
@@ -466,7 +466,6 @@ export const featuredProject: FeaturedProject = {
     height: 630
   },
   facts: [
-    { k: 'Status', v: 'Opening soon' },
     { k: 'Shows', v: 'The passages behind a reply, from the Berean Standard Bible' },
     { k: "Won't", v: "Speak for God. Replies aren't Scripture." }
   ]

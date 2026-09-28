@@ -22,6 +22,7 @@
 - Type/content checks: `npm run check`
 - Production build: `npm run build`
 - Bundle budget check: `npm run check:perf` (after a build; JS/CSS/HTML budgets across home, about, blog, docs, contact, lab, projects)
+- Image privacy check: `npm run check:images` (fails if any tracked image has EXIF/XMP location data; strip with `exiftool -all= -overwrite_original <file>`)
 
 ## Content locations
 - Blog posts: `src/content/blog/*.md`
@@ -48,6 +49,7 @@
 ## Definition of done for changes
 - `npm run check` passes.
 - `npm run build` passes.
+- `npm run check:images` passes (runs in CI before the build).
 - For UI/content-impacting work, verify key routes:
   - `/`
   - `/about`

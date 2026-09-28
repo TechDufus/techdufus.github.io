@@ -18,7 +18,7 @@ const firstYear = Math.min(...earlierWork.map((item) => item.year));
 
 <BaseLayout
   title="Projects"
-  description={`${yw.name}, a pre-release AI Bible-study tool, plus the open-source tools I maintain (${repos.map((repo) => repo.name).join(', ')}) and the PowerShell modules where it started.`}
+  description={`${yw.name}, an AI Bible-study tool opening soon, plus the open-source tools I maintain (${repos.map((repo) => repo.name).join(', ')}) and the PowerShell modules where it started.`}
 >
   <div class="pg-projects">
   <!-- ============ HERO ============ -->
@@ -29,7 +29,7 @@ const firstYear = Math.min(...earlierWork.map((item) => item.year));
       <p class="lede phero__lede" data-reveal style="--d:2">One I'm still building, the open-source tools I lean on, and some old PowerShell.</p>
 
       <dl class="stats phero__stats" data-reveal style="--d:3">
-        <Stat value={1} term="Pre-release" label={`in pre-release: ${yw.name}`} href="#featured" />
+        <Stat value={1} term="Opening soon" label={`opening soon: ${yw.name}`} href="#featured" />
         <Stat value={repos.length} term="Open source" label="open-source repos I maintain" href="#open-source" />
         <Stat value={String(firstYear)} num term="Earlier work" label="my first PowerShell module" href="#earlier" />
       </dl>
