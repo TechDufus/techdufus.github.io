@@ -25,6 +25,8 @@ socialImageHeight: 630
 import OldVsNew from '../../components/drawing/post/operator/OldVsNew.astro';
 import WhoDidWhat from '../../components/drawing/post/operator/WhoDidWhat.astro';
 import TheNight from '../../components/drawing/post/operator/TheNight.astro';
+import TheLoop from '../../components/drawing/post/operator/TheLoop.astro';
+import BlastRadius from '../../components/drawing/post/operator/BlastRadius.astro';
 import SheetLink from '../../components/drawing/post/SheetLink.astro';
 
 # I Rebuilt My Homelab for an AI Operator
@@ -46,6 +48,8 @@ Those sound like the same thing. They aren't, and the difference is the whole po
 When people say "AI in the homelab," they usually mean running models: a GPU, a local LLM, a chat UI in a container. That's AI as a workload. Cool. Not this.
 
 AI-first flips it. The agent isn't something the lab runs. The agent runs the lab. It reads the repo, plans a change, makes it, checks that it worked and writes down what it learned. I own the lab. The agent operates it.
+
+<TheLoop />
 
 Take that seriously and every decision changes. You stop asking "what's the best tool?" and start asking "what's the best tool for the operator?" And my operator doesn't click.
 
@@ -223,12 +227,9 @@ Sometimes the agent was stricter than me. When I asked if it could create the bi
 
 Then there's what it may do alone. The rules go by blast radius, not by tool:
 
-- **Reads and harmless restarts:** any time.
-- **Small, low-risk changes:** allowed, but reported.
-- **Infrastructure changes:** only with me there to confirm.
-- **Wiping disks, firmware, core network changes:** I confirm the exact command, at that moment.
+<BlastRadius />
 
-Unattended runs are capped at the first two. Anything bigger becomes a notification with a diagnosis and the exact command it wants to run.
+Unattended runs never cross the dashed line.
 
 No pull requests, no CI. That was my call: it commits as me, straight to main. The honest part comes from the decision record itself: "the levels are convention plus friction." Nothing technically stops a session that ignores them. For a homelab, I'm fine with that trade. Git remembers everything, and the lab is designed to be rebuilt.
 

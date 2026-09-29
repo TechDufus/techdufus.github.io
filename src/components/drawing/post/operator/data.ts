@@ -1,10 +1,52 @@
 /**
- * The words in "I Rebuilt My Homelab for an AI Operator"'s three figures (OldVsNew, WhoDidWhat,
- * TheNight), kept apart from the drawing code so the copy can be checked in one place. Labels are
- * the owner's, verbatim; the figures only lay them out.
+ * The words in "I Rebuilt My Homelab for an AI Operator"'s five figures (in reading order:
+ * TheLoop, OldVsNew, TheNight, BlastRadius, WhoDidWhat), kept apart from the drawing code so the
+ * copy can be checked in one place. Labels are the owner's, verbatim; the figures only lay them
+ * out.
  */
 
-/* ------------------------------------------------ FIG 1 · Same server. Different operator. */
+export type Who = 'me' | 'agent';
+
+/* ------------------------------------------------------ FIG 1 · How a change happens now */
+
+/** One box of the loop: a bold label, a small sub line, and whose step it is. */
+export type Step = { id: string; label: string; sub?: string; who: Who };
+
+export const theLoop = {
+  title: 'How a change happens now',
+  steps: [
+    { id: 's1', label: 'A sentence from me', sub: 'often from my phone', who: 'me' },
+    { id: 's2', label: 'The agent reads the repo', sub: 'AGENTS.md, skills, decision records', who: 'agent' },
+    { id: 's3', label: 'It changes Git', sub: 'straight to main', who: 'agent' },
+    { id: 's4', label: 'It gets applied', sub: 'Flux in the cluster, OpenTofu and Ansible below', who: 'agent' },
+    { id: 's5', label: 'It checks the result', sub: 'through APIs and CLIs, not screenshots', who: 'agent' },
+    { id: 's6', label: 'It writes the lesson down', sub: 'a skill, a decision record, an issue', who: 'agent' },
+  ] as Step[],
+  /** The gate between steps 2 and 3, and its "yes" branch. */
+  gate: 'Big blast radius?',
+  confirm: { id: 'ok', label: 'I confirm first', who: 'me' } as Step,
+  /** The return arrow from step 6 to step 2. */
+  back: 'the next agent starts here',
+};
+
+/* ------------------------------------------------------------ FIG 4 · Blast radius, not tool */
+
+export const blastRadius = {
+  title: 'Blast radius, not tool',
+  centre: 'the change',
+  /** Centre outward: each ring is a bigger blast radius. */
+  rings: [
+    { label: 'Reads and harmless restarts', sub: 'any time' },
+    { label: 'Small, low-risk changes', sub: 'allowed, but reported' },
+    { label: 'Infrastructure changes', sub: 'only with me there to confirm' },
+    { label: 'Disks, firmware, core network', sub: 'I confirm the exact command, at that moment' },
+  ],
+  /** The dashed line between rings 2 and 3, and the note outside it. */
+  line: 'unattended runs stop here',
+  past: 'past it: a notification with a diagnosis and the exact command',
+};
+
+/* ------------------------------------------------ FIG 2 · Same server. Different operator. */
 
 export const oldVsNew = {
   title: 'Same server. Different operator.',
@@ -23,9 +65,7 @@ export const oldVsNew = {
   ],
 };
 
-/* ------------------------------------------------------------------ FIG 3 · Who did what */
-
-export type Who = 'me' | 'agent';
+/* ------------------------------------------------------------------ FIG 5 · Who did what */
 
 export const whoDidWhat = {
   title: 'Who did what',
@@ -62,7 +102,7 @@ export const whoDidWhat = {
   ],
 };
 
-/* ----------------------------------------------------------- FIG 2 · Bare metal to monitoring */
+/* ----------------------------------------------------------- FIG 3 · Bare metal to monitoring */
 
 /** One moment of the night; `quote` events are the owner's words, drawn as speech. */
 export type Moment = { time: string; event: string; who: Who; quote?: boolean };

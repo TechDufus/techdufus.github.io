@@ -4,7 +4,8 @@
    the agent, in every figure.
    TEXT  .op-t (running text) · .op-old (before, receding) · .op-new (now) · .op-q (a quote) ·
          .op-time · .op-foil (static gold foil: the page's #studio-gold gradient, SvgDefs.astro)
-   MARKS .op-me (hollow) · .op-ag (solid) */
+   BOXES .op-l (a box's bold label) · .op-s (its small sub line)
+   MARKS .op-me (hollow) · .op-ag (solid) · BLAST .op-zone (inside the line) · .op-bd .op-amb (the line) */
 .dwg .op-t{font-size:11.5px;letter-spacing:.01em;fill:var(--dwg-text)}
 .dwg .op-old{fill:var(--muted)}
 .dwg .op-new{fill:var(--ink)}
@@ -13,4 +14,9 @@
 .dwg .op-foil{fill:url(#studio-gold)}
 .dwg .op-me{fill:var(--dwg-paper);stroke:var(--gold-light);stroke-width:1.3px;vector-effect:non-scaling-stroke}
 .dwg .op-ag{fill:var(--gold-light)}
+.dwg .op-l{font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;fill:var(--dwg-text-hi)}
+.dwg .op-s{font-size:10.5px;letter-spacing:.02em;fill:var(--muted)}
+.dwg .op-zone{fill:color-mix(in srgb,var(--gold) 6%,transparent)}
+.dwg .op-bd{stroke:var(--dwg-amber);--sw:1.3px;stroke-dasharray:7 4}
+.dwg .op-amb{fill:var(--dwg-amber)}
 @media print{.dwg .op-foil{fill:#000}}

@@ -1,0 +1,63 @@
+---
+/*
+  FIG 4 · Blast radius, not tool: four rings round the change, each a bigger blast radius. The
+  line between rings 2 and 3 is dashed amber (unattended runs stop there) and the inside of it
+  is faintly tinted. Wide: a half-target on a ground line, the change at its foot, one callout
+  per ring on the right (inner at the bottom), the line's label and note under the ground
+  outside it. Narrow: the rings become bands stacked down from the change, each a little wider,
+  with the dashed line between band 2 and band 3. Labels are drawn once and moved (at()).
+*/
+import Figure from '../../figure/Figure.astro';
+import { at, f, Pen, rc, wrap, type P } from '../../../../lib/drawing/figure';
+import { blastRadius as D } from './data';
+import './operator.css';
+
+/* wide: half rings of radius R on the ground line G, centred at CX; callouts from LX */
+const R = [46, 86, 126, 166], CX = 178, G = 12 + R[3], LX = 372, H = G + 58;
+const arc = (r: number): string => `M${CX - r} ${G}A${r} ${r} 0 0 1 ${CX + r} ${G}`;
+const rowY = (i: number): number => G - 22 - 42 * i; // each ring's label baseline
+const lead = (i: number): P => [CX + 20 + 4.5 * i, rowY(i) - 4];
+
+/* narrow: bands 46 tall, each 16 wider a side than the one inside it; the line between 2 and 3 */
+const NB = [50, 96, 214, 260], BH = 46, NL = 150, NH = NB[3] + BH + 12;
+const band = (i: number): [number, number, number] => [8 + (3 - i) * 16, NB[i], 344 - (3 - i) * 32];
+
+const pen = new Pen()
+  .add('op-zone fg-w', `${arc(R[1])}Z`)
+  .add('op-zone fg-n', [0, 1].map((i) => { const [x, y, w] = band(i); return rc(x, y, w, BH); }).join(''))
+  .add('ln-med fg-w', [0, 2, 3].map((i) => arc(R[i])).join(''))
+  .add('ln-med fg-n', [0, 1, 2, 3].map((i) => { const [x, y, w] = band(i); return rc(x, y, w, BH); }).join(''))
+  .add('ln-med op-bd fg-w', arc(R[1]))
+  .add('ln-med op-bd fg-n', `M8 ${NL}H352`)
+  .add('ln-obj fg-w', `M8 ${G}H348`)
+  .add('ln-thin fg-w', Array.from({ length: 21 }, (_, i) => `M${14 + i * 16} ${G}l-6 6`).join(''))
+  .add('ln-lead fg-w', R.map((_, i) => `M${f(lead(i)[0])} ${lead(i)[1]}H${LX - 8}`).join(''))
+  .add('dim-arr fg-w', R.map((_, i) => { const [x, y] = lead(i); return `M${f(x - 2)} ${y}a2 2 0 1 0 4 0a2 2 0 1 0 -4 0`; }).join(''));
+const past = wrap(D.past, 40);
+
+const desc =
+  `Four rings round ${D.centre}, from the centre outward, each a bigger blast radius. ` +
+  D.rings.slice(0, 2).map((r) => `${r.label}: ${r.sub}.`).join(' ') +
+  ` Then a dashed line: ${D.line}; ${D.past}. ` +
+  D.rings.slice(2).map((r) => `${r.label}: ${r.sub}.`).join(' ');
+---
+
+<Figure id="fig-blast" fig={4} date="2026-09-29" title={D.title} desc={desc} size={[680, H]} narrow={[360, NH]}>
+  <g style="--p:2">{pen.list.map(({ c, d }) => <path class={c} d={d} />)}</g>
+  <g style="--p:5">
+    <g {...at([CX, G], [180, 18], 'fg-c')}>
+      <circle class="op-ag" r="4.5" />
+      <text class="txt-label" y="20">{D.centre}</text>
+    </g>
+    {D.rings.map((r, i) => (
+      <g {...at([LX, rowY(i)], [band(i)[0] + 12, NB[i] + 19])}>
+        <text class="op-l">{r.label}</text>
+        <text class="op-s" y="15">{r.sub}</text>
+      </g>
+    ))}
+    <g {...at([CX + R[1], G + 17], [16, NL + 18])}>
+      <text class="txt-note op-amb">{D.line}</text>
+      <text class="op-s" y="16">{past.map((t, j) => <tspan x="0" dy={j ? 13.5 : undefined}>{t}</tspan>)}</text>
+    </g>
+  </g>
+</Figure>
