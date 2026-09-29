@@ -1,0 +1,97 @@
+---
+/*
+  FIG 2 · Bare metal to monitoring: the night on one vertical time axis, by the owner's clock.
+  Rows are evenly spaced, not to scale, and the night itself is a break in the axis. My moments
+  are hollow marks, the agent's solid. Wide: mine on the left of the axis, the agent's on the
+  right, each time next to the axis. Narrow: the axis near the left edge, times before it,
+  every moment after it. Row heights are the same in both layouts, so only x moves (at()). A
+  couple of points of light run down the axis (the kit's Particles; none under reduced motion).
+*/
+import Figure from '../../figure/Figure.astro';
+import Particles from '../../Particles.astro';
+import { at, wrap } from '../../../../lib/drawing/figure';
+import { theNight as D, type Moment } from './data';
+import './operator.css';
+
+const WRAP = 34, QWRAP = 26; // mono characters a line (≈ 235 units); quotes, italic serif
+const LH = 15, QLH = 17, TOP = 50, GAPH = 58;
+
+/* x: wide axis 340, mine end at 256 (time ends 326), the agent's start 424 (time 354);
+   narrow axis 80, times end at 66, text starts 96 */
+const AX = 340, NAX = 80;
+
+type Row = Moment & { y: number; t: string[]; lh: number };
+let y = TOP;
+const rows: Row[][] = [];
+const breaks: number[] = [];
+D.parts.forEach((part, i) => {
+  if (i) {
+    breaks.push(y - 6);
+    y += GAPH;
+  }
+  rows.push(
+    part.map((m) => {
+      const t = m.quote ? wrap(`“${m.event}”`, QWRAP) : wrap(m.event, WRAP);
+      const lh = m.quote ? QLH : LH;
+      const r = { ...m, y: y + 16, t, lh };
+      y += t.length * lh + 14;
+      return r;
+    }),
+  );
+});
+const H = y + 10;
+const all = rows.flat();
+
+/* the axis, local to x = 0, broken for the night */
+const segs = rows.map((p) => [p[0].y - 14, p[p.length - 1].y + 8] as const);
+const axis = segs.map(([a, b]) => `M0 ${a}V${b}`).join('');
+const brk = breaks.map((b) => {
+  const m = b + GAPH / 2 - 4;
+  return `M-7 ${m - 3}l14 -6M-7 ${m + 5}l14 -6`;
+}).join('');
+
+const say = (m: Moment): string => `${m.time}, ${m.who === 'me' ? 'me' : 'the agent'}: ${m.quote ? `“${m.event}”` : m.event}`;
+const desc =
+  `A timeline of the night, not to scale, with the night itself as a break in the axis; hollow marks are me, solid marks are the agent. ` +
+  D.parts.map((p) => p.map(say).join('; ')).join(`; then ${D.gap}; `) + '.';
+---
+
+<Figure
+  id="fig-night"
+  fig={2}
+  date="2026-09-29"
+  title={D.title}
+  desc={desc}
+  caption={D.foot}
+  size={[680, H]}
+  narrow={[360, H]}
+>
+  <g {...at([AX, 0], [NAX, 0])}>
+    <path class="ln-obj" d={axis} pathLength="1" style="--p:1" />
+    <path class="ln-med" d={brk} style="--p:2" />
+    {segs.map(([a, b]) => <Particles d={`M0 ${a}V${b}`} kind="net10" n={2} dur={5.5} r={2} guide={false} p={3} />)}
+    <g style="--p:4">
+      {all.map((r) => <circle class={r.who === 'me' ? 'op-me' : 'op-ag'} cy={r.y - 4} r="4" />)}
+    </g>
+  </g>
+
+  <g style="--p:5">
+    <g {...at([236, 24], [106, 24])}>
+      <circle class="op-me" cx="-10" cy="-4" r="4" />
+      <text class="txt-label fg-h">me</text>
+    </g>
+    <g {...at([424, 24], [172, 24])}>
+      <circle class="op-ag" cx="-10" cy="-4" r="4" />
+      <text class="txt-label fg-h">agent</text>
+    </g>
+    {breaks.map((b) => <text {...at([AX - 20, b + GAPH / 2], [NAX + 16, b + GAPH / 2], 'txt-note fg-e fg-ns')}>{D.gap}</text>)}
+    {all.map((r) => (
+      <Fragment>
+        <text {...at([r.who === 'me' ? AX - 14 : AX + 14, r.y], [NAX - 14, r.y], `op-time ${r.who === 'me' ? 'fg-e' : 'fg-ne'}`)}>{r.time}</text>
+        <text {...at([r.who === 'me' ? 256 : 424, r.y], [NAX + 16, r.y], `${r.quote ? 'op-q' : 'op-t op-new'}${r.who === 'me' ? ' fg-e fg-ns' : ''}`)}>
+          {r.t.map((t, j) => <tspan x="0" y={j ? j * r.lh : undefined}>{t}</tspan>)}
+        </text>
+      </Fragment>
+    ))}
+  </g>
+</Figure>

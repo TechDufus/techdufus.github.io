@@ -1,0 +1,87 @@
+---
+/*
+  FIG 1 · Same server. Different operator. The old lab and the new one, layer by layer: a
+  drawing-schedule table. Wide: three columns (layer · before → now), the now column on a faint
+  band. Narrow: one block per layer, before (receding) over now (with the arrow). Every cell's
+  text wraps to the same width in both layouts, so each is drawn once and moved (at()).
+*/
+import Figure from '../../figure/Figure.astro';
+import { at, head, wrap } from '../../../../lib/drawing/figure';
+import { oldVsNew as D } from './data';
+import './operator.css';
+
+const WRAP = 34; // characters a line (11.5px mono ≈ 6.9 units a character → ≈ 235 units)
+const LH = 15;
+
+/* wide: 680 · layer 16 · before 124 · arrow 372→410 · now 420 (band from 410) */
+const W = 680, LX = 16, BX = 124, NX = 420, TOP = 60;
+/* narrow: 360 · layer 16 · text 34 */
+const NW = 360, NT = 34, NTOP = 60;
+
+let y = TOP, ny = NTOP;
+const rows = D.rows.map((r) => {
+  const b = wrap(r.before, WRAP), n = wrap(r.now, WRAP);
+  const h = 16 + Math.max(b.length, n.length) * LH;
+  const nh = 42 + (b.length + n.length) * LH;
+  const row = { ...r, b, n, y, ny, h, nh };
+  y += h;
+  ny += nh;
+  return row;
+});
+const H = y + 14, NH = ny + 10;
+
+const rulesW = rows.map((r) => `M${LX} ${r.y}H${W - LX}`).join('') + `M${LX} ${y}H${W - LX}`;
+const rulesN = rows.slice(1).map((r) => `M${LX} ${r.ny}H${NW - LX}`).join('') + `M${LX} ${NTOP - 4}H${NW - LX}`;
+const arrW = rows.map((r) => `M372 ${r.y + 16}H403`).join('');
+const headW = rows.map((r) => head(410, r.y + 16, 'r')).join('');
+const nowY = (r: (typeof rows)[number]): number => r.ny + 36 + r.b.length * LH + 4;
+const arrN = rows.map((r) => `M${LX} ${nowY(r) - 4}h7`).join('');
+const headN = rows.map((r) => head(NT - 6, nowY(r) - 4, 'r')).join('');
+const dashN = rows.map((r) => `M${LX} ${r.ny + 32}h9`).join('');
+
+const desc =
+  `Nine layers of the same server, before (${D.before.head}, ${D.before.sub}) and now (${D.now.head}, ${D.now.sub}). ` +
+  D.rows.map((r) => `${r.layer}: ${r.before}, now ${r.now}`).join('; ') + '.';
+---
+
+<Figure
+  id="fig-operator"
+  fig={1}
+  date="2026-09-29"
+  title={D.title}
+  desc={desc}
+  size={[W, H]}
+  narrow={[NW, NH]}
+>
+  <rect class="fg-band fg-w" x="410" y="8" width={W - 410 - 8} height={H - 16} style="--p:0" />
+  <path class="ln-thin fg-w" d={rulesW} style="--p:1" />
+  <path class="ln-thin fg-n" d={rulesN} style="--p:1" />
+  <g class="fg-edge" style="--p:3">
+    <path class="ln-med fg-w" d={arrW} pathLength="1" />
+    <path class="fg-arr fg-w" d={headW} />
+    <path class="ln-thin fg-n" d={dashN} />
+    <path class="ln-med fg-n" d={arrN} />
+    <path class="fg-arr fg-n" d={headN} />
+  </g>
+
+  <g style="--p:4">
+    <g {...at([BX, 28], [LX, 24])}>
+      <text class="view__t op-old">{D.before.head}</text>
+      <text class="txt-note" y="16">{D.before.sub}</text>
+    </g>
+    <g {...at([NX, 28], [190, 24])}>
+      <text class="view__t op-foil">{D.now.head}</text>
+      <text class="txt-note" y="16">{D.now.sub}</text>
+    </g>
+  </g>
+
+  <g style="--p:5">
+    {rows.map((r) => (
+      <Fragment>
+        <text {...at([LX, r.y + 20], [LX, r.ny + 18], 'txt-label fg-h')}>{r.layer}</text>
+        <text {...at([BX, r.y + 20], [NT, r.ny + 36], 'op-t op-old')}>{r.b.map((t, i) => <tspan x="0" y={i ? i * LH : undefined}>{t}</tspan>)}</text>
+        <text {...at([NX, r.y + 20], [NT, nowY(r)], 'op-t op-new')}>{r.n.map((t, i) => <tspan x="0" y={i ? i * LH : undefined}>{t}</tspan>)}</text>
+      </Fragment>
+    ))}
+  </g>
+</Figure>

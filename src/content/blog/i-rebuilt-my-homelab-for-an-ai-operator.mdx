@@ -1,0 +1,279 @@
+---
+title: 'I Rebuilt My Homelab for an AI Operator'
+description: >-
+  I didn't add AI to my homelab. I scorched it and rebuilt it from bare metal so
+  an agent could run it, and picked every tool for the operator instead of for me.
+pubDate: '2026-09-30'
+created: '2026-09-29'
+tags:
+  - homelab
+  - ai
+  - ai-agents
+  - kubernetes
+  - talos
+  - flux
+  - opentofu
+category: tech
+socialImage: /img/posts/i-rebuilt-my-homelab-for-an-ai-operator.png
+socialImageAlt: >-
+  The post title over a gold-ink drawing on navy: two lanes across five stages,
+  me as the hands and the agent as the operator, with the agent's lane far
+  fuller.
+socialImageWidth: 1200
+socialImageHeight: 630
+---
+import OldVsNew from '../../components/drawing/post/operator/OldVsNew.astro';
+import WhoDidWhat from '../../components/drawing/post/operator/WhoDidWhat.astro';
+import TheNight from '../../components/drawing/post/operator/TheNight.astro';
+import SheetLink from '../../components/drawing/post/SheetLink.astro';
+
+# I Rebuilt My Homelab for an AI Operator
+
+"Proxmox is up!"
+
+That was the whole message. I sent it at 11 on a Monday night, about an hour after I'd shut my server down and pulled its RAID card out by hand.
+
+Then I got out of the way.
+
+By 1:45 AM, a three-node Talos cluster was running on that box. By lunch the next day it had GitOps, real certificates, a first app and monitoring. I didn't build any of it. My AI agent did.
+
+I didn't add AI to my homelab. I rebuilt my homelab for an AI operator.
+
+Those sound like the same thing. They aren't, and the difference is the whole post.
+
+## AI in the homelab vs. AI-first
+
+When people say "AI in the homelab," they usually mean running models: a GPU, a local LLM, a chat UI in a container. That's AI as a workload. Cool. Not this.
+
+AI-first flips it. The agent isn't something the lab runs. The agent runs the lab. It reads the repo, plans a change, makes it, checks that it worked and writes down what it learned. I own the lab. The agent operates it.
+
+Take that seriously and every decision changes. You stop asking "what's the best tool?" and start asking "what's the best tool for the operator?" And my operator doesn't click.
+
+(The agent runs in [oh-my-pi](https://github.com/can1357/oh-my-pi), for the curious. The ideas matter more than the harness.)
+
+## The lab I had was built for me
+
+My old homelab lived in a public repo called [home.io](https://github.com/TechDufus/home.io): Terraform for the VMs, k3s for Kubernetes, Argo CD for deploys, Longhorn for storage. It worked, mostly because I was the one holding it together.
+
+In September I asked an agent to review it, so it could help me manage things. One line from its answer stuck with me:
+
+> Those are manageable for you because you know the history. A fresh agent does not.
+
+Then it kept digging, and the history got embarrassing:
+
+- **I couldn't get root on my own hypervisor.** The agent had to find a working SSH key in my 1Password to get me back in.
+- **A boot drive had reached "impending failure" and nothing noticed.** There were zero backup jobs.
+- **My Terraform state was gone.** Rebuilding it from what was actually running produced a plan that wanted to replace 13 objects. The agent's verdict: "It would never be applied in that form."
+- **My docs lied.** Per-folder CLAUDE.md files still described Traefik and Talos long after both were gone. Stale docs are worse than no docs when your reader believes every word.
+- **My redundancy was fake.** Longhorn kept three replicas on three VMs, all backed by one consumer SSD.
+
+On the 23rd I was still asking for "the most minimal changes possible." Two days later I typed this:
+
+> If I were to completely scorch that server, what's the best way for AI in an automated way to manage it? That's really what I'm looking for.
+
+Two things flipped me. The old lab was shaped around a human, and patching it would only give an agent a tidier version of my mess. And I wanted the real test: not "can an agent maintain my lab?" but "can an agent own it, from bare metal up?"
+
+A few minutes later I said it plainly: "I want an AI-first home lab."
+
+## What AI-first means
+
+The agent came back with a plan: 452 lines, starting with a definition I'd still sign today. The short version:
+
+- **Git is the only way to change anything.** Every layer reconciles from the repo. Nothing precious lives outside Git, 1Password and one remote state bucket.
+- **Rebuildable from scratch.** "Scorching the server and rebuilding it from this repo is a routine, tested operation, not a disaster."
+- **Queryable, not clickable.** Every layer answers "what is running and is it healthy?" through an API or a CLI, "never by screen-scraping a UI."
+- **Agents never see secret values.** They wire up references. Something else resolves the values.
+- **Least privilege by default.** Admin power goes through named commands and clear rules, not credentials lying around.
+- **Few, boring, well-documented tools that language models already know well.**
+
+That last one is my favorite, and it's the one people skip. Your operator learned from the internet, so pick the tools the internet wrote the most about. Boring is a feature when your operator learned its trade from Stack Overflow.
+
+## Tools for the operator, not for me
+
+Here's where it got fun. I pushed back on some of these choices. The agent pushed back on me. A couple of times it pushed back on itself.
+
+<OldVsNew />
+
+### Talos: I pushed back, and lost
+
+I've been burned by Talos before. In 2025 I [got it running with Terraform](/blog/building-a-talos-kubernetes-homelab-on-proxmox-with-terraform/), and calling it a "multi-weekend project" was me being polite. The old lab ended up on k3s.
+
+Funny thing: before it did any research, the agent agreed with past me. "I'd stay with Ubuntu + k3s, which language models know very well." Then it read up and changed its mind.
+
+The day before the swap, I tried to talk it back out:
+
+> i don't want to have to do custom talos ISO building if i want to extend functionality
+
+It didn't budge:
+
+> I'd keep Talos. You won't need to build a custom ISO: new abilities come from official add-ons, each listed as one line in a config file.
+
+Then it pointed out that my old pain was self-inflicted. My old Terraform "downloaded and decompressed the image with shell scripts, which is probably why it felt like custom building." Ouch. Fair.
+
+The real argument was about the operator, not the OS. Talos has no SSH. Every node is a declarative config behind an API: "Nodes are changed only through an API, so there's no SSH drift." A bad config rolls itself back. Or, as the plan put it, for an agent "change the OS" becomes "change YAML."
+
+Everything I disliked about Talos in 2025 was a human-operator problem. No SSH felt wrong because I wanted to poke at things. My agent doesn't want to poke at things. It wants an API. If the agent runs it, it should run the tools it's best at.
+
+Three Talos nodes were up 2 hours and 45 minutes after Proxmox came back, secrets plumbing included. In 2025 that took me several weekends. I'm choosing not to do that math.
+
+### Flux: Git is the interface
+
+In February I wrote "GitOps or go home" about Argo CD. I still mean the GitOps part.
+
+But the plan's argument was hard to beat: "ArgoCD's main value is its UI, which an agent doesn't use." My old lab had also burned about 15 commits chasing Argo drift.
+
+Flux is plain Kubernetes resources, and Git is the interface. When I want to look, Headlamp is right there. The agent reads the same state from the command line. No screenshots required.
+
+### OpenTofu: the state lives off the box
+
+My first instinct was to keep the OpenTofu state on the Proxmox host. If the server dies, I lose everything anyway, right?
+
+The agent's answer started with one sentence:
+
+> The host gets wiped on purpose.
+
+Rebuilds reinstall Proxmox, so state stored there gets deleted every time. "That's how home.io lost its state." Then came the line that sold me: "You'd lose what's running, yes, but not your ability to get it back."
+
+So the state lives in Cloudflare R2 (free at my size, I asked), encrypted before it leaves the machine. That part isn't optional, because Talos machine secrets live in that state. A run without the passphrase fails instead of writing plain state. And any trusted machine can run an apply, not just one special box.
+
+Every Terraform failure in my old lab was really a state failure. OpenTofu encrypts state natively, which fixes the exact part that bit me.
+
+### The hardware had to change too
+
+This is the part people don't expect: I changed hardware for my agent.
+
+My R720xd had a PERC RAID card, and RAID hid the disks, and their health, behind virtual disks. ZFS wants raw disks. So does an agent that's supposed to notice a dying drive before I do.
+
+So I bought an HBA330 and pulled the RAID card. The whole hardware story is in [From Hardware RAID to ZFS on My R720xd](/blog/from-hardware-raid-to-zfs/). Short version: the agent owns the disks now, and there's a skill that says so:
+
+> The owner only does the physical part: pulling and inserting drives. The agent runs every command, from diagnosis to the verified rebuild.
+
+That skill exists because I asked for it: "i never want to run these commands after pulling / replacing a drive." I meant it.
+
+## Monday night, I was the hands
+
+The agent researched the chassis, the backplane and the cabling. Then it built me a runbook: a web page with 11 stages, 61 checkboxes and two kinds of steps, mine and its. The legend said it plainly:
+
+> You is the owner. Agent is the AI agent, over SSH, after you say go.
+
+At 9:44 PM, I sent my AI a status update:
+
+> I'm on step 2.1 of the walkthrough … shutting down VMs and server. just FYI.
+
+It already knew. "The server is already off." Then it told me what to do next: "Tick Stage 2 step 1."
+
+I was checking boxes on a checklist my agent wrote, and reporting my progress to it. That's when the roles flipped for me. I wasn't the operator anymore. I was the hands.
+
+About an hour later: "Proxmox is up!" I handed it back.
+
+The first thing the agent told me afterward was a confession:
+
+> I didn't show you the disk commands first.
+
+The rules said it needed my OK before wiping disks and before adding an old SAS drive to the boot pool. It did both without asking. Everything it wiped was the old install and disks I'd already written off, and it all matched the runbook. It flagged itself anyway: "Still, that was a skipped approval, and I'll ask first next time."
+
+Honestly, that built more trust than it cost. The disks were disposable, it followed the runbook, and it owned up without being asked. That's a mistake I can live with.
+
+<TheNight />
+
+The next morning it wrote a kubeconfig script for me (the human needs access too), then stood up Flux, 1Password Connect, External Secrets, the Gateway API, real certificates and Headlamp.
+
+At 11:11 AM I typed "it works! I love it!" In the same message I asked: "is this documented? is there a skill for this local vs public unifi DNS stuff?"
+
+That second part is the whole mindset.
+
+## Every fix ends as a skill
+
+In an AI-first lab, "it works" isn't done. Done is when the next agent can do it without me.
+
+I caught myself asking the same thing over and over:
+
+- "ensure there's a agent skill for this storage management for ZFS"
+- "is there a SKILL in this repo for this new Pi op proxy stuff for creds?"
+- "is there a skill for this local vs public unifi DNS stuff?"
+
+The repo has six skills now (ZFS storage, secrets, exposing an app, network inspection, storage inspection and observability), 15 decision records and three dozen issues for what's next.
+
+Then the lab tested it. A separate agent, the one filing issues, noticed the boot pool was DEGRADED. The operator agent dug in:
+
+- One of my cheap boot SSDs had dropped off the controller twice and come back.
+- Both of those SSDs report the same serial number. (Thanks, Gigastone.) So when the flaky one came back, ZFS opened the wrong disk for the other slot.
+- No data was lost. With my OK, it re-attached the disk by its bay instead of its ID, resilvered in 84 seconds with zero errors, and changed the host to find pools by bay from then on.
+- Then it wrote the check and the fix into the ZFS skill, and filed an issue to replace the failing SSD.
+
+I found out from a summary that opened with "Something broke while this was happening, and it's fixed." Best way to hear about an incident, honestly.
+
+The plan went the same way. PLAN.md grew from 452 lines to 1,805. Then I told the agent: "this PLAN file won't live forever, we should wrap up what's in there so we can get rid of it and you and i drive what comes next, not the PLAN file." It became architecture docs, decision records and issues. A plan is scaffolding. The repo is the memory.
+
+## Out of the approval loop, not out of the decisions
+
+The biggest blocker wasn't Kubernetes. It was me pressing enter.
+
+1Password's desktop app asks a human to approve access. That's great security and a terrible operator experience. In my words at the time: "a human me having to be around to approve all this stuff is really annoying." I do a lot of SSH-ing from my phone to talk to AI, and I need those agents to do everything they need without me.
+
+So the Raspberry Pi in my rack became a credential broker. It holds a scoped 1Password service account, and agents on my machines ask it for what they need, by name. No desktop prompts. Inside the cluster, 1Password Connect and External Secrets do the same job for apps.
+
+The rule underneath all of it: agents handle references, not values. I put it this way:
+
+> they act on my behalf and i'm fine with these creds being around, as long as the agent isn't reading them directly (obviously).
+
+Sometimes the agent was stricter than me. When I asked if it could create the big API key itself, it talked me out of it:
+
+> I recommend against it: a token that can create tokens can give itself anything, so it's effectively full control of your Cloudflare account.
+
+Then there's what it may do alone. The rules go by blast radius, not by tool:
+
+- **Reads and harmless restarts:** any time.
+- **Small, low-risk changes:** allowed, but reported.
+- **Infrastructure changes:** only with me there to confirm.
+- **Wiping disks, firmware, core network changes:** I confirm the exact command, at that moment.
+
+Unattended runs are capped at the first two. Anything bigger becomes a notification with a diagnosis and the exact command it wants to run.
+
+No pull requests, no CI. That was my call: it commits as me, straight to main. The honest part comes from the decision record itself: "the levels are convention plus friction." Nothing technically stops a session that ignores them. For a homelab, I'm fine with that trade. Git remembers everything, and the lab is designed to be rebuilt.
+
+And then I handed it over:
+
+> You own the cluster, you do any cleanup that you want.
+
+Its next update started with "Since you said the cluster is mine, I also went ahead with persistent storage." Fair enough.
+
+<WhoDidWhat />
+
+## What I still do
+
+I'm not pretending the human is gone. Here's the honest list:
+
+- **The physical stuff.** Cards, cables, drives, USB sticks. It doesn't get a screwdriver.
+- **The accounts.** I created three API tokens in web dashboards and clicked a handful of 1Password approvals. A few 1Password operations still need me at a computer.
+- **The calls.** Private repo. No CI. No Tailscale (sorry, [February me](/blog/i-deleted-my-cloudflare-tunnels-tailscale-operator-homelab-k8s/)). Single DNS records, not a wildcard. A three-way mirror for the boot pool. The agent proposes, I decide.
+- **The failing SSD.** It found it. I'll swap it.
+
+And plenty isn't done. Phone alerts aren't hooked up yet. The unattended side, where an alert wakes an agent that investigates and proposes the fix, is still an issue in the repo. Backups aren't in place. And the real proof, destroying the cluster and rebuilding it from Git, 1Password and R2 alone, hasn't happened yet.
+
+Still figuring this out. That's half the fun.
+
+## Steal this
+
+If you want an AI-first lab, or an AI-first anything, here's what I'd steal:
+
+- **Pick tools for the operator.** If a tool's main value is its UI, it's a tool for humans. Agents want APIs, CLIs and declarative config.
+- **Put the history in the repo.** An agent can't read your muscle memory. Write skills, decision records and docs, and delete the docs that lie.
+- **Make every fix a skill.** "It works" isn't done. Done is when the next agent can do it without you.
+- **Take yourself out of the approval loop, not out of the decisions.** Service accounts and references instead of prompts. Blast-radius rules instead of approving every read.
+- **Rebuild beats repair.** If an agent can't rebuild it from the repo, it doesn't own it. You do, and you're the bottleneck.
+- **Change the hardware if you have to.** An operator that can't see the disks can't run them.
+
+## The picture moved
+
+In February I wrote that [AI already took my job](/blog/ai-already-took-my-job/), and that it still struggles to hold the whole picture: the networking, the storage, the history, how it all fails together. I still believe that.
+
+What changed is where the picture lives. It used to live in my head. Now it lives in the repo, where my agent can read it.
+
+I didn't stop being the engineer. I stopped being the operator.
+
+The whole stack is drawn on Sheet 03, and my agent keeps that drawing in sync with the lab, too.
+
+<SheetLink sheet="stack" />
+
+Proxmox is up. The rest is the agent's job.

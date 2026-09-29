@@ -1,36 +1,83 @@
 ---
 /*
-  SheetLink: the card at the end of the post that points to Sheet 02 (TD-LAB-02), with a tiny
-  front elevation of the R720xd drawn from its dimensions and bay count.
+  SheetLink: the card at the end of a post that points to a lab sheet, with a tiny drawing.
+    sheet="server"  (default) Sheet 02 (TD-LAB-02): a front elevation of the R720xd drawn from
+                    its dimensions and bay count
+    sheet="stack"   Sheet 03 (TD-LAB-03): the three layers as storeys, a box per thing, planned
+                    ones dashed (from src/data/lab/stack.ts); title, note and link from labSpec
 */
 import { device } from '../../../data/lab/rack';
 import { server } from '../../../data/lab/server';
+import { stack } from '../../../data/lab/stack';
+import { labSpec } from '../../../data/site';
 import { f } from '../../../lib/drawing/figure';
 
-const href = device('r720xd').sheetHref ?? '/lab/r720xd/';
-const { before, now } = server.controller;
-const { body, earsWidth } = server.dims;
+interface Props {
+  sheet?: 'server' | 'stack';
+}
+const { sheet = 'server' } = Astro.props;
 
-/* thumbnail: front elevation, ears included, fitted to 150 units wide */
-const k = 150 / earsWidth;
-const W = earsWidth * k, H = body.h * k, ear = ((earsWidth - body.w) / 2) * k;
-const X = 5, Y = 8;
-const n = server.bays.front;
-const bayW = (W - 2 * ear - 4) / n;
-const bays = Array.from({ length: n + 1 }, (_, i) => `M${f(X + ear + 2 + i * bayW)} ${f(Y + 3)}v${f(H - 6)}`).join('');
-const outline = `M${X} ${Y}h${f(W)}v${f(H)}h${f(-W)}Z M${f(X + ear)} ${Y}v${f(H)}M${f(X + W - ear)} ${Y}v${f(H)}`;
+let href: string, meta: string, title: string, desc: string, go: string;
+let H: number, outline: string, bays: string, hid = '';
+if (sheet === 'stack') {
+  const s = labSpec.drawings.sheets.find((x) => x.no === 'TD-LAB-03');
+  if (!s) throw new Error('SheetLink: labSpec has no TD-LAB-03 sheet');
+  ({ href, title } = s);
+  // No Rev here: Sheet 03 is still going up, and its REV lives in StackSheet.astro.
+  meta = 'TD-LAB-03 · Sheet 3 of 3 · Checked TD';
+  desc = s.note;
+  go = 'Open Sheet 03';
+
+  /* thumbnail: the layers as storeys, top layer on top, fitted to 150 units wide */
+  const X = 5, Y = 8, W = 150, FH = 16, SLAB = 4, PAD = 3, G = 2;
+  H = stack.length * (FH + SLAB);
+  outline = `M${X - 3} ${Y + H}H${X + W + 3}`;
+  bays = '';
+  [...stack].reverse().forEach((l, i) => {
+    const y = Y + i * (FH + SLAB);
+    outline += `M${X} ${y}h${W}v${FH}h${-W}Z`;
+    const cells = l.groups.flatMap((g) => (g.items.length ? g.items.map((it) => it.status === 'planned') : [true]));
+    const rows = cells.length > 6 ? 2 : 1;
+    const per = Math.ceil(cells.length / rows);
+    const bw = (W - 2 * PAD - G * (per - 1)) / per;
+    const bh = (FH - 2 * PAD - G * (rows - 1)) / rows;
+    cells.forEach((planned, j) => {
+      const d = `M${f(X + PAD + (j % per) * (bw + G))} ${f(y + PAD + Math.floor(j / per) * (bh + G))}h${f(bw)}v${f(bh)}h${f(-bw)}Z`;
+      if (planned) hid += d;
+      else bays += d;
+    });
+  });
+} else {
+  href = device('r720xd').sheetHref ?? '/lab/r720xd/';
+  const { before, now } = server.controller;
+  const { body, earsWidth } = server.dims;
+  meta = 'TD-LAB-02 · Sheet 2 of 3 · Rev B · Checked TD';
+  title = 'The server';
+  desc = `The R720xd inside and out, after the ${before.name} → ${now.id.toUpperCase()} swap.`;
+  go = 'Open Sheet 02';
+
+  /* thumbnail: front elevation, ears included, fitted to 150 units wide */
+  const k = 150 / earsWidth;
+  const W = earsWidth * k, ear = ((earsWidth - body.w) / 2) * k;
+  const X = 5, Y = 8;
+  H = body.h * k;
+  const n = server.bays.front;
+  const bayW = (W - 2 * ear - 4) / n;
+  bays = Array.from({ length: n + 1 }, (_, i) => `M${f(X + ear + 2 + i * bayW)} ${f(Y + 3)}v${f(H - 6)}`).join('');
+  outline = `M${X} ${Y}h${f(W)}v${f(H)}h${f(-W)}Z M${f(X + ear)} ${Y}v${f(H)}M${f(X + W - ear)} ${Y}v${f(H)}`;
+}
 ---
 
 <a class="pf-card" href={href}>
   <svg class="pf-card__th" viewBox={`0 0 160 ${f(H + 16)}`} aria-hidden="true" focusable="false">
     <path class="pf-card__o" d={outline} />
-    <path class="pf-card__b" d={bays} />
+    <path class="pf-card__b" d={bays} />{hid && <path class="pf-card__b" d={hid} stroke-dasharray="3 2" />}
   </svg>
   <span class="pf-card__txt">
-    <span class="pf-card__meta">TD-LAB-02 · Sheet 2 of 3 · Rev B · Checked TD</span>
-    <span class="pf-card__t">The server</span>
-    <span class="pf-card__d">The R720xd inside and out, after the {before.name} → {now.id.toUpperCase()} swap.</span>
-    <span class="pf-card__go">Open Sheet 02 <span class="arrow" aria-hidden="true">→</span></span>
+    <span class="pf-card__meta">{meta}</span>
+    <span class="pf-card__t">{title}</span>
+    <span class="pf-card__d">{desc}</span>
+    <span class="pf-card__go">{go} <span class="arrow" aria-hidden="true">→</span></span>
   </span>
 </a>
 

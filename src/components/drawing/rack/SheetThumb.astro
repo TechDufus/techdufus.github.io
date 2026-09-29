@@ -8,14 +8,18 @@
     kind="stack"    Sheet 03: the three layers as storeys, one box per thing, planned ones dashed
     kind="path"     the post: disks → PERC → virtual disks → Proxmox (red, dashed: gone) over
                     disks → HBA330 → ZFS pools → Proxmox (green: what went in)
+    kind="lanes"    the operator post's FIG 2: two lanes across five stages, a stroke per line of
+                    each item, mine (top, hollow marks) sparse and the agent's (bottom) dense
   Decorative: the card's text names the sheet, so the SVG is aria-hidden.
 */
 import { HOLES, rr, slotOf$, yBot, yTop } from './model';
 import { server } from '../../../data/lab/server';
 import { stack } from '../../../data/lab/stack';
+import { whoDidWhat } from '../post/operator/data';
+import { wrap } from '../../../lib/drawing/figure';
 
 interface Props {
-  kind: 'cabinet' | 'server' | 'stack' | 'path';
+  kind: 'cabinet' | 'server' | 'stack' | 'path' | 'lanes';
 }
 const { kind } = Astro.props;
 const r1 = (n: number): string => String(Math.round(n * 10) / 10);
@@ -98,6 +102,35 @@ if (kind === 'cabinet') {
   });
   // ground line with short hatch strokes under the bottom storey
   thin += `M${X0 - 20} ${Hh}H${X0 + W + 6}` + Array.from({ length: 24 }, (_, i) => `M${X0 - 12 + i * 19} ${Hh}l-7 7`).join('');
+} else if (kind === 'lanes') {
+  // Five columns; per item a mark (a ring for me, a square for the agent) and one stroke per
+  // wrapped line, its length from the line's length. Lane heights follow the fuller cell.
+  const W = 480, CW = W / whoDidWhat.stages.length, PITCH = 9, GAP = 6, PAD = 12, WRAP = 19;
+  const cell = (xs: string[]) => xs.map((x) => wrap(x, WRAP).map((l) => l.length));
+  const height = (c: number[][]): number => c.reduce((s, it) => s + it.length * PITCH + GAP, -GAP);
+  const lanes = (['me', 'agent'] as const).map((k) => whoDidWhat.stages.map((s) => cell(s[k])));
+  let top = 0;
+  lanes.forEach((cols, li) => {
+    const h = PAD * 2 + Math.max(...cols.map(height));
+    obj += rr(0, top, W, h);
+    thin += cols.slice(1).map((_, i) => `M${r1((i + 1) * CW)} ${r1(top + 6)}v${r1(h - 12)}`).join('');
+    cols.forEach((items, ci) => {
+      let y = top + PAD + 3;
+      for (const lines of items) {
+        const x = ci * CW + 10;
+        if (li === 0) thin += `M${r1(x + 3)} ${r1(y)}m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0`;
+        else med += rr(x, y - 2.5, 5, 5);
+        lines.forEach((n, j) => {
+          const d = `M${r1(x + 12)} ${r1(y + j * PITCH)}h${r1((n / WRAP) * (CW - 30))}`;
+          if (li === 0) med += d;
+          else obj += d;
+        });
+        y += lines.length * PITCH + GAP;
+      }
+    });
+    top += h + 8;
+  });
+  vb = `-6 -6 ${W + 12} ${r1(top - 8 + 12)}`;
 } else {
   // Two rows, as the post's FIG 1: every drive before (the pulled SAS drive included), the kept
   // ones after; 4 virtual disks (the OS's view before) against one line per pool.

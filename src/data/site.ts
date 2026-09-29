@@ -624,7 +624,7 @@ export const labSpec: {
   drawings: {
     lede: string;
     sheets: LabDrawing[];
-    posts: { title: string; href: string; note: string; thumb: 'path' }[];
+    posts: { title: string; href: string; note: string; thumb: 'path' | 'lanes' }[];
   };
   /** Newest first. `cta` is the link text (default "Read the post"). */
   changelog: { date: string; title: string; href?: string; note?: string; cta?: string }[];
@@ -677,6 +677,12 @@ export const labSpec: {
         href: '/blog/from-hardware-raid-to-zfs/',
         note: 'The swap, start to finish, with the drawings in it.',
         thumb: 'path'
+      },
+      {
+        title: 'I rebuilt my homelab for an AI operator',
+        href: '/blog/i-rebuilt-my-homelab-for-an-ai-operator/',
+        note: 'Why it’s built for an agent to run, and who did what.',
+        thumb: 'lanes'
       }
     ]
   },
