@@ -683,6 +683,13 @@ export const labSpec: {
   changelog: [
     {
       date: '2026-09-29',
+      title: 'Real HTTPS, first app',
+      href: '/lab/stack/',
+      note: 'Apps on my network get proper HTTPS now: cert-manager fetches the certificates and Cilium serves them. First one in: Headlamp, a web UI for the cluster.',
+      cta: 'See the stack'
+    },
+    {
+      date: '2026-09-29',
       title: 'Talos cluster, Flux and friends',
       href: '/lab/stack/',
       note: 'Three Talos VMs on Proxmox, built with OpenTofu. Cilium runs the network, and Flux runs the cluster from git.',

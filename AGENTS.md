@@ -34,6 +34,7 @@
   - `labSpec`: homelab spec rendered on `/lab/`
   - `featuredRepos`, `featuredProject` (YahwAI) and `earlierWork`: rendered on `/projects/` (repos and YahwAI also on the home Projects section)
 - Lab data: `src/data/lab/` (`types.ts`; `rack.ts` for the cabinet, its devices and network links; `server.ts` for the R720xd as built; `stack.ts` for the software layers). Plain values; every clickable thing carries a `card`. Stack items are `running` or `planned` (planned draws as dashed phantom lines): flip the status as the homelab rebuild lands, and every drawing, the home lab section and the site guide follow
+- Syncing the lab with the homelab repo (`../homelab`): follow `.omp/skills/lab-sync/SKILL.md` (source map, status rules, drawing limits, privacy scan); the last synced homelab commit is the marker on line 1 of `src/data/lab/stack.ts`
 - Lab page: `src/pages/lab.astro` (the cabinet and stack excerpts, the sheet index, changelog, desk); drawing sheets: `src/pages/lab/rack.astro` (Sheet 01), `src/pages/lab/r720xd.astro` (Sheet 02), `src/pages/lab/stack.astro` (Sheet 03), with heavy secondary views pre-rendered as partials in `src/pages/lab/*/views.astro`
 - Projects page: `src/pages/projects.astro`
 - Global layout + metadata tags: `src/layouts/BaseLayout.astro`

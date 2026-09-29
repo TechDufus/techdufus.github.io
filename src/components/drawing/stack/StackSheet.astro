@@ -26,12 +26,15 @@ const plan = [
   id={DWG}
   dwgNo="TD-LAB-03"
   title="The stack"
-  desc="The software on the lab, drawn as a building. Section A–A: the R720xd below grade on three ZFS pools, Proxmox at ground level, the gateway, NAS and control node beside it; a floor of virtual machines with three Talos nodes; the Kubernetes cluster as a tower on those nodes, with Cilium as its floor, the platform as fixtures and an empty apps storey. Plan: the three nodes inside the Proxmox host, one API endpoint, one network, and their disks on the fast pool. Solid is running, dashed is planned."
+  desc="The software on the lab, drawn as a building. Section A–A: the R720xd below grade on three ZFS pools, Proxmox at ground level, the gateway, NAS and control node beside it; a floor of virtual machines with three Talos nodes; the Kubernetes cluster as a tower on those nodes, with Cilium as its floor, the platform as fixtures and the apps storey on top. Plan: the three nodes inside the Proxmox host, one API endpoint, one network, and their disks on the fast pool. Solid is running, dashed is planned."
   sheet={[3, 3]}
-  rev="A"
+  rev="B"
   date="2026-09-29"
   checked="TD"
-  revisions={[{ rev: 'A', date: '2026-09-29', desc: 'First issue' }]}
+  revisions={[
+    { rev: 'A', date: '2026-09-29', desc: 'First issue' },
+    { rev: 'B', date: '2026-09-29', desc: 'Gateway, cert-manager, first app' },
+  ]}
   stamp={{ text: 'IN PROGRESS', tone: 'wip', x: 1086, y: 214 }}
   interactive
   hint
