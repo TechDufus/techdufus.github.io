@@ -19,7 +19,8 @@ Astro; the browser only gets SVG, a little CSS and one small script.
   and friends.
 - **A figure** is one idea in a post: a flow, a stack, a before/after, a hand-off or some bars.
   Pass plain data to a primitive and it lays itself out twice, once for the ~680px prose column
-  and once for a phone, 360 units wide and reflowed vertically. Figures sit in the text column
+  and once for a phone, 272 units wide and reflowed vertically (so 10.5-unit notes read at 12px
+  or more and 12-unit labels at 14px or more on a 320px-wide figure). Figures sit in the text column
   (or break out of it), carry a one-line caption, and can have a FIG title strip.
 
 If a post needs a picture that isn't a flow, stack, comparison, lanes or bars, draw it inside
@@ -52,7 +53,7 @@ the post that's imported the same way. Types (`FlowNode`, `StackLayer`, …) com
 | `hint` | `boolean \| string` | on when any node has a `card` | The "Hover or tap anything numbered." cue beside the caption. |
 | `desc` | `string` | generated from the data | The SVG `<desc>`. Write one when the generated sentence isn't good enough. |
 | `scale`, `rev`, `date` | `string` | `"NTS"`, `"A"`, none | Strip fields. |
-| `bp` | `number` | 0.8 × wide width | Figure width in px below which the narrow layout is used. |
+| `bp` | `number` | the wide width | Figure width in px below which the narrow layout is used. The default keeps the wide layout at 1:1 or larger; the narrow one is capped at 1.4 px a unit (and 440px). |
 
 ### Nodes (`FigNode`)
 
@@ -190,7 +191,7 @@ import Node from '../components/drawing/figure/Node.astro';
 import { at, boxes, rc } from '../lib/drawing/figure';
 const [a] = boxes([{ id: 'nas', label: 'UNAS Pro 8', card: { title: 'UNAS Pro 8', lines: ['NFS over 10 GbE.'] } }], 140);
 ---
-<Figure id="fig-x" title="…" desc="…" caption="…" size={[680, 200]} narrow={[360, 320]} interactive hint>
+<Figure id="fig-x" title="…" desc="…" caption="…" size={[680, 200]} narrow={[272, 320]} bp={680} interactive hint>
   <g class="fg-w"><path class="ln-med" d="M40 100H300" pathLength="1" /></g>
   <g class="fg-n"><path class="ln-med" d="M180 40V140" pathLength="1" /></g>
   <Node box={a} wp={[300, 70]} np={[110, 140]} />
@@ -198,6 +199,10 @@ const [a] = boxes([{ id: 'nas', label: 'UNAS Pro 8', card: { title: 'UNAS Pro 8'
   <Fragment slot="cards"><PartCard id="nas" title="UNAS Pro 8" lines={['NFS over 10 GbE.']} /></Fragment>
 </Figure>
 ```
+
+Keep lettering at 10.5 units or more and the narrow layout at 272 units or less, and pass
+`bp` = the wide width (Figure's own default, 0.8 × w, lets the wide layout shrink). A primitive
+box can carry `nb` (its own narrow size and lettering); `Node` then draws it once per layout.
 
 `Figure` props: `id`, `title`, `desc` (required here), `caption`, `size: [w, h]`,
 `narrow?: [w, h]`, `bp`, `breakout`, `fig`, `hint`, `interactive`, `scale`, `rev`, `date`,

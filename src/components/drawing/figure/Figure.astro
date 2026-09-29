@@ -5,7 +5,7 @@
   title strip. The primitives (FlowFigure, StackFigure, CompareFigure, LanesFigure, BarsFigure)
   build on it; use it directly for a hand-drawn figure in the same frame.
 
-  <Figure id="fig-x" title="…" desc="…" caption="…" size={[680, 240]} narrow={[360, 420]} fig={2}>
+  <Figure id="fig-x" title="…" desc="…" caption="…" size={[680, 240]} narrow={[272, 420]} bp={680} fig={2}>
     <g class="fg-w">…wide-only lines…</g>
     <g class="fg-n">…narrow-only lines…</g>
     <g {...at([40, 30], [20, 60])}>…a block drawn once, moved between layouts…</g>
@@ -16,7 +16,8 @@
     narrow    [w, h] of the phone layout. Below `bp` px of figure width (default 0.8 × w) the
               script swaps the viewBox and adds .is-narrow: .fg-w hides, .fg-n shows, .fg-m
               blocks move to their --n (at() in lib/drawing/figure.ts). Without JS the wide
-              layout pans sideways instead.
+              layout pans sideways instead. The narrow layout is capped at 1.4 px a unit (and
+              440px), so it doesn't balloon on tablets.
     breakout  wider than the text column: into the right margin on the three-column post layout,
               centred on narrower screens (never past the page gutter)
     caption   one short line, in voice (sans, muted, under the drawing)
@@ -99,6 +100,7 @@ const dwgNo = fig === undefined ? title : typeof fig === 'number' ? `FIG ${fig}`
       const on = e.contentRect.width < Number(bp);
       if (fig.classList.contains('is-narrow') === on && fig.dataset.vbSet) continue;
       fig.dataset.vbSet = '';
+      fig.style.setProperty('--fg-nw', narrow.split(' ')[2]);
       fig.classList.toggle('is-narrow', on);
       fig.querySelector('.dwg__svg')?.setAttribute('viewBox', on ? narrow : wide);
     }

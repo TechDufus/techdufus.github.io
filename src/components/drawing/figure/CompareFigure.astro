@@ -35,7 +35,7 @@ const text =
     rows.filter((r) => r.stamp).map((r) => ` ${r.label} is stamped ${typeof r.stamp === 'string' ? r.stamp : r.stamp!.text}.`).join('');
 ---
 
-<Figure {...base} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0} defs={L.rows.some((r) => r.stamp) ? ['rough'] : []}>
+<Figure {...base} bp={base.bp ?? L.size[0]} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0} defs={L.rows.some((r) => r.stamp) ? ['rough'] : []}>
   {(['w', 'n'] as const).map((k) => (
     <g class={`fg-${k}`}>
       <path class="ln-thin" d={L.rules[k]} style="--p:1" />

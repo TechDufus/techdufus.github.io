@@ -3,16 +3,17 @@
   Node: one box of a figure primitive (a Box from lib/drawing/figure.ts boxes()), drawn once and
   placed in both layouts. Tone classes colour it; `planned` draws a dashed phantom outline. A node
   with a `card` is a kit part: focusable button, numbered balloon on its corner, name tag on
-  hover/focus, and the card (the primitive renders the PartCard template).
+  hover/focus, and the card (the primitive renders the PartCard template). A box with `nb` (a
+  narrow size of its own) draws its outline and lettering once per layout (.fg-w / .fg-n).
 
   <Node box={b} wp={[x, y]} np={[nx, ny]} />
 
-    box    the sized node (w, h, wrapped lines, tone, n)
+    box    the sized node (w, h, wrapped lines, tone, n, nb?)
     wp np  top-left in the wide / narrow layout (np omitted: same spot)
     p      plot order (default 2)
 */
 import Balloon from '../Balloon.astro';
-import { at, f, rc, toneOf, type Box, type P } from '../../../lib/drawing/figure';
+import { at, f, rc, toneOf, type Box, type Line, type P } from '../../../lib/drawing/figure';
 
 interface Props {
   box: Box;
@@ -25,12 +26,24 @@ const planned = b.tone === 'planned';
 const part = b.card
   ? { class: 'part', 'data-part': b.id, role: 'button' as const, tabindex: '0', 'aria-pressed': 'false' as const, 'aria-label': b.label }
   : {};
+/* one entry per layout: both when the narrow box has its own size */
+const faces: { w: number; h: number; lines: Line[]; k: string }[] = b.nb
+  ? [{ w: b.w, h: b.h, lines: b.lines, k: ' fg-w' }, { ...b.nb, k: ' fg-n' }]
+  : [{ w: b.w, h: b.h, lines: b.lines, k: '' }];
 ---
 
 <g {...at(wp, np, `fg-node ${toneOf(b.tone)}`.trim(), `--p:${p}`)}>
   <g {...part}>
-    <path class={planned ? 'face ln-phantom' : 'face ln-obj'} d={rc(0, 0, b.w, b.h)} pathLength={planned ? undefined : '1'} />
-    {b.lines.map((l) => <text class={`${l.cls} fg-c`} x={f(b.w / 2)} y={f(l.y)}>{l.t}</text>)}
+    {faces.map((fc) => (
+      <Fragment>
+        <path class={(planned ? 'face ln-phantom' : 'face ln-obj') + fc.k} d={rc(0, 0, fc.w, fc.h)} pathLength={planned ? undefined : '1'} />
+        {fc.lines.map((l) => <text class={`${l.cls} fg-c${fc.k}`} x={f(fc.w / 2)} y={f(l.y)}>{l.t}</text>)}
+      </Fragment>
+    ))}
   </g>
-  {b.card && b.n && <Balloon at={[b.w, 0]} n={b.n} part={b.id} r={9} />}
+  {b.card && b.n && (b.nb ? (
+    <g {...at([b.w, 0], [b.nb.w, 0])}><Balloon at={[0, 0]} n={b.n} part={b.id} r={9} /></g>
+  ) : (
+    <Balloon at={[b.w, 0]} n={b.n} part={b.id} r={9} />
+  ))}
 </g>

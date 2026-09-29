@@ -2,7 +2,7 @@
 /*
   FIG 2 · Three pools, no new drives. One block per pool (members, layout, usable size, what it
   holds) plus the failing drive set aside, each a clickable part with the data's card. Wide: four
-  blocks in a row. Narrow: two by two.
+  blocks in a row. Narrow (272 units): one column, the drive set aside under a dashed rule.
 */
 import Figure from '../figure/Figure.astro';
 import Balloon from '../Balloon.astro';
@@ -22,8 +22,7 @@ type Block = { id: string; w: number; wp: P; np: P; c: string; head: string; sub
 
 const widths = [180, 150, 150, 130];
 const xs = widths.map((_, i) => 12 + widths.slice(0, i).reduce((s, w) => s + w + 18, 0));
-const nxs = [8, 206, 8, 206];
-const Y0 = 30, NY1 = Y0 + 208;
+const Y0 = 30;
 
 /** Members by bay; twins get "#1", "#2". */
 const members = (bays: number[]) => {
@@ -40,7 +39,7 @@ const pools: Block[] = server.pools.map((p, i) => ({
   id: `pool-${p.id}`,
   w: widths[i],
   wp: [xs[i], Y0],
-  np: [nxs[i], i < 2 ? Y0 : NY1],
+  np: [12, 0],
   c: POOL_CLASS[p.id],
   head: p.id,
   sub: layout(p),
@@ -54,7 +53,7 @@ const out: Block = {
   id: 'pool-out',
   w: widths[3],
   wp: [xs[3], Y0],
-  np: [nxs[3], NY1],
+  np: [12, 0],
   c: 'sem-removed',
   head: 'set aside',
   sub: 'not replaced',
@@ -64,15 +63,20 @@ const out: Block = {
   card: gone.card,
 };
 const blocks = [...pools, out];
-const tally = `${derived.drives} drives kept · 0 bought · 1 set aside`;
-/* Narrow: the second row (bulk, set aside) has fewer drives, so its size and notes move up. */
-const lift = (i: number): number => (i < 2 ? 0 : (3 - Math.max(blocks[2].drives.length, blocks[3].drives.length)) * ROW);
-const NH = NY1 + BIG + 18 + 14 * Math.max(blocks[2].foot.length, blocks[3].foot.length) - lift(2) + 34;
+const tally = [`${derived.drives} drives kept`, '0 bought', '1 set aside'];
+/* Narrow: one column; a block with fewer than three drives moves its size and notes up. */
+const lift = (i: number): number => (3 - blocks[i].drives.length) * ROW;
+let ny = Y0;
+blocks.forEach((b, i) => {
+  b.np = [12, ny + (i === 3 ? 22 : 0)];
+  ny = b.np[1] + BIG - lift(i) + 18 + 14 * (b.foot.length - 1) + 44;
+});
+const NH = ny + 8;
 
 const desc =
   `Three ZFS pools from drives already in the server. ` +
   pools.map((b) => `${b.head}, ${b.sub}: ${b.drives.map((m) => m.name).join(', ')}, about ${b.big.slice(2)}, for ${b.foot.join(' ').toLowerCase()}.`).join(' ') +
-  ` Set aside: the failing ${shortName(gone)}, pulled from rear bay ${gone.bay}. ${tally.replaceAll(' · ', ', ')}.`;
+  ` Set aside: the failing ${shortName(gone)}, pulled from rear bay ${gone.bay}. ${tally.join(', ')}.`;
 ---
 
 <Figure
@@ -84,7 +88,8 @@ const desc =
   desc={desc}
   caption="Every healthy drive gets a job. The one that isn't healthy gets a drawer."
   size={[680, 262]}
-  narrow={[390, NH]}
+  narrow={[272, NH]}
+  bp={680}
   interactive
   hint
 >
@@ -93,7 +98,7 @@ const desc =
       {b.id === 'pool-out' && (
         <Fragment>
           <path class="ln-phantom fg-w" d={`M-9 -14V${BIG + 38}`} style="--p:4" />
-          <path class="ln-phantom fg-n" d={`M-9 -14V${BIG + 38 - lift(i)}`} style="--p:4" />
+          <path class="ln-phantom fg-n" d="M-4 -36H252" style="--p:4" />
         </Fragment>
       )}
       <g class="part" data-part={b.id} role="button" tabindex="0" aria-pressed="false" aria-label={b.id === 'pool-out' ? shortName(gone) : b.head}>
@@ -116,8 +121,14 @@ const desc =
       <Balloon at={[b.w - 16, -4]} n={i + 1} part={b.id} r={9} />
     </g>
   ))}
-  <text {...at([12, 248], [8, NH - 14], 'txt-note', '--p:6')}>{tally}</text>
+  <text class="txt-note fg-w" x="12" y="248" style="--p:6">{tally.join(' · ')}</text>
+  <text {...at([0, 0], [12, NH - 22], 'txt-note fg-n', '--p:6')}><tspan>{tally.slice(0, 2).join(' · ')} ·</tspan><tspan x="0" dy="14">{tally[2]}</tspan></text>
   <Fragment slot="cards">
     {blocks.map((b) => <PartCard id={b.id} title={b.card.title} kind={b.card.kind} lines={b.card.lines} />)}
   </Fragment>
 </Figure>
+
+<style is:global>
+  /* narrow: one column leaves room, so the drive names and notes letter at 12 (≥ 13.7px on a phone) */
+  .fg.is-narrow [data-dwg="fig-pools"] .txt-note { font-size: 12px; }
+</style>

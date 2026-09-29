@@ -60,7 +60,7 @@ const tickLabels = (k: 'w' | 'n') => {
 };
 ---
 
-<Figure {...base} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0} defs={band ? ['hatch'] : []}>
+<Figure {...base} bp={base.bp ?? L.size[0]} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0} defs={band ? ['hatch'] : []}>
   {(['w', 'n'] as const).map((k) => (
     <g class={`fg-${k}`}>
       {L.band && <path class="hatch ln-hid" d={L.band[k]} style="--p:4" />}
@@ -95,7 +95,7 @@ const tickLabels = (k: 'w' | 'n') => {
       </g>
     );
   })}
-  {L.band?.label && <text {...at(L.band.label.wp, L.band.label.np, 'txt-note fg-e', '--p:6')}>{L.band.label.t}</text>}
+  {L.band?.label && <text {...at(L.band.label.wp, L.band.label.np, `txt-note fg-e${L.band.label.start ? ' fg-ns' : ''}`, '--p:6')}>{L.band.label.t}</text>}
   <Fragment slot="cards">
     {cards.map((b) => <PartCard id={b.id} title={b.card!.title} kind={b.card!.kind} lines={b.card!.lines} />)}
   </Fragment>

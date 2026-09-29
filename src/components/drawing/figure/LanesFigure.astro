@@ -36,7 +36,7 @@ const text =
     steps.map((s, i) => `${i && steps[i - 1].lane !== s.lane ? `hand-off${s.handoff ? ` (${s.handoff})` : ''} to ` : ''}${laneName(s.lane)}: ${say(s)}`).join('; ') + '.';
 ---
 
-<Figure {...base} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0}>
+<Figure {...base} bp={base.bp ?? L.size[0]} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0}>
   {(['w', 'n'] as const).map((k) => (
     <g class={`fg-${k}`}>
       <path class="ln-thin" d={L.rules[k]} style="--p:1" />

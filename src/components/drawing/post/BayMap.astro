@@ -2,8 +2,8 @@
 /*
   FIG 3 · Bay map, as built: the 24 front bays (0 far left → 23 far right) and the two rear flex
   bays, from server.bays. Every filled bay is a clickable part; its bay number is its balloon.
-  Wide: one row, rear at the right. Narrow: the front row broken in two (drafting break lines),
-  rear and key below.
+  Wide: one row, rear at the right. Narrow (272 units): the front row broken in three (drafting
+  break lines), rear and key below.
 */
 import Figure from '../figure/Figure.astro';
 import Balloon from '../Balloon.astro';
@@ -13,23 +13,25 @@ import { at, Pen, rc, wNote, type P } from '../../../lib/drawing/figure';
 import { bayName, glyphRun, POOL_CLASS, shortName } from './fig';
 
 const FRONT = server.bays.front;
-const HALF = FRONT / 2;
+const ROWS = 3, PER = FRONT / ROWS; // narrow: three rows of eight
 const PITCH = 27, BW = 23, BH = 80, EAR = 24;
 const rear = server.bays.list.filter((b) => b.face === 'rear').map((b) => ({ n: b.n, d: driveAt(b.n) }));
 const filled = server.drives.filter((d) => d.bay < FRONT);
 const partId = (n: number): string => `bay-${n}`;
 
-/* Front bays: two groups of 12 (they move independently in the narrow layout). Local x of bay i
-   within its group keeps the wide position; the narrow layout shifts the second group back. */
+/* Front bays: three groups of 8 (they move independently in the narrow layout). Local x of bay i
+   within its group keeps the wide position; the narrow layout shifts each group back. */
 const PX = 24; // panel left, wide
 const bx = (i: number): number => PX + EAR + i * PITCH + (PITCH - BW) / 2;
 const Y = 44; // bay top, wide
 const NUM = Y + BH + 28; // bay number baseline
-// Narrow: row 1 panel at (9, 48), row 2 at (33, 180); both rows' first bay lands at x 35.
-const groups = [0, 1].map((g) => ({
-  bays: Array.from({ length: HALF }, (_, k) => g * HALF + k),
-  np: [35 - bx(g * HALF), g ? 146 : 14] as P,
+// Narrow: row panels at (4, 48 + 132 r), the first with its ear; every row's first bay lands at x 30.
+const NL = 4, NROW = 132;
+const groups = Array.from({ length: ROWS }, (_, g) => ({
+  bays: Array.from({ length: PER }, (_, k) => g * PER + k),
+  np: [NL + EAR + (PITCH - BW) / 2 - bx(g * PER), 14 + g * NROW] as P,
 }));
+const NREAR = 14 + ROWS * NROW + 52; // the rear block's top, narrow
 const panelW = FRONT * PITCH + 2 * EAR;
 const panel = (x: number, y: number, n: number, left: boolean, right: boolean): string => {
   const w = n * PITCH + (left ? EAR : 0) + (right ? EAR : 0);
@@ -40,17 +42,25 @@ const panel = (x: number, y: number, n: number, left: boolean, right: boolean): 
 };
 const holes = (x: number, y: number): string => `M${x + 12} ${y + 24}m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M${x + 12} ${y + 76}m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0`;
 
+const panelsN = groups
+  .map((_, g) => {
+    const x = g ? NL + EAR : NL, y = 48 + g * NROW;
+    return panel(x, y, PER, g === 0, g === ROWS - 1) + (g === 0 ? holes(x, y) : '') + (g === ROWS - 1 ? holes(x + PER * PITCH, y) : '');
+  })
+  .join('');
+
 const key = [
   { c: 'pool-rpool', t: 'rpool' },
   { c: 'pool-fast', t: 'fast' },
   { c: 'pool-bulk', t: 'bulk' },
   { c: '', t: 'empty' },
 ];
+// wide: one line; narrow: two by two
 let kx = 0;
-const keyItems = key.map((k) => {
+const keyItems = key.map((k, i) => {
   const x = kx;
   kx += 22 + wNote(k.t) + 18;
-  return { ...k, x };
+  return { ...k, x, np: [(i % 2) * 96, Math.floor(i / 2) * 20] as P };
 });
 const drives = [...filled, ...server.drives.filter((d) => d.bay >= FRONT)];
 const desc =
@@ -69,14 +79,15 @@ const desc =
   desc={desc}
   caption="Five SSDs up front, one spinner out back, and twenty bays of optimism."
   size={[900, 214]}
-  narrow={[390, 462]}
+  narrow={[272, NREAR + 158]}
+  bp={900}
   breakout
   interactive
   hint
 >
   <!-- panel outlines -->
   <path class="ln-obj fg-w" d={panel(PX, Y - 10, FRONT, true, true) + holes(PX, Y - 10) + holes(PX + panelW - EAR, Y - 10)} pathLength="1" style="--p:1" />
-  <path class="ln-obj fg-n" d={panel(9, 48, HALF, true, false) + holes(9, 48) + panel(33, 180, HALF, false, true) + holes(33 + HALF * PITCH, 180)} pathLength="1" style="--p:1" />
+  <path class="ln-obj fg-n" d={panelsN} pathLength="1" style="--p:1" />
 
   {groups.map((g) => {
     const empty = new Pen();
@@ -109,10 +120,10 @@ const desc =
     );
   })}
 
-  <text {...at([24, 22], [9, 30], 'view__t', '--p:6')}>FRONT · {FRONT} BAYS</text>
+  <text {...at([24, 22], [NL, 30], 'view__t', '--p:6')}>FRONT · {FRONT} BAYS</text>
 
   <!-- rear flex bays -->
-  <g {...at([750, 22], [9, 330])}>
+  <g {...at([750, 22], [NL, NREAR])}>
     <text class="view__t" style="--p:6">REAR · FLEX</text>
     {rear.map(({ n, d }, i) => {
       const x = i * 76;
@@ -120,7 +131,7 @@ const desc =
         <Fragment>
           <g class={`part ${POOL_CLASS[d.pool]}`} data-part={partId(n)} role="button" tabindex="0" aria-pressed="false" aria-label={shortName(d)}>
             <path class="tint ln-med" d={rc(x, 24, 70, 24) + `M${x + 58} 29v14`} pathLength="1" style="--p:2" />
-            <text class="pm-bt" x={x + 8} y="40" style="--p:6">15k SAS</text>
+            <text class="pm-bt pm-r" x={x + 8} y="40" style="--p:6">15k SAS</text>
           </g>
           <Balloon at={[x + 35, 68]} n={n} part={partId(n)} r={10} />
           <text class="txt-note fg-c" x={x + 35} y="98" style="--p:6">{d.pool}</text>
@@ -138,11 +149,11 @@ const desc =
   </g>
 
   <!-- key -->
-  <g {...at([24, 196], [9, 448], '', '--p:6')}>
+  <g {...at([24, 196], [NL, NREAR + 130], '', '--p:6')}>
     {keyItems.map((k) => (
-      <g class={k.c || undefined}>
-        <path class={k.c ? 'tint ln-med' : 'face ln-thin'} d={rc(k.x, -9, 16, 10)} />
-        <text class="txt-note" x={k.x + 22} y="0">{k.t}</text>
+      <g {...at([k.x, 0], k.np, k.c)}>
+        <path class={k.c ? 'tint ln-med' : 'face ln-thin'} d={rc(0, -9, 16, 10)} />
+        <text class="txt-note" x="22">{k.t}</text>
       </g>
     ))}
   </g>
@@ -154,4 +165,5 @@ const desc =
 
 <style is:global>
   .fg .pm-bt { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; fill: var(--dwg-obj); }
+  .fg.is-narrow .pm-bt:not(.pm-r) { font-size: 12px; letter-spacing: 0.02em; }
 </style>

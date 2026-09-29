@@ -49,6 +49,7 @@ Hardware usually has opinions. This time it mostly kept them to itself.
   desc="Before: seven disks into the PERC H710P Mini, a hardware RAID card, and four virtual disks up to Proxmox VE 8.4 on LVM-thin. After, as built: six disks straight through the HBA330 into ZFS, three pools up to Proxmox VE 9.2."
   caption="Same disks, minus one. The difference is who gets to see them."
   breakout
+  bp={850}
   stamp={{ text: 'AS BUILT', tone: 'ok' }}
   rows={[
     { label: 'Before', note: 'hardware RAID', nodes: [
@@ -174,6 +175,7 @@ Once I said "Proxmox is up", stage 10 was the agent's: check the card's firmware
   title="Me and the agent, step by step"
   caption="Hands for me, SSH for the agent. It doesn't get a screwdriver."
   breakout
+  bp={850}
   lanes={[{ id: 'me', label: 'Me', sub: 'hands' }, { id: 'agent', label: 'Agent', sub: 'over SSH' }]}
   steps={[
     { id: 'step-down', lane: 'agent', label: 'Shut it down', sub: 'on my go' },

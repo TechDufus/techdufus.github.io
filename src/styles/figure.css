@@ -18,7 +18,7 @@
 
 /* two layouts (the swap is Figure.astro's script) */
 .fg-n{display:none}
-.fg.is-narrow>*{max-width:440px;margin-inline:auto}
+.fg.is-narrow>*{max-width:min(440px,calc(var(--fg-nw,999)*1.4px));margin-inline:auto}
 .fg.is-narrow .fg-n{display:inline}
 .fg.is-narrow .fg-w{display:none}
 .fg.is-narrow .fg-m{transform:var(--n)}

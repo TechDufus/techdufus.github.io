@@ -35,7 +35,7 @@ const text =
 const dots = (e: FlowEdge): number => (e.tone === 'planned' || !e.particles ? 0 : e.particles === true ? 3 : Math.max(1, Math.min(4, e.particles)));
 ---
 
-<Figure {...base} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0}>
+<Figure {...base} bp={base.bp ?? L.size[0]} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0}>
   {(['w', 'n'] as const).map((k) => (
     <g class={`fg-${k}`}>
       {L.edges.map((e) => {
