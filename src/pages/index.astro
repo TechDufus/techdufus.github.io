@@ -102,7 +102,7 @@ const roleNote: Record<ListedRole, string | undefined> = {
   storage: item('unas')?.what,
   edge: item('rpi')?.what
 };
-// Branded gear only (the ISP's modem and the PoE injector stay on the cabinet sheet); one device → its full name.
+// Branded gear only (the ISP's ONT and the PoE injector stay on the cabinet sheet); one device → its full name.
 const hardwareRows = devicesByRole().map(({ role, label, devices }) => {
   const named = devices.filter((d) => d.maker);
   return {

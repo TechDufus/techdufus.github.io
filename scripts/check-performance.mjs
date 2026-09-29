@@ -38,6 +38,7 @@ const PAGES = [
   { page: 'lab/r720xd/index.html', html: DRAWING_HTML },
   { page: 'lab/stack/index.html', html: DRAWING_HTML },
   { page: 'blog/from-hardware-raid-to-zfs/index.html', html: DRAWING_HTML },
+  { page: 'blog/i-rebuilt-my-homelab-for-an-ai-operator/index.html', html: DRAWING_HTML },
   { page: 'lab/rack/views/index.html', html: LAZY_HTML },
   { page: 'lab/r720xd/views/index.html', html: LAZY_HTML }
 ];

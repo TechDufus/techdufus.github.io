@@ -78,7 +78,7 @@ export type ShelfId = 'top-shelf' | 'bottom-shelf';
 export type DeviceId =
   | ShelfId
   | 'rpi-4b'
-  | 'fiber-modem'
+  | 'ont'
   | 'poe-injector'
   | 'unas-pro-8'
   | 'udm-pro'

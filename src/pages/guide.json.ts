@@ -12,8 +12,8 @@ const SLUG = {
   talos: 'building-a-talos-kubernetes-homelab-on-proxmox-with-terraform',
   omc: 'oh-my-claude-batteries-included-enhancements-for-claude-code',
   aijob: 'ai-already-took-my-job',
-  obsidian: 'deploying-obsidian-sync-for-my-ai-agents',
-  zfs: 'from-hardware-raid-to-zfs'
+  zfs: 'from-hardware-raid-to-zfs',
+  operator: 'i-rebuilt-my-homelab-for-an-ai-operator'
 };
 
 export async function GET() {
@@ -43,9 +43,9 @@ export async function GET() {
     homelab: {
       text:
         `One Dell PowerEdge R720xd (${server.threads} threads, ${server.memory.gb} GB) running Proxmox VE ${pve?.version ?? ''} on ZFS. OpenTofu puts ${talos?.count ?? 3} Talos VMs on it, and those are the Kubernetes cluster. Cilium runs its network, and Flux runs everything else from git.\n\n` +
-        `Ansible configures the host, and a Raspberry Pi 4 on the top shelf is the control node. A UDM Pro runs the network and a UNAS Pro 8 holds the storage. All of it is declared in one git repo, private for now.\n\n` +
+        `Ansible configures the host, and a Raspberry Pi 4 on the top shelf is the control node. A UDM Pro runs the network and a UNAS Pro 8 holds the storage. All of it is declared in one git repo, private for now, and it's built for an AI agent to run, not me: [here's why](/blog/${SLUG.operator}/).\n\n` +
         `As of ${labSpec.lastRevised} it's ${labSpec.status.toLowerCase()}: ${running} things running, the rest still on paper. The [lab page](/lab/) has the drawings, and ${sheet('stack')} shows what runs where.`,
-      cards: cards(SLUG.zfs, SLUG.talos)
+      cards: cards(SLUG.operator, SLUG.zfs, SLUG.talos)
     },
     omc: {
       text:
@@ -56,15 +56,15 @@ export async function GET() {
     start: {
       text:
         `Depends why you're here.\n\n` +
-        `For what I'm thinking about now, start with the latest post. For the homelab, the Talos build is the best way in. For how I work with AI, read “AI Already Took My Job”.\n\n` +
+        `For what I'm thinking about now, start with the latest post. For the homelab, start with how I rebuilt it for an AI operator. For how I work with AI, read “AI Already Took My Job”.\n\n` +
         `Or browse [all ${stats.count} posts](/blog/), going back to ${stats.first.getFullYear()}.`,
-      cards: cards(metas[0]?.slug, SLUG.talos, SLUG.aijob).filter((s, i, a) => a.indexOf(s) === i)
+      cards: cards(metas[0]?.slug, SLUG.operator, SLUG.aijob).filter((s, i, a) => a.indexOf(s) === i)
     },
     agents: {
       text:
         `With my name on the result. When work gets big, I split it into phases: gather context, implement, then verify.\n\n` +
-        `AI helps with speed, but I still own the final decision and the release. I prefer git-first, reproducible workflows because they are easier to review and easier to recover. Same pattern in my public tooling ([oh-my-claude](${omcUrl}), [openkanban](${kanbanUrl})) and in my homelab GitOps flow.`,
-      cards: cards(SLUG.aijob, SLUG.omc, SLUG.obsidian)
+        `AI helps with speed, but I still own the final decision and the release. I prefer git-first, reproducible workflows because they are easier to review and easier to recover. Same pattern in my public tooling ([oh-my-claude](${omcUrl}), [openkanban](${kanbanUrl})) and in my homelab, where [an agent does the operating](/blog/${SLUG.operator}/) and I make the calls.`,
+      cards: cards(SLUG.operator, SLUG.aijob, SLUG.omc)
     },
     building: {
       text:
@@ -74,7 +74,7 @@ export async function GET() {
     },
     rack: {
       text:
-        `A 42U cabinet, and its rails count from the top. Up there is a shelf with the Raspberry Pi 4, the fiber modem and the PoE injector that powers the U7 Pro. Under it: the UNAS Pro 8, the UDM Pro, then the R720xd. A shelf of spares sits at the very bottom, and the rest is air.\n\n` +
+        `A 42U cabinet, and its rails count from the top. Up there is a shelf with the Raspberry Pi 4, the fiber ONT and the PoE injector that powers the U7 Pro. Under it: the UNAS Pro 8, the UDM Pro, then the R720xd. A shelf of spares sits at the very bottom, and the rest is air.\n\n` +
         `It's all drawn to spec. ${sheet('cabinet')} has every box where it sits, ${sheet('server')} opens up the R720xd, and ${sheet('stack')} shows what runs on it. The first two are stamped as built.`,
       cards: cards(SLUG.zfs)
     },

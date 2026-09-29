@@ -57,7 +57,7 @@ const lanPort = (zone: string, i: number): Pt => {
 const KX = 704;
 const call = [
   { from: lanPort('lan-top', 1), y: 438, text: ['PORT 3', 'TO THE SERVER'] },
-  { from: at(udm, 'wan-9'), y: 474, text: ['PORT 9 · WAN', 'TO THE MODEM'] },
+  { from: at(udm, 'wan-9'), y: 474, text: ['PORT 9 · WAN', 'TO THE ONT'] },
   { from: at(udm, 'sfp-11'), y: 510, text: ['SFP+ PORT 11', `${links.find((l) => l.id === 'gw-nas')?.speed} · NAS`], cls: 'net-10g' },
   { from: lanPort('lan-bottom', 0), y: 546, text: ['PORT 2', 'TO THE PI'] },
 ];

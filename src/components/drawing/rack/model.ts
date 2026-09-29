@@ -251,12 +251,12 @@ function drawZone(id: string, z: PanelZone, x: number, y: number, w: number, h: 
     for (let i = 0; i < 6; i++) thin.push(rr(x + (i % 3) * cw + 0.3, y + Math.floor(i / 3) * chh + 0.3, cw - 0.6, chh - 0.6));
     return;
   }
-  if (key === 'fiber-modem:leds') {
+  if (key === 'ont:leds') {
     // the row of status lights along the top
     for (let i = 0; i < 5; i++) thin.push(ci(x + (w * (i + 0.5)) / 5, y + h / 2, 1.2));
     return;
   }
-  if (key === 'fiber-modem:vents') {
+  if (key === 'ont:vents') {
     // staggered rows of short slots, as in the photo
     const rows = lite ? 3 : 6, cols = lite ? 10 : 14, sw = w / cols;
     for (let j = 0; j < rows; j++) {
@@ -362,7 +362,7 @@ export function frontPanel(s: Slot, lite = false): Panel {
     case 'patch-cables':
       return { obj: '', med: coilSide(s.faceX, s.faceW, s.faceH), thin: '' };
     case 'rpi-4b':
-    case 'fiber-modem':
+    case 'ont':
     case 'poe-injector': {
       const p = zonesPanel(d, 'front', s.faceX, s.faceW, s.faceH, lite);
       return { ...p, obj: rr(s.faceX, 0, s.faceW, s.faceH) + p.obj };
@@ -396,7 +396,7 @@ export function rearPanel(s: Slot): Panel {
     case 'rpi-4b':
       // the USB-C power inlet on the far side
       return { obj: rr(ox, 0, s.body.w, s.body.h), med: '', thin: rr(ox + s.body.w * 0.55, s.body.h - 7, 9, 3.4) };
-    case 'fiber-modem':
+    case 'ont':
     case 'poe-injector':
     case 'spare-drive':
       return { obj: rr(ox, 0, s.body.w, s.body.h), med: '', thin: '' };

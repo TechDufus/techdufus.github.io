@@ -2,8 +2,8 @@
  * Sheet 01 · The cabinet, as surveyed: a 42U enclosure whose rails count from the top (U1 is the
  * top), what sits in it, and the documented links between the boxes.
  *
- * Panel zones are traced from each maker's product images. The fiber modem and the PoE injector
- * are the ISP's and a generic box: their shapes are drawn from the owner's photo.
+ * Panel zones are traced from each maker's product images. The ONT and the PoE injector are the
+ * ISP's and a generic box: their shapes are drawn from the owner's photo.
  */
 import type {
   Cabinet,
@@ -74,7 +74,7 @@ export const devices: Device[] = [
     card: {
       title: 'Top shelf',
       kind: 'Shelf · U1–2',
-      lines: ['The small stuff: the Pi, the fiber modem and the PoE injector.']
+      lines: ['The small stuff: the Pi, the ONT and the PoE injector.']
     }
   },
   {
@@ -108,10 +108,10 @@ export const devices: Device[] = [
     }
   },
   {
-    id: 'fiber-modem',
-    name: 'Fiber modem',
-    short: 'Modem',
-    model: 'ISP fiber modem',
+    id: 'ont',
+    name: 'Fiber ONT',
+    short: 'ONT',
+    model: 'ISP optical network terminal',
     role: 'network',
     placement: { kind: 'shelf', shelf: 'top-shelf', x: 216 },
     body: { w: 160, h: 45, d: 120 },
@@ -125,9 +125,9 @@ export const devices: Device[] = [
       }
     },
     card: {
-      title: 'Fiber modem',
+      title: 'Fiber ONT',
       kind: 'From the ISP · top shelf',
-      lines: ['Fiber in, Ethernet out.', 'Feeds the gateway’s WAN port.']
+      lines: ['Optical network terminal: fiber in, Ethernet out.', 'Feeds the gateway’s WAN port.']
     }
   },
   {
@@ -258,7 +258,7 @@ export const devices: Device[] = [
       kind: 'Gateway · U10',
       lines: [
         'Router and firewall. Everything else hangs off it.',
-        'WAN on port 9, to the fiber modem.',
+        'WAN on port 9, to the ONT.',
         'Port 2: the Pi. Port 3: the server.',
         'SFP+ port 11: the NAS, at 10 GbE.'
       ]
@@ -468,15 +468,15 @@ export const links: Link[] = [
     medium: 'sfp+'
   },
   {
-    id: 'gw-modem',
+    id: 'gw-ont',
     from: { device: 'udm-pro', port: 'Port 9 · WAN' },
-    to: { device: 'fiber-modem', port: 'Ethernet' },
+    to: { device: 'ont', port: 'Ethernet' },
     speed: '1 GbE',
     medium: 'copper'
   },
   {
-    id: 'modem-isp',
-    from: { device: 'fiber-modem', port: 'Fiber' },
+    id: 'ont-isp',
+    from: { device: 'ont', port: 'Fiber' },
     to: { device: 'isp' },
     medium: 'fiber',
     offSheet: true
@@ -512,7 +512,7 @@ export const roleLabels: Record<Role, string> = {
 /** The /lab list: which devices each role shows, in order. Shelves and spares stay off it. */
 const listed: Record<ListedRole, DeviceId[]> = {
   compute: ['r720xd'],
-  network: ['udm-pro', 'u7-pro', 'fiber-modem', 'poe-injector'],
+  network: ['udm-pro', 'u7-pro', 'ont', 'poe-injector'],
   storage: ['unas-pro-8'],
   edge: ['rpi-4b']
 };

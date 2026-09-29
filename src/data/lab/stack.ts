@@ -1,4 +1,4 @@
-// Synced from homelab @ 1d41dbe (2026-09-29)
+// Synced from homelab @ bf7e1f3 (2026-09-29)
 /**
  * Sheet 03 · The stack: what runs where, in three layers. Bootstrap turns the metal into a
  * hypervisor, OpenTofu puts VMs on it, and the cluster runs the rest.
@@ -262,6 +262,21 @@ export const stack: StackLayer[] = [
             }
           },
           {
+            id: 'observability',
+            name: 'VictoriaMetrics + VictoriaLogs + Grafana',
+            what: 'Metrics, logs and dashboards',
+            status: 'running',
+            card: {
+              title: 'Observability',
+              kind: 'Metrics and logs',
+              lines: [
+                'VictoriaMetrics for metrics, VictoriaLogs for logs.',
+                'Grafana for looking at both.',
+                'The alert rules run, but nothing pages me yet. On purpose.'
+              ]
+            }
+          },
+          {
             id: 'nfs-csi',
             name: 'NFS CSI',
             what: 'Shared storage on the UNAS',
@@ -281,17 +296,6 @@ export const stack: StackLayer[] = [
             what: 'Postgres',
             status: 'planned',
             card: { title: 'CloudNativePG', kind: 'Databases', lines: ['Postgres, for the apps that want one.'] }
-          },
-          {
-            id: 'observability',
-            name: 'VictoriaMetrics + VictoriaLogs + Grafana',
-            what: 'Metrics, logs and dashboards',
-            status: 'planned',
-            card: {
-              title: 'Observability',
-              kind: 'Metrics and logs',
-              lines: ['VictoriaMetrics for metrics, VictoriaLogs for logs.', 'Grafana for looking at both.']
-            }
           },
           {
             id: 'policies',

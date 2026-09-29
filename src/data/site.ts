@@ -420,12 +420,12 @@ export const featuredRepos: FeaturedRepo[] = [
     name: 'home.io',
     url: 'https://github.com/TechDufus/home.io',
     tag: 'Homelab IaC',
-    status: 'Active',
+    status: 'Archived',
     starsFallback: '35+',
     summary:
-      'Homelab infrastructure-as-code with Terraform + GitOps patterns for repeatable rebuilds and low-drama operations.',
+      'My old homelab as code: Terraform, k3s and Argo CD. Retired in September 2026, when I rebuilt the lab for an AI operator.',
     whyItMatters:
-      'I test ideas here first so production gets a cleaner version.',
+      'Every lesson it taught me the hard way went into the new lab’s plan.',
     fallback: {
       description: 'Home automation.',
       language: 'Shell',
@@ -624,7 +624,7 @@ export const labSpec: {
   drawings: {
     lede: string;
     sheets: LabDrawing[];
-    posts: { title: string; href: string; note: string; thumb: 'path' }[];
+    posts: { title: string; href: string; note: string; thumb: 'path' | 'lanes' }[];
   };
   /** Newest first. `cta` is the link text (default "Read the post"). */
   changelog: { date: string; title: string; href?: string; note?: string; cta?: string }[];
@@ -677,10 +677,23 @@ export const labSpec: {
         href: '/blog/from-hardware-raid-to-zfs/',
         note: 'The swap, start to finish, with the drawings in it.',
         thumb: 'path'
+      },
+      {
+        title: 'I rebuilt my homelab for an AI operator',
+        href: '/blog/i-rebuilt-my-homelab-for-an-ai-operator/',
+        note: 'Why it’s built for an agent to run, and who did what.',
+        thumb: 'lanes'
       }
     ]
   },
   changelog: [
+    {
+      date: '2026-09-29',
+      title: 'kubectl top → Grafana',
+      href: '/lab/stack/',
+      note: 'Metrics and logs land in VictoriaMetrics and VictoriaLogs now, and Grafana draws them. The alert rules run too, but nothing pages me yet. On purpose.',
+      cta: 'See the stack'
+    },
     {
       date: '2026-09-29',
       title: 'Real HTTPS, first app',

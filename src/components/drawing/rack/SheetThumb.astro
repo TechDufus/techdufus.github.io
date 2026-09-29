@@ -8,14 +8,18 @@
     kind="stack"    Sheet 03: the three layers as storeys, one box per thing, planned ones dashed
     kind="path"     the post: disks → PERC → virtual disks → Proxmox (red, dashed: gone) over
                     disks → HBA330 → ZFS pools → Proxmox (green: what went in)
+    kind="lanes"    the operator post's FIG 5: two lanes across five stages, a stroke per line of
+                    each item, mine (top, hollow marks) sparse and the agent's (bottom) dense
   Decorative: the card's text names the sheet, so the SVG is aria-hidden.
 */
 import { HOLES, rr, slotOf$, yBot, yTop } from './model';
 import { server } from '../../../data/lab/server';
 import { stack } from '../../../data/lab/stack';
+import { whoDidWhat } from '../post/operator/data';
+import { wrap } from '../../../lib/drawing/figure';
 
 interface Props {
-  kind: 'cabinet' | 'server' | 'stack' | 'path';
+  kind: 'cabinet' | 'server' | 'stack' | 'path' | 'lanes';
 }
 const { kind } = Astro.props;
 const r1 = (n: number): string => String(Math.round(n * 10) / 10);
@@ -42,7 +46,7 @@ if (kind === 'cabinet') {
     thin += rr(x - 8, 0, 16, Y(cut)) + rr(x - 8, Y(resume), 16, H - Y(resume));
     thin += `M${r1(x - 14)} ${r1(brk)}h8l3 -6l4 12l3 -6h8`;
   }
-  for (const id of ['top-shelf', 'rpi-4b', 'fiber-modem', 'poe-injector', 'unas-pro-8', 'udm-pro', 'r720xd'] as const) {
+  for (const id of ['top-shelf', 'rpi-4b', 'ont', 'poe-injector', 'unas-pro-8', 'udm-pro', 'r720xd'] as const) {
     const s = slotOf$(id);
     if (id === 'top-shelf') {
       // the tray, and the two brackets
@@ -58,7 +62,7 @@ if (kind === 'cabinet') {
     if (id === 'unas-pro-8') med += cells(x + 5, t + 10, w - 10, s.faceH * 0.34, 4) + cells(x + 5, t + s.faceH * 0.54, w - 10, s.faceH * 0.34, 4);
     if (id === 'udm-pro') med += rr(x + 6, t + 10, 20, 24) + rr(x + 186, t + 8, 107, 29) + cells(x + 308, t + 9, 64, 26, 4) + rr(x + 386, t + 20, 20, 15);
     if (id === 'rpi-4b') med += rr(x + 4, t + 6, 14, s.faceH - 8) + rr(x + 42, t + 6, 16, s.faceH - 8);
-    if (id === 'fiber-modem') med += `M${r1(x + w * 0.42)} ${r1(t + 5)}h${r1(w * 0.26)}` + cells(x + 8, t + 14, w - 16, s.faceH - 20, 10);
+    if (id === 'ont') med += `M${r1(x + w * 0.42)} ${r1(t + 5)}h${r1(w * 0.26)}` + cells(x + 8, t + 14, w - 16, s.faceH - 20, 10);
     if (id === 'poe-injector') med += rr(x + 8, t + 11, 20, 16) + rr(x + 32, t + 11, 20, 16);
   }
   // the ears of the two bracketed boxes
@@ -98,6 +102,35 @@ if (kind === 'cabinet') {
   });
   // ground line with short hatch strokes under the bottom storey
   thin += `M${X0 - 20} ${Hh}H${X0 + W + 6}` + Array.from({ length: 24 }, (_, i) => `M${X0 - 12 + i * 19} ${Hh}l-7 7`).join('');
+} else if (kind === 'lanes') {
+  // Five columns; per item a mark (a ring for me, a square for the agent) and one stroke per
+  // wrapped line, its length from the line's length. Lane heights follow the fuller cell.
+  const W = 480, CW = W / whoDidWhat.stages.length, PITCH = 9, GAP = 6, PAD = 12, WRAP = 19;
+  const cell = (xs: string[]) => xs.map((x) => wrap(x, WRAP).map((l) => l.length));
+  const height = (c: number[][]): number => c.reduce((s, it) => s + it.length * PITCH + GAP, -GAP);
+  const lanes = (['me', 'agent'] as const).map((k) => whoDidWhat.stages.map((s) => cell(s[k])));
+  let top = 0;
+  lanes.forEach((cols, li) => {
+    const h = PAD * 2 + Math.max(...cols.map(height));
+    obj += rr(0, top, W, h);
+    thin += cols.slice(1).map((_, i) => `M${r1((i + 1) * CW)} ${r1(top + 6)}v${r1(h - 12)}`).join('');
+    cols.forEach((items, ci) => {
+      let y = top + PAD + 3;
+      for (const lines of items) {
+        const x = ci * CW + 10;
+        if (li === 0) thin += `M${r1(x + 3)} ${r1(y)}m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0`;
+        else med += rr(x, y - 2.5, 5, 5);
+        lines.forEach((n, j) => {
+          const d = `M${r1(x + 12)} ${r1(y + j * PITCH)}h${r1((n / WRAP) * (CW - 30))}`;
+          if (li === 0) med += d;
+          else obj += d;
+        });
+        y += lines.length * PITCH + GAP;
+      }
+    });
+    top += h + 8;
+  });
+  vb = `-6 -6 ${W + 12} ${r1(top - 8 + 12)}`;
 } else {
   // Two rows, as the post's FIG 1: every drive before (the pulled SAS drive included), the kept
   // ones after; 4 virtual disks (the OS's view before) against one line per pool.

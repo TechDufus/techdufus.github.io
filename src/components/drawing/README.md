@@ -319,8 +319,12 @@ drawing), `Stamp`, `LineKey`, `ScaleBar`, `URuler`, `DrawingDefs`, `Monogram`, `
   `card: { title, kind?, lines }`, so a sheet and its excerpt say the same thing.
 - An excerpt's `id` prefixes its part and card ids, so an excerpt and the full sheet (or two
   excerpts) can share a page.
-- `rack/SheetThumb.astro` (`kind: 'cabinet' | 'server' | 'stack' | 'path'`) is the small
-  decorative line drawing on the `/lab` "Drawn to spec" cards.
+- `rack/SheetThumb.astro` (`kind: 'cabinet' | 'server' | 'stack' | 'path' | 'lanes'`) is the
+  small decorative line drawing on the `/lab` "Drawn to spec" cards (`path` and `lanes` are the
+  two posts' cards).
+- `post/SheetLink.astro` (`sheet?: 'server' | 'stack'`, default `'server'`) is the card at the
+  end of a post that links a sheet. The stack card reads its title, note and thumbnail from
+  `labSpec` and `stack.ts`, and states no Rev: Sheet 03 is still going up.
 
 ## Budgets
 
