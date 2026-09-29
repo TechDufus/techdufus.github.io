@@ -1,4 +1,4 @@
-// Synced from homelab @ f8689a1 (2026-09-29)
+// Synced from homelab @ c3dcd12 (2026-09-29)
 /**
  * Sheet 03 · The stack: what runs where, in three layers. Bootstrap turns the metal into a
  * hypervisor, OpenTofu puts VMs on it, and the cluster runs the rest.
@@ -196,7 +196,12 @@ export const stack: StackLayer[] = [
             card: {
               title: 'Cilium 1.20',
               kind: 'Networking',
-              lines: ['The cluster’s network (CNI).', 'Replaces kube-proxy.', 'Hubble shows the traffic.']
+              lines: [
+                'The cluster’s network (CNI).',
+                'Replaces kube-proxy.',
+                'Hubble shows the traffic.',
+                'Its Gateway API serves my apps over HTTPS.'
+              ]
             }
           },
           {
@@ -226,8 +231,13 @@ export const stack: StackLayer[] = [
             id: 'cert-manager',
             name: 'cert-manager',
             what: 'Certificates',
-            status: 'planned',
-            card: { title: 'cert-manager', kind: 'Certificates', lines: ['Issues and renews certificates.'] }
+            status: 'running',
+            version: '1.21',
+            card: {
+              title: 'cert-manager 1.21',
+              kind: 'Certificates',
+              lines: ['Issues and renews certificates.', 'Let’s Encrypt ones, so my apps get real HTTPS.']
+            }
           },
           {
             id: 'external-secrets',
@@ -299,12 +309,19 @@ export const stack: StackLayer[] = [
       {
         id: 'apps',
         title: 'Apps',
-        items: [],
-        card: {
-          title: 'Apps',
-          kind: 'Empty slot',
-          lines: ['Nothing decided yet.', 'Adding one will mean adding a folder.']
-        }
+        items: [
+          {
+            id: 'headlamp',
+            name: 'Headlamp',
+            what: 'A web UI for the cluster',
+            status: 'running',
+            card: {
+              title: 'Headlamp',
+              kind: 'Cluster UI',
+              lines: ['A web UI for the cluster.', 'The first app in, mostly so I can click instead of type.']
+            }
+          }
+        ]
       }
     ]
   }
