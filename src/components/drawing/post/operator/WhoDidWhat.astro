@@ -2,9 +2,9 @@
 /*
   FIG 5 · Who did what: two lanes (me, the agent) across five stages. Every item gets a mark,
   hollow for me and solid for the agent, so the fuller lane reads before a word does. Wide
-  (breakout): stages are columns, lanes are rows, the agent's lane on a faint band. Narrow: lanes
-  are columns, stages are rows. Items wrap to the same width in both layouts, so each is drawn
-  once and moved (at()).
+  (breakout, 850 units): stages are columns, lanes are rows, the agent's lane on a faint band.
+  Narrow (280 units): lanes are columns, stages are rows. Items wrap to the same width in both
+  layouts; each cell (a stage's items for one lane) is drawn once and moved (at()).
 */
 import Figure from '../../figure/Figure.astro';
 import { at, wrap } from '../../../../lib/drawing/figure';
@@ -12,16 +12,27 @@ import { monoWidth } from '../../../../lib/drawing/sheet';
 import { whoDidWhat as D, type Who } from './data';
 import './operator.css';
 
-const WRAP = 19; // characters a line (≈ 131 units at 11.5px mono)
-const LH = 15, GAP = 7;
+const WRAP = 16; // characters a line (≈ 117 units at 12px mono)
+const LH = 16, GAP = 7;
 const who: Who[] = ['me', 'agent'];
 
 type Item = { t: string[]; dy: number };
+/** wrap(), but a last line of four characters or fewer takes a word from the line above. */
+const lines = (x: string): string[] => {
+  const t = wrap(x, WRAP);
+  const n = t.length;
+  if (n > 1 && t[n - 1].length <= 4) {
+    const cut = t[n - 2].lastIndexOf(' ');
+    const moved = `${t[n - 2].slice(cut + 1)} ${t[n - 1]}`;
+    if (cut > 0 && moved.length <= WRAP) return [...t.slice(0, n - 2), t[n - 2].slice(0, cut), moved];
+  }
+  return t;
+};
 /** A cell's items, stacked: each item's first baseline relative to the cell's first one. */
 const stackUp = (xs: string[]): { items: Item[]; h: number } => {
   let dy = 0;
   const items = xs.map((x) => {
-    const t = wrap(x, WRAP);
+    const t = lines(x);
     const it = { t, dy };
     dy += t.length * LH + GAP;
     return it;
@@ -31,14 +42,14 @@ const stackUp = (xs: string[]): { items: Item[]; h: number } => {
 const cells = D.stages.map((s) => ({ stage: s.stage, me: stackUp(s.me), agent: stackUp(s.agent) }));
 const tallest = (k: Who): number => Math.max(...cells.map((c) => c[k].h));
 
-/* wide: 920 · 5 columns of CW from X0 · lane rows under a stage header row */
-const W = 920, X0 = 16, CW = (W - 2 * X0) / D.stages.length, HEAD = 46;
+/* wide: 850 · 5 columns of CW from X0 · lane rows under a stage header row */
+const W = 850, X0 = 16, CW = (W - 2 * X0) / D.stages.length, HEAD = 46;
 const laneTop = { me: HEAD, agent: HEAD + 46 + tallest('me') + 14 };
 const H = laneTop.agent + 46 + tallest('agent') + 16;
 const colX = (i: number): number => X0 + i * CW;
 
-/* narrow: 360 · two lane columns · one band per stage */
-const NW = 360, NCOL = { me: 16, agent: 188 }, NHEAD = 58;
+/* narrow: 280 · two lane columns · one band per stage */
+const NW = 280, NCOL = { me: 4, agent: 140 }, NHEAD = 58;
 let ny = NHEAD;
 const bands = cells.map((c) => {
   const top = ny;
@@ -53,7 +64,7 @@ const colRules = (top: number, bottom: number): string =>
 const rulesW =
   `M${X0} ${HEAD}H${W - X0}M${X0} ${laneTop.agent}H${W - X0}` +
   colRules(10, HEAD - 6) + colRules(laneTop.me + 32, laneTop.agent - 8) + colRules(laneTop.agent + 32, H - 8);
-const rulesN = bands.map((t) => `M${X0} ${t}H${NW - X0}`).join('');
+const rulesN = bands.map((t) => `M6 ${t}H${NW - 6}`).join('');
 
 const lane = (k: Who) => D.lanes.find((l) => l.id === k)!;
 const say = (k: Who): string => cells.map((c) => `${c.stage}: ${D.stages.find((s) => s.stage === c.stage)![k].join(', ')}`).join('; ');
@@ -70,10 +81,11 @@ const desc =
   desc={desc}
   size={[W, H]}
   narrow={[NW, NH]}
+  bp={W}
   breakout
 >
   <rect class="fg-band fg-w" x="8" y={laneTop.agent + 4} width={W - 16} height={H - laneTop.agent - 10} style="--p:0" />
-  <rect class="fg-band fg-n" x={NCOL.agent - 8} y="8" width={NW - NCOL.agent} height={NH - 14} style="--p:0" />
+  <rect class="fg-band fg-n" x={NCOL.agent - 5} y="8" width={NW - NCOL.agent} height={NH - 14} style="--p:0" />
   <path class="ln-thin fg-w" d={rulesW} style="--p:1" />
   <path class="ln-thin fg-n" d={rulesN} style="--p:1" />
 
@@ -81,23 +93,25 @@ const desc =
     {who.map((k) => (
       <g {...at([X0, laneTop[k] + 26], [NCOL[k], 24])}>
         <text class:list={['view__t', k === 'agent' && 'op-foil']}>{lane(k).label.toUpperCase()}</text>
-        <text class="txt-note fg-w" x={Math.round(monoWidth(lane(k).label.toUpperCase(), 13, 0.14)) + 12}>{lane(k).sub}</text>
-        <text class="txt-note fg-n" y="16">{lane(k).sub}</text>
+        <text class="op-n fg-w" x={Math.round(monoWidth(lane(k).label.toUpperCase(), 13, 0.14)) + 12}>{lane(k).sub}</text>
+        <text class="op-n fg-n" y="17">{lane(k).sub}</text>
       </g>
     ))}
-    {cells.map((c, i) => <text {...at([colX(i) + 12, 32], [X0, bands[i] + 22], 'txt-label fg-h')}>{c.stage}</text>)}
+    {cells.map((c, i) => <text {...at([colX(i) + 12, 32], [NCOL.me, bands[i] + 22], 'txt-label fg-h')}>{c.stage}</text>)}
   </g>
 
   <g style="--p:5">
     {cells.map((c, i) =>
-      who.map((k) =>
-        c[k].items.map((it) => (
-          <g {...at([colX(i) + 24, laneTop[k] + 52 + it.dy], [NCOL[k] + 14, bands[i] + 46 + it.dy])}>
-            <circle class={k === 'me' ? 'op-me' : 'op-ag'} cx="-11" cy="-4" r="3.2" />
-            <text class="op-t">{it.t.map((t, j) => <tspan x="0" y={j ? j * LH : undefined}>{t}</tspan>)}</text>
-          </g>
-        )),
-      ),
+      who.map((k) => (
+        <g {...at([colX(i) + 22, laneTop[k] + 52], [NCOL[k] + 11, bands[i] + 46])}>
+          {c[k].items.map((it) => (
+            <Fragment>
+              <circle class={k === 'me' ? 'op-me' : 'op-ag'} cx="-7" cy={it.dy - 4} r="3.2" />
+              <text class="op-t" y={it.dy || undefined}>{it.t.map((t, j) => <tspan x="0" y={j ? it.dy + j * LH : undefined}>{t}</tspan>)}</text>
+            </Fragment>
+          ))}
+        </g>
+      )),
     )}
   </g>
 </Figure>

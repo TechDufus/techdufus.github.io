@@ -4,36 +4,48 @@
   line between rings 2 and 3 is dashed amber (unattended runs stop there) and the inside of it
   is faintly tinted. Wide: a half-target on a ground line, the change at its foot, one callout
   per ring on the right (inner at the bottom), the line's label and note under the ground
-  outside it. Narrow: the rings become bands stacked down from the change, each a little wider,
-  with the dashed line between band 2 and band 3. Labels are drawn once and moved (at()).
+  outside it. Narrow (280 units): the rings become bands stacked down from the change, each a
+  little wider, with the dashed line between band 2 and band 3. Labels are drawn once and moved (at()).
 */
 import Figure from '../../figure/Figure.astro';
 import { at, f, Pen, rc, wrap, type P } from '../../../../lib/drawing/figure';
 import { blastRadius as D } from './data';
 import './operator.css';
 
-/* wide: half rings of radius R on the ground line G, centred at CX; callouts from LX */
-const R = [46, 86, 126, 166], CX = 178, G = 12 + R[3], LX = 372, H = G + 58;
+/* ring subs and the note wrap the same in both layouts (12px: ≈ 7.4 units a character) */
+const subs = D.rings.map((r) => wrap(r.sub, 30));
+const past = wrap(D.past, 34);
+
+/* wide: half rings of radius R on the ground line G, centred at CX; callouts from LX, 48 apart */
+const R = [50, 94, 138, 182], CX = 190, G = 16 + R[3], LX = 392, H = G + 64;
 const arc = (r: number): string => `M${CX - r} ${G}A${r} ${r} 0 0 1 ${CX + r} ${G}`;
-const rowY = (i: number): number => G - 22 - 42 * i; // each ring's label baseline
+const rowY = (i: number): number => G - 22 - 48 * i - (i === 3 ? 6 : 0); // label baselines; the outer's sub takes two lines
 const lead = (i: number): P => [CX + 20 + 4.5 * i, rowY(i) - 4];
 
-/* narrow: bands 46 tall, each 16 wider a side than the one inside it; the line between 2 and 3 */
-const NB = [50, 96, 214, 260], BH = 46, NL = 150, NH = NB[3] + BH + 12;
-const band = (i: number): [number, number, number] => [8 + (3 - i) * 16, NB[i], 344 - (3 - i) * 32];
+/* narrow (280): bands stacked down from the change, each 8 wider than the one inside it, the
+   dashed line and its note between band 2 and band 3 */
+const NL = 160;
+let ny = 46;
+const bands = subs.map((sl, i) => {
+  const w = 240 + 8 * i, h = 49 + 15 * (sl.length - 1);
+  const b = { x: (280 - w) / 2, y: ny, w, h };
+  ny += h + 6 + (i === 1 ? 70 : 0);
+  return b;
+});
+const NH = ny + 2;
+const box = (i: number): string => rc(bands[i].x, bands[i].y, bands[i].w, bands[i].h);
 
 const pen = new Pen()
   .add('op-zone fg-w', `${arc(R[1])}Z`)
-  .add('op-zone fg-n', [0, 1].map((i) => { const [x, y, w] = band(i); return rc(x, y, w, BH); }).join(''))
+  .add('op-zone fg-n', box(0) + box(1))
   .add('ln-med fg-w', [0, 2, 3].map((i) => arc(R[i])).join(''))
-  .add('ln-med fg-n', [0, 1, 2, 3].map((i) => { const [x, y, w] = band(i); return rc(x, y, w, BH); }).join(''))
+  .add('ln-med fg-n', [0, 1, 2, 3].map(box).join(''))
   .add('ln-med op-bd fg-w', arc(R[1]))
-  .add('ln-med op-bd fg-n', `M8 ${NL}H352`)
-  .add('ln-obj fg-w', `M8 ${G}H348`)
-  .add('ln-thin fg-w', Array.from({ length: 21 }, (_, i) => `M${14 + i * 16} ${G}l-6 6`).join(''))
+  .add('ln-med op-bd fg-n', `M8 ${NL}H272`)
+  .add('ln-obj fg-w', `M8 ${G}H${CX + R[3] + 8}`)
+  .add('ln-thin fg-w', Array.from({ length: 23 }, (_, i) => `M${14 + i * 16} ${G}l-6 6`).join(''))
   .add('ln-lead fg-w', R.map((_, i) => `M${f(lead(i)[0])} ${lead(i)[1]}H${LX - 8}`).join(''))
   .add('dim-arr fg-w', R.map((_, i) => { const [x, y] = lead(i); return `M${f(x - 2)} ${y}a2 2 0 1 0 4 0a2 2 0 1 0 -4 0`; }).join(''));
-const past = wrap(D.past, 40);
 
 const desc =
   `Four rings round ${D.centre}, from the centre outward, each a bigger blast radius. ` +
@@ -42,22 +54,22 @@ const desc =
   D.rings.slice(2).map((r) => `${r.label}: ${r.sub}.`).join(' ');
 ---
 
-<Figure id="fig-blast" fig={4} date="2026-09-29" title={D.title} desc={desc} size={[680, H]} narrow={[360, NH]}>
+<Figure id="fig-blast" fig={4} date="2026-09-29" title={D.title} desc={desc} size={[680, H]} narrow={[280, NH]} bp={680}>
   <g style="--p:2">{pen.list.map(({ c, d }) => <path class={c} d={d} />)}</g>
   <g style="--p:5">
-    <g {...at([CX, G], [180, 18], 'fg-c')}>
+    <g {...at([CX, G], [140, 14], 'fg-c')}>
       <circle class="op-ag" r="4.5" />
       <text class="txt-label" y="20">{D.centre}</text>
     </g>
     {D.rings.map((r, i) => (
-      <g {...at([LX, rowY(i)], [band(i)[0] + 12, NB[i] + 19])}>
+      <g {...at([LX, rowY(i)], [bands[i].x + 10, bands[i].y + 21])}>
         <text class="op-l">{r.label}</text>
-        <text class="op-s" y="15">{r.sub}</text>
+        <text class="op-s" y="16">{subs[i].map((t, j) => <tspan x="0" dy={j ? 15 : undefined}>{t}</tspan>)}</text>
       </g>
     ))}
-    <g {...at([CX + R[1], G + 17], [16, NL + 18])}>
-      <text class="txt-note op-amb">{D.line}</text>
-      <text class="op-s" y="16">{past.map((t, j) => <tspan x="0" dy={j ? 13.5 : undefined}>{t}</tspan>)}</text>
+    <g {...at([CX + R[1], G + 18], [12, NL + 20])}>
+      <text class="op-n op-amb">{D.line}</text>
+      <text class="op-s" y="17">{past.map((t, j) => <tspan x="0" dy={j ? 15 : undefined}>{t}</tspan>)}</text>
     </g>
   </g>
 </Figure>

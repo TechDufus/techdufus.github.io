@@ -4,8 +4,8 @@
   loop runs 2 → gate → 3 → 4 → 5 → 6 and returns to 2 ("the next agent starts here", the heavier
   pale-gold line). The gate's "yes" branch goes to my confirmation and rejoins before 3. Hollow
   corner marks are my steps, solid ones the agent's. Wide: 2, the gate and 3 on top, 6 ← 5 ← 4
-  under them, my two boxes above. Narrow: one column, the confirmation beside the gate, the
-  return up the left edge. Boxes keep their size in both layouts, so each is drawn once and
+  under them, my two boxes above. Narrow (280 units): the key on top, one column, the
+  confirmation to the right under the gate, the return up the left edge. Boxes keep their size in both layouts, so each is drawn once and
   moved (at()).
 */
 import Figure from '../../figure/Figure.astro';
@@ -13,8 +13,8 @@ import { at, f, head, rc, wrap, type P } from '../../../../lib/drawing/figure';
 import { theLoop as D, type Step } from './data';
 import './operator.css';
 
-/* lettering: .op-l 12px caps +.06em, .op-s 10.5px +.02em (mono advance .6em) */
-const LCH = 12 * 0.66, SCH = 10.5 * 0.62, LH = 15, SH = 13.5;
+/* lettering: .op-l 12px caps +.06em, .op-s 12px +.02em (mono advance .6em) */
+const LCH = 12 * 0.66, SCH = 12 * 0.62, LH = 15, SH = 15;
 type Box = Step & { w: number; h: number; l: string[]; s: string[] };
 const size = (st: Step, w: number): Box => ({
   ...st, w, h: 0,
@@ -39,11 +39,11 @@ const Y0 = 12, YA = Y0 + b1.h + 34, YB = YA + b2.h + 56, H = YB + b4.h + 12;
 const ym = YA + b2.h / 2, yb = YB + b4.h / 2, oy = Y0 + ok.h / 2;
 const wide: [Box, P][] = [[b1, [X[0], Y0]], [ok, [CX[1] - ok.w / 2, Y0]], [b2, [X[0], YA]], [b3, [X[2], YA]], [b4, [X[2], YB]], [b5, [X[1], YB]], [b6, [X[0], YB]]];
 
-/* narrow: one column at 40 (centre 134), the confirmation at 240 beside the gate */
-const NX = 40, nc = NX + W / 2, G = 26;
-const n1 = 12, n2 = n1 + b1.h + G, yg = n2 + b2.h + 30, n3 = yg + 64, n4 = n3 + b3.h + G, n5 = n4 + b4.h + G, n6 = n5 + b5.h + G;
-const NH = n6 + b6.h + 12, yj = yg + ok.h / 2 + 18;
-const narrow: P[] = [[NX, n1], [240, yg - ok.h / 2], [NX, n2], [NX, n3], [NX, n4], [NX, n5], [NX, n6]];
+/* narrow: one column at 30 (centre 124), the return at 20; the confirmation at 164, under the gate */
+const NX = 30, nc = NX + W / 2, G = 26, OX = 164, oc = OX + ok.w / 2;
+const n1 = 30, n2 = n1 + b1.h + G, yg = n2 + b2.h + 30, yc = yg + 22, yj = yc + ok.h + 16, n3 = yj + 24;
+const n4 = n3 + b3.h + G, n5 = n4 + b4.h + G, n6 = n5 + b5.h + G, NH = n6 + b6.h + 12;
+const narrow: P[] = [[NX, n1], [OX, yc], [NX, n2], [NX, n3], [NX, n4], [NX, n5], [NX, n6]];
 
 const dia = (x: number, y: number): string => `M${f(x)} ${f(y - 10)}l10 10l-10 10l-10 -10Z`;
 const dot = (x: number, y: number): string => `M${f(x - 2.2)} ${f(y)}a2.2 2.2 0 1 0 4.4 0a2.2 2.2 0 1 0 -4.4 0`;
@@ -56,14 +56,14 @@ const edges = {
     head(CX[0], YA, 'd') + head(CX[1] - 10, ym, 'r') + head(X[2], ym, 'r') + head(CX[1], Y0 + ok.h, 'u') +
     head(CX[2], YB, 'd') + head(X[1] + W, yb, 'l') + head(X[0] + W, yb, 'l') + dot(440, ym),
   n:
-    `M${nc} ${n1 + b1.h}V${n2}M${nc} ${n2 + b2.h}V${yg - 10}M${nc} ${yg + 10}V${n3}M${nc + 10} ${yg}H240` +
-    `M296 ${yg + ok.h / 2}V${yj}H${nc}M${nc} ${n3 + b3.h}V${n4}M${nc} ${n4 + b4.h}V${n5}M${nc} ${n5 + b5.h}V${n6}`,
+    `M${nc} ${n1 + b1.h}V${n2}M${nc} ${n2 + b2.h}V${yg - 10}M${nc} ${yg + 10}V${n3}M${nc + 10} ${yg}H${oc}V${yc}` +
+    `M${oc} ${yc + ok.h}V${yj}H${nc}M${nc} ${n3 + b3.h}V${n4}M${nc} ${n4 + b4.h}V${n5}M${nc} ${n5 + b5.h}V${n6}`,
   nh:
-    head(nc, n2, 'd') + head(nc, yg - 10, 'd') + head(nc, n3, 'd') + head(240, yg, 'r') + head(nc, n4, 'd') +
+    head(nc, n2, 'd') + head(nc, yg - 10, 'd') + head(nc, n3, 'd') + head(oc, yc, 'd') + head(nc, n4, 'd') +
     head(nc, n5, 'd') + head(nc, n6, 'd') + dot(nc, yj),
   bw: `M${CX[0]} ${YB}V${YA + b2.h}`,
   bwh: head(CX[0], YA + b2.h, 'u'),
-  bn: `M${NX} ${n6 + b6.h / 2}H22V${n2 + b2.h / 2}H${NX}`,
+  bn: `M${NX} ${n6 + b6.h / 2}H20V${n2 + b2.h / 2}H${NX}`,
   bnh: head(NX, n2 + b2.h / 2, 'r'),
 };
 const diaW = dia(CX[1], ym), diaN = dia(nc, yg);
@@ -77,7 +77,7 @@ const desc =
   rest.map((st) => `${lc(st.label)} (${st.sub})`).join('; ') + `. An arrow returns to reading the repo: ${D.back}.`;
 ---
 
-<Figure id="fig-loop" fig={1} date="2026-09-29" title={D.title} desc={desc} size={[680, H]} narrow={[360, NH]}>
+<Figure id="fig-loop" fig={1} date="2026-09-29" title={D.title} desc={desc} size={[680, H]} narrow={[280, NH]} bp={680}>
   <g class="fg-edge" style="--p:3">
     <path class="ln-med fg-w" d={edges.w} pathLength="1" />
     <path class="fg-arr fg-w" d={edges.wh + diaW} />
@@ -102,15 +102,15 @@ const desc =
     </g>
   ))}
 
-  <g class="txt-note" style="--p:5">
+  <g class="op-n" style="--p:5">
     <text {...at([CX[1] - 12, ym + 22], [nc - 14, yg - 2], 'fg-e fg-h')}>
-      {gate.map((t, j) => <tspan x="0" dy={j ? 13 : undefined}>{t}</tspan>)}
+      {gate.map((t, j) => <tspan x="0" dy={j ? 14 : undefined}>{t}</tspan>)}
     </text>
     <text {...at([CX[1] + 6, ym - 34], [nc + 16, yg - 6])}>yes</text>
-    <text {...at([CX[1] + 16, ym - 6], [nc - 8, yj - 4], 'fg-ne')}>no</text>
+    <text {...at([CX[1] + 16, ym - 6], [nc + 8, yg + 30])}>no</text>
     <text class="fg-hand fg-h fg-w" transform={`translate(${CX[0] + 10} ${f((YA + b2.h + YB) / 2 + 4)})`}>{D.back}</text>
-    <text class="fg-hand fg-h fg-n fg-c" transform={`translate(16 ${f((n2 + n6 + b6.h) / 2)}) rotate(-90)`}>{D.back}</text>
-    <g {...at([496, 30], [258, 30])}><circle class="op-me" cy="-4" r="4" /><text class="txt-label" x="10">me</text></g>
-    <g {...at([552, 30], [258, 50])}><circle class="op-ag" cy="-4" r="4" /><text class="txt-label" x="10">agent</text></g>
+    <text class="fg-hand fg-h fg-n fg-c" transform={`translate(13 ${f((n2 + n6 + b6.h) / 2)}) rotate(-90)`}>{D.back}</text>
+    <g {...at([496, 30], [30, 16])}><circle class="op-me" cy="-4" r="4" /><text class="txt-label" x="10">me</text></g>
+    <g {...at([552, 30], [84, 16])}><circle class="op-ag" cy="-4" r="4" /><text class="txt-label" x="10">agent</text></g>
   </g>
 </Figure>

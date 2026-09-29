@@ -1,22 +1,30 @@
-/* Figures for "I Rebuilt My Homelab for an AI Operator" (OldVsNew, WhoDidWhat, TheNight), on top
-   of drawing.css and figure.css. Running text keeps its case (names like k3s, AGENTS.md); the
-   owner's own words are set in italic serif, like speech. Hollow marks are me, solid marks are
-   the agent, in every figure.
+/* Figures for "I Rebuilt My Homelab for an AI Operator" (TheLoop, OldVsNew, TheNight,
+   BlastRadius, WhoDidWhat), on top of drawing.css and figure.css. Running text keeps its case
+   (names like k3s, AGENTS.md); the owner's own words are set in italic serif, like speech. Hollow
+   marks are me, solid marks are the agent, in every figure.
+   LEGIBLE  No lettering under 12 units. Wide layouts are 680 units (WhoDidWhat 850) and bp is
+         that width, so they only show at 1:1 or larger; narrow layouts are 280 units, so 12 units
+         read at 13.7px on a 360px phone, capped at 380px (16.3px) so they don't balloon.
    TEXT  .op-t (running text) · .op-old (before, receding) · .op-new (now) · .op-q (a quote) ·
-         .op-time · .op-foil (static gold foil: the page's #studio-gold gradient, SvgDefs.astro)
-   BOXES .op-l (a box's bold label) · .op-s (its small sub line)
+         .op-time · .op-n (a small caps note) · .op-foil (static gold foil: the page's
+         #studio-gold gradient, SvgDefs.astro)
+   BOXES .op-l (a box's bold label) · .op-s (its sub line)
    MARKS .op-me (hollow) · .op-ag (solid) · BLAST .op-zone (inside the line) · .op-bd .op-amb (the line) */
-.dwg .op-t{font-size:11.5px;letter-spacing:.01em;fill:var(--dwg-text)}
+.dwg .op-t{font-size:12px;letter-spacing:.01em;fill:var(--dwg-text)}
 .dwg .op-old{fill:var(--muted)}
 .dwg .op-new{fill:var(--ink)}
 .dwg .op-q{font:italic 15px var(--font-display);letter-spacing:.01em;fill:var(--gold-light)}
-.dwg .op-time{font-size:11px;letter-spacing:.04em;fill:var(--gold)}
+.dwg .op-time{font-size:12px;letter-spacing:.04em;fill:var(--gold)}
+.dwg .op-n{font-size:12px;letter-spacing:.06em;text-transform:uppercase;fill:var(--muted)}
 .dwg .op-foil{fill:url(#studio-gold)}
 .dwg .op-me{fill:var(--dwg-paper);stroke:var(--gold-light);stroke-width:1.3px;vector-effect:non-scaling-stroke}
 .dwg .op-ag{fill:var(--gold-light)}
 .dwg .op-l{font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;fill:var(--dwg-text-hi)}
-.dwg .op-s{font-size:10.5px;letter-spacing:.02em;fill:var(--muted)}
+.dwg .op-s{font-size:12px;letter-spacing:.02em;fill:var(--muted)}
 .dwg .op-zone{fill:color-mix(in srgb,var(--gold) 6%,transparent)}
 .dwg .op-bd{stroke:var(--dwg-amber);--sw:1.3px;stroke-dasharray:7 4}
 .dwg .op-amb{fill:var(--dwg-amber)}
+/* the FIG strip's kickers (DWG NO, SCALE…) at 12px too, and the narrow cap */
+:is([data-dwg=fig-loop],[data-dwg=fig-operator],[data-dwg=fig-night],[data-dwg=fig-blast],[data-dwg=fig-who]) .dwg-tb dt{font-size:12px;letter-spacing:.1em}
+.fg.is-narrow:has(>:is([data-dwg=fig-loop],[data-dwg=fig-operator],[data-dwg=fig-night],[data-dwg=fig-blast],[data-dwg=fig-who]))>*{max-width:380px}
 @media print{.dwg .op-foil{fill:#000}}
