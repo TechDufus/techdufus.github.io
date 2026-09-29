@@ -1,0 +1,24 @@
+---
+/*
+  CadStatus: the CAD status bar under a sheet. Sheet.astro renders it (status={false} to drop
+  it). drawing.ts fills it: active view, cursor X/Y in model mm and rack units (fine pointers,
+  from the hovered view's data-mm / data-u0), sheet zone, view scale, and "PLOTTING… n%" during
+  the draw-in. Purely visual (aria-hidden): every value it shows is in the drawing or its text.
+
+    view   initial view title;  scale  initial scale text
+*/
+interface Props {
+  view?: string;
+  scale?: string;
+}
+const { view = 'MODEL', scale = '' } = Astro.props;
+---
+
+<div class="dwg-status" aria-hidden="true">
+  <span class="dwg-st dwg-st--view" data-st="view">{view}</span>
+  <span class="dwg-st dwg-st--xy" data-st="xy">X ——— Y ———</span>
+  <span class="dwg-st dwg-st--u" data-st="u">U ——</span>
+  <span class="dwg-st dwg-st--zone" data-st="zone">ZONE ——</span>
+  <span class="dwg-st dwg-st--scale" data-st="scale">{scale}</span>
+  <span class="dwg-st dwg-st--plot" data-st="plot"><i data-st="bar"></i><span data-st="pct">PLOT 100%</span></span>
+</div>

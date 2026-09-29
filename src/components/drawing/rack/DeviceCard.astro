@@ -1,0 +1,56 @@
+---
+/*
+  One device's detail card for Sheet 01: balloon number, where it sits, name and role, key specs
+  with provenance chips, ports, and a link to its own sheet when it has one. Rendered into
+  <template>s on /lab/rack/views/ and shown by ./rack.ts when the device is selected.
+*/
+import ProvChip from '../ProvChip.astro';
+import type { Device, Fact } from '../../../data/hardware/types';
+import { balloonOf, sources, uText } from './model';
+
+interface Props {
+  dev: Device;
+}
+const { dev: d } = Astro.props;
+const src = (f: Fact<unknown>) => (f.source ? sources[f.source as keyof typeof sources] : undefined);
+const where = d.location === 'cabinet' ? `${uText(d)}${d.heightU ? ` · ${d.heightU}U` : ''}` : d.mount === 'desk' ? 'At the desk' : 'Ceiling or wall';
+const b = d.body.value;
+const rows: { k: string; v: string; f: Fact<unknown> }[] = [
+  { k: 'Where', v: where, f: d.u ?? { value: 0, prov: 'owner' } },
+  { k: 'Body', v: `${b.w} × ${b.h} × ${b.d} mm`, f: d.body },
+  ...(d.mass ? [{ k: 'Mass', v: `${d.mass.value} kg`, f: d.mass }] : []),
+  ...(d.maxPower ? [{ k: 'Max power', v: `${d.maxPower.value} W nameplate`, f: d.maxPower }] : []),
+  ...(d.airflow ? [{ k: 'Airflow', v: d.airflow.value.replace(/-/g, ' '), f: d.airflow }] : []),
+  ...d.specs.map((s) => ({ k: s.label, v: s.fact.value, f: s.fact })),
+];
+---
+
+<article class="rk-card" data-card={d.id}>
+  <div>
+  <p class="rk-card__meta"><span class="rk-card__n">{balloonOf(d.id)}</span>{d.maker} · {d.model}</p>
+  <h3 class="rk-card__t">{d.name}</h3>
+  <p class="rk-card__role">{d.role}</p>
+  {d.sheetHref && <a class="link rk-card__more" href={d.sheetHref}>Sheet 02 · The server, inside and out <span class="arrow" aria-hidden="true">→</span></a>}
+  </div>
+  <div>
+  <dl class="rk-card__specs">
+    {rows.map((r) => {
+      const s = src(r.f);
+      return (
+        <div>
+          <dt>{r.k}</dt>
+          <dd>{r.v} <ProvChip prov={r.f.prov} asOf={r.f.asOf} note={r.f.note} href={s?.href} source={s?.publisher} compact /></dd>
+        </div>
+      );
+    })}
+  </dl>
+  {d.ports && d.ports.length > 0 && (
+    <>
+      <p class="rk-card__h">Ports</p>
+      <ul class="rk-card__ports">
+        {d.ports.map((p) => <li>{p.group}: {p.count} × {p.kind}{p.speed && ` · ${p.speed}`} <span>({p.face})</span></li>)}
+      </ul>
+    </>
+  )}
+  </div>
+</article>

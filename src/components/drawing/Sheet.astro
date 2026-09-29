@@ -1,0 +1,242 @@
+---
+/*
+  Sheet: one engineering drawing: figure.dwg[data-dwg] around the SVG (paper, drafting grid,
+  frame with zone markers, stamp), the HTML sheet furniture (revision table, numbered notes,
+  title block with the TD monogram), an optional toolbar and legend, and the CAD status bar.
+  Importing it also brings src/styles/drawing.css and src/scripts/drawing.ts (bundled once).
+
+  On wide screens the furniture sits over the sheet's right column, lettered in paper units
+  (container units), so it scales with the drawing. Below a 1080px-wide figure (and whenever
+  the figure is narrower than the drawing's pan width) the SVG pans sideways inside its own box
+  with a hint, and the furniture drops under it as ordinary HTML. Printing gives black on white.
+
+  ---
+  import Sheet from '../components/drawing/Sheet.astro';
+  import { sheetLayout } from '../lib/drawing/sheet';
+  const L = sheetLayout('A3');
+  ---
+  <Sheet id="lab01" dwgNo="TD-LAB-01" title="The cabinet" sheet={[1, 2]} rev="P1" date="2026-09-28"
+         desc="Isometric and front views of…" interactive
+         notes={['U POSITIONS NOT SURVEYED — VERIFY IN FIELD.']}
+         revisions={[{ rev: 'P1', date: '2026-09-28', desc: 'First issue' }]}
+         stamp={{ text: 'PRELIMINARY', sub: 'NOT FOR CONSTRUCTION' }}>
+    <Fragment slot="toolbar"><ViewTabs … /><LayerPanel … /></Fragment>
+    <View …>…</View>                       ← default slot: SVG content in paper units
+    <Fragment slot="legend"><ProvLegend /></Fragment>
+  </Sheet>
+
+  Props
+    id          unique on the page: prefixes defs, views and tabs (letters, digits, dashes)
+    dwgNo       drawing number, e.g. "TD-LAB-01"
+    title       sheet title (Instrument Serif italic in the title block)
+    desc        the SVG's <desc>: what the drawing shows, in a sentence or two (required)
+    size        'A3' (default) | 'A4' | { w, h } (a frameless figure: no zones/furniture overlay;
+                the title block becomes a one-line strip under the drawing)
+    project     default "HOMELAB"
+    sheet       [n, of] (default [1, 1]);  scale  default "AS NOTED";  units  default "mm"
+    rev date drawn checked   title block fields (drawn default "TD", checked default "—")
+    revisions   { rev, date, desc, by? }[] (newest last)
+    notes       (string | { text, prov?, asOf? })[]; numbered; toggled by data-layer="notes"
+    stamp       "PRELIMINARY" or { text, sub?, x?, y?, tone? } (see Stamp.astro)
+    interactive true when the drawing has parts or view tabs (SVG role="group"; else "img")
+    grid        drafting grid inside the frame (default true)
+    status      render the CAD status bar (default true); statusScale = its initial scale text
+    panMin      px width below which the SVG pans (default: 0.84 px per paper unit)
+    defs        which shared defs to render: ('grid' | 'hatch' | 'hatch-x' | 'rough')[] (default
+                all four); skip the ones a small figure never uses to save bytes
+  Slots: default (SVG), toolbar (HTML above), legend (HTML below the status bar).
+*/
+import '../../styles/drawing.css';
+import DrawingDefs from './DrawingDefs.astro';
+import Stamp from './Stamp.astro';
+import Monogram from './Monogram.astro';
+import CadStatus from './CadStatus.astro';
+import ProvChip from './ProvChip.astro';
+import { sheetLayout, type Box, type SheetSize } from '../../lib/drawing/sheet';
+import type { DefKind } from './DrawingDefs.astro';
+import type { Provenance } from '../../lib/drawing/prov';
+
+type Note = string | { text: string; prov?: Provenance; asOf?: string };
+interface Props {
+  id: string;
+  dwgNo: string;
+  title: string;
+  desc: string;
+  size?: SheetSize;
+  project?: string;
+  sheet?: [number, number];
+  scale?: string;
+  units?: string;
+  rev?: string;
+  date?: string;
+  drawn?: string;
+  checked?: string;
+  revisions?: { rev: string; date: string; desc: string; by?: string }[];
+  notes?: Note[];
+  stamp?: string | { text: string; sub?: string; x?: number; y?: number; tone?: 'warn' | 'ok' };
+  interactive?: boolean;
+  grid?: boolean;
+  status?: boolean;
+  statusScale?: string;
+  panMin?: number;
+  defs?: DefKind[];
+}
+const {
+  id, dwgNo, title, desc, size = 'A3', project = 'HOMELAB', sheet = [1, 1], scale = 'AS NOTED', units = 'mm',
+  rev = '—', date = '—', drawn = 'TD', checked = '—', revisions = [], notes = [], stamp, interactive = false,
+  grid = true, status = true, statusScale = '', panMin, defs = ['grid', 'hatch', 'hatch-x', 'rough'],
+} = Astro.props;
+
+const L = sheetLayout(size);
+const { w: W, h: H } = L;
+const f = (v: number): string => String(Math.round(v * 100) / 100);
+// Furniture placement over the sheet, as custom properties (drawing.css applies them only in the
+// overlay layout, so the stacked phone layout needs no overrides).
+const place = (b: Box, withH: boolean): string =>
+  `--x:${f((b.x / W) * 100)}%;--y:${f((b.y / H) * 100)}%;--w:${f((b.w / W) * 100)}%` + (withH ? `;--h:${f((b.h / H) * 100)}%` : '');
+
+// Frame furniture (framed sheets only)
+const revH = revisions.length ? 44 + revisions.length * 20 : 0;
+const revBox: Box = { ...L.revTable, h: revH };
+const notesBox: Box = { ...L.notes, y: L.frame.y + (revH ? revH + 26 : 18) };
+const zoneTicks: string[] = [];
+// Zone letters and numbers: one <text> per sheet edge with a per-glyph x/y list (each glyph is
+// its own anchored chunk, so every label centres on its zone) instead of 28 separate elements.
+const zoneLabels: { x: string; y: string; t: string }[] = [];
+if (L.framed) {
+  const { frame: fr, border: bo, cols, rows } = L;
+  const zw = fr.w / cols, zh = fr.h / rows;
+  const xs: string[] = [], ys: string[] = [];
+  for (let i = 0; i <= cols; i++) {
+    const x = fr.x + i * zw;
+    if (i > 0 && i < cols) zoneTicks.push(`M${f(x)} ${bo.y}V${fr.y}M${f(x)} ${fr.y + fr.h}V${bo.y + bo.h}`);
+    if (i < cols) xs.push(f(x + zw / 2));
+  }
+  for (let j = 0; j <= rows; j++) {
+    const y = fr.y + j * zh;
+    if (j > 0 && j < rows) zoneTicks.push(`M${bo.x} ${f(y)}H${fr.x}M${fr.x + fr.w} ${f(y)}H${bo.x + bo.w}`);
+    if (j < rows) ys.push(f(y + zh / 2 + 3.5));
+  }
+  const nums = xs.map((_, i) => String(i + 1)).join('');
+  const lets = ys.map((_, j) => String.fromCharCode(65 + j)).join('');
+  // one glyph per zone (A–Z, 1–9); wider sheets would need multi-glyph numbers. Letters need an x
+  // per glyph too, or each one advances sideways from the last.
+  const col = (x: number) => ys.map(() => f(x)).join(' ');
+  zoneLabels.push({ x: xs.join(' '), y: f((bo.y + fr.y) / 2 + 3.5), t: nums });
+  zoneLabels.push({ x: xs.join(' '), y: f((fr.y + fr.h + bo.y + bo.h) / 2 + 3.5), t: nums });
+  zoneLabels.push({ x: col((bo.x + fr.x) / 2), y: ys.join(' '), t: lets });
+  zoneLabels.push({ x: col((fr.x + fr.w + bo.x + bo.w) / 2), y: ys.join(' '), t: lets });
+}
+// ISO 5457 centring marks: heavy strokes from the sheet edge into the frame at each mid-side.
+const centring = L.framed
+  ? `M${W / 2} 0V${L.frame.y + 10}M${W / 2} ${H}V${L.frame.y + L.frame.h - 10}M0 ${H / 2}H${L.frame.x + 10}M${W} ${H / 2}H${L.frame.x + L.frame.w - 10}`
+  : '';
+
+const stampCfg = typeof stamp === 'string' ? { text: stamp } : stamp;
+const stampX = stampCfg?.x ?? L.area.x + L.area.w - 150;
+const stampY = stampCfg?.y ?? L.area.y + 64;
+
+const vars = [
+  ...defs.map((d) => `--dwg-${d}:url(#${id}-${d})`), `--dwg-vw:${W}`, `--dwg-vh:${H}`,
+  panMin ? `--dwg-pan-min:${panMin}px` : '',
+].filter(Boolean).join(';');
+const hasToolbar = Astro.slots.has('toolbar');
+const hasLegend = Astro.slots.has('legend');
+const sheetNo = `${sheet[0]} OF ${sheet[1]}`;
+---
+
+<figure
+  class:list={['dwg', L.framed ? 'dwg--sheet' : 'dwg--figure']}
+  data-dwg={id}
+  data-plot="pending"
+  data-frame={L.framed ? `${L.frame.x},${L.frame.y},${L.frame.w},${L.frame.h}` : undefined}
+  data-zones={L.framed ? `${L.cols},${L.rows}` : undefined}
+  style={vars}
+  aria-labelledby={`${id}-t`}
+>
+  {hasToolbar && <div class="dwg__bar"><slot name="toolbar" /></div>}
+  <div class="dwg__stage">
+    <div class="dwg__view">
+      <div class="dwg__pan">
+        <svg
+          class="dwg__svg"
+          viewBox={`0 0 ${W} ${H}`}
+          role={interactive ? 'group' : 'img'}
+          aria-labelledby={`${id}-t`}
+          aria-describedby={`${id}-d`}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title id={`${id}-t`}>{dwgNo} · {title}</title>
+          <desc id={`${id}-d`}>{desc}</desc>
+          <DrawingDefs id={id} gridX={L.frame.x} gridY={L.frame.y} only={defs} />
+          {grid && defs.includes('grid') && <rect class="dwg-gridbg" x={L.frame.x} y={L.frame.y} width={L.frame.w} height={L.frame.h} data-layer="grid" />}
+          {L.framed && (
+            <g class="dwg-frame" style="--p:0">
+              <rect class="ln-thin" x={L.border.x} y={L.border.y} width={L.border.w} height={L.border.h} pathLength="1" />
+              <rect class="ln-frame" x={L.frame.x} y={L.frame.y} width={L.frame.w} height={L.frame.h} pathLength="1" />
+              <path class="ln-thin" d={zoneTicks.join('')} />
+              <path class="ln-frame" d={centring} />
+              {zoneLabels.map((z) => (
+                <text class="txt-zone" x={z.x} y={z.y}>{z.t}</text>
+              ))}
+              <g class="dwg-stackonly">
+                <rect class="ln-frame" x={L.titleBlock.x} y={L.titleBlock.y} width={L.titleBlock.w} height={L.titleBlock.h} />
+                <text class="txt-label" x={f(L.titleBlock.x + L.titleBlock.w / 2)} y={f(L.titleBlock.y + L.titleBlock.h / 2 - 4)} text-anchor="middle">{dwgNo}</text>
+                <text class="txt-note" x={f(L.titleBlock.x + L.titleBlock.w / 2)} y={f(L.titleBlock.y + L.titleBlock.h / 2 + 16)} text-anchor="middle">TITLE BLOCK AND NOTES BELOW</text>
+                {revH > 0 && <rect class="ln-frame" x={revBox.x} y={revBox.y} width={revBox.w} height={revBox.h} />}
+              </g>
+            </g>
+          )}
+          <slot />
+          {stampCfg && <Stamp x={stampX} y={stampY} text={stampCfg.text} sub={stampCfg.sub} tone={stampCfg.tone} />}
+        </svg>
+      </div>
+      <p class="dwg__hint" aria-hidden="true">
+        <svg viewBox="0 0 24 10" focusable="false"><path d="M1 5h22M5 1 1 5l4 4M19 1l4 4-4 4" /></svg>
+        Swipe to pan
+      </p>
+    </div>
+    <div class="dwg__furn">
+      {revH > 0 && (
+        <table class="dwg-rev" style={L.framed ? place(revBox, false) : undefined}>
+          <caption>Revisions</caption>
+          <thead><tr><th scope="col">Rev</th><th scope="col">Description</th><th scope="col">Date</th><th scope="col">By</th></tr></thead>
+          <tbody>
+            {revisions.map((r) => (
+              <tr><td>{r.rev}</td><td>{r.desc}</td><td>{r.date}</td><td>{r.by ?? drawn}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      {notes.length > 0 && (
+        <div class="dwg-notes" data-layer="notes" style={L.framed ? place(notesBox, false) : undefined}>
+          <p class="dwg-notes__h">Notes</p>
+          <ol>
+            {notes.map((n) => typeof n === 'string' ? <li>{n}</li> : (
+              <li>{n.text} {n.prov && <ProvChip prov={n.prov} asOf={n.asOf} compact />}</li>
+            ))}
+          </ol>
+        </div>
+      )}
+      <dl class="dwg-tb" style={L.framed ? place(L.titleBlock, true) : undefined}>
+        {L.framed && <div class="tb-proj" style="grid-area:proj"><dt>Project</dt><dd>{project}</dd></div>}
+        {L.framed && <div class="tb-mono" style="grid-area:mono"><Monogram /></div>}
+        <div class="tb-title" style="grid-area:title"><dt>Title</dt><dd>{title}</dd></div>
+        <div class="tb-scale" style="grid-area:scale"><dt>Scale</dt><dd>{scale}</dd></div>
+        {L.framed && <div class="tb-units" style="grid-area:units"><dt>Units</dt><dd>{units}</dd></div>}
+        {L.framed && <div class="tb-sheet" style="grid-area:sheet"><dt>Sheet</dt><dd>{sheetNo}</dd></div>}
+        <div class="tb-rev" style="grid-area:rev"><dt>Rev</dt><dd>{rev}</dd></div>
+        <div class="tb-date" style="grid-area:date"><dt>Date</dt><dd>{date}</dd></div>
+        {L.framed && <div class="tb-drawn" style="grid-area:drawn"><dt>Drawn</dt><dd>{drawn}</dd></div>}
+        {L.framed && <div class="tb-chk" style="grid-area:chk"><dt>Checked</dt><dd>{checked}</dd></div>}
+        <div class="tb-no" style="grid-area:no"><dt>Dwg no</dt><dd>{dwgNo}</dd></div>
+      </dl>
+    </div>
+  </div>
+  {status && <CadStatus scale={statusScale} />}
+  {hasLegend && <div class="dwg__legend"><slot name="legend" /></div>}
+</figure>
+
+<script>
+  import '../../scripts/drawing';
+</script>

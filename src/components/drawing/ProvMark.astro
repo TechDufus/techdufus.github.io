@@ -1,0 +1,28 @@
+---
+/*
+  ProvMark: the SVG provenance tag, a 10-unit square (round for 'owner') carrying the letter
+  from src/lib/drawing/prov.ts. Solid for measured, outlined for vendor/owner, dashed for
+  inferred/assumed. Hover shows the full word (and date) via <title>.
+
+  <ProvMark x={x} y={y} prov="measured" asOf="2026-09-27" />   x, y = top-left corner, paper units
+    k   paper units per local unit inside a scaled group (default 1)
+*/
+import { PROV, provText, type Provenance } from '../../lib/drawing/prov';
+
+interface Props {
+  x: number;
+  y: number;
+  prov: Provenance;
+  asOf?: string;
+  k?: number;
+}
+const { x, y, prov, asOf, k = 1 } = Astro.props;
+const s = 10 / k;
+const f = (v: number): string => String(Math.round(v * 10) / 10);
+---
+
+<g class={`pm pm--${prov}`} transform={`translate(${f(x)} ${f(y)})`}>
+  <title>{provText(prov, asOf)}</title>
+  <rect width={f(s)} height={f(s)} rx={f(prov === 'owner' ? s / 2 : 1.2 / k)} />
+  <text x={f(s / 2)} y={f(s * 0.76)} style={k !== 1 ? `font-size:${f(7.5 / k)}px` : undefined}>{PROV[prov].letter}</text>
+</g>

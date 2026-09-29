@@ -1,0 +1,24 @@
+---
+/*
+  /lab/rack/views/: a page partial (no layout, no head) with the parts of Sheet 01 that load after
+  the page: the front, side and rear tab panels, the rear panel symbols, and one <template> per
+  device with its detail card. src/components/drawing/rack/rack.ts fetches it once and moves
+  the pieces into the sheet. Everything here is generated at build time, like the rest.
+*/
+import PanelDefs from '../../../components/drawing/rack/PanelDefs.astro';
+import FrontView from '../../../components/drawing/rack/FrontView.astro';
+import SideView from '../../../components/drawing/rack/SideView.astro';
+import RearView from '../../../components/drawing/rack/RearView.astro';
+import DeviceCard from '../../../components/drawing/rack/DeviceCard.astro';
+import { DWG, ORDER, dev } from '../../../components/drawing/rack/model';
+
+export const partial = true;
+---
+
+<svg xmlns="http://www.w3.org/2000/svg">
+  <PanelDefs dwg={DWG} face="rear" />
+  <FrontView dwg={DWG} />
+  <SideView dwg={DWG} />
+  <RearView dwg={DWG} />
+</svg>
+{ORDER.map((id) => <template data-dev={id}><DeviceCard dev={dev(id)} /></template>)}

@@ -1,0 +1,39 @@
+---
+/*
+  LineKey: legend of line types and semantic colours. Each swatch is drawn with the real line
+  class (lineSwatch() in src/lib/drawing/sheet.ts), so it matches the drawing, print included.
+  Use it in a Sheet's `legend` slot (it needs the Sheet's --dwg-hatch for the 'hatch' swatch).
+
+  <LineKey items={[{ line: 'obj', label: 'Object' }, { line: 'air-cold', label: 'Cold air' }]} />
+
+    items  { line, label } — line: 'obj' | 'med' | 'hid' | 'ctr' | 'phantom' | 'cut' | 'dim' |
+           'cons' | 'thin' | 'flow' | 'net' | 'hatch' | 'air-cold' | 'air-hot' | 'net-10g' |
+           'net-1g' | 'pool-rpool' | 'pool-fast' | 'pool-bulk' | 'sem-new' | 'sem-removed' |
+           'sem-power' | 'sem-keep'
+    title  heading (default "Line key")
+*/
+import { lineSwatch } from '../../lib/drawing/sheet';
+
+interface Props {
+  items: { line: string; label: string }[];
+  title?: string;
+}
+const { items, title = 'Line key' } = Astro.props;
+---
+
+<div class="dwg-key">
+  <p class="dwg-key__h">{title}</p>
+  <ul class="dwg-key__list">
+    {items.map((it) => {
+      const sw = lineSwatch(it.line);
+      return (
+        <li>
+          <svg class="dwg-key__sw" viewBox="0 0 28 10" aria-hidden="true">
+            <g class={sw.group || undefined}>{sw.hatch ? <rect class={sw.cls} x="1" y="1" width="26" height="8" /> : <path class={sw.cls} d="M1 5h26" />}</g>
+          </svg>
+          <span>{it.label}</span>
+        </li>
+      );
+    })}
+  </ul>
+</div>

@@ -1,0 +1,100 @@
+---
+/*
+  TD-LAB-01 · Sheet 1 of 2 · The cabinet. The whole A3 sheet: view tabs (isometric, front
+  elevation, side section, rear + links), layers, the shared panel symbols, notes, revisions
+  and the stamp. Every line comes from src/data/hardware/rack.ts via ./model.ts.
+
+  Only the isometric ships inline. The front, side and rear views (and the rear panel symbols)
+  are rendered at build time into the partial page /lab/rack/views/ and moved into their empty
+  tab panels by ./rack.ts, on idle or on first use, which keeps the page HTML inside budget.
+  Without JS the tabs are hidden and only the isometric shows, as before.
+*/
+import Sheet from '../Sheet.astro';
+import ViewTabs from '../ViewTabs.astro';
+import LayerPanel from '../LayerPanel.astro';
+import PanelDefs from './PanelDefs.astro';
+import IsoView from './IsoView.astro';
+import View from '../View.astro';
+import LineKey from '../LineKey.astro';
+import ProvLegend from '../ProvLegend.astro';
+
+interface Props {
+  id?: string;
+}
+const { id = 'lab01' } = Astro.props;
+/** Tab panels filled from /lab/rack/views/ (see the header). */
+const LAZY = ['front', 'side', 'rear'] as const;
+
+const notes = [
+  'All dimensions in millimetres unless noted.',
+  { text: 'U positions not surveyed — verify in field.', prov: 'assumed' as const },
+  { text: 'Cabinet is a nominal 42U enclosure (APC AR3100 size). Make and size unknown.', prov: 'assumed' as const },
+  { text: 'Patch panel and shelf seen in a Nov 2024 photo. Still there? Unknown.', prov: 'inferred' as const },
+  { text: 'Power is nameplate maximum, not measured.', prov: 'vendor' as const },
+  { text: 'Airflow per vendor docs. Arrows only where it is documented.', prov: 'inferred' as const },
+  'Provenance marks per legend.',
+];
+---
+
+<Sheet
+  id={id}
+  dwgNo="TD-LAB-01"
+  title="The cabinet"
+  sheet={[1, 2]}
+  rev="A"
+  date="2026-09-28"
+  desc="The 42U cabinet and everything in it. Isometric: a key plan of the whole cabinet with the door open, and detail A, the stack at 1:6: a Raspberry Pi on a shelf at U25, the shelf at U24, a patch panel at U23, a UniFi UDM Pro at U22, a UNAS Pro 8 at U20 to 21 and a Dell R720xd at U18 to 19. Front elevation at 1:10 with the U ruler, 35U free. Side section with device depths, clearances and airflow. Rear with the four documented network links. U positions are assumed."
+  revisions={[{ rev: 'A', date: '2026-09-28', desc: 'First issue' }]}
+  notes={notes}
+  stamp={{ text: 'PRELIMINARY', sub: 'NOT FOR CONSTRUCTION', x: 486, y: 232 }}
+  interactive
+  statusScale="SCALE 1:6"
+>
+  <Fragment slot="toolbar">
+    <ViewTabs
+      dwg={id}
+      active="iso"
+      views={[
+        { id: 'iso', label: 'Isometric', icon: 'iso' },
+        { id: 'front', label: 'Front', icon: 'front' },
+        { id: 'side', label: 'Side', icon: 'section' },
+        { id: 'rear', label: 'Rear', icon: 'rear' },
+      ]}
+    />
+    <LayerPanel
+      layers={[
+        { id: 'devices', label: 'Devices', line: 'obj' },
+        { id: 'labels', label: 'Labels', line: 'lead' },
+        { id: 'dims', label: 'Dimensions', line: 'dim' },
+        { id: 'network', label: 'Network', line: 'net-10g' },
+        { id: 'airflow', label: 'Airflow', line: 'air-cold' },
+        { id: 'power', label: 'Power', line: 'sem-power' },
+        { id: 'notes', label: 'Notes', line: 'thin' },
+        { id: 'grid', label: 'Grid', line: 'cons' },
+      ]}
+    />
+  </Fragment>
+
+  <PanelDefs dwg={id} face="front" />
+  <IsoView dwg={id} active />
+  {LAZY.map((name) => <View dwg={id} name={name} x={39} y={39} w={798} h={813} />)}
+
+  <Fragment slot="legend">
+    <LineKey
+      items={[
+        { line: 'obj', label: 'Object' },
+        { line: 'hid', label: 'Hidden' },
+        { line: 'phantom', label: 'Alternate position' },
+        { line: 'ctr', label: 'Centre' },
+        { line: 'dim', label: 'Dimension' },
+        { line: 'hatch', label: 'Section' },
+        { line: 'net-10g', label: '10 GbE' },
+        { line: 'net-1g', label: '1 GbE' },
+        { line: 'air-cold', label: 'Cold air' },
+        { line: 'air-hot', label: 'Hot air' },
+        { line: 'sem-power', label: 'Power' },
+      ]}
+    />
+    <ProvLegend />
+  </Fragment>
+</Sheet>

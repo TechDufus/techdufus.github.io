@@ -1,0 +1,149 @@
+---
+title: 'From Hardware RAID to ZFS: The Plan for My R720xd'
+description: >-
+  My R720xd's RAID card was hiding two flaky SSDs and a dying 15k drive. The
+  plan: swap in an HBA330, rebuild Proxmox on ZFS, buy no new drives.
+pubDate: '2026-09-28'
+created: '2026-09-28'
+tags:
+  - homelab
+  - proxmox
+  - zfs
+  - hardware
+  - dell
+  - ai-agents
+category: tech
+socialImage: /img/posts/from-hardware-raid-to-zfs.png
+socialImageAlt: >-
+  Gold-ink drawing of the storage path: seven disks into a PERC RAID card and
+  four virtual disks today, and, stamped planned, six disks straight through an
+  HBA330 into ZFS.
+socialImageWidth: 1200
+socialImageHeight: 630
+---
+import StoragePath from '../../components/drawing/post/StoragePath.astro';
+import Pools from '../../components/drawing/post/Pools.astro';
+import BayMap from '../../components/drawing/post/BayMap.astro';
+import MirrorSizes from '../../components/drawing/post/MirrorSizes.astro';
+import TwoCables from '../../components/drawing/post/TwoCables.astro';
+import YouAndAgent from '../../components/drawing/post/YouAndAgent.astro';
+import SheetLink from '../../components/drawing/post/SheetLink.astro';
+
+# From Hardware RAID to ZFS: The Plan for My R720xd
+
+My server thinks it's an R720.
+
+The firmware says "PowerEdge R720". But the front has 24 drive bays and the back has two more, and only the R720xd has that layout. So it's an xd with an identity crisis. Relatable, honestly.
+
+A Dell HBA330 showed up today. This post is the plan: pull the hardware RAID card, reinstall Proxmox on ZFS, and buy zero new drives.
+
+**The swap hasn't happened yet.** Everything below is what I *think* will happen. Hardware has a way of disagreeing.
+
+<StoragePath />
+
+## The RAID card was hiding things
+
+Right now the server runs a PERC H710P Mini, Dell's hardware RAID card. It takes the physical disks, groups them into virtual disks, and hands Proxmox only those. Proxmox puts LVM-thin on top and never sees a real drive.
+
+That's fine until you want ZFS. ZFS wants raw disks so it can checksum every block, run its own mirrors and take its own snapshots. It can't do that through a card that's pretending.
+
+Turns out the card was also hiding problems.
+
+Before touching anything, I had an AI agent inspect everything, read-only: SSH into the host, IPMI and Redfish against the iDRAC, and the UniFi API for the network. It came back with this:
+
+- In late August 2026, the PERC reset both of my Gigastone SSDs and logged one of them as "not functioning correctly" and then "removed". I didn't notice. {/* CHECK: "I didn't notice" — confirm you really hadn't seen it before the agent found it. */}
+- Both Gigastones still pass SMART, with 6 and 22 reallocated sectors. Not dead. Just not trustworthy.
+- One of the two 15k SAS drives in the back, half of the RAID1 that Proxmox boots from, reports "HARDWARE IMPENDING FAILURE" with 16 grown defects.
+
+So the boot mirror was one bad day away from being a boot *drive*, and two SSDs were quietly getting kicked out by the card. Cool cool cool.
+
+The agent found the dropped drives in the iDRAC's lifecycle log. The iDRAC's web page is broken (every page ends in a 404), so nobody had been reading it. The APIs still worked. {/* CHECK: OK to publish that the iDRAC web UI is broken? It's a security-posture detail about a network-exposed controller. Cut this sentence if not. */}
+
+| Drive | Health, read 2026-09-27/28 | Goes to |
+|---|---|---|
+| 2× Gigastone 256 GB SSD | SMART passed; 6 and 22 reallocated sectors | `rpool` |
+| Seagate ST300MP0004, 300 GB 15k SAS | 0 defects, about 55,500 hours powered on | `rpool`, after the install |
+| 2× Crucial MX500 500 GB SSD | passed; 64% and 90% life left | `fast` |
+| Crucial MX500 1 TB SSD | passed; 84% life left | `bulk` |
+| Seagate ST9300653SS, 300 GB 15k SAS | "HARDWARE IMPENDING FAILURE", 16 grown defects | out, for good |
+
+Proxmox 8 went end of life in August, and everything on the old install is disposable. A clean reinstall costs me nothing.
+
+## The card
+
+The HBA330 (Dell part J7TNV) is an LSI SAS3008 at 12 Gb/s in pass-through mode. No RAID, no virtual disks, no opinions. Every disk shows up as itself.
+
+The catch: Dell doesn't list the HBA330 for the R720 or R720xd. But it's the same chip and the same Linux driver (`mpt3sas`) as the widely used LSI 9300-8i. So I'm not worried about Linux seeing it. I'm a little worried about whether it boots. {/* CHECK: "not worried / a little worried" is my guess at your feelings. */}
+
+## Three pools, no new drives
+
+I'm not buying drives for this. Everything in the box that's still healthy gets a job.
+
+<Pools />
+
+- **`rpool`** holds Proxmox itself and ISOs. It's a 3-way mirror: both Gigastones plus the good 15k SAS drive. About 220 GiB usable.
+- **`fast`** holds VM disks for Talos, Kubernetes and databases. It's a mirror of the two 500 GB MX500s. About 450 GiB.
+- **`bulk`** is scratch, sandboxes and backup staging. The 1 TB MX500 on its own, about 930 GiB. Losing it costs nothing.
+
+Why three disks just to boot? Because I don't trust the Gigastones. They were flaky behind the old card, so the healthy SAS drive becomes a third copy. If both Gigastones die, the server still runs and still boots from the SAS drive.
+
+Is a mirror of two sketchy SSDs and a 15k spinner what a storage textbook would draw? No. It's what I have.
+
+<BayMap />
+
+That layout is only a suggestion. ZFS finds disks by serial number, not by bay, so moving drives around is purely for tidiness.
+
+## The installer's 10% rule
+
+The Proxmox installer has opinions too. It refuses to build a mirror if the disks differ in size by more than 10%. The error literally says "Mirrored disks must have same size".
+
+The Gigastones are about 238 GiB each. The SAS drive is about 279 GiB, roughly 17% bigger. So the installer says no.
+
+<MirrorSizes />
+
+So Proxmox installs on the two Gigastones only. Afterwards the agent attaches the SAS drive as the third copy, sets up its boot partition, and checks that all three disks can boot.
+
+Two more tricks. The boot pool gets capped at 220 GB, so any SSD of 240 GB or more can replace a boot disk later. And during the install, every other drive gets slid 2–3 cm out of its bay. The installer pre-selects every disk it sees; this makes erasing the wrong one impossible.
+
+Lazy-proofing. My favorite kind.
+
+## Two cables, 26 bays
+
+The HBA330 has two ports. The server has three SAS cables. That math bugged me for a minute.
+
+The third cable never went to the controller. It runs from the front backplane to the two rear flex bays. The front backplane has a SAS expander that feeds all 24 front bays *and* the 2 rear ones, so two cables from the card reach all 26.
+
+<TwoCables />
+
+The old card's cable doesn't get moved, it gets pulled: the mini PERC has no cable ports, so its cable starts at the system board. The new cables get tape labels, A and B. The flex-bay cable and every power and sideband cable stay put.
+
+## Me and the agent
+
+The runbook splits every step into two columns: **You** (me, with hands) and **Agent** (the AI, over SSH, after I say go).
+
+Most of stages 0 to 9 are mine: pick the slot, shut down, pull the card, cable, close up, sort the drives, install. This iDRAC is the Express licence, so there's no virtual console. The install happens on a real VGA monitor and a USB keyboard. A VGA monitor. In 2026.
+
+The agent can write the installer USB stick and shut things down on my go. Once I tell it "Proxmox is up", stage 10 is its turn: check the card's firmware, install updates, attach the SAS drive to `rpool`, create `fast` and `bulk`, then burn in with long SMART tests, a write-and-verify pass and a full scrub. It records which bay holds which drive by serial number and updates the repo. Where the plan requires it, I see each change first.
+
+<YouAndAgent />
+
+A few rules make me comfortable with that:
+
+- The inspection was read-only, except two things I approved first: changing the iDRAC's address (it sat on a network nothing could reach) and resetting the iDRAC.
+- Secrets stay in 1Password. The rule is that the agent handles references, and `op run` hands the values straight to the process that needs them. {/* CHECK: PLAN §3.3 says the Pi's console password was read once to bootstrap sudo, so this is phrased as the rule, not "it has never seen a secret". Confirm you're happy with it. */}
+- It can't pull a drive. That part is still my job.
+
+## What I don't know yet
+
+- **Which rear bay is 24 and which is 25.** Dell doesn't document it. The failing drive should blink green, amber, off; the good one should be steady green. The failing one gets tape before the old card comes out.
+- **Whether the old card's odd listing of the Gigastones means anything.** The PERC holds them as "Foreign", and the iDRAC files them outside the enclosure every other drive sits in.
+- **Whether this exact card boots in UEFI on this BIOS.** If "Dell HBA Configuration Utility" doesn't show up in System Setup, I stop, and the fallback is a legacy BIOS install.
+- **Whether the fans go full jet engine.** Dell's third-party PCIe card cooling response is switched on. If the new card sets it off, the agent proposes a setting change and I say yes or no.
+
+The full drawing of the server, bays and cables and all, is on Sheet 02.
+
+<SheetLink />
+
+That's the plan. Plans are great right up until you take the lid off.
+
+I'll update this after the swap with what actually broke.

@@ -617,7 +617,14 @@ export const labSpec: {
   headline: string;
   lede: string;
   setupHref: string;
-  hardware: { role: string; name: string; spec?: string; href?: string }[];
+  /** `sheet`: the /lab/ "Drawn to spec" drawing this row links to (only /lab/ uses it). */
+  hardware: { role: string; name: string; spec?: string; href?: string; sheet?: string }[];
+  /** The engineering drawings (/lab/rack/, /lab/r720xd/) and the post that uses them. */
+  drawings: {
+    lede: string;
+    sheets: { no: string; sheet: string; title: string; href: string; note: string; thumb: 'stack' | 'server' }[];
+    post: { title: string; href: string; note: string };
+  };
   services: { name: string; note: string }[];
   servicesCount: '25+';
   changelog: { date: string; title: string; href?: string; note?: string }[];
@@ -643,11 +650,37 @@ export const labSpec: {
   lede: "What's running at home right now. It's mid-rebuild, so expect this to change.",
   setupHref: '/docs/setup/',
   hardware: [
-    { role: 'Compute', name: 'Dell PowerEdge R720xd', spec: '40 threads · 256GB ECC RAM' },
-    { role: 'Network', name: 'UniFi UDM Pro + U7 AP' },
-    { role: 'Storage', name: 'UNAS Pro 8' },
-    { role: 'Edge', name: 'Raspberry Pi 4B', spec: '8GB' }
+    { role: 'Compute', name: 'Dell PowerEdge R720xd', spec: '40 threads · 256GB ECC RAM', sheet: '/lab/r720xd/' },
+    { role: 'Network', name: 'UniFi UDM Pro + U7 AP', sheet: '/lab/rack/' },
+    { role: 'Storage', name: 'UNAS Pro 8', sheet: '/lab/rack/' },
+    { role: 'Edge', name: 'Raspberry Pi 4B', spec: '8GB', sheet: '/lab/rack/' }
   ],
+  drawings: {
+    lede: 'The rack and the server as engineering drawings, generated from the specs. Nobody has checked them yet, so they’re stamped preliminary.',
+    sheets: [
+      {
+        no: 'TD-LAB-01',
+        sheet: 'Sheet 1 of 2',
+        title: 'The cabinet',
+        href: '/lab/rack/',
+        note: 'The 42U and everything in it, each box at its U position. My best guess until I measure.',
+        thumb: 'stack'
+      },
+      {
+        no: 'TD-LAB-02',
+        sheet: 'Sheet 2 of 2',
+        title: 'The server',
+        href: '/lab/r720xd/',
+        note: 'The R720xd inside and out, including the RAID card I’m about to pull.',
+        thumb: 'server'
+      }
+    ],
+    post: {
+      title: 'From hardware RAID to ZFS',
+      href: '/blog/from-hardware-raid-to-zfs/',
+      note: 'The plan for the swap, with the drawings in it.'
+    }
+  },
   services: [
     { name: 'Immich', note: 'Self-hosted photo and video library.' },
     { name: 'Dashboards', note: 'Lab dashboards, private to my tailnet.' },

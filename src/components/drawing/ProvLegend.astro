@@ -1,0 +1,28 @@
+---
+/*
+  ProvLegend: the key to the provenance marks. Put one next to every drawing that uses them
+  (the Sheet's `legend` slot). `only` limits it to the kinds that appear.
+
+  <ProvLegend />   <ProvLegend only={['measured', 'assumed']} title="Where the numbers come from" />
+*/
+import { PROV, PROV_ORDER, type Provenance } from '../../lib/drawing/prov';
+
+interface Props {
+  only?: Provenance[];
+  title?: string;
+}
+const { only, title = 'Provenance' } = Astro.props;
+const kinds = PROV_ORDER.filter((k) => !only || only.includes(k));
+---
+
+<div class="dwg-key">
+  <p class="dwg-key__h">{title}</p>
+  <ul class="dwg-key__list">
+    {kinds.map((k) => (
+      <li>
+        <span class={`prov prov--${k}`}><b aria-hidden="true">{PROV[k].letter}</b></span>
+        <span><strong>{PROV[k].label}</strong> {PROV[k].means}</span>
+      </li>
+    ))}
+  </ul>
+</div>

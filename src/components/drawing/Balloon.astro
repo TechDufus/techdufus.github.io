@@ -1,0 +1,55 @@
+---
+/*
+  Balloon: an item reference (ISO 6433): a numbered circle, optionally with a leader to the part.
+  Numbers should match a BOM / parts list in the page's text equivalent.
+
+  <Balloon at={[x, y]} n={3} to={[px, py]} end="dot" qty="2×" />
+
+    at    centre of the circle (paper units)
+    n     item number or letter
+    to    the part; the leader starts on the circle edge
+    end   'dot' (default, lands inside a surface) | 'arrow' (lands on an outline) | 'none'
+    qty   small quantity note beside the balloon ("2×")
+    r     radius (default 11)
+    part  id of a [data-part] this balloon refers to; it lights up with that part
+    k, p, class   as Dim (p default 6)
+*/
+import type { Pt } from '../../lib/drawing/projection';
+
+interface Props {
+  at: Pt;
+  n: string | number;
+  to?: Pt;
+  end?: 'dot' | 'arrow' | 'none';
+  qty?: string;
+  r?: number;
+  part?: string;
+  k?: number;
+  p?: number;
+  class?: string;
+}
+const { at, n, to, end = 'dot', qty, r: r0 = 11, part, k = 1, p = 6, class: cls = '' } = Astro.props;
+const f = (v: number): string => String(Math.round(v * 10) / 10);
+const r = r0 / k;
+let lead = '';
+let tip = '';
+if (to) {
+  const L = Math.hypot(to[0] - at[0], to[1] - at[1]) || 1;
+  const u = [(to[0] - at[0]) / L, (to[1] - at[1]) / L];
+  lead = `M${f(at[0] + u[0] * r)} ${f(at[1] + u[1] * r)}L${f(to[0])} ${f(to[1])}`;
+  if (end === 'arrow') {
+    const AL = 8.5 / k, AW = 1.45 / k;
+    const bx = to[0] - u[0] * AL, by = to[1] - u[1] * AL;
+    tip = `M${f(to[0])} ${f(to[1])}L${f(bx - u[1] * AW)} ${f(by + u[0] * AW)}L${f(bx + u[1] * AW)} ${f(by - u[0] * AW)}Z`;
+  }
+}
+---
+
+<g class:list={['balloon', cls]} style={[p !== 6 && `--p:${p}`, k !== 1 && `--dwg-k:${k}`].filter(Boolean).join(';') || undefined} data-balloon-for={part}>
+  {lead && <path class="ln-lead" d={lead} pathLength="1" />}
+  {to && end === 'dot' && <circle class="dim-arr" cx={f(to[0])} cy={f(to[1])} r={f(2 / k)} />}
+  {tip && <path class="dim-arr" d={tip} />}
+  <circle class="balloon__ring" cx={f(at[0])} cy={f(at[1])} r={f(r)} pathLength="1" />
+  <text class="balloon__n" x={f(at[0])} y={f(at[1] + 4.2 / k)}>{n}</text>
+  {qty && <text class="txt-note" x={f(at[0] + r + 4 / k)} y={f(at[1] + 4 / k)}>{qty}</text>}
+</g>

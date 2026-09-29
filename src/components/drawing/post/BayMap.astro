@@ -1,0 +1,141 @@
+---
+/*
+  FIG 3 · Bay map: the 24 front bays (0 far left → 23 far right) in the suggested layout, and the
+  two rear flex bays, whose left/right order is not documented. Wide: one row, rear at the right.
+  Narrow: the front row broken in two (drafting break lines), rear and key below.
+*/
+import PostFigure from './PostFigure.astro';
+import ProvMark from '../ProvMark.astro';
+import { r720xd } from '../../../data/hardware/r720xd';
+import type { Drive } from '../../../data/hardware/types';
+import { at, cls, glyphRun, Pen, rc, shortName, wNote, type P } from './fig';
+
+const FRONT = r720xd.bays.front.value;
+const HALF = FRONT / 2;
+const PITCH = 27, BW = 23, BH = 80, EAR = 24;
+/** Fits a rotated 80-unit carrier: "Gigastone", "MX500 500", "MX500 1TB". */
+const bayName = (d: Drive): string => {
+  const s = shortName(d).replace(/ #\d/, '').replace(/ (\d+) GB$/, ' $1').replace(/ (\d+) TB$/, ' $1TB');
+  return s.length > 10 ? s.split(' ')[0] : s;
+};
+const bySlot = new Map<number, Drive>();
+for (const d of r720xd.drives) {
+  const slot = d.suggestedBay?.value ?? d.bay.value;
+  if (slot !== null && slot !== undefined) bySlot.set(slot, d);
+}
+const rear = [FRONT, FRONT + 1].map((n) => ({ n, d: bySlot.get(n) }));
+const filled = [...Array(FRONT).keys()].filter((n) => bySlot.has(n)).length;
+
+/* Front bays: two groups of 12 (they move independently in the narrow layout). Local x of bay i
+   within its group keeps the wide position; the narrow layout shifts the second group back. */
+const PX = 24; // panel left, wide
+const bx = (i: number): number => PX + EAR + i * PITCH + (PITCH - BW) / 2;
+const Y = 44; // bay top, wide
+// Narrow: row 1 panel at (9, 48), row 2 at (33, 180); both rows' first bay lands at x 35.
+const groups = [0, 1].map((g) => ({
+  bays: Array.from({ length: HALF }, (_, k) => g * HALF + k),
+  np: [35 - bx(g * HALF), g ? 146 : 14] as P,
+}));
+const panelW = FRONT * PITCH + 2 * EAR;
+const panel = (x: number, y: number, n: number, left: boolean, right: boolean): string => {
+  const w = n * PITCH + (left ? EAR : 0) + (right ? EAR : 0);
+  const h = BH + 20;
+  const zig = (x0: number): string => `M${x0} ${y - 6}v${h / 2}l-6 4l12 4l-6 4v${h / 2}`;
+  const ears = (left ? rc(x, y, EAR, h) : '') + (right ? rc(x + w - EAR, y, EAR, h) : '');
+  return `M${x + (left ? 0 : -2)} ${y}H${x + w + (right ? 0 : 2)}M${x + (left ? 0 : -2)} ${y + h}H${x + w + (right ? 0 : 2)}` + (left ? `M${x} ${y}V${y + h}` : '') + (right ? `M${x + w} ${y}V${y + h}` : '') + ears + (left ? '' : zig(x - 2)) + (right ? '' : zig(x + w + 2));
+};
+const holes = (x: number, y: number): string => `M${x + 12} ${y + 24}m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0M${x + 12} ${y + 76}m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0`;
+
+const key = [
+  { c: 'pool-rpool', t: 'rpool' },
+  { c: 'pool-fast', t: 'fast' },
+  { c: 'pool-bulk', t: 'bulk' },
+  { c: '', t: 'empty' },
+  { c: 'sem-removed', t: 'removed' },
+];
+let kx = 0;
+const keyItems = key.map((k) => {
+  const x = kx;
+  kx += 22 + wNote(k.t) + 18;
+  return { ...k, x };
+});
+const desc =
+  `Suggested layout of the ${FRONT} front bays (0 far left to ${FRONT - 1} far right): ` +
+  [...bySlot].filter(([n]) => n < FRONT).map(([n, d]) => `${n} ${shortName(d)} (${d.pool})`).join(', ') +
+  `; ${filled} to ${FRONT - 1} empty. Today's positions are not recorded. Rear flex bays: ` +
+  rear.map(({ n, d }) => `${n} ${d ? `${shortName(d)}, ${d.fate === 'remove' ? 'comes out' : 'kept'}` : 'empty'}`).join('; ') +
+  `; which side is which is not documented.`;
+---
+
+<PostFigure
+  id="fig-bays"
+  n={3}
+  title="Bay map, suggested"
+  desc={desc}
+  caption="A suggestion, not a survey. ZFS won't care where anything sits. I might."
+  size={[900, 214]}
+  narrow={[390, 496]}
+  breakout
+>
+  <!-- panel outlines -->
+  <path class="ln-obj pf-w" d={panel(PX, Y - 10, FRONT, true, true) + holes(PX, Y - 10) + holes(PX + panelW - EAR, Y - 10)} pathLength="1" style="--p:1" />
+  <path class="ln-obj pf-n" d={panel(9, 48, HALF, true, false) + holes(9, 48) + panel(33, 180, HALF, false, true) + holes(33 + HALF * PITCH, 180)} pathLength="1" style="--p:1" />
+
+  {groups.map((g) => {
+    const pen = new Pen();
+    for (const n of g.bays) {
+      const d = bySlot.get(n);
+      const x = bx(n);
+      pen.add(d ? `tint ln-med ${cls(d)}` : 'ln-thin', rc(x, Y, BW, BH) + (d ? '' : `M${x + 5} ${Y + BH - 9}h${BW - 10}`));
+    }
+    const nums = glyphRun(g.bays.map((n) => [bx(n) + BW / 2, String(n)]));
+    return (
+      <g {...at([0, 0], g.np)}>
+        {pen.list.map(({ c, d }) => <path class={c} d={d} style="--p:2" pathLength={c === 'ln-thin' ? undefined : '1'} />)}
+        <g class="pf-c" style="--p:6">
+          {g.bays.filter((n) => bySlot.has(n)).map((n) => {
+            const d = bySlot.get(n)!;
+            return <text class:list={['pf-bt', cls(d)]} transform={`translate(${bx(n) + BW / 2 + 4} ${Y + BH / 2}) rotate(-90)`}>{bayName(d)}</text>;
+          })}
+          <text class="txt-note" x={nums.x} y={Y + BH + 28}>{nums.t}</text>
+        </g>
+      </g>
+    );
+  })}
+
+  <g style="--p:6">
+    <text {...at([24, 22], [9, 20], 'view__t')}>FRONT · {FRONT} BAYS</text>
+    <g {...at([184, 22], [9, 38])}>
+      <text class="txt-note">suggested layout · today's bays unknown</text>
+      <ProvMark x={wNote("suggested layout · today's bays unknown") + 6} y={-8.5} prov="assumed" />
+    </g>
+  </g>
+
+  <!-- rear flex bays -->
+  <g {...at([750, 22], [9, 330])}>
+    <text class="view__t" style="--p:6">REAR · FLEX</text>
+    {rear.map(({ n, d }, i) => (
+      <g class={d && cls(d)}>
+        <path class="tint ln-med" d={rc(i * 76, 24, 70, 24) + `M${i * 76 + 58} 29v14`} pathLength="1" style="--p:2" />
+        <text class="txt-label pf-c" x={i * 76 + 26} y="40" style="--p:6">{n}?</text>
+        <text class="txt-note" x={i * 76} y="66" style="--p:6">{d ? (d.fate === 'remove' ? 'out' : 'keep') : 'empty'}</text>
+      </g>
+    ))}
+    <path class="ln-phantom" d="M35 19q38 -12 76 0" style="--p:4" />
+    <g style="--p:6">
+      <text class="txt-note" y="92">left/right not</text>
+      <text class="txt-note" y="106">documented</text>
+      <text class="txt-label" y="126">verify in field</text>
+    </g>
+  </g>
+
+  <!-- key -->
+  <g {...at([24, 196], [9, 482], '', '--p:6')}>
+    {keyItems.map((k) => (
+      <g class={k.c || undefined}>
+        <path class={k.c ? 'tint ln-med' : 'face ln-thin'} d={rc(k.x, -9, 16, 10)} />
+        <text class="txt-note" x={k.x + 22} y="0">{k.t}</text>
+      </g>
+    ))}
+  </g>
+</PostFigure>

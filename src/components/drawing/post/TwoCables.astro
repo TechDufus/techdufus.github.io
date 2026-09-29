@@ -1,0 +1,144 @@
+---
+/*
+  FIG 5 · Two cables, 26 bays: the inside of the R720xd from above, simplified, from
+  r720xd.internal (parts and cable routes as fractions of the chassis). The part drawing is one
+  group in fraction units, mapped by a matrix: front to the left in the wide layout, front at the
+  top in the narrow one (a CSS matrix; strokes are non-scaling). Labels move as blocks.
+*/
+import PostFigure from './PostFigure.astro';
+import ProvMark from '../ProvMark.astro';
+import { r720xd } from '../../../data/hardware/r720xd';
+import { at, Pen, type P } from './fig';
+
+const { internal, cables, controllers, bays } = r720xd;
+const part = (id: string) => {
+  const p = internal.parts.find((x) => x.id === id);
+  if (!p) throw new Error(`internal part ${id} missing`);
+  return p;
+};
+const route = (n: number) => internal.routes.find((r) => r.cable === n)?.paths ?? [];
+const cable = (n: number) => cables.find((c) => c.n === n)!;
+
+/* fraction formatter: ".017", "-.966" */
+const q = (v: number): string => String(Math.round(v * 1000) / 1000).replace(/^(-?)0\./, '$1.');
+const box = (id: string): string => {
+  const { x, z } = part(id);
+  return `M${q(x[0])} ${q(z[0])}h${q(x[1] - x[0])}v${q(z[1] - z[0])}h${q(x[0] - x[1])}Z`;
+};
+const line = (pts: [number, number][]): string => pts.map(([x, z], i) => `${i ? 'L' : 'M'}${q(x)} ${q(z)}`).join('');
+
+/* layouts: wide = front at the left, narrow = front at the top */
+const Wd = { x: 110, y: 34, d: 680, w: 380 };
+const Nw = { x: 20, y: 84, d: 560, w: 350 };
+const mapW = (u: number, v: number): P => [Wd.x + Wd.d * v, Wd.y + Wd.w * (1 - u)];
+const mapN = (u: number, v: number): P => [Nw.x + Nw.w * u, Nw.y + Nw.d * v];
+const matW = `matrix(0 ${-Wd.w} ${Wd.d} 0 ${Wd.x} ${Wd.y + Wd.w})`;
+const matN = `--n:matrix(${Nw.w},0,0,${Nw.d},${Nw.x},${Nw.y})`;
+
+/* the drawing, one path per pen */
+const FRONT = bays.front.value;
+const bp = part('backplane');
+const bayLines = Array.from({ length: FRONT + 1 }, (_, i) => bp.x[0] + ((bp.x[1] - bp.x[0]) * i) / FRONT)
+  .map((x) => `M${q(x)} 0V${q(bp.z[0])}`)
+  .join('');
+const pen = new Pen()
+  .add('ln-obj', 'M0 0h1v1h-1Z')
+  .add('ln-thin', bayLines + ['fans', 'retention', 'riser-1', 'psu-1', 'psu-2'].map(box).join(''))
+  .add('ln-med', ['backplane', 'sas-b', 'sas-a', 'sas-a1', 'flex-backplane', 'flex-sas-a1'].map(box).join(''))
+  .add('ln-hid sem-removed', box('perc') + route(1).map(line).join(''))
+  .add('tint ln-med sem-removed', box('j-sasx8'))
+  .add('tint ln-med sem-new', ['hba330', 'hba-port-1', 'hba-port-2'].map(box).join(''))
+  .add('ln-obj sem-new', [2, 3].flatMap(route).map(line).join(''))
+  .add('ln-obj', route(4).map(line).join(''));
+
+/* labels: [wide pos, narrow pos] from fraction anchors plus per-layout nudges */
+const both = (u: number, v: number, dw: P = [0, 0], dn: P = [0, 0]): [P, P] => {
+  const w = mapW(u, v), n = mapN(u, v);
+  return [[w[0] + dw[0], w[1] + dw[1]], [n[0] + dn[0], n[1] + dn[1]]];
+};
+const mid = (id: string): [number, number] => {
+  const { x, z } = part(id);
+  return [(x[0] + x[1]) / 2, (z[0] + z[1]) / 2];
+};
+const connectors = ['sas-b', 'sas-a', 'sas-a1'].map((id, i) => {
+  const [u, v] = mid(id);
+  // narrow: the three sit 47 apart, so the middle one steps up a line
+  const [wp, np] = both(u, v, [-10 - Wd.d * v, 4], [0, -12 - Nw.d * v - (i === 1 ? 15 : 0)]);
+  return { t: part(id).label, wp, np, lw: `M${wp[0] + 4} ${wp[1] - 4}H${mapW(u, v)[0]}`, ln: `M${np[0]} ${np[1] + 4}V${mapN(u, v)[1]}` };
+});
+// "tape" flags on the cables: a point on each route
+const flags = [
+  { n: 2, t: 'A', at: [0.227, 0.745] as [number, number], c: 'sem-new' },
+  { n: 3, t: 'B', at: [0.133, 0.755] as [number, number], c: 'sem-new' },
+  { n: 4, t: '4', at: [0.95, 0.42] as [number, number], c: '' },
+  { n: 1, t: '1', at: [0.097, 0.42] as [number, number], c: 'sem-removed' },
+].map((fl) => ({ ...fl, pos: both(...fl.at) }));
+const [hbaU, hbaV] = mid('hba330');
+const [percU, percV] = mid('perc');
+const flex = part('flex-backplane');
+const hba = controllers.after.id.toUpperCase();
+const slot = r720xd.pcie.slots.find((s) => s.plan?.startsWith('HBA330 (low'))?.slot;
+
+const desc =
+  `The server from above, simplified. New cables A and B run from the ${hba} (riser 1${slot ? `, slot ${slot}` : ''}) to backplane SAS A and SAS B; ` +
+  `its SAS expander feeds all ${FRONT} front bays. Cable 4 stays and feeds the ${bays.rear.value} rear bays. ` +
+  `Cable 1, from ${cable(1).from}, comes out with the ${controllers.before.name}.`;
+---
+
+<PostFigure
+  id="fig-cables"
+  n={5}
+  title="Two cables, 26 bays"
+  desc={desc}
+  caption="Two cables reach all 26 bays, because the backplane does the fanning out."
+  size={[900, 456]}
+  narrow={[390, 710]}
+  breakout
+>
+  <g transform={matW} class="pf-m" style={matN}>
+    {pen.list.map(({ c, d }) => <path class={c} d={d} />)}
+  </g>
+  <path class="ln-lead pf-w" d={connectors.map((c) => c.lw).join('')} style="--p:5" />
+  <path class="ln-lead pf-n" d={connectors.map((c) => c.ln).join('')} style="--p:5" />
+
+  <g style="--p:6">
+    <g {...at([12, 24], [20, 22])}>
+      <text class="view__t">FRONT</text>
+      <text class="txt-note" x="62">{FRONT} bays</text>
+    </g>
+    <g {...at([12, 360], [20, 44])}>
+      <text class="txt-note">backplane +</text>
+      <text class="txt-note" y="15">SAS expander</text>
+    </g>
+    {connectors.map((c) => <text {...at(c.wp, c.np, 'txt-label pf-e pf-nm')}>{c.t}</text>)}
+    <g {...at(...both(hbaU, hbaV, [0, -3], [0, -3]), 'sem-new pf-c')}>
+      <text class="txt-label">{hba}</text>
+      <text class="txt-note" y="15">{slot ? `slot ${slot}` : 'new'}</text>
+    </g>
+    <g {...at(...both(percU, percV, [-34, -6], [0, -2]), 'sem-removed pf-e pf-nm pf-ko')}>
+      <text class="txt-label">{controllers.before.name}</text>
+      <text class="txt-note" y="15">comes out</text>
+    </g>
+    <text {...at(...both(...mid('j-sasx8'), [-14, 4], [7, 21]), 'txt-note sem-removed pf-e pf-ko')}>{part('j-sasx8').label}</text>
+    <g {...at(...both((flex.x[0] + flex.x[1]) / 2, flex.z[0], [-27, -8], [-20, -41]), 'pf-e pf-nm pf-ko')}>
+      <text class="txt-note">flex backplane</text>
+      <text class="txt-label" y="15">{bays.rear.value} rear bays</text>
+    </g>
+    <text {...at([Wd.x + Wd.d + 14, Wd.y + Wd.w / 2], [Nw.x, Nw.y + Nw.d + 20], 'view__t')}>REAR</text>
+    {flags.map((fl) => (
+      <g {...at(...fl.pos, fl.c)}>
+        <circle class="balloon__ring" r="9" />
+        <text class="balloon__n pf-c" y="4">{fl.t}</text>
+      </g>
+    ))}
+    <g {...at([Wd.x, Wd.y + Wd.w + 30], [Nw.x, Nw.y + Nw.d + 44])}>
+      <text class="txt-note sem-new">A, B · new</text>
+      <text class="txt-note" x="110">4 · stays</text>
+      <text class="txt-note sem-removed" x="200">1 · comes out</text>
+    </g>
+    <g {...at([876, Wd.y + Wd.w + 30], [370, Nw.y + Nw.d + 20])}>
+      <text class="txt-note pf-e">schematic · approximate</text>
+      <ProvMark x={4} y={-8.5} prov={internal.prov} />
+    </g>
+  </g>
+</PostFigure>

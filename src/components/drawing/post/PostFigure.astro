@@ -1,0 +1,113 @@
+---
+/*
+  PostFigure: one blog figure (TD-LAB-02 · FIG n) for "From hardware RAID to ZFS". A frameless kit
+  Sheet inside a figure with a figcaption in the owner's voice.
+
+    n         figure number (the drawing number becomes "TD-LAB-02 · FIG n")
+    size      [w, h] of the wide layout, paper units
+    narrow    [w, h] of the phone layout. Below `bp` px (default 0.8 × w) the script swaps the
+              viewBox and adds .is-narrow: .pf-w groups hide, .pf-n groups show and .pf-m blocks
+              move to their --n position (see fig.ts). Without JS the wide layout pans instead.
+    breakout  wider than the text column: into the empty right margin on the three-column layout,
+              centred on narrower screens (never past the page gutter)
+    caption   one short line, in voice
+*/
+import Sheet from '../Sheet.astro';
+
+interface Props {
+  id: string;
+  n: number;
+  title: string;
+  desc: string;
+  caption: string;
+  size: [number, number];
+  narrow?: [number, number];
+  bp?: number;
+  breakout?: boolean;
+  scale?: string;
+  /** Extra kit defs this figure uses ('hatch', 'rough' for a Stamp); the grid is always on. */
+  defs?: ('hatch' | 'hatch-x' | 'rough')[];
+}
+const { id, n, title, desc, caption, size, narrow, bp = Math.round(size[0] * 0.8), breakout = false, scale = 'NTS', defs = [] } = Astro.props;
+const [w, h] = size;
+---
+
+<figure
+  class:list={['pf', breakout && 'pf--b']}
+  data-vb={narrow ? `0 0 ${w} ${h}|0 0 ${narrow[0]} ${narrow[1]}|${bp}` : undefined}
+>
+  <Sheet
+    id={id}
+    size={{ w, h }}
+    dwgNo={`TD-LAB-02 · FIG ${n}`}
+    title={title}
+    desc={desc}
+    scale={scale}
+    rev="A"
+    date="2026-09-28"
+    grid={false}
+    defs={['grid', ...defs]}
+    status={false}
+  >
+    <rect class="dwg-gridbg" width="100%" height="100%" />
+    <slot />
+  </Sheet>
+  <figcaption>{caption}</figcaption>
+</figure>
+
+<style is:global>
+  .prose .pf { margin-block: 2.4em 2.6em; }
+  .pf :is(.pool-rpool, .pool-fast, .pool-bulk) .dwg-pt { fill: var(--dwg-obj); }
+  .pf .pool-rpool :is(.txt-label, .txt-dim) { fill: var(--gold-light); }
+  .pf :is(.txt-note, .txt-dim, .txt-label):is(.sem-new, .sem-removed), .pf :is(.sem-new, .sem-removed) .txt-note { fill: var(--flow); }
+  .pf .pf-you { --flow: var(--gold); }
+  .pf .pf-agent { --dwg-obj: var(--dwg-steel); --flow: var(--dwg-steel); }
+  .pf .pf-agent .view__t, .pf .txt-note.pf-agent { fill: var(--dwg-steel); }
+  .pf .ln-hid:is(.sem-removed, .pf-agent) { stroke: var(--dwg-obj); }
+  .pf .pf-ko { paint-order: stroke; stroke: var(--dwg-paper); stroke-width: 4px; stroke-linejoin: round; }
+  .pf.is-narrow .pf-nm { text-anchor: middle; }
+  .pf .pf-tt { letter-spacing: 0.02em; }
+  .pf .pf-bt { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; fill: var(--dwg-obj); }
+  .pf .pf-c { text-anchor: middle; }
+  .prose .pf.is-narrow > figcaption { max-width: 460px; }
+  .pf .pf-e { text-anchor: end; }
+  .pf .pf-nc { text-transform: none; }
+  .prose .pf > figcaption { max-width: 62ch; margin-top: 12px; font: 0.9375rem/1.55 var(--font-sans); color: var(--muted); text-wrap: pretty; }
+  .js .pf .dwg__svg { min-width: 0; }
+  .pf-grow { transform-box: fill-box; transform-origin: 0 50%; }
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .js .pf [data-plot="pending"] .pf-grow { transform: scaleX(0); }
+    .pf [data-plot="run"] .pf-grow { animation: pf-grow 1.2s var(--ease-out) calc(var(--p, 1) * var(--dwg-plot-step) + 250ms) both; }
+  }
+  @keyframes pf-grow { from { transform: scaleX(0); } }
+  .pf-n { display: none; }
+  .pf.is-narrow > * { max-width: 460px; margin-inline: auto; }
+  .pf.is-narrow .pf-n { display: inline; }
+  .pf.is-narrow .pf-w { display: none; }
+  .pf.is-narrow .pf-m { transform: var(--n); }
+  /* Breakout: the post grid is rail · 680px column · empty margin from 1120px up (blog/[slug]). */
+  @media (min-width: 1120px) {
+    .prose .pf--b { width: min(920px, calc(50vw + 340px - var(--gutter))); }
+  }
+  @media (max-width: 1119.98px) {
+    .prose .pf--b {
+      --bw: min(920px, calc(100vw - 2 * var(--gutter)));
+      width: var(--bw);
+      margin-inline: calc((100% - var(--bw)) / 2);
+    }
+  }
+</style>
+
+<script>
+  /* Narrow layouts: swap the viewBox and flag the figure below its breakpoint. */
+  const ro = new ResizeObserver((entries) => {
+    for (const e of entries) {
+      const fig = e.target as HTMLElement;
+      const [wide, narrow, bp] = (fig.dataset.vb ?? '').split('|');
+      const on = e.contentRect.width < Number(bp);
+      fig.classList.toggle('is-narrow', on);
+      fig.querySelector('.dwg__svg')?.setAttribute('viewBox', on ? narrow : wide);
+    }
+  });
+  document.querySelectorAll('.pf[data-vb]').forEach((fig) => ro.observe(fig));
+</script>

@@ -11,7 +11,8 @@ const SLUG = {
   tailscale: 'i-deleted-my-cloudflare-tunnels-tailscale-operator-homelab-k8s',
   omc: 'oh-my-claude-batteries-included-enhancements-for-claude-code',
   aijob: 'ai-already-took-my-job',
-  obsidian: 'deploying-obsidian-sync-for-my-ai-agents'
+  obsidian: 'deploying-obsidian-sync-for-my-ai-agents',
+  zfs: 'from-hardware-raid-to-zfs'
 };
 
 export async function GET() {
@@ -60,6 +61,12 @@ export async function GET() {
         `[${featuredProject.name}](${featuredProject.href}), mostly. It's an AI Bible-study tool, opening soon. It answers in plain words and shows you the passages, so you can read them for yourself.\n\n` +
         `The rest is open source: ${featured.map((r) => `[${r.name}](${r.url})`).join(', ')}. Everything, plus the old PowerShell, is on the [projects page](/projects/).`,
       cards: []
+    },
+    rack: {
+      text:
+        `A 42U cabinet. Top to bottom: a Raspberry Pi 4 on a shelf, a 24-port patch panel, the UDM Pro, the UNAS Pro 8 and the R720xd.\n\n` +
+        `I drew it from the vendor specs. [Sheet 01 · The cabinet](/lab/rack/) has every box at its U position, the links and the airflow, and [Sheet 02 · The server](/lab/r720xd/) opens up the R720xd. The U positions are a best guess until I measure, so both sheets are stamped preliminary.`,
+      cards: cards(SLUG.zfs)
     },
     hire: {
       text: business.enabled

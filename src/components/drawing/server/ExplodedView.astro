@@ -1,0 +1,172 @@
+---
+/*
+  ExplodedView: the R720xd taken apart, isometric (front-right), parts lifted straight up out
+  of the chassis, the drive carriers pulled forward and the PSUs pulled out the back. Numbered
+  balloons follow explodedBom (geom.ts); every part is a kit <Part> (hover, focus, select).
+
+  The static drawing IS the exploded state (fallback, reduced motion, print). With scroll-driven
+  animations, each part's inner g.xp starts at its assembled offset (--ax, --ay, paper px) and
+  comes apart as the sheet scrolls into view; the page supplies that CSS (see r720xd.astro).
+  Needs <ServerDefs id={dwg} /> in the same SVG.
+
+  <ExplodedView dwg="lab02" />
+*/
+import View from '../View.astro';
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import { isometric, join, type IsoBoxInput, type Pt } from '../../../lib/drawing/projection';
+import { BAY_H, BAY_Y0, D, EAR, EAR_D, H, HANDLES, W, WE, R, O, Vl, bayX, BAY_N, dimmBanks, explodedBom, isoBox, n, part } from './geom';
+
+interface Props {
+  dwg: string;
+  active?: boolean;
+}
+const { dwg, active = false } = Astro.props;
+
+const S = 0.55, OX = 250, OY = 600;
+const iso = isometric({ x: OX, y: OY, scale: S, view: 'front-right' });
+const ib = (b: IsoBoxInput) => isoBox(OX, OY, S, b);
+
+/** look: solid (default), see (faint faces), wire (edges only), ghost (phantom edges: leaving) */
+type XPart = {
+  id: string; label: string; boxes: IsoBoxInput[]; lift?: number; slide?: number;
+  look?: 'see' | 'wire' | 'ghost'; cls?: string; tex?: string; anchor: Pt; at: Pt;
+  /** draw box by box (boxes that overlap on paper), else one path per face kind */
+  split?: boolean;
+};
+
+/** A footprint from the internal layout, as a box of height h starting at y0. */
+const fromPart = (id: string, y0: number, h: number): IsoBoxInput => {
+  const p = part(id);
+  return { x: p.x, y: y0, z: p.z, w: p.w, h, d: p.d };
+};
+const up = (b: IsoBoxInput, L: number): IsoBoxInput => ({ ...b, y: b.y + L });
+
+// Exploded offsets (mm). Assembled = these undone.
+const L = { backplane: 115, fans: 185, dimms: 92, heatsinks: 205, perc: 150, risers: 235, hba: 370, flex: 160, shroud: 330, lid: 450 };
+const SLED_OUT = -115, PSU_OUT = 125;
+const bp = up(fromPart('backplane', 4, 79), L.backplane);
+const fans = up(fromPart('fans', 4, 76), L.fans);
+const hs = ['cpu1', 'cpu2'].map((id) => up(fromPart(id, 4, 66), L.heatsinks));
+const all = dimmBanks();
+const banks = [0, 6, 12, 18].map((i) => up({ x: all[i].x, y: 4, z: all[i].z, w: all[i + 5].x + all[i + 5].w - all[i].x, h: 31, d: all[i].d }, L.dimms));
+const perc = up(fromPart('perc', 8, 6), L.perc);
+const risers = ['riser-3', 'riser-2', 'riser-1'].map((id) => up(fromPart(id, 4, 78), L.risers));
+const hba = up(fromPart('hba330', 40, 5), L.hba);
+const flex = up({ ...fromPart('flex-backplane', 44, 42), d: D - part('flex-backplane').z }, L.flex);
+const psus = ['psu-2', 'psu-1'].map((id) => ({ ...fromPart(id, 2, 40), z: part(id).z + PSU_OUT, d: HANDLES - part(id).z }));
+const shroud = up(fromPart('shroud', 40, 45), L.shroud);
+const lid = up({ x: EAR, y: H, z: 0, w: W, h: 2, d: D }, L.lid);
+const sleds: IsoBoxInput = { x: bayX(0), y: H - BAY_Y0 - BAY_H, z: -EAR_D + SLED_OUT, w: bayX(BAY_N) - bayX(0), h: BAY_H, d: 128 };
+
+/** Lines along the depth (z) on a box's top face, at the given x offsets: fins, DIMM sticks. */
+const alongZ = (b: IsoBoxInput, xs: number[]) => {
+  const [dx, dy] = iso.slide(b.d - 12);
+  return xs.map((x) => {
+    const [px, py] = iso.pt(b.x + x, b.y + b.h, b.z + 6);
+    return `M${n(px)} ${n(py)}l${n(dx)} ${n(dy)}`;
+  }).join('');
+};
+const fw = fans.w / 6;
+const fanTex = join(...Array.from({ length: 6 }, (_, i) => O((i + 0.5) * fw, fans.h / 2, 25)), ...Array.from({ length: 5 }, (_, i) => Vl((i + 1) * fw, 0, fans.h)));
+const mid = (b: IsoBoxInput): Pt => iso.pt(b.x + b.w / 2, b.y + b.h, b.z + b.d / 2);
+
+const parts: XPart[] = [
+  { id: 'psus', label: 'Power supplies, pulled out the back', boxes: psus, slide: PSU_OUT, split: true, anchor: iso.pt(psus[1].x + 40, psus[1].y + psus[1].h, psus[1].z + 170), at: [792, 244] },
+  { id: 'dimms', label: 'DIMM slots, four banks of six', boxes: banks, lift: L.dimms, tex: banks.map((b) => alongZ(b, [10.8, 23.1, 35.4])).join(''), anchor: mid(banks[3]), at: [792, 556] },
+  { id: 'perc', label: 'PERC H710P Mini, leaving', boxes: [perc], lift: L.perc, look: 'ghost', cls: 'sem-removed', anchor: iso.pt(perc.x + perc.w, perc.y, perc.z + perc.d / 2), at: [792, 490] },
+  { id: 'flex', label: 'Rear flex bays and their backplane', boxes: [flex], lift: L.flex, anchor: mid(flex), at: [548, 150] },
+  { id: 'risers', label: 'Risers 1 to 3', boxes: risers, lift: L.risers, split: true, anchor: iso.pt(risers[2].x + risers[2].w, risers[2].y + risers[2].h / 2, risers[2].z + 40), at: [792, 404] },
+  { id: 'hba330', label: 'Dell HBA330, planned for riser 1 slot 2', boxes: [hba], lift: L.hba, cls: 'sem-new', anchor: iso.pt(hba.x + hba.w, hba.y + hba.h, hba.z + hba.d / 2), at: [792, 318] },
+  { id: 'heatsinks', label: 'Heatsinks over the two Xeon E5-2690 v2', boxes: hs, lift: L.heatsinks, tex: hs.map((b) => alongZ(b, [1, 2, 3, 4, 5].map((i) => (i * b.w) / 6))).join(''), anchor: mid(hs[0]), at: [100, 392] },
+  { id: 'fans', label: 'Fan assembly, six fans', boxes: [fans], lift: L.fans, anchor: iso.pt(fans.x + 20, fans.y + fans.h * 0.6, fans.z), at: [100, 472] },
+  { id: 'backplane', label: 'Backplane with the SAS expander', boxes: [bp], lift: L.backplane, anchor: iso.pt(bp.x + 40, bp.y + 20, bp.z), at: [100, 560] },
+  { id: 'shroud', label: 'Cooling shroud', boxes: [shroud], lift: L.shroud, look: 'see', anchor: iso.pt(shroud.x, shroud.y + shroud.h / 2, shroud.z + 60), at: [100, 300] },
+  { id: 'lid', label: 'Top cover, drawn as a wireframe', boxes: [lid], lift: L.lid, look: 'wire', anchor: iso.pt(lid.x, lid.y + 2, lid.z + 160), at: [100, 196] },
+];
+const ofs = (p: XPart): string => {
+  if (!p.slide) return `--ay:${n((p.lift ?? 0) * S)}px`;
+  const [dx, dy] = iso.slide(-p.slide);
+  return `--ax:${dx}px;--ay:${dy}px`;
+};
+/** One set of face/edge paths per part (merged) or per box (split). */
+const groups = (p: XPart) => (p.split ? p.boxes.map((b) => [ib(b)]) : [p.boxes.map(ib)]).map((qs) => ({
+  top: qs.map((q) => q.top).join(''), side: qs.map((q) => q.side).join(''), front: qs.map((q) => q.front).join(''), edges: qs.map((q) => q.edges).join(''),
+}));
+
+// Chassis: floor, far walls, board footprints, near walls with the front plate
+const cb = ib({ x: EAR, y: 0, z: 0, w: W, h: H, d: D });
+const plate = ib({ x: 0, y: 0, z: -EAR_D, w: WE, h: H, d: EAR_D });
+const floor = ib({ x: EAR, y: 0, z: 0, w: W, h: 1, d: D }).top;
+const farWalls = join(iso.poly([[EAR, 0, 0], [EAR, H, 0], [EAR, H, D], [EAR, 0, D]], true), iso.poly([[EAR, 0, D], [EAR, H, D], [WE - EAR, H, D], [WE - EAR, 0, D]], true));
+const sledBox = ib(sleds);
+const bayField = R(bayX(0), BAY_Y0, bayX(BAY_N) - bayX(0), BAY_H);
+const num = new Map(explodedBom.map((b) => [b.id, b.n]));
+const trail = (b: IsoBoxInput, L0: number) =>
+  [[b.x + 12, b.z + 12], [b.x + b.w - 12, b.z + b.d - 12]].map(([x, z]) => {
+    const [ax, ay] = iso.pt(x, b.y - 6, z);
+    return `M${n(ax)} ${n(ay)}v${n((L0 - 18) * S)}`;
+  }).join('');
+const [sdx, sdy] = iso.slide(-SLED_OUT);
+---
+
+<View dwg={dwg} name="exploded" active={active} x={39} y={39} w={798} h={813} title="EXPLODED AXONOMETRIC" scale="NOT TO SCALE" note="PARTS SEPARATED · INTERNALS APPROX." labelAt={[438, 790]}>
+  <clipPath id={`${dwg}-clip-bays`}><path d={bayField} /></clipPath>
+  <clipPath id={`${dwg}-clip-ears`}><path d={join(R(0, 0, EAR, H), R(WE - EAR, 0, EAR, H))} /></clipPath>
+
+  {([parts[0], 'chassis', 'sleds', ...parts.slice(1)] as (XPart | 'chassis' | 'sleds')[]).map((p) => {
+    if (p === 'chassis') return (
+      <Part id="chassis" label="Chassis and system board" p={1}>
+        <path class="face-top" d={floor} />
+        <g class="dwg-tex" transform={iso.faceMatrix('top', [0, 1, 0])}><use href={`#${dwg}-plan`} /></g>
+        <path class="face-front ln-med" d={farWalls} />
+        <path class="face-side" d={cb.side} />
+        <path class="face-top" d={plate.top} />
+        <path class="face-side" d={plate.side} />
+        <path class="face-front" d={plate.front} />
+        <g class="dwg-tex" transform={iso.faceMatrix('front', [0, H, -EAR_D])}>
+          <path class="face-side ln-med" d={bayField} />
+          <use href={`#${dwg}-front`} clip-path={`url(#${dwg}-clip-ears)`} />
+        </g>
+        <path class="ln-obj" d={join(cb.edges, plate.edges)} pathLength="1" />
+      </Part>
+    );
+    if (p === 'sleds') return (
+      <Part id="sleds" label="Drive carriers, pulled out the front" p={2}>
+        <g class="xp" style={`--ax:${sdx}px;--ay:${sdy}px`}>
+          <path class="face-top" d={sledBox.top} />
+          <path class="face-side" d={sledBox.side} />
+          <path class="face-front" d={sledBox.front} />
+          <g class="dwg-tex" transform={iso.faceMatrix('front', [0, H, sleds.z])}><use href={`#${dwg}-front`} clip-path={`url(#${dwg}-clip-bays)`} /></g>
+          <path class="ln-obj" d={sledBox.edges} pathLength="1" />
+        </g>
+      </Part>
+    );
+    return (
+      <Part id={p.id} label={p.label} p={p.id === 'psus' ? 2 : 3} class={[p.cls, p.look && `xp-${p.look}`].filter(Boolean).join(' ') || undefined}>
+        <g class="xp" style={ofs(p)}>
+          {groups(p).map((q) => (
+            <>
+              {(!p.look || p.look === 'see') && <><path class="face-side" d={q.side} /><path class="face-top" d={q.top} /><path class="face-front" d={q.front} /></>}
+              <path class={p.look === 'ghost' ? 'ln-phantom' : p.look ? 'ln-med' : 'ln-obj'} d={q.edges} />
+            </>
+          ))}
+          {p.tex && <path class="ln-thin" d={p.tex} />}
+          {p.id === 'fans' && <path class="ln-thin" d={fanTex} transform={iso.faceMatrix('front', [fans.x, fans.y + fans.h, fans.z])} />}
+        </g>
+      </Part>
+    );
+  })}
+
+  <!-- balloons and assembly trails (fade in once the parts have separated) -->
+  <g class="xp-lbl" data-layer="labels">
+    <path class="ln-ctr" d={join(trail(hba, L.hba - L.risers), trail(perc, L.perc))} />
+    {parts.map((p) => <Balloon at={p.at} n={num.get(p.id) ?? '?'} to={p.anchor} part={p.id} />)}
+    <Balloon at={[100, 650]} n={num.get('sleds') ?? '?'} to={iso.pt(sleds.x + 30, sleds.y + 20, sleds.z)} part="sleds" />
+    <Balloon at={[716, 690]} n={num.get('chassis') ?? '?'} to={iso.pt(WE - EAR, H * 0.4, D * 0.45)} part="chassis" />
+    <g class="nt">
+      <text x="792" y="518" class="sem-removed">LEAVING</text>
+      <text x="792" y="346" class="sem-new">PLANNED</text>
+    </g>
+  </g>
+</View>

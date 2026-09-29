@@ -1,0 +1,259 @@
+---
+/*
+  /lab/r720xd/: Sheet 02 · The server (TD-LAB-02). The Dell PowerEdge R720xd inside and out, and
+  the planned PERC H710P Mini → HBA330 swap. Every number comes from src/data/hardware/r720xd.ts;
+  the drawings live in src/components/drawing/server/.
+*/
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Sheet from '../../components/drawing/Sheet.astro';
+import ViewTabs from '../../components/drawing/ViewTabs.astro';
+import LayerPanel from '../../components/drawing/LayerPanel.astro';
+import ProvLegend from '../../components/drawing/ProvLegend.astro';
+import LineKey from '../../components/drawing/LineKey.astro';
+import ServerDefs from '../../components/drawing/server/ServerDefs.astro';
+import OrthoViews from '../../components/drawing/server/OrthoViews.astro';
+import ExplodedView from '../../components/drawing/server/ExplodedView.astro';
+import SwapView from '../../components/drawing/server/SwapView.astro';
+import ServerSchedule from '../../components/drawing/server/ServerSchedule.astro';
+
+const DWG = 'lab02';
+const notes = [
+  { text: 'Positions inside the chassis are approximate, traced from Dell Owner’s Manual Fig 69 and 78. Overall sizes are Dell’s (Technical Guide Fig 18).', prov: 'inferred' as const },
+  { text: 'Rear bays: the iDRAC saw the good SAS drive in 24 and the failing one in 25. Dell doesn’t say which side is which. Verify in field.', prov: 'measured' as const, asOf: '2026-09-25' },
+  { text: 'The swap is planned, not done. The HBA330 arrived 2026-09-28. Every AFTER on this sheet is the plan.', prov: 'owner' as const, asOf: '2026-09-28' },
+  'RAM: my notes say 256 GB ECC; the OS saw 125 GiB usable on 2026-09-27. Unresolved. Mirroring, or missing DIMMs.',
+  { text: 'PSU wattage unknown. Dell sold 495, 750 and 1100 W units for this chassis.', prov: 'vendor' as const },
+  { text: 'Bay layout is a suggestion. ZFS finds disks by serial, not by bay.', prov: 'assumed' as const },
+  'Provenance marks per legend. Dimensions in mm.',
+];
+---
+
+<BaseLayout title="The server · Sheet 02" description="Sheet 02 of my homelab drawings: the Dell PowerEdge R720xd inside and out, drawn from Dell’s specs, and the planned swap from a PERC H710P Mini to an HBA330.">
+  <div class="pg-server">
+    <section class="wrap srv-hero" aria-labelledby="srv-title">
+      <p class="eyebrow srv-hero__eyebrow">Lab · Sheet 02</p>
+      <h1 class="h1" id="srv-title">The <em>server</em>.</h1>
+      <p class="lede srv-hero__lede">A Dell PowerEdge R720xd that thinks it’s an R720. Inside and out, and the RAID card that’s about to leave.</p>
+      <p class="srv-hero__links">
+        <a class="link link--quiet" href="/lab/"><span aria-hidden="true">←</span> The lab</a>
+        <a class="link link--quiet" href="/lab/rack/">Sheet 01 · The cabinet <span class="arrow" aria-hidden="true">→</span></a>
+      </p>
+    </section>
+
+    <div class="srv-wide">
+      <Sheet
+        id={DWG}
+        dwgNo="TD-LAB-02"
+        title="The server"
+        desc="Dell PowerEdge R720xd. Orthographic tab: top view with the cover off, front, rear, and details of front bays 0 to 7 and the rear flex bays. Exploded tab: the chassis taken apart with numbered balloons. Swap tab: the storage controller before and after the planned HBA330 swap, with its cables and the data path."
+        sheet={[2, 2]}
+        rev="A"
+        date="2026-09-28"
+        revisions={[{ rev: 'A', date: '2026-09-28', desc: 'First issue' }]}
+        notes={notes}
+        stamp={{ text: 'PRELIMINARY', sub: 'SWAP PLANNED · NOT YET BUILT', x: 694, y: 70 }}
+        interactive
+        statusScale="SCALE 1:4"
+      >
+        <Fragment slot="toolbar">
+          <ViewTabs dwg={DWG} active="ortho" views={[
+            { id: 'ortho', label: 'Orthographic', icon: 'front' },
+            { id: 'exploded', label: 'Exploded', icon: 'iso' },
+            { id: 'swap', label: 'Swap', icon: 'top' },
+          ]} />
+          <LayerPanel layers={[
+            { id: 'parts', label: 'Parts', line: 'obj' },
+            { id: 'labels', label: 'Labels', line: 'lead' },
+            { id: 'dims', label: 'Dimensions', line: 'dim' },
+            { id: 'cables', label: 'Cables', line: 'sem-keep' },
+            { id: 'air', label: 'Airflow', line: 'air-cold' },
+            { id: 'pools', label: 'Pools', line: 'pool-rpool' },
+          ]} />
+        </Fragment>
+
+        <ServerDefs id={DWG} />
+        <OrthoViews dwg={DWG} active />
+        <ExplodedView dwg={DWG} />
+        <SwapView dwg={DWG} />
+
+        <Fragment slot="legend">
+          <LineKey items={[
+            { line: 'obj', label: 'Object' },
+            { line: 'phantom', label: 'Alternate / removed' },
+            { line: 'sem-new', label: 'New (planned)' },
+            { line: 'sem-removed', label: 'Leaving' },
+            { line: 'air-cold', label: 'Cold air' },
+            { line: 'air-hot', label: 'Hot air' },
+          ]} />
+          <ProvLegend />
+        </Fragment>
+      </Sheet>
+    </div>
+
+    <ServerSchedule />
+  </div>
+</BaseLayout>
+
+<style is:global>
+  .pg-server .srv-hero { padding-block: clamp(40px, 6vw, 80px) clamp(28px, 4vw, 44px); }
+  .pg-server .srv-hero__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .pg-server .srv-hero__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
+  .pg-server .srv-hero__lede { margin-top: 20px; max-width: 46ch; }
+  .pg-server .srv-hero__links { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 24px; font-size: var(--fs-sm); }
+  .pg-server .srv-wide { max-width: 1400px; margin-inline: auto; padding-inline: var(--gutter); }
+
+  /* drawing lettering and cables local to Sheet 02 */
+  .pg-server .nums { font-size: 8.5px; fill: var(--dwg-text); letter-spacing: 0; }
+  .pg-server .nums--b { font-size: 12px; fill: var(--dwg-text-hi); }
+  .pg-server :is(.nt, .sm) text { text-anchor: middle; font-size: 10.5px; letter-spacing: .06em; fill: var(--muted); }
+  .pg-server .sm text, .pg-server .nt .sm-l { font-size: 8.5px; letter-spacing: .08em; }
+  .pg-server .nt .sm-l { paint-order: stroke; stroke: var(--dwg-paper); stroke-width: 3px; stroke-linejoin: round; }
+  .pg-server .nt .sem-new { fill: var(--dwg-new); }
+  .pg-server .nt .sem-removed { fill: var(--dwg-removed); }
+  .pg-server .cbls { --flow: var(--ink-2); }
+  .pg-server .cbl { fill: none; stroke: var(--flow); stroke-width: 2.2px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; opacity: .85; }
+  .pg-server .ctag text { font: 500 11px var(--font-mono); fill: var(--flow); text-anchor: middle; paint-order: stroke; stroke: var(--dwg-paper); stroke-width: 5px; stroke-linejoin: round; }
+  .pg-server [data-swap="after"] .ctag .cb1 { fill: var(--dwg-removed); }
+
+  /* exploded view: faint shroud; the static drawing is the exploded state */
+  .pg-server .xp-see :is(.face-top, .face-front, .face-side) { fill-opacity: .35; }
+  .pg-server .xp-wire .ln-med { stroke: var(--dwg-rule); }
+
+  /* swap view: before (default) / after (planned) */
+  .pg-server .sem-removed .cbl { stroke-dasharray: 9 6; opacity: .7; }
+  .pg-server :is(.swap-a, .swap-b) { transition: opacity var(--t-2) ease, visibility 0s; }
+  .pg-server [data-dwg]:not([data-swap="after"]) .swap-a, .pg-server [data-swap="after"] .swap-b { opacity: 0; visibility: hidden; transition: opacity var(--t-2) ease, visibility 0s var(--t-2); }
+  .pg-server .swt { cursor: pointer; }
+  .pg-server .swt rect { fill: var(--dwg-paper); stroke: var(--dwg-rule); vector-effect: non-scaling-stroke; }
+  .pg-server .swt[aria-pressed="true"] rect { fill: color-mix(in srgb, var(--gold) 16%, var(--dwg-paper)); stroke: var(--gold-light); }
+  .pg-server .swt[aria-pressed="false"] text { fill: var(--muted); }
+  .pg-server .swt:hover rect { stroke: var(--gold-light); }
+  .pg-server .swt:focus-visible { outline: none; }
+  .pg-server .swt:focus-visible rect { stroke: var(--gold-pale); stroke-width: 2px; }
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .pg-server [data-plot="done"] .swap-in [pathLength] { stroke-dasharray: 1 1; stroke-dashoffset: 1; vector-effect: none; transition: stroke-dashoffset 1.1s var(--ease-io) .15s; }
+    .pg-server [data-swap="after"][data-plot="done"] .swap-in [pathLength] { stroke-dashoffset: 0; }
+  }
+  /* The drawing's box (outside its pan scroller) drives it: assembled when the page opens, apart
+     as the drawing rises, balloons in before it's fully on screen, so the sheet at rest (or after a
+     parts-list jump) is always the whole picture. */
+  @supports (animation-timeline: view()) {
+    @media screen and (prefers-reduced-motion: no-preference) {
+      .pg-server .dwg__view { view-timeline: --srv-xp block; }
+      .pg-server .xp { animation: srv-xp linear both; animation-timeline: --srv-xp; animation-range: cover 25% cover 42%; }
+      .pg-server .xp-lbl { animation: srv-fade linear both; animation-timeline: --srv-xp; animation-range: cover 40% cover 46%; }
+    }
+  }
+  @keyframes srv-xp { from { transform: translate(var(--ax, 0px), var(--ay, 0px)); } }
+  @keyframes srv-fade { from { opacity: 0; } }
+
+  /* ---------- below the sheet ---------- */
+  .pg-server .srv-sec { padding-top: clamp(56px, 7vw, 96px); }
+  .pg-server .srv-sec:last-child { padding-bottom: clamp(64px, 8vw, 112px); }
+  .pg-server .srv-split { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 40px clamp(32px, 4vw, 64px); align-items: start; margin-top: 28px; }
+  .pg-server .srv-h, .pg-server .srv-t th[scope="col"], .pg-server .srv-read dt { font: 500 .6875rem/1.2 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+  .pg-server .srv-h { margin: 0 0 14px; color: var(--gold-light); }
+  .pg-server .srv-t { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+  .pg-server .srv-t :is(th, td) { padding: 10px 14px 10px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: baseline; }
+  .pg-server .srv-t th[scope="row"] { font-weight: 500; color: var(--ink); }
+  .pg-server .srv-t td { color: var(--ink-2); }
+  .pg-server .srv-t tr.new th[scope="row"] { color: var(--ok); }
+  .pg-server .srv-t tr.removed th[scope="row"] { color: var(--danger-ink); }
+  .pg-server .srv-bom tr { transition: background var(--t-1) ease; }
+  .pg-server .srv-bom tr:is(.is-hot, .is-sel, :hover) { background: var(--accent-faint); }
+  .pg-server .srv-bom tr > td:first-child { width: 36px; font: 500 .75rem/1 var(--font-mono); color: var(--gold-light); }
+  .pg-server .srv-bom button { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: var(--line-3); text-underline-offset: 4px; }
+  .pg-server .srv-bom button:hover, .pg-server .is-sel button { text-decoration-color: var(--gold-light); }
+  .pg-server .srv-read { padding: 20px 22px; border: 1px solid var(--line-2); background: var(--surface-lit); }
+  .pg-server .srv-read dl { display: grid; gap: 14px; margin: 0 0 16px; }
+  .pg-server .srv-read dd { margin: 4px 0 0; color: var(--ink-2); font-size: var(--fs-sm); }
+  .pg-server .srv-read dd > b { font: 400 1.5rem/1.1 var(--font-mono); color: var(--gold-light); letter-spacing: -.01em; }
+  .pg-server .srv-read p { margin: 0; font-size: var(--fs-sm); color: var(--muted); }
+  .pg-server .srv-vs { font-size: 1.1rem !important; color: var(--ink) !important; }
+  .pg-server .srv-flag { margin-top: 14px !important; padding-left: 12px; border-left: 2px dashed var(--danger-ink); color: var(--ink-2) !important; }
+  .pg-server [data-pool] { --pc: var(--line-3); }
+  .pg-server [data-pool="rpool"] { --pc: var(--gold); }
+  .pg-server [data-pool="fast"] { --pc: var(--ink); }
+  .pg-server [data-pool="bulk"] { --pc: #8fa3c7; }
+  .pg-server [data-fate="remove"] { --pc: var(--danger-ink); }
+  .pg-server .srv-drv { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1px; margin: 28px 0 0; padding: 0; list-style: none; background: var(--line); border: 1px solid var(--line); }
+  .pg-server .srv-drv li { position: relative; padding: 18px 18px 16px; background: var(--bg); box-shadow: inset 0 2px 0 var(--pc); }
+  .pg-server .srv-drv__h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0; font-size: var(--fs-sm); }
+  .pg-server .srv-drv__h b { flex: 1 1 100%; font-weight: 500; color: var(--ink); }
+  .pg-server .srv-drv__h span { font: 500 .6875rem/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--pc); }
+  .pg-server .srv-drv__h span + span { color: var(--faint); }
+  .pg-server [data-fate="remove"] .srv-drv__h span + span { color: var(--danger-ink); }
+  .pg-server .srv-drv__g { margin: 10px 0 12px; font: italic 1.2rem/1.25 var(--font-display); color: var(--ink); }
+  .pg-server [data-fate="remove"] .srv-drv__g { color: var(--danger-ink); }
+  .pg-server .srv-drv__m { margin: 0; font: .75rem/1.6 var(--font-mono); letter-spacing: .02em; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .pg-server .srv-pools { display: grid; gap: 10px; margin: 28px 0 0; padding: 0; list-style: none; font-size: var(--fs-sm); color: var(--ink-2); }
+  .pg-server .srv-pools li { padding-left: 14px; box-shadow: inset 3px 0 0 var(--pc); }
+  .pg-server .srv-pools b { margin-right: 8px; font: 500 .8125rem var(--font-mono); color: var(--ink); }
+  .pg-server .srv-pools span { color: var(--muted); }
+  .pg-server .srv-fine { max-width: 72ch; margin: 20px 0 0; font-size: var(--fs-sm); color: var(--muted); }
+  .pg-server .srv-q { margin: 0; padding: 0; list-style: none; counter-reset: q; font-size: var(--fs-sm); color: var(--ink-2); }
+  .pg-server .srv-q li { counter-increment: q; position: relative; padding: 0 0 14px 40px; }
+  .pg-server .srv-q li::before { content: counter(q, decimal-leading-zero); position: absolute; left: 0; font: 500 .75rem/1.6 var(--font-mono); color: var(--gold-light); }
+  .pg-server .srv-q b { display: block; font-weight: 500; color: var(--ink); }
+  .pg-server .srv-src { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; font-size: .8125rem; color: var(--muted); }
+  .pg-server .srv-src a { color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--line-3); text-underline-offset: 3px; }
+  .pg-server .srv-next { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 32px; margin: 48px 0 0; padding-top: 24px; border-top: 1px solid var(--line-2); }
+  @media (max-width: 960px) { .pg-server .srv-split { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 640px) {
+    .pg-server .srv-t { font-size: .8125rem; }
+    .pg-server .srv-bom thead { display: none; }
+    .pg-server .srv-bom tr { display: grid; grid-template-columns: 40px 1fr auto; gap: 2px 8px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .pg-server .srv-bom :is(th, td) { padding: 0; border: 0; }
+    .pg-server .srv-bom td:first-child { grid-row: span 2; }
+    .pg-server .srv-bom td:last-child { grid-column: 2 / -1; }
+  }
+</style>
+
+<script>
+  // Sheet 02: the Before/After switch on the SWAP view, and the parts list ↔ exploded view sync.
+  const fig = document.querySelector<HTMLElement>('[data-dwg="lab02"]');
+  if (fig) {
+    const switches = [...fig.querySelectorAll<SVGGElement>('[data-swap-to]')];
+    const set = (to: string, focus?: SVGGElement): void => {
+      fig.dataset.swap = to;
+      for (const s of switches) s.setAttribute('aria-pressed', String(s.dataset.swapTo === to));
+      focus?.focus();
+    };
+    for (const s of switches) {
+      s.addEventListener('click', () => set(s.dataset.swapTo ?? 'before'));
+      s.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          set(s.dataset.swapTo ?? 'before');
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          const next = switches[(switches.indexOf(s) + 1) % switches.length];
+          set(next.dataset.swapTo ?? 'before', next);
+        }
+      });
+    }
+
+    // Parts list rows light their balloon and part; the row button selects the part in the
+    // exploded view (switching to that tab first).
+    const hot = (id: string, on: boolean): void => {
+      for (const el of fig.querySelectorAll(`[data-balloon-for="${id}"], [data-part="${id}"]`)) el.classList.toggle('is-hot', on);
+    };
+    for (const row of document.querySelectorAll<HTMLElement>('[data-bom]')) {
+      const id = row.dataset.bom ?? '';
+      row.addEventListener('pointerenter', () => hot(id, true));
+      row.addEventListener('pointerleave', () => hot(id, false));
+      row.addEventListener('focusin', () => hot(id, true));
+      row.addEventListener('focusout', () => hot(id, false));
+      row.querySelector('button')?.addEventListener('click', () => {
+        fig.querySelector<HTMLElement>('[data-view="exploded"]')?.click();
+        const part = fig.querySelector<SVGGElement>(`[data-part="${id}"]`);
+        if (part?.getAttribute('aria-pressed') !== 'true') part?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        fig.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      });
+    }
+    document.addEventListener('dwg:select', (e) => {
+      const { id, selected } = (e as CustomEvent<{ id: string; selected: boolean }>).detail;
+      for (const row of document.querySelectorAll<HTMLElement>('[data-bom]')) row.classList.toggle('is-sel', selected && row.dataset.bom === id);
+    });
+  }
+</script>

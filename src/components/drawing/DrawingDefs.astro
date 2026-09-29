@@ -1,0 +1,42 @@
+---
+/*
+  DrawingDefs: the shared <defs> of one drawing SVG. Sheet.astro renders it for you; render it
+  yourself only for a bare <svg> outside a Sheet. Every id is prefixed with `id`, so several
+  drawings can share a page, and Sheet exposes them as CSS variables on its figure:
+    #{id}-grid      drafting grid (minor 15 = 5 mm paper, major 75 = 25 mm)  → var(--dwg-grid)
+    #{id}-hatch     45° section hatching, 6 units pitch                    → var(--dwg-hatch)
+    #{id}-hatch-x   135° hatching for the adjacent part in a section        → var(--dwg-hatch-x)
+    #{id}-rough     rubber-stamp ink texture (Stamp.astro)                  → var(--dwg-rough)
+  `gridX`/`gridY` align the grid with the sheet frame. `only` limits the output to the listed
+  kinds (default: all four), for small figures that never use hatching or the stamp.
+*/
+export type DefKind = 'grid' | 'hatch' | 'hatch-x' | 'rough';
+interface Props {
+  id: string;
+  gridX?: number;
+  gridY?: number;
+  only?: DefKind[];
+}
+const { id, gridX = 0, gridY = 0, only = ['grid', 'hatch', 'hatch-x', 'rough'] } = Astro.props;
+const on = (k: DefKind): boolean => only.includes(k);
+const minor = [15, 30, 45, 60].map((n) => `M${n} 0V75M0 ${n}H75`).join('');
+---
+
+<defs>
+  {on('grid') && <pattern id={`${id}-grid`} x={gridX} y={gridY} width="75" height="75" patternUnits="userSpaceOnUse">
+    <path class="dwg-grid-minor" d={minor} />
+    <path class="dwg-grid-major" d="M0 0V75M0 0H75" />
+  </pattern>}
+  {on('hatch') && <pattern id={`${id}-hatch`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <path class="dwg-hatch-ln" d="M0 -1V7" />
+  </pattern>}
+  {on('hatch-x') && <pattern id={`${id}-hatch-x`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+    <path class="dwg-hatch-ln" d="M0 -1V7" />
+  </pattern>}
+  {on('rough') && <filter id={`${id}-rough`} x="-4%" y="-8%" width="108%" height="116%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="11" result="n" />
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.4 2.05" result="m" />
+    <feComposite in="SourceGraphic" in2="m" operator="in" result="c" />
+    <feDisplacementMap in="c" in2="n" scale="1.2" />
+  </filter>}
+</defs>

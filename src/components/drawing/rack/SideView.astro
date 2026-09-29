@@ -1,0 +1,152 @@
+---
+/*
+  Sheet 01 · SIDE tab: SECTION A–A, a partial side section through the middle of the stack at
+  1:5 (looking from the left, front to the left): device depths against the rail span and the
+  cabinet depth, front and rear clearances, and airflow only where the vendor imagery shows a
+  direction. PLAN B–B at 1:15 shows the door swing.
+*/
+import View from '../View.astro';
+import Dim from '../Dim.astro';
+import Leader from '../Leader.astro';
+import Particles from '../Particles.astro';
+import { U_MM, atScale, fmtMm, join, ortho } from '../../../lib/drawing/projection';
+import { CAB, HOLES, derived, slotOf$, slots, stack, type Slot } from './model';
+
+interface Props {
+  dwg: string;
+}
+const { dwg } = Astro.props;
+
+/* ---------- SECTION A–A, 1:5: model (z, y) → paper ---------- */
+const lo = (stack.from - 2) * U_MM; // partial: a spare U below the stack …
+const hi = (stack.to + 3) * U_MM; // … to 3U above it (the Pi stands in the first)
+const S = ortho({ x: 214, y: 752 + lo * atScale(1, 5), scale: atScale(1, 5), flipY: true });
+const sc = S.scale;
+const skin = CAB.skin;
+const zDoorIn = CAB.z0 + skin;
+const zRearIn = CAB.z1 - skin;
+const brk = (y: number): string => {
+  const m = (CAB.z0 + CAB.z1) / 2;
+  return S.poly([[CAB.z0 - 20, y], [m - 18, y], [m - 8, y + 16], [m + 8, y - 16], [m + 18, y], [CAB.z1 + 20, y]]);
+};
+const shell = join(
+  S.rect(CAB.z0, lo, skin, hi - lo),
+  S.rect(zRearIn, lo, skin, hi - lo),
+);
+const rails = join(S.rect(-2, lo, 2, hi - lo), S.rect(CAB.railSpan, lo, 2, hi - lo));
+const r7 = slotOf$('r720xd'), un = slotOf$('unas-pro-8'), udm = slotOf$('udm-pro'), pi = slotOf$('rpi-4b'), pp = slotOf$('patch-panel'), sh = slotOf$('shelf');
+const box = (sl: Slot): string => join(S.rect(sl.body.z, sl.body.y, sl.body.d, sl.body.h), sl.plate ? S.rect(sl.plate.z, sl.faceTop - sl.plate.h, sl.plate.t, sl.plate.h) : '');
+// R720xd extras (Dell Technical Guide Fig 18): bezel to Za 32, PSU handles to Zc 723
+const bezel = S.rect(-32, r7.body.y + 4, 14, r7.body.h - 8);
+const handles = S.rect(r7.body.d, r7.body.y + 6, 723 - r7.body.d, 26);
+const slide = S.poly([[0, r7.body.y + 14], [CAB.railSpan, r7.body.y + 14]]); // under the R720xd's label
+const inBox = (sl: Slot) => S.pt(sl.body.z + sl.body.d / 2, sl.body.y + sl.body.h / 2 - 4.5 / sc);
+
+// Airflow (front → back) only for the two boxes with fans that imply it
+const flow = (sl: Slot) => ({
+  cold: S.poly([[zDoorIn - 10, sl.body.y + sl.body.h * 0.5], [sl.faceZ - 4, sl.body.y + sl.body.h * 0.5]]),
+  hot: S.poly([[sl.body.z + sl.body.d + (sl === r7 ? 44 : 4), sl.body.y + sl.body.h * 0.5], [zRearIn - 6, sl.body.y + sl.body.h * 0.5]]),
+});
+const fR = flow(r7), fU = flow(un);
+// Inline tags right of each shallow box, at its own height
+const tag = (sl: Slot, text: string) => {
+  const [x] = S.pt(sl.body.z + sl.body.d + 14, 0);
+  const [, y] = S.pt(0, sl.body.y + sl.body.h / 2);
+  return { x, y: y + 4, text };
+};
+const tags = [
+  tag(sh, 'PASSIVE'),
+  tag(pp, `PATCH PANEL · ${fmtMm(pp.body.d)} · PASSIVE`),
+  tag(udm, 'AIRFLOW ? · NOT DOCUMENTED'),
+];
+
+/* ---------- PLAN B–B, 1:15: model (x, z) → paper, front at the bottom ---------- */
+const P = ortho({ x: 104, y: 232, scale: atScale(1, 15), flipY: true });
+const ps = P.scale;
+const pCab = P.rect(CAB.x0, CAB.z0, CAB.w, CAB.d);
+const pSkins = join(P.rect(CAB.x0, CAB.z0, CAB.w, skin), P.rect(CAB.x0, CAB.z1 - skin, CAB.w, skin), P.rect(CAB.x0, CAB.z0, skin, CAB.d), P.rect(CAB.x1 - skin, CAB.z0, skin, CAB.d));
+const pPosts = join(...HOLES.flatMap((x) => [0, CAB.railSpan].map((z) => P.rect(x - 8, z - 8, 16, 16))));
+const pUnas = P.rect(un.body.x, un.body.z, un.body.w, un.body.d);
+const pR7 = P.rect(r7.body.x, un.body.z + un.body.d, r7.body.w, r7.body.d - un.body.d);
+const hinge: [number, number] = [CAB.x0, CAB.z0];
+const doorOpen = P.rect(CAB.x0 - skin, CAB.z0 - CAB.w, skin, CAB.w);
+const swing = (() => {
+  const [hx, hy] = P.pt(...hinge);
+  const r = CAB.w * ps;
+  return `M${hx + r} ${hy}A${r} ${r} 0 0 1 ${hx} ${hy + r}`;
+})();
+---
+
+<View dwg={dwg} name="side" x={39} y={39} w={798} h={813}>
+  <View x={46} y={380} w={791} h={470} title="SECTION A–A" scale={sc} note={`PARTIAL · U${stack.from - 1}–${stack.to + 3} · LOOKING FROM THE LEFT`} labelAt={[652, 350]}
+        mm={S.matrix} u0={0} uStart={1}>
+    <g style="--p:1">
+      <path class="hatch" d={shell} />
+      <path class="ln-obj" d={shell} pathLength="1" />
+      <path class="ln-med" d={rails} />
+      <path class="ln-thin" d={join(brk(lo), brk(hi))} />
+      <path class="ln-ctr" d={join(S.poly([[0, lo - 30], [0, hi + 30]]), S.poly([[CAB.railSpan, lo - 30], [CAB.railSpan, hi + 30]]))} style="--p:4" />
+    </g>
+    <g data-layer="devices" style="--p:2">
+      {slots.map((sl) => (
+        <g data-part-ref={sl.dev.id}>
+          <path class="face-front" d={box(sl)} />
+          <path class="ln-obj" d={box(sl)} pathLength="1" />
+        </g>
+      ))}
+      <path class="ln-phantom" d={bezel} />
+      <path class="ln-med" d={handles} />
+      <path class="ln-hid" d={slide} style="--p:4" />
+    </g>
+
+    <g data-layer="airflow">
+      <Particles d={fR.cold} kind="cold" n={3} dur={2.8} />
+      <Particles d={fR.hot} kind="hot" n={3} dur={2.8} />
+      <Particles d={fU.cold} kind="cold" n={2} dur={3.2} />
+      <Particles d={fU.hot} kind="hot" n={2} dur={3.2} />
+    </g>
+
+    <g data-layer="labels">
+      {[r7, un, udm, sh].map((sl) => {
+        const [x, y] = inBox(sl);
+        return <text class="txt-dim" x={x} y={y + 4} text-anchor="middle">{sl.dev.short.toUpperCase()} · {fmtMm(sl.body.d)}</text>;
+      })}
+      {tags.map((t) => <text class="txt-note" x={t.x} y={t.y}>{t.text}</text>)}
+      <Leader from={S.pt(pi.body.z + pi.body.d * 0.6, pi.body.y + pi.body.h)} to={S.pt(250, pi.body.y + 80)} end="dot" text={[`PI · ${pi.body.d} DEEP`, 'ON THE SHELF · PASSIVE']} prov="vendor" />
+      <text class="txt-note" x={S.pt(zDoorIn + 14, 0)[0]} y={S.pt(0, hi - 40)[1]}>FRONT</text>
+      <text class="txt-note" x={S.pt(zRearIn - 14, 0)[0]} y={S.pt(0, hi - 40)[1]} text-anchor="end">REAR</text>
+    </g>
+
+    <g data-layer="dims">
+      <Dim a={S.pt(CAB.z0, hi)} b={S.pt(CAB.z1, hi)} offset={-58} mm={CAB.d} prov="assumed" />
+      <Dim a={S.pt(0, hi)} b={S.pt(CAB.railSpan, hi)} offset={-26} mm={CAB.railSpan} sub="RAIL SPAN" prov="assumed" />
+      <Dim a={S.pt(zDoorIn, lo)} b={S.pt(-32, lo)} offset={34} mm={-32 - zDoorIn} sub="FRONT CLEAR" prov="inferred" />
+      <Dim a={S.pt(-32, lo)} b={S.pt(723, lo)} offset={34} mm={derived.r720xdOverallDepthMm.value} sub="R720xd, BEZEL TO PSU HANDLES" prov="inferred" ext="b" />
+      <Dim a={S.pt(723, lo)} b={S.pt(zRearIn, lo)} offset={34} mm={zRearIn - 723} sub="REAR CLEAR" prov="inferred" ext="b" />
+      <Dim a={S.pt(CAB.z0, lo)} b={S.pt(0, lo)} offset={72} mm={CAB.setBack} sub="RAIL SET-BACK" prov="assumed" />
+    </g>
+  </View>
+
+  <!-- ======== PLAN B–B: door swing ======== -->
+  <View x={46} y={46} w={330} h={330} title="PLAN B–B" scale={ps} note="CUT AT U21 · DOOR SWING" labelAt={[300, 250]} mm={P.matrix}>
+    <g style="--p:1">
+      <path class="face" d={pCab} />
+      <path class="hatch" d={pSkins} />
+      <path class="ln-obj" d={pCab} pathLength="1" />
+      <path class="ln-med" d={pPosts} />
+    </g>
+    <g data-layer="devices" style="--p:2">
+      <path class="face-top" d={pUnas} />
+      <path class="ln-obj" d={pUnas} />
+      <path class="ln-med" d={pR7} />
+    </g>
+    <g style="--p:4">
+      <path class="ln-phantom" d={join(doorOpen, swing)} />
+      <path class="ln-ctr" d={join(P.poly([[241.3, CAB.z0 - 40], [241.3, CAB.z1 + 40]]))} />
+    </g>
+    <g data-layer="labels">
+      <text class="txt-note" x={P.pt(241.3, 0)[0]} y={P.pt(0, CAB.z0)[1] + 18} text-anchor="middle">FRONT</text>
+      <Leader from={P.pt(CAB.x0 + CAB.w * 0.64, CAB.z0 - CAB.w * 0.77)} to={P.pt(CAB.x1 + 90, CAB.z0 - CAB.w * 0.62)} end="dot" text={['SWING R600', 'DOOR WIDTH ASSUMED']} prov="assumed" />
+    </g>
+  </View>
+</View>

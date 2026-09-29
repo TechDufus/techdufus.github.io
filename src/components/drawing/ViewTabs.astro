@@ -1,0 +1,51 @@
+---
+/*
+  ViewTabs: ARIA tabs that switch the sheet's <View name=…> panels (Left/Right/Home/End move,
+  the tab and its panel are linked by id). Put it in the Sheet's `toolbar` slot. Switching
+  re-plots the new view (unless reduced motion). Hidden without JS (the active view stays).
+
+  <ViewTabs dwg="lab01" active="iso" views={[{ id: 'iso', label: 'Isometric', icon: 'iso' },
+                                             { id: 'front', label: 'Front', icon: 'front' }]} />
+
+    dwg     the Sheet id
+    views   { id, label, icon? } — icon: 'iso' | 'front' | 'side' | 'rear' | 'top' | 'section'
+    active  id of the panel rendered with <View active>
+    label   accessible name of the tab list (default "Views")
+*/
+type Icon = 'iso' | 'front' | 'side' | 'rear' | 'top' | 'section';
+interface Props {
+  dwg: string;
+  views: { id: string; label: string; icon?: Icon }[];
+  active: string;
+  label?: string;
+}
+const { dwg, views, active, label = 'Views' } = Astro.props;
+const ICONS: Record<Icon, string> = {
+  iso: 'M8 1.5 14 5v6l-6 3.5L2 11V5zM2 5l6 3.5L14 5M8 8.5v6',
+  front: 'M1.5 5h13v6h-13zM4 8h3',
+  side: 'M4 2.5h8v11H4zM4 6h8',
+  rear: 'M1.5 5h13v6h-13zM10 7v2M12 7v2',
+  top: 'M2.5 2.5h11v11h-11zM2.5 11h11',
+  section: 'M2.5 3.5h11v9h-11zM2.5 8.5l5-5M5 12.5l8.5-8.5M10 12.5l3.5-3.5',
+};
+---
+
+<div class="dwg-tabs" role="tablist" aria-label={label}>
+  {views.map((v) => (
+    <button
+      type="button"
+      role="tab"
+      class="dwg-tab"
+      id={`${dwg}-tab-${v.id}`}
+      aria-controls={`${dwg}-view-${v.id}`}
+      aria-selected={v.id === active ? 'true' : 'false'}
+      tabindex={v.id === active ? 0 : -1}
+      data-view={v.id}
+    >
+      {v.icon && (
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d={ICONS[v.icon]} /></svg>
+      )}
+      {v.label}
+    </button>
+  ))}
+</div>

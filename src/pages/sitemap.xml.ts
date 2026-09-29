@@ -14,6 +14,8 @@ export async function GET() {
     '/blog/',
     '/projects/',
     '/lab/',
+    '/lab/rack/',
+    '/lab/r720xd/',
     ...(business.enabled ? [business.appHref] : []),
     '/docs/',
     '/docs/setup/',

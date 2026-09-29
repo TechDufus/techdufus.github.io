@@ -1,0 +1,57 @@
+---
+/*
+  ServerDefs: the R720xd drawn once, in model millimetres, as <defs> groups that any view places
+  with <use href="#{id}-front" transform={…}/>. Lines only (no fills, no lettering), so a <use>
+  can be scaled freely: strokes are non-scaling and the pens come from drawing.css.
+
+    #{id}-front   front panel, face-local (u → from the left ear, v ↓ from the top), 482.4 × 87.3
+    #{id}-rear    rear panel seen from behind (u → from the left of the body), 444.0 × 87.3
+    #{id}-plan    top view with the cover off (u = model x from the left ear, v = −z: the rear wall
+                  at v −684, the front plate at v 0 … 18). Internals approximate (see geom.ts).
+
+  Place a face at scale s with transform={`matrix(${s},0,0,${s},${x},${y})`} (y = its top edge;
+  for the plan, y = the rack-flange line). Put fills (face-front, tints) BEFORE the <use>.
+
+  <ServerDefs id="lab02" />                     all three
+  <ServerDefs id="fig1" only={['front']} />     just the front
+*/
+import { join } from '../../../lib/drawing/projection';
+import { frontPanel, rearPanel, planPaths } from './geom';
+
+type Face = 'front' | 'rear' | 'plan';
+interface Props {
+  id: string;
+  only?: Face[];
+}
+const { id, only = ['front', 'rear', 'plan'] } = Astro.props;
+const has = new Set(only);
+const f = has.has('front') ? frontPanel() : null;
+const r = has.has('rear') ? rearPanel() : null;
+const p = has.has('plan') ? planPaths() : null;
+---
+
+<defs>
+  {f && (
+    <g id={`${id}-front`}>
+      <path class="ln-obj" d={join(f.outline, f.ears)} />
+      <path class="ln-med" d={join(f.bays, f.ctrl)} />
+      <path class="ln-thin" d={join(f.detail, f.latches)} />
+    </g>
+  )}
+  {r && (
+    <g id={`${id}-rear`}>
+      <path class="ln-obj" d={join(r.outline, r.psus)} />
+      <path class="ln-med" d={join(r.slots, r.bays, r.nics)} />
+      <path class="ln-thin" d={r.io} />
+    </g>
+  )}
+  {p && (
+    <g id={`${id}-plan`}>
+      <path class="ln-obj" d={join(p.shell, p.cpus)} />
+      <path class="ln-med" d={join(p.board, p.fans, p.risers, p.psus)} />
+      <path class="ln-thin" d={join(p.cage, p.fins, p.dimms, p.retention)} />
+      <path class="ln-phantom" d={p.shroud} />
+      <path class="ln-ctr" d={p.ctr} />
+    </g>
+  )}
+</defs>
