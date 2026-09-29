@@ -1,3 +1,4 @@
+// Synced from homelab @ f8689a1 (2026-09-29)
 /**
  * Sheet 03 · The stack: what runs where, in three layers. Bootstrap turns the metal into a
  * hypervisor, OpenTofu puts VMs on it, and the cluster runs the rest.
