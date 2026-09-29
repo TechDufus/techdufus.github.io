@@ -683,6 +683,13 @@ export const labSpec: {
   changelog: [
     {
       date: '2026-09-29',
+      title: 'kubectl top → Grafana',
+      href: '/lab/stack/',
+      note: 'Metrics and logs land in VictoriaMetrics and VictoriaLogs now, and Grafana draws them. The alert rules run too, but nothing pages me yet. On purpose.',
+      cta: 'See the stack'
+    },
+    {
+      date: '2026-09-29',
       title: 'Real HTTPS, first app',
       href: '/lab/stack/',
       note: 'Apps on my network get proper HTTPS now: cert-manager fetches the certificates and Cilium serves them. First one in: Headlamp, a web UI for the cluster.',
