@@ -1,0 +1,140 @@
+---
+/*
+  StackExcerpt: Sheet 03 in small, for the /lab page. The three layers as storeys of a section,
+  bottom up, each thing a numbered chip (same numbers and cards as the full sheet), what builds
+  the layer lettered beside it, planned things dashed. A link to the full sheet sits under it.
+  Everything comes from src/data/lab/stack.ts through ./model.ts; it's a kit Figure, so it lays
+  itself out twice (680 wide, 360 on a phone) and works on its own on any page.
+
+  <StackExcerpt />
+  <StackExcerpt id="lab-stack" caption="What runs on the metal. Dashed is next." />
+
+    id       unique on the page (default "sx"); prefixes the part ids, so it never clashes
+             with the full sheet or another excerpt
+    caption  the line under it (default "Solid is running. Dashed is next.")
+    href     the full sheet (default "/lab/stack/")
+*/
+import Figure from '../figure/Figure.astro';
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import PartCard from '../PartCard.astro';
+import { at, f, rc, type P } from '../../../lib/drawing/figure';
+import { allThings, kindOf, planned, tagOf, toolText, type Thing } from './model';
+import { stack } from '../../../data/lab/stack';
+
+interface Props {
+  id?: string;
+  caption?: string;
+  href?: string;
+}
+const { id = 'sx', caption = 'Solid is running. Dashed is next.', href = '/lab/stack/' } = Astro.props;
+
+const W = 680, NW = 360;
+const CH = 26, GX = 12, GY = 16, SLAB = 5, CHAR = 6.95;
+const label = (t: Thing): string => {
+  if (!t.item) return `${t.group.title} · nothing yet`;
+  const name = t.item.name.length > 22 ? t.card.title : t.item.name;
+  return `${name}${t.item.version ? ` ${t.item.version}` : ''}${t.item.count ? ` ×${t.item.count}` : ''}`;
+};
+// Flow chips left to right in `width`, wrapping; returns each chip's offset and the height used.
+const flow = (ws: number[], width: number): { at: P[]; h: number } => {
+  const out: P[] = [];
+  let x = 0, y = 0;
+  for (const w of ws) {
+    if (x > 0 && x + w > width) {
+      x = 0;
+      y += CH + GY;
+    }
+    out.push([x, y]);
+    x += w + GX;
+  }
+  return { at: out, h: ws.length ? y + CH : 0 };
+};
+
+// wide: head column on the left, chips to its right; narrow: head on top, chips under it
+const LW = 150, AX = LW + 14, AW = W - AX - 12;
+const NAX = 18, NAW = NW - 2 * NAX;
+let y = 14, ny = 12;
+const floors = [...stack].reverse().map((l) => {
+  const things = allThings().filter((t) => t.layer === l);
+  const chips = things.map((t) => ({ t, text: label(t).toUpperCase(), w: Math.min(AW, Math.round(label(t).length * CHAR + 22)) }));
+  const wf = flow(chips.map((c) => c.w), AW);
+  const nf = flow(chips.map((c) => c.w), NAW);
+  const h = Math.max(70, 18 + wf.h + 16);
+  const nh = 40 + nf.h + 16;
+  const floor = {
+    l, h, nh, y, ny,
+    chips: chips.map((c, i) => ({ ...c, wp: [AX + wf.at[i][0], y + 18 + wf.at[i][1]] as P, np: [NAX + nf.at[i][0], ny + 40 + nf.at[i][1]] as P })),
+  };
+  y += h + SLAB;
+  ny += nh + SLAB;
+  return floor;
+});
+const H = Math.ceil(y + 12), NH = Math.ceil(ny + 12);
+const desc =
+  `The stack in ${stack.length} layers, top down: ` +
+  floors
+    .map((fl) => {
+      const plan = fl.chips.filter((c) => planned(c.t)).length;
+      return `${fl.l.title}, built with ${toolText(fl.l.tool)} (${fl.chips.length - plan} running, ${plan} planned)`;
+    })
+    .join('; ') +
+  '. Each numbered part opens a card.';
+const pid = (t: Thing) => `${id}-${t.id}`;
+---
+
+<div class="stx">
+  <Figure id={id} title="The stack" desc={desc} caption={caption} size={[W, H]} narrow={[NW, NH]} interactive hint defs={['hatch', 'hatch-x']} grid>
+    <!-- storeys: an outline per floor, a cut slab under each, the ground under the last -->
+    {floors.map((fl, i) => (
+      <Fragment>
+        <path class="fg-w ln-obj" d={rc(LW, fl.y, W - LW - 4, fl.h)} pathLength="1" style="--p:1" />
+        <path class="fg-w hatch ln-thin" d={rc(LW, fl.y + fl.h, W - LW - 4, SLAB)} style="--p:1" />
+        <path class="fg-w ln-thin" d={`M${LW - 10} ${f(fl.y + 4)}h6V${f(fl.y + fl.h - 4)}h-6`} style="--p:2" />
+        <path class="fg-n ln-obj" d={rc(8, fl.ny, NW - 16, fl.nh)} pathLength="1" style="--p:1" />
+        <path class="fg-n hatch ln-thin" d={rc(8, fl.ny + fl.nh, NW - 16, SLAB)} style="--p:1" />
+        {i === floors.length - 1 && (
+          <Fragment>
+            <path class="fg-w stx-earth" d={rc(LW - 20, fl.y + fl.h + SLAB, W - LW + 16, 10)} />
+            <path class="fg-n stx-earth" d={rc(0, fl.ny + fl.nh + SLAB, NW, 10)} />
+          </Fragment>
+        )}
+        <g class="fg-w" style="--p:3">
+          <text class="stx-idx fg-e" x={LW - 18} y={f(fl.y + 26)}>{String(fl.l.n).padStart(2, '0')}</text>
+          <text class="txt-label fg-h fg-e" x={LW - 18} y={f(fl.y + 43)}>{fl.l.title.toUpperCase()}</text>
+          <text class="txt-note fg-e" x={LW - 18} y={f(fl.y + 59)}>{toolText(fl.l.tool).toUpperCase()}</text>
+        </g>
+        <g class="fg-n" style="--p:3">
+          <text class="txt-label fg-h" x={NAX} y={f(fl.ny + 24)}><tspan class="stx-idx">{String(fl.l.n).padStart(2, '0')}</tspan> {fl.l.title.toUpperCase()}</text>
+          <text class="txt-note fg-e" x={NW - NAX} y={f(fl.ny + 24)}>{toolText(fl.l.tool).toUpperCase()}</text>
+        </g>
+        <g style="--p:4">
+          {fl.chips.map((c) => (
+            <g {...at(c.wp, c.np, planned(c.t) ? 'fg-planned' : '')}>
+              <Part id={pid(c.t)} label={tagOf(c.t)}>
+                <path class:list={['face', planned(c.t) ? 'ln-phantom' : 'ln-obj']} d={rc(0, 0, c.w, CH)} />
+                <text class="stx-chip" x="10" y="17">{c.text}</text>
+              </Part>
+              <Balloon at={[c.w, 0]} n={c.t.n} part={pid(c.t)} r={8} />
+            </g>
+          ))}
+        </g>
+      </Fragment>
+    ))}
+    <Fragment slot="cards">
+      {allThings().map((t) => <PartCard id={pid(t)} title={t.card.title} kind={kindOf(t)} lines={t.card.lines} />)}
+    </Fragment>
+  </Figure>
+  <p class="stx-link"><a class="link" href={href}>Sheet 03 · The stack <span class="arrow" aria-hidden="true">→</span></a></p>
+</div>
+
+<style is:global>
+  .stx .stx-chip { font-size: 10.5px; letter-spacing: .06em; fill: var(--dwg-text-hi); }
+  .stx .fg-planned .stx-chip { fill: var(--muted); }
+  .stx .fg-planned .ln-phantom { stroke-dasharray: 5 3; opacity: .75; }
+  .stx .part.is-lit .stx-chip, .stx .part:focus-visible .stx-chip, .stx .part[aria-pressed="true"] .stx-chip { fill: var(--gold-pale); }
+  .stx .stx-idx { font: 500 15px var(--font-mono); letter-spacing: .04em; fill: var(--gold); }
+  .stx .fg-n .stx-idx { font-size: 12px; }
+  .stx .stx-earth { fill: var(--dwg-hatch-x); opacity: .5; }
+  .stx .stx-link { margin: 14px 0 0; font-size: var(--fs-sm); }
+</style>

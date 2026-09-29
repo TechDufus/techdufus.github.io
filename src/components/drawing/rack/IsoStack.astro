@@ -1,0 +1,170 @@
+---
+/*
+  Sheet 01 · the isometric stack (./iso.ts): rails with top-down U rulers, broken between U15 and
+  U40, every box as a Part with its front panel symbol (PanelDefs, same dwg) mapped onto its face,
+  a numbered balloon per part, and airflow where it runs front to back. Selecting a racked box
+  slides it out of the front on its rails; things on a shelf lift off it. Used by IsoView (the
+  sheet) and CabinetExcerpt (/lab).
+
+    dwg      the Sheet id (panel symbols are #{dwg}-pf-{id})
+    x, y, k  see isoStack()
+    bx, by   the balloon column: its x, and the [top, bottom] y it spreads over (paper)
+    ty       y of the balloon row above the top shelf, for the top shelf and what's on it
+*/
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import URuler from '../URuler.astro';
+import Particles from '../Particles.astro';
+import { U_MM, join, type Iso, type Pt } from '../../../lib/drawing/projection';
+import { CAB, FRONT_TO_BACK, HOLES, RAIL_W, el, slotOf$, slots } from './model';
+import { BREAK, isoStack } from './iso';
+
+interface Props {
+  dwg: string;
+  x: number;
+  y: number;
+  k: number;
+  bx: number;
+  by: [number, number];
+  ty: number;
+}
+const { dwg, x, y, k, bx, by, ty } = Astro.props;
+const { hi, lo, of, cut } = isoStack(x, y, k);
+const [cutHi, cutLo] = cut;
+const fl = HOLES[0] - RAIL_W / 2, fr = HOLES[1] - RAIL_W / 2;
+
+/* rails: rear posts, side members top and bottom, zig-zag breaks across the front and rear rails */
+const runs: [Iso, number, number][] = [[hi, cutHi, CAB.railTop], [lo, 0, cutLo]];
+const post = (D: Iso, px: number, z: number, y0: number, y1: number): string =>
+  D.poly([[px, y0, z], [px + RAIL_W, y0, z], [px + RAIL_W, y1, z], [px, y1, z]], true);
+const rear = join(...runs.flatMap(([D, y0, y1]) => [fl, fr].map((px) => post(D, px, CAB.railSpan, y0, y1))));
+const members = join(
+  ...[fl, fr + RAIL_W].flatMap((px) => [hi.poly([[px, CAB.railTop, 0], [px, CAB.railTop, CAB.railSpan]]), lo.poly([[px, 0, 0], [px, 0, CAB.railSpan]])]),
+);
+const brk = (D: Iso, px: number, z: number, yb: number): string => {
+  const m = px + RAIL_W / 2;
+  return D.poly([[px - 5, yb, z], [m - 3, yb, z], [m, yb + 7, z], [m + 3, yb - 7, z], [m + 6, yb, z], [px + RAIL_W + 5, yb, z]]);
+};
+const breaks = join(...([[hi, cutHi], [lo, cutLo]] as [Iso, number][]).flatMap(([D, yb]) => [fl, fr].flatMap((px) => [brk(D, px, 0, yb), brk(D, px, CAB.railSpan, yb)])));
+const rightRail = join(...runs.map(([D, y0, y1]) => post(D, fr, 0, y0, y1)));
+
+/* parts */
+const items = slots.map((s) => {
+  const D = of(s);
+  const { x: bx0, y: by0, z: bz, w, h, d } = s.body;
+  const b = D.box(s.body);
+  const plate = s.plate ? D.box({ x: s.plate.x, y: s.faceTop - s.plate.h, z: s.plate.z, w: s.plate.w, h: s.plate.h, d: s.plate.t }) : undefined;
+  const shelf = s.dev.role === 'shelf' && !s.on;
+  // shelf brackets: a 3 mm plate at each end of the 2U face
+  const brackets = shelf && s.ears ? [0, 1].map((i) => D.box({ x: i ? 482.6 - s.ears!.w : 0, y: s.y0 + 0.4, z: -3, w: s.ears!.w, h: s.hU - 0.8, d: 3 })) : [];
+  // the tray's perforations, a few lines front to back
+  const perf = shelf ? join(...Array.from({ length: 10 }, (_, i) => D.poly([[bx0 + 22 + i * 44, by0 + h, 24], [bx0 + 22 + i * 44, by0 + h, d - 24]]))) : '';
+  // a coil of patch cable: loops on the shelf, as ellipses in the horizontal plane
+  const coil = s.dev.id === 'patch-cables'
+    ? [0, 1, 2, 3, 4].map((i) => {
+        const [cx, cy] = D.pt(bx0 + w / 2 + (i % 2 ? 4 : -3), by0 + 3 + i * 6, bz + d / 2 + (i % 3) * 3);
+        const r = 50 - (i % 2) * 5;
+        return el(cx, cy, r * k * Math.sqrt(1.5), r * k * Math.sqrt(0.5));
+      }).join('')
+    : '';
+  // the spare: a 2.5″ drive lying in its open box, caddy handle to the front
+  const drive = s.dev.id === 'spare-drive'
+    ? D.poly([[bx0 + 8, by0 + h, 14], [bx0 + w - 8, by0 + h, 14], [bx0 + w - 8, by0 + h, bz + d - 10], [bx0 + 8, by0 + h, bz + d - 10]], true) + D.poly([[bx0 + 8, by0 + h, 34], [bx0 + w - 8, by0 + h, 34]])
+    : '';
+  const rail: Pt | undefined = s.lift ? [0, -s.lift * k] : s.travel ? D.slide(-s.travel) : undefined;
+  return { s, D, b, plate, brackets, perf, coil, drive, rail, tex: D.faceMatrix('front', [0, s.faceTop, s.faceZ]) };
+});
+
+/* airflow where it runs front to back */
+const air = FRONT_TO_BACK.map((id) => {
+  const s = slotOf$(id);
+  const D = of(s);
+  const my = s.body.y + s.body.h / 2;
+  return {
+    cold: D.poly([[300, my, CAB.z0 + 40], [300, my, s.faceZ - 6]]),
+    hot: D.poly([[300, my, s.body.z + s.body.d + 6], [300, my, s.body.z + s.body.d + 170]]),
+  };
+});
+
+/* balloons: the top shelf and its things in a row above it, pointing at their tops; the rest in a
+   column on the left, pointing at their front faces, spread in the paper order of their anchors */
+const topShelf = slots.filter((q) => q.dev.role === 'shelf' && !q.on).reduce((a, q) => (q.y0 > a.y0 ? q : a));
+const inRow = (s: (typeof items)[number]['s']): boolean => s === topShelf || s.on === topShelf.dev.id;
+const row = items
+  .filter((it) => inRow(it.s))
+  .map(({ s, D }) => ({ s, a: s.on ? D.pt(s.body.x + s.body.w * 0.4, s.faceTop, s.body.z + s.body.d * 0.5) : D.pt(s.body.x + 24, s.body.y + s.body.h, s.body.d * 0.55) }))
+  .sort((p, q) => p.a[0] - q.a[0]);
+let last = -Infinity;
+const rowAt = row.map(({ s, a }) => {
+  last = Math.max(a[0], last + 30);
+  return { s, a, at: [last, ty] as Pt };
+});
+const col = items
+  .filter((it) => !inRow(it.s))
+  .map(({ s, D }) => {
+    if (s.dev.id === 'patch-cables') return { s, a: D.pt(s.body.x + 14, s.body.y + 20, s.body.z + s.body.d * 0.35) };
+    if (s.on) return { s, a: D.pt(s.body.x + s.body.w * 0.25, s.faceTop - s.faceH * 0.5, s.faceZ) };
+    if (s.dev.role === 'shelf') return { s, a: D.pt(s.ears!.w * 0.5, s.y0 + s.hU * 0.6, -3) };
+    return { s, a: D.pt(s.faceX + Math.min(60, s.faceW * 0.3), s.faceTop - s.faceH * 0.5, s.faceZ) };
+  })
+  .sort((p, q) => p.a[1] - q.a[1]);
+const step = (by[1] - by[0]) / Math.max(1, col.length - 1);
+---
+
+<g style="--p:1">
+  <path class="ln-thin" d={rear} />
+  <path class="ln-cons" d={members} />
+</g>
+<g transform={hi.faceMatrix('front', [fl, 0, 0])}>
+  <URuler x={0} y={-cutHi} units={BREAK.upper} start={1} down scale={1} k={k} title="U" />
+</g>
+<g transform={lo.faceMatrix('front', [fl, 0, 0])}>
+  <URuler x={0} y={0} units={Math.round(cutLo / U_MM)} start={BREAK.lower} down scale={1} k={k} title="" />
+</g>
+<path class="ln-thin" d={rightRail} />
+<path class="ln-thin" d={breaks} style="--p:4" />
+
+<g>
+  {items.map(({ s, b, plate, brackets, perf, coil, drive, rail, tex }) => (
+    <Part id={s.dev.id} label={s.dev.short} rail={rail} p={2}>
+      {coil ? (
+        <path class="ln-med" d={coil} pathLength="1" />
+      ) : (
+        <>
+          <path class="face-side" d={b.side} />
+          <path class="face-top" d={b.top} />
+          {!plate && <path class="face-front" d={b.front} />}
+          {perf && <path class="ln-thin" d={perf} />}
+          {drive && <path class="ln-med" d={drive} />}
+          <path class="ln-obj" d={b.edges} pathLength="1" />
+        </>
+      )}
+      {brackets.map((bb) => (
+        <>
+          <path class="face-side" d={bb.side} />
+          <path class="face-front" d={bb.front} />
+          <path class="ln-obj" d={bb.edges} />
+        </>
+      ))}
+      {plate && (
+        <>
+          <path class="face-top" d={plate.top} />
+          <path class="face-side" d={plate.side} />
+          <path class="face-front" d={plate.front} />
+        </>
+      )}
+      {!coil && <g class="dwg-tex"><use href={`#${dwg}-pf-${s.dev.id}`} transform={tex} /></g>}
+      {plate && <path class="ln-obj" d={plate.edges} pathLength="1" />}
+    </Part>
+  ))}
+</g>
+
+{air.map((a) => (
+  <>
+    <Particles d={a.cold} kind="cold" n={2} dur={3.2} guide={false} />
+    <Particles d={a.hot} kind="hot" n={2} dur={3.2} />
+  </>
+))}
+
+{rowAt.map(({ s, a, at }) => <Balloon at={at} n={s.n} to={a} end="dot" part={s.dev.id} />)}
+{col.map(({ s, a }, i) => <Balloon at={[bx, by[0] + i * step]} n={s.n} to={a} end="dot" part={s.dev.id} />)}

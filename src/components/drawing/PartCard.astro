@@ -1,0 +1,31 @@
+---
+/*
+  PartCard: the card a clickable part opens: an inert <template data-card={id}> that drawing.ts
+  clones into the page's one card (#dwg-card) when the [data-part={id}] is selected. Put it in a
+  Sheet's `cards` slot or a Figure's `cards` slot (looked up in that drawing first, then in the
+  whole document, so ids must be unique on the page). The part's balloon number is added to the
+  card automatically. 1–4 short lines; what the thing is, not telemetry.
+
+  <PartCard id="bay0" title="Gigastone 256 GB" kind="SATA SSD · bay 0" lines={['rpool, 1 of 3']} />
+
+    id     the part id (same as the Part's / figure node's id)
+    title  the name (Instrument Serif italic; the card's accessible name)
+    kind   small mono line above it ("Gateway · U10")
+    lines  plain sentences, one per bullet
+  Default slot: extra HTML after the lines (a link, say); keep it short.
+*/
+interface Props {
+  id: string;
+  title: string;
+  kind?: string;
+  lines?: string[];
+}
+const { id, title, kind, lines = [] } = Astro.props;
+---
+
+<template data-card={id}>
+  {kind && <p class="dwg-card__k">{kind}</p>}
+  <p class="dwg-card__t">{title}</p>
+  {lines.length > 0 && <ul class="dwg-card__l">{lines.map((l) => <li>{l}</li>)}</ul>}
+  <slot />
+</template>

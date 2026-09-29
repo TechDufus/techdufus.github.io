@@ -1,0 +1,41 @@
+---
+/*
+  Particles: a few dots travelling a path (airflow, packets, power) with CSS offset-path.
+  Hard limit 8 per instance (keep a drawing ≤ 12 in total). They start once the plot finishes,
+  pause while the drawing is off screen or the browser tab is hidden, and are not rendered at
+  all under prefers-reduced-motion (the dashed flow line stays as the static state).
+
+  <Particles d={iso.poly([[240, 44, -40], [240, 44, 760]])} kind="cold" n={4} />
+
+    d       path in the local coordinates of where it is placed (paper units at the top level)
+    kind    'cold' | 'hot' (airflow) | 'net10' | 'net1' (links) | 'power'
+    n       number of dots, 1–8 (default 4)
+    dur     seconds per lap (default 3.6)
+    r       dot radius (default 2.4)
+    guide   draw the dashed flow line under the dots (default true)
+    p       plot order of the guide line (default 4)
+    class   extra classes on the group (e.g. "pool-bulk" to recolour the dots)
+*/
+interface Props {
+  d: string;
+  kind: 'cold' | 'hot' | 'net10' | 'net1' | 'power';
+  n?: number;
+  dur?: number;
+  r?: number;
+  guide?: boolean;
+  p?: number;
+  class?: string;
+}
+const { d, kind, n = 4, dur = 3.6, r = 2.4, guide = true, p = 4, class: cls = '' } = Astro.props;
+// --i phase: omitted for the first dot (the CSS default is 0), else ".5" style, 3 decimals max
+const phase = (i: number): string | undefined => (i ? `--i:${String(Math.round((i / count) * 1000) / 1000).replace(/^0\./, '.')}` : undefined);
+const count = Math.max(1, Math.min(8, Math.round(n)));
+const kindClass = { cold: 'air-cold', hot: 'air-hot', net10: 'net-10g', net1: 'net-1g', power: 'sem-power' }[kind];
+---
+
+<g class:list={['flow', kindClass, cls]} style={`--p:${p};--path:path('${d}');--dur:${dur}s`}>
+  {guide && <path class="ln-flow" d={d} />}
+  {Array.from({ length: count }, (_, i) => (
+    <circle class="dwg-pt" r={r} style={phase(i)} />
+  ))}
+</g>

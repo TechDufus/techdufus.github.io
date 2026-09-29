@@ -1,0 +1,102 @@
+---
+/*
+  BarsFigure: horizontal bars from zero, to scale, with an optional hatched tolerance band (a
+  limit, a target range). Bars grow in with the plot (static under reduced motion).
+  Wide: names in a left column. Narrow: each name sits above its bar.
+
+  <BarsFigure id="fig-sizes" title="Mirror members, to scale" unit="GiB" max={300}
+    band={{ from: 238, to: 262, label: 'installer +10%' }}
+    bars={[
+      { id: 'g1', label: 'Gigastone #1', value: 238 },
+      { id: 'sas', label: 'ST300MP0004', value: 279, tone: 'removed', display: '≈ 279 GiB' },
+    ]} />
+
+    bars    { id, label, value, display?, sub?, tone?, card?, n? }[]
+    unit    appended to values and the axis end ("GiB")
+    max     axis end (default: the largest value or band end, rounded up to a tick)
+    tick    axis step (default: a round step, ≤ 6 of them)
+    band    { from, to, label? }: hatched range across every bar
+    + FigureBase props (id, title, caption, fig, breakout, hint, desc, scale, rev, date, bp)
+*/
+import Figure from './Figure.astro';
+import Balloon from '../Balloon.astro';
+import PartCard from '../PartCard.astro';
+import { BREAKOUT, WIDE, at, barsLayout, f, list, toneOf, type Band, type Bar, type FigureBase } from '../../../lib/drawing/figure';
+import { monoWidth } from '../../../lib/drawing/sheet';
+
+interface Props extends FigureBase {
+  bars: Bar[];
+  unit?: string;
+  max?: number;
+  tick?: number;
+  band?: Band;
+}
+const { bars, unit, max, tick, band, desc, hint, ...base } = Astro.props;
+const L = barsLayout(bars, { max, unit, tick, band }, base.breakout ? BREAKOUT : WIDE);
+const cards = L.bars.filter((b) => b.card);
+const last = L.axis.ticks[L.axis.ticks.length - 1];
+const text =
+  desc ??
+  `Bars to scale from 0 to ${last.v}${unit ? ` ${unit}` : ''}: ${list(L.bars.map((b) => `${b.label} ${b.text}`))}.` +
+    (band ? ` A band marks ${band.label ?? 'the range'}, ${band.from} to ${band.to}.` : '');
+// Tick labels per layout: the last carries the unit (end-anchored); walking back from it, a label
+// that would touch the one after it is dropped (its tick mark stays), so close ticks don't collide.
+const tickLabels = (k: 'w' | 'n') => {
+  const n = L.axis.ticks.length - 1;
+  const out: { x: number; t: string; end: boolean }[] = [];
+  let left = Infinity;
+  for (let i = n; i >= 0; i--) {
+    const tk = L.axis.ticks[i];
+    const end = i === n && !!unit;
+    const t = end ? `${tk.v} ${unit}` : String(tk.v);
+    const w = monoWidth(t, 10.5, 0.06);
+    const x = tk[k] + (end ? 6 : 0);
+    const [l, r] = end ? [x - w, x] : [x - w / 2, x + w / 2];
+    if (r + 6 > left) continue;
+    out.push({ x, t, end });
+    left = l;
+  }
+  return out;
+};
+---
+
+<Figure {...base} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0} defs={band ? ['hatch'] : []}>
+  {(['w', 'n'] as const).map((k) => (
+    <g class={`fg-${k}`}>
+      {L.band && <path class="hatch ln-hid" d={L.band[k]} style="--p:4" />}
+      <path class="ln-thin" d={L.axis[k]} style="--p:5" pathLength="1" />
+      <g style="--p:6">
+        {tickLabels(k).map((t) => (
+          <text class:list={['txt-note', t.end ? 'fg-e' : 'fg-c']} x={f(t.x)} y={f((k === 'w' ? L.axis.wy : L.axis.ny) + 18)}>{t.t}</text>
+        ))}
+      </g>
+    </g>
+  ))}
+  {L.bars.map((b, i) => {
+    const bar = (
+      <Fragment>
+        <path class="tint ln-med fg-grow fg-w" d={b.geo.w.bar} style={`--p:${2 + i * 0.5}`} />
+        <path class="tint ln-med fg-grow fg-n" d={b.geo.n.bar} style={`--p:${2 + i * 0.5}`} />
+        <g {...at(b.at.wp, b.at.np, '', '--p:6')}>
+          <text class="txt-label">{b.label}</text>
+          {b.sub && <text class="txt-note" y="14">{b.sub}</text>}
+        </g>
+        <text {...at(b.geo.w.val, b.geo.n.val, 'txt-dim fg-ko', '--p:6')}>{b.text}</text>
+      </Fragment>
+    );
+    return (
+      <g class={toneOf(b.tone) || undefined}>
+        {b.card ? (
+          <g class="part" data-part={b.id} role="button" tabindex="0" aria-pressed="false" aria-label={b.label}>{bar}</g>
+        ) : bar}
+        {b.card && b.box.n && (
+          <g {...at(b.geo.w.ball, b.geo.n.ball)}><Balloon at={[0, 0]} n={b.box.n} part={b.id} r={9} /></g>
+        )}
+      </g>
+    );
+  })}
+  {L.band?.label && <text {...at(L.band.label.wp, L.band.label.np, 'txt-note fg-e', '--p:6')}>{L.band.label.t}</text>}
+  <Fragment slot="cards">
+    {cards.map((b) => <PartCard id={b.id} title={b.card!.title} kind={b.card!.kind} lines={b.card!.lines} />)}
+  </Fragment>
+</Figure>

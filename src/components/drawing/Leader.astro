@@ -1,0 +1,54 @@
+---
+/*
+  Leader: a callout line from a feature to a note (ISO 128 / ASME style: sloped leg, horizontal
+  shoulder, text at the shoulder end, vertically centred).
+
+  <Leader from={[x, y]} to={[kx, ky]} text={['PSU 2', '750 W']} end="dot" />
+
+    from    the feature (paper units): 'arrow' ends on an outline, 'dot' inside a surface
+    to      the knee where the shoulder starts; the shoulder runs away from `from`
+    text    one line or several; mono caps (.txt-label, first line) and .txt-note (the rest)
+    end     'arrow' (default) | 'dot' | 'none'
+    shoulder  shoulder length (default 14)
+    k, p, class   as Dim (p default 6)
+*/
+import type { Pt } from '../../lib/drawing/projection';
+
+interface Props {
+  from: Pt;
+  to: Pt;
+  text?: string | string[];
+  end?: 'arrow' | 'dot' | 'none';
+  shoulder?: number;
+  k?: number;
+  p?: number;
+  class?: string;
+}
+const { from, to, text, end = 'arrow', shoulder = 14, k = 1, p = 6, class: cls = '' } = Astro.props;
+const lines = text === undefined ? [] : Array.isArray(text) ? text : [text];
+const f = (v: number): string => String(Math.round(v * 10) / 10);
+const side = to[0] >= from[0] ? 1 : -1;
+const sh = shoulder / k;
+const knee2: Pt = [to[0] + side * sh, to[1]];
+const d = `M${f(from[0])} ${f(from[1])}L${f(to[0])} ${f(to[1])}L${f(knee2[0])} ${f(knee2[1])}`;
+
+const L = Math.hypot(to[0] - from[0], to[1] - from[1]) || 1;
+const u: Pt = [(to[0] - from[0]) / L, (to[1] - from[1]) / L];
+const AL = 8.5 / k, AW = 1.45 / k;
+const base: Pt = [from[0] + u[0] * AL, from[1] + u[1] * AL];
+const arrow = `M${f(from[0])} ${f(from[1])}L${f(base[0] - u[1] * AW)} ${f(base[1] + u[0] * AW)}L${f(base[0] + u[1] * AW)} ${f(base[1] - u[0] * AW)}Z`;
+
+const FS = 12 / k, LH = 15 / k;
+const tx = knee2[0] + side * (4 / k);
+const top = to[1] - ((lines.length - 1) * LH) / 2 + FS * 0.36;
+const anchor = side > 0 ? undefined : 'end';
+---
+
+<g class:list={['leader', cls]} style={[p !== 6 && `--p:${p}`, k !== 1 && `--dwg-k:${k}`].filter(Boolean).join(';') || undefined}>
+  <path class="ln-lead" d={d} pathLength="1" />
+  {end === 'arrow' && <path class="dim-arr" d={arrow} />}
+  {end === 'dot' && <circle class="dim-arr" cx={f(from[0])} cy={f(from[1])} r={f(2 / k)} />}
+  {lines.map((line, i) => (
+    <text class={i ? 'txt-note' : 'txt-label'} x={f(tx)} y={f(top + i * LH)} text-anchor={anchor}>{line}</text>
+  ))}
+</g>

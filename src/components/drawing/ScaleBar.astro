@@ -1,0 +1,40 @@
+---
+/*
+  ScaleBar: a graphic scale (alternate filled/open blocks), so the view can be measured even
+  when the screen or the printer resizes it.
+
+  <ScaleBar x={x} y={y} scale={atScale(1, 5)} mm={500} step={100} />
+
+    x, y    left end of the bar, top edge (paper units)
+    scale   paper units per mm of the view it belongs to
+    mm      total length in model mm; step = block length (default mm / 5)
+    label   heading (default "SCALE 1:5" from fmtScale)
+    p       plot order (default 5)
+*/
+import { fmtScale } from '../../lib/drawing/projection';
+
+interface Props {
+  x: number;
+  y: number;
+  scale: number;
+  mm: number;
+  step?: number;
+  label?: string;
+  p?: number;
+}
+const { x, y, scale, mm, step = mm / 5, label = `SCALE ${fmtScale(scale)}`, p = 5 } = Astro.props;
+const f = (v: number): string => String(Math.round(v * 10) / 10);
+const n = Math.round(mm / step);
+const w = step * scale;
+const fill = Array.from({ length: n }, (_, i) => i).filter((i) => i % 2 === 0).map((i) => `M${f(x + i * w)} ${f(y)}h${f(w)}v4h${f(-w)}Z`).join('');
+---
+
+<g class="scalebar" style={`--p:${p}`}>
+  <text class="txt-note" x={f(x)} y={f(y - 7)}>{label}</text>
+  <path class="scalebar__fill" d={fill} />
+  <path class="ln-dim" d={`M${f(x)} ${f(y)}h${f(n * w)}v4h${f(-n * w)}Z`} pathLength="1" />
+  {Array.from({ length: n + 1 }, (_, i) => (
+    <text class="txt-note" x={f(x + i * w)} y={f(y + 17)} text-anchor="middle">{String(Math.round(i * step))}</text>
+  ))}
+  <text class="txt-note" x={f(x + n * w + 16)} y={f(y + 5.5)}>mm</text>
+</g>

@@ -7,7 +7,7 @@ description: My current workstation + homelab setup, in one place.
 This is my single source of truth for what I run every day. I keep it practical and update it when I actually change something.
 
 - Workstation automation lives in [`dotfiles`](https://github.com/techdufus/dotfiles).
-- Homelab infrastructure lives in [`home.io`](https://github.com/techdufus/home.io).
+- The homelab is on the [lab page](/lab/), drawn to spec. Its repo is private for now.
 - Goal: fast workflow, repeatable rebuilds, and less guesswork when things break.
 
 <h2 id="setup-hardware">Hardware</h2>
@@ -93,26 +93,4 @@ On Linux this runs through AwesomeWM automation; on macOS through Hammerspoon. S
 
 <h2 id="setup-homelab">Homelab</h2>
 
-My homelab is built for repeatability, not hand-tuned snowflakes.
-
-### Hardware at a glance
-
-| Component | Specs |
-|-----------|-------|
-| Compute | Dell PowerEdge R720xd (40 threads, 256GB ECC RAM) |
-| Network | UniFi UDM Pro + U7 AP |
-| Storage | UNAS Pro 8 |
-| Edge | Raspberry Pi 4B (8GB) |
-
-### Architecture
-
-- Proxmox VE hosts a 3-node Talos Kubernetes cluster.
-- GitOps via ArgoCD.
-- Traefik ingress + Tailscale Kubernetes Operator for access (replaced HA Cloudflare tunnels in Feb 2026).
-- MetalLB, Pi-hole DNS, local + NFS-backed storage patterns.
-
-### Workloads + rebuild path
-
-I run 25+ services including Immich, dashboards, self-hosted runners, and an observability stack.
-
-Everything is declarative through [`home.io`](https://github.com/techdufus/home.io) using Terraform + Ansible + ArgoCD. If I lose a node, I rebuild from git.
+The homelab lives on [the lab page](/lab/) now, drawn to spec: [the cabinet](/lab/rack/), [the server](/lab/r720xd/) and [the stack](/lab/stack/). It's mid-rebuild, so I keep the drawings current and this page short.

@@ -1,0 +1,88 @@
+---
+/*
+  Sheet 03 · The stack (TD-LAB-03): the Sheet with its two views (SECTION A–A and the cluster
+  PLAN), every card, and the line key. The page (src/pages/lab/stack.astro) wraps it in the page
+  shell and the text equivalent. All of it comes from src/data/lab/ through ./model.ts.
+*/
+import Sheet from '../Sheet.astro';
+import ViewTabs from '../ViewTabs.astro';
+import PartCard from '../PartCard.astro';
+import LineKey from '../LineKey.astro';
+import SectionView from './SectionView.astro';
+import ClusterView from './ClusterView.astro';
+import { API_ID, DWG, allThings, apiCard, kindOf, pool, talos, thing } from './model';
+
+const fast = pool(talos.vm.pool);
+// the plan's parts: same things as the section, under their own ids
+const plan = [
+  { id: 'c-proxmox', t: thing('proxmox') },
+  { id: 'c-talos', t: thing(talos.id) },
+  { id: 'c-cilium', t: thing('cilium') },
+  { id: 'c-proxmox-csi', t: thing('proxmox-csi') },
+];
+---
+
+<Sheet
+  id={DWG}
+  dwgNo="TD-LAB-03"
+  title="The stack"
+  desc="The software on the lab, drawn as a building. Section A–A: the R720xd below grade on three ZFS pools, Proxmox at ground level, the gateway, NAS and control node beside it; a floor of virtual machines with three Talos nodes; the Kubernetes cluster as a tower on those nodes, with Cilium as its floor, the platform as fixtures and an empty apps storey. Plan: the three nodes inside the Proxmox host, one API endpoint, one network, and their disks on the fast pool. Solid is running, dashed is planned."
+  sheet={[3, 3]}
+  rev="A"
+  date="2026-09-29"
+  checked="TD"
+  revisions={[{ rev: 'A', date: '2026-09-29', desc: 'First issue' }]}
+  stamp={{ text: 'IN PROGRESS', tone: 'wip', x: 1086, y: 214 }}
+  interactive
+  hint
+>
+  <Fragment slot="toolbar">
+    <ViewTabs dwg={DWG} active="section" views={[
+      { id: 'section', label: 'Section', icon: 'section' },
+      { id: 'cluster', label: 'Cluster', icon: 'top' },
+    ]} />
+  </Fragment>
+
+  <SectionView active />
+  <ClusterView />
+
+  <Fragment slot="cards">
+    {allThings().map((t) => <PartCard id={t.id} title={t.card.title} kind={kindOf(t)} lines={t.card.lines} />)}
+    {plan.map(({ id, t }) => <PartCard id={id} title={t.card.title} kind={kindOf(t)} lines={t.card.lines} />)}
+    <PartCard id="c-fast" title={fast.card.title} kind={fast.card.kind} lines={fast.card.lines} />
+    <PartCard id={API_ID} title={apiCard.title} kind={apiCard.kind} lines={apiCard.lines} />
+  </Fragment>
+
+  <Fragment slot="legend">
+    <LineKey items={[
+      { line: 'obj', label: 'Running' },
+      { line: 'phantom', label: 'Planned' },
+      { line: 'hatch', label: 'Cut: walls, floors, pools' },
+      { line: 'net-1g', label: 'Network' },
+    ]} />
+  </Fragment>
+</Sheet>
+
+<style is:global>
+  /* Sheet 03 lettering and fills (the kit's line types do the rest) */
+  [data-dwg="lab03"] .stk-fx { font-size: 8.5px; letter-spacing: .05em; text-transform: uppercase; fill: var(--dwg-text-hi); }
+  [data-dwg="lab03"] .stk-v { fill: var(--muted); letter-spacing: .02em; }
+  [data-dwg="lab03"] .stk-idx { font: 500 20px var(--font-mono); letter-spacing: .04em; fill: var(--gold); text-anchor: end; }
+  [data-dwg="lab03"] .stk-notes text { text-anchor: end; }
+  [data-dwg="lab03"] .stk-h { fill: var(--gold-light); font-weight: 500; }
+  [data-dwg="lab03"] .stk-c { text-anchor: middle; }
+  [data-dwg="lab03"] .stk-ko { paint-order: stroke; stroke: var(--dwg-paper); stroke-width: 5px; stroke-linejoin: round; }
+  [data-dwg="lab03"] .stk-arr { fill: var(--dwg-dim); }
+  [data-dwg="lab03"] .stk-earth { fill: var(--dwg-hatch-x); opacity: .5; }
+  [data-dwg="lab03"] .stk-trench { fill: none; stroke: var(--dwg-paper); stroke-width: 7px; vector-effect: non-scaling-stroke; }
+  [data-dwg="lab03"] .stk-pool { fill: color-mix(in srgb, var(--ink) 5%, transparent); }
+  [data-dwg="lab03"] .stk-cutl { font: 500 16px var(--font-mono); fill: var(--gold-light); text-anchor: middle; }
+  /* planned: dashed phantom, muted lettering, no fill (a hit rect keeps it clickable) */
+  [data-dwg="lab03"] .stk-void { fill: none; }
+  [data-dwg="lab03"] .stk-pl { --dwg-obj: var(--gold); }
+  [data-dwg="lab03"] .stk-pl :is(.stk-fx, .txt-label, .txt-note) { fill: var(--muted); }
+  [data-dwg="lab03"] .stk-pl .ln-phantom { opacity: .85; stroke-dasharray: 12 4 3 4; }
+  [data-dwg="lab03"] .part.stk-pl:is(.is-lit, :focus-visible, [aria-pressed="true"]) :is(.stk-fx, .txt-label) { fill: var(--gold-pale); }
+  [data-dwg="lab03"] .dwg-key__sw .ln-phantom { stroke-dasharray: 6 3 2 3; opacity: .85; }
+  [data-dwg="lab03"] .stk-nc { text-transform: none; }
+</style>

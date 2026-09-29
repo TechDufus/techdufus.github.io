@@ -1,0 +1,21 @@
+---
+/*
+  Hint: the one quiet cue line for a drawing with clickable parts: a small numbered balloon and
+  "Hover or tap anything numbered." Hidden without JS (nothing is clickable then). Sheet renders
+  it in the toolbar row with `hint`; Figure beside its caption with `hint`. Use it directly
+  anywhere else (styles come with Sheet's drawing.css).
+
+  <Hint />   <Hint text="Tap a drive." />
+
+    text   the cue (default "Hover or tap anything numbered.")
+*/
+interface Props {
+  text?: string;
+}
+const { text = 'Hover or tap anything numbered.' } = Astro.props;
+---
+
+<p class="dwg-cue">
+  <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" /><text x="8" y="11">1</text></svg>
+  {text}
+</p>

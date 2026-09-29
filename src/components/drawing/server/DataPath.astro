@@ -1,0 +1,63 @@
+---
+/*
+  DataPath: the storage data path as a compact strip, left to right:
+  disks → SAS expander (backplane) → controller → what the OS sees.
+    before  PERC H710P Mini, hardware RAID: the OS saw virtual disks
+    after   HBA330, pass-through: the OS sees every disk, ZFS on top
+  Paper units; put it inside any drawing SVG (Sheet or figure).
+
+  <DataPath x={80} y={600} w={520} state="after" />
+*/
+import Particles from '../Particles.astro';
+import { server } from '../../../data/lab/server';
+
+interface Props {
+  x: number;
+  y: number;
+  w: number;
+  state: 'before' | 'after';
+  /** dots along the path (off for static figures) */
+  flow?: boolean;
+}
+const { x, y, w, state, flow = false } = Astro.props;
+
+type Stage = { t: string; s: string; cls?: string };
+const now = server.drives.length;
+const sas = server.drives.filter((d) => d.interface === 'SAS').length;
+const was = now + 1; // plus the failing SAS drive pulled in the swap
+const text: Record<'before' | 'after', Stage[]> = {
+  before: [
+    { t: `${was} DISKS`, s: `${now - sas} SSD + ${sas + 1} SAS` },
+    { t: 'EXPANDER', s: 'BACKPLANE' },
+    { t: 'H710P MINI', s: 'HARDWARE RAID', cls: 'sem-removed' },
+    { t: 'OS SAW', s: 'VIRTUAL DISKS' },
+  ],
+  after: [
+    { t: `${now} DISKS`, s: `${now - sas} SSD + ${sas} SAS` },
+    { t: 'EXPANDER', s: 'THE SAME ONE' },
+    { t: 'HBA330', s: 'PASS-THROUGH', cls: 'sem-new' },
+    { t: 'ZFS SEES', s: 'EVERY DISK', cls: 'sem-new' },
+  ],
+};
+const GAP = 26, BH = 42, N = 4;
+const bw = (w - GAP * (N - 1)) / N;
+const f = (v: number) => String(Math.round(v * 10) / 10);
+const mid = y + BH / 2;
+const line = `M${f(x + 4)} ${f(mid)}H${f(x + w - 4)}`;
+const bx = (i: number) => x + i * (bw + GAP);
+const arrows = [1, 2, 3].map((i) => `M${f(bx(i) - 3)} ${f(mid)}l-8.5 -2.8v5.6z`).join('');
+const box = (i: number) => `M${f(bx(i))} ${f(y)}h${f(bw)}v${BH}h${f(-bw)}z`;
+---
+
+<g class="dpath">
+  <path class="ln-dim" d={line} />
+  <path class="dim-arr" d={arrows} />
+  {flow && <Particles d={line} kind="net10" n={3} dur={3.2} guide={false} />}
+  {text[state].map((t, i) => (
+    <g class={t.cls}>
+      <path class="face ln-obj" d={box(i)} />
+      <text class="txt-label" x={f(bx(i) + bw / 2)} y={f(y + 18)} text-anchor="middle">{t.t}</text>
+      <text class="txt-note" x={f(bx(i) + bw / 2)} y={f(y + 33)} text-anchor="middle">{t.s}</text>
+    </g>
+  ))}
+</g>

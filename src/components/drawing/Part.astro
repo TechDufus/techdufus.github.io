@@ -1,0 +1,34 @@
+---
+/*
+  Part: a clickable part of a drawing. Keyboard reachable (Tab, then Enter/Space; Esc clears),
+  gold highlight and a name tag (its label) on hover/focus, slides out "on rails" while
+  selected, and opens its card when a <PartCard id={id}> exists (see ./README.md). drawing.ts
+  toggles aria-pressed (one selected part per drawing) and dispatches `dwg:select` (bubbles):
+    detail = { dwg: string, id: string, selected: boolean }
+  Give every Part a numbered Balloon with part={id}: numbered = clickable.
+
+  <Part id="r720xd" label="Dell PowerEdge R720xd" rail={iso.slide(-300)}>…paths…</Part>
+
+    id      part id (the `id` in dwg:select; balloons with part={id} light up with it and
+            select it when clicked; the card template with data-card={id} is its card)
+    label   accessible name and hover name tag (the part's short name, not an instruction)
+    rail    [dx, dy] paper translation while selected (iso.slide(−mm) pulls it out of the front)
+    p       plot order for the part's own lines (inherited by children; optional)
+    class   extra classes (e.g. "sem-removed")
+*/
+import type { Pt } from '../../lib/drawing/projection';
+
+interface Props {
+  id: string;
+  label: string;
+  rail?: Pt;
+  p?: number;
+  class?: string;
+}
+const { id, label, rail, p, class: cls = '' } = Astro.props;
+const style = [rail ? `--rail:translate(${rail[0]}px,${rail[1]}px)` : '', p === undefined ? '' : `--p:${p}`].filter(Boolean).join(';');
+---
+
+<g class:list={['part', cls]} data-part={id} role="button" tabindex="0" aria-pressed="false" aria-label={label} style={style || undefined}>
+  <slot />
+</g>

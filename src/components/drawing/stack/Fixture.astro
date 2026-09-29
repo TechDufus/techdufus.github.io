@@ -1,0 +1,30 @@
+---
+/*
+  One fixture on Sheet 03's cluster floors (a platform component or an app): a room-sized box,
+  its name in small caps, the version, and its balloon as a room tag in the corner. Running is
+  solid; planned is a phantom with a hit rect so it stays clickable.
+*/
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import { f } from '../../../lib/drawing/figure';
+import { fixtureLines, planned, tagOf, type Thing } from './model';
+
+interface Props {
+  t: Thing;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+const { t, x, y, w, h } = Astro.props;
+const lines = fixtureLines(t, Math.floor((w - 12) / 5.45));
+const pl = planned(t);
+---
+
+<Part id={t.id} label={tagOf(t)} p={4} class={pl ? 'stk-pl' : undefined}>
+  <rect class={pl ? 'ln-phantom stk-void' : 'face-front ln-obj'} x={f(x)} y={f(y)} width={f(w)} height={h} pathLength={pl ? undefined : '1'} />
+  {pl && <rect class="dwg-hit" x={f(x)} y={f(y)} width={f(w)} height={h} />}
+  {lines.map((l, i) => <text class="stk-fx" x={f(x + 7)} y={f(y + 15 + i * 11)}>{l.toUpperCase()}</text>)}
+  {t.item?.version && <text class="stk-fx stk-v" x={f(x + 7)} y={f(y + h - 7)}>{t.item.version}</text>}
+</Part>
+<Balloon at={[x + w - 12, y + h - 12]} n={t.n} part={t.id} r={8.5} />

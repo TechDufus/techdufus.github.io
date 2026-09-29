@@ -1,0 +1,135 @@
+---
+/*
+  Sheet 01 · FRONT tab: FRONT ELEVATION of the whole cabinet at 1:10 (door removed) with the
+  U ruler counting down from the top, every box as a Part, the free units hatched and the floor
+  line; DETAIL B, the faces from U1 to U14 at 1:5, with the gateway ports that carry the
+  documented links called out.
+*/
+import View from '../View.astro';
+import Part from '../Part.astro';
+import Dim from '../Dim.astro';
+import Leader from '../Leader.astro';
+import Balloon from '../Balloon.astro';
+import URuler from '../URuler.astro';
+import { atScale, join, ortho, type Pt } from '../../../lib/drawing/projection';
+import { CAB, HOLES, RAIL_W, faceRect, free, links, placeFront as place, slotOf$, slots, yBot, zoneCentre, type Slot } from './model';
+
+interface Props {
+  dwg: string;
+}
+const { dwg } = Astro.props;
+
+/* ---------- FRONT ELEVATION, 1:10 ---------- */
+const FLOOR_Y = 766;
+const E = ortho({ x: 150, y: FLOOR_Y + CAB.y0 * atScale(1, 10), scale: atScale(1, 10), flipY: true });
+const s = E.scale;
+const frame = join(E.rect(CAB.x0, CAB.y0, CAB.w, CAB.h), E.rect(CAB.x0 + 34, -30, CAB.w - 68, CAB.railTop + 50));
+const plinth = E.poly([[CAB.x0, -40], [CAB.x1, -40]]);
+const feet = join(E.rect(CAB.x0 + 20, CAB.y0, 60, 30), E.rect(CAB.x1 - 80, CAB.y0, 60, 30));
+const [fx0, fy] = E.pt(CAB.x0 - 200, CAB.y0);
+const [fx1] = E.pt(CAB.x1 + 90, CAB.y0);
+const ground = Array.from({ length: Math.floor((fx1 - fx0) / 9) }, (_, i) => `M${fx0 + i * 9 + 7} ${fy}l-7 7`).join('');
+// balloons: one column right of the cabinet, each near its target's height (the rightmost target
+// of a row first, so leaders don't cross)
+const BX = 358;
+let lastY = -Infinity;
+const eBalloons = slots
+  .map((sl) => ({ sl, to: E.pt(sl.on ? sl.faceX + sl.faceW / 2 : sl.dev.role === 'shelf' ? 470 : sl.faceX + sl.faceW * 0.86, sl.faceTop - sl.faceH / 2) }))
+  .sort((a, b) => Math.round(a.to[1] / 12) - Math.round(b.to[1] / 12) || b.to[0] - a.to[0])
+  .map((b) => ({ ...b, y: (lastY = Math.max(b.to[1] - 22, lastY + 29)) }));
+
+/* ---------- DETAIL B, faces U1–14 at 1:5 ---------- */
+const TOP_Y = 250;
+const Bv = ortho({ x: 398, y: TOP_Y + CAB.railTop * atScale(1, 5), scale: atScale(1, 5), flipY: true });
+const lo = yBot(14);
+const upper = slots.filter((sl) => sl.y0 >= lo);
+const bFree = free.filter((r) => r.y0 >= lo);
+const udm = slotOf$('udm-pro'), pi = slotOf$('rpi-4b'), inj = slotOf$('poe-injector');
+const at = (sl: Slot, zone: string): Pt => {
+  const [u, v] = zoneCentre(sl, 'front', zone);
+  return Bv.pt(u, sl.faceTop - v);
+};
+/** The i-th of four jacks in a UDM Pro LAN row zone. */
+const lanPort = (zone: string, i: number): Pt => {
+  const z = udm.dev.panels!.front!.zones.find((q) => q.id === zone)!;
+  return Bv.pt(udm.faceX + (z.x0 + ((z.x1 - z.x0) * (i + 0.5)) / 4) * udm.faceW, udm.faceTop - ((z.y0 + z.y1) / 2) * udm.faceH);
+};
+const KX = 704;
+const call = [
+  { from: lanPort('lan-top', 1), y: 438, text: ['PORT 3', 'TO THE SERVER'] },
+  { from: at(udm, 'wan-9'), y: 474, text: ['PORT 9 · WAN', 'TO THE MODEM'] },
+  { from: at(udm, 'sfp-11'), y: 510, text: ['SFP+ PORT 11', `${links.find((l) => l.id === 'gw-nas')?.speed} · NAS`], cls: 'net-10g' },
+  { from: lanPort('lan-bottom', 0), y: 546, text: ['PORT 2', 'TO THE PI'] },
+];
+---
+
+<View dwg={dwg} name="front" x={39} y={39} w={798} h={813}>
+  <View x={46} y={110} w={400} h={740} title="FRONT ELEVATION" scale={s} note="DOOR REMOVED" labelAt={[222, 800]}>
+    <g style="--p:1">
+      <path class="face" d={E.rect(CAB.x0, CAB.y0, CAB.w, CAB.h)} />
+      <path class="ln-obj" d={frame} pathLength="1" />
+      <path class="ln-med" d={join(plinth, feet)} />
+    </g>
+    <g class="rk-free" style="--p:4">
+      <path class="hatch" d={join(...free.map((r) => E.rect(0, r.y0, 482.6, r.y1 - r.y0)))} />
+      <path class="ln-phantom" d={join(...free.map((r) => E.rect(0, r.y0, 482.6, r.y1 - r.y0)))} />
+    </g>
+    {free.map((r) => {
+      const [cx, cy] = E.pt(241.3, (r.y0 + r.y1) / 2);
+      return (
+        <>
+          <path class="face" d={`M${cx - 40} ${cy - 10}h80v20h-80Z`} />
+          <text class="txt-label" x={cx} y={cy + 4.5} text-anchor="middle">{r.n}U FREE</text>
+        </>
+      );
+    })}
+    <URuler x={E.pt(HOLES[0] - RAIL_W / 2, 0)[0]} y={E.pt(0, 0)[1]} units={CAB.units} start={1} down scale={s} title="U" />
+    <URuler x={E.pt(HOLES[1] - RAIL_W / 2, 0)[0]} y={E.pt(0, 0)[1]} units={CAB.units} scale={s} side="right" every={999} title="" />
+    <path class="ln-ctr" d={E.poly([[241.3, CAB.y0 - 20], [241.3, CAB.y1 + 30]])} style="--p:4" />
+
+    <g>
+      {slots.map((sl) => (
+        <Part id={sl.dev.id} label={sl.dev.short} p={2}>
+          <path class="face-front" d={faceRect(E, sl)} />
+          <g class="dwg-tex"><use href={`#${dwg}-pf-${sl.dev.id}`} transform={place(E, sl)} /></g>
+        </Part>
+      ))}
+    </g>
+
+    <g style="--p:1">
+      <path class="ln-obj" d={`M${fx0} ${fy}H${fx1}`} pathLength="1" />
+      <path class="ln-thin" d={ground} />
+      <text class="txt-note" x={fx0 + 2} y={fy + 24}>FLOOR</text>
+    </g>
+
+    <Dim a={E.pt(CAB.x0, CAB.y0)} b={E.pt(CAB.x0, CAB.y1)} offset={-54} mm={CAB.h} />
+    <Dim a={E.pt(CAB.x0, CAB.y0)} b={E.pt(CAB.x0, 0)} offset={-22} mm={-CAB.y0} ext="b" />
+    <Dim a={E.pt(CAB.x0, CAB.y1)} b={E.pt(CAB.x1, CAB.y1)} offset={-58} mm={CAB.w} />
+    <Dim a={E.pt(0, CAB.y1)} b={E.pt(482.6, CAB.y1)} offset={-28} mm={482.6} sub="[19.00]" ext="none" />
+    <Dim a={E.pt(CAB.x1, 0)} b={E.pt(CAB.x1, CAB.railTop)} offset={20} mm={CAB.railTop} sub={`${CAB.units}U`} />
+
+    {eBalloons.map(({ sl, to, y }) => <Balloon at={[BX, y]} n={sl.n} to={to} end="dot" part={sl.dev.id} />)}
+  </View>
+
+  <!-- ======== DETAIL B ======== -->
+  <View x={390} y={200} w={447} h={520} title="DETAIL B · U1–14" scale={Bv.scale} note="WHERE THE CABLES START" labelAt={[540, 700]}>
+    <g class="rk-free" style="--p:4">
+      <path class="hatch" d={join(...bFree.map((r) => Bv.rect(0, r.y0, 482.6, r.y1 - r.y0)))} />
+    </g>
+    <g>
+      {upper.map((sl) => (
+        <g>
+          <path class="face-front" d={faceRect(Bv, sl)} />
+          <g class="dwg-tex"><use href={`#${dwg}-pf-${sl.dev.id}`} transform={place(Bv, sl)} /></g>
+        </g>
+      ))}
+    </g>
+    <path class="ln-ctr" d={Bv.poly([[241.3, lo - 12], [241.3, CAB.railTop + 12]])} style="--p:4" />
+    <Dim a={Bv.pt(0, lo)} b={Bv.pt(482.6, lo)} offset={30} mm={482.6} sub="[19.00]" />
+    <g class="net-1g">
+      {call.map((c) => <Leader from={c.from} to={[KX, c.y]} end="dot" text={c.text} class={c.cls} />)}
+    </g>
+    <Leader from={at(pi, 'eth')} to={[536, 222]} end="dot" text={['PI · ETHERNET']} />
+    <Leader from={at(inj, 'poe')} to={[KX, 226]} end="dot" text={['POE OUT', 'TO THE U7 PRO']} class="sem-power" />
+  </View>
+</View>

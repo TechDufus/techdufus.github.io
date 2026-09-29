@@ -1,0 +1,141 @@
+---
+/*
+  PlanView: the R720xd from above with the cover off, in one of two states:
+    now     as built since 2026-09-28: the HBA330 in riser 1, cables 2 and 3 to backplane SAS A
+            and SAS B, the SAS drive in rear bay 24, rear bay 25 empty
+    before  the PERC H710P Mini on the board, cable 1 from J_SASX8 to SAS A and SAS B, and the
+            failing drive still in rear bay 25
+  Cable 4 (backplane SAS A1 → the rear flex bays) and cable 5 are in both. Needs
+  <ServerDefs id={dwg} /> (plan) in the same SVG, and ServerCards on the page for the parts.
+
+  <PlanView dwg="lab02" x={64} y={612} s={0.75} />                        top view, rear up
+  <PlanView dwg="lab02" x={70} y={140} s={0.75} rot state="before" tone labels="swap" />
+
+    x, y      paper point of model (x 0, z 0): the left ear's outer edge at the rack flange
+    s         paper units per mm
+    rot       turn it 90° (front at the left, the server's left side at the top)
+    state     'now' (default) | 'before'
+    tone      colour the change: what the swap added green, what it took out red
+    labels    'top' (every major part named) | 'swap' (the storage path only) | 'none'
+    click     ids made clickable (default all of them: hba330, perc, cable-1 … cable-4,
+              st300mp0004, st9300653ss)
+  Balloons are the caller's: planAt(x, y, s, rot) from ./geom maps model points onto the paper.
+*/
+import Bit from './Bit.astro';
+import { D, EAR, W, n, part, planAt, rearBay, rearDrive, routes, type Box2 } from './geom';
+import { server } from '../../../data/lab/server';
+
+interface Props {
+  dwg: string;
+  x: number;
+  y: number;
+  s: number;
+  rot?: boolean;
+  state?: 'now' | 'before';
+  tone?: boolean;
+  labels?: 'top' | 'swap' | 'none';
+  click?: string[];
+}
+const { dwg, x, y, s, rot = false, state = 'now', tone = false, labels = 'top', click } = Astro.props;
+const on = (id: string) => !click || click.includes(id);
+const pa = planAt(x, y, s, rot);
+const { pt, box } = pa;
+const rt = routes();
+const cable = (k: 1 | 2 | 3 | 4 | 5) => rt[k].map((p) => pa.line(p)).join('');
+const now = state === 'now';
+const cardOf = (k: number) => server.cables.find((c) => c.n === k)!;
+const newCls = tone ? 'sem-new' : undefined, oldCls = tone ? 'sem-removed' : undefined;
+
+const hba = part('hba330'), ports = [part('hba-port-1'), part('hba-port-2')], perc = part('perc');
+const b24 = rearBay(24), b25 = rearBay(25);
+
+/** A label: text at model (x, z); `turn` = run it along the depth (rotated −90° on paper). */
+type L = { t: string; x: number; z: number; sm?: boolean; turn?: boolean; cls?: string };
+const lbl = (l: L) => {
+  const [px, py] = pt(l.x, l.z);
+  const vert = l.turn;
+  return { ...l, px: n(px + (vert ? 3.5 : 0)), py: n(py + (vert ? 0 : 3.5)), tr: vert ? `rotate(-90 ${n(px + 3.5)} ${n(py)})` : undefined };
+};
+const sas = ['sas-a1', 'sas-a', 'sas-b'].map(part);
+const mid = (b: Box2) => ({ x: b.x + b.w / 2, z: b.z + b.d / 2 });
+const list: L[] = [];
+if (labels === 'top') {
+  list.push(
+    { t: 'CPU 1', x: 152, z: 330 },
+    { t: 'CPU 2', x: 322, z: 330 },
+    { t: 'FAN WALL · 6 FANS', x: 228.5, z: 153 },
+    { t: 'SHROUD', x: 236, z: 385 },
+    { t: '24 DIMM SLOTS', x: 236, z: 188, sm: true },
+    { t: 'RISER 2', x: 264, z: 640 },
+    { t: 'RISER 3', x: part('riser-3').x + 9, z: 590, turn: true },
+    { t: 'BACKPLANE · EXPANDER', x: 364, z: 75, sm: true },
+  );
+}
+if (labels !== 'none') {
+  const sy = labels === 'top' ? 75 : 76;
+  list.push(
+    { t: 'A1', x: sas[0].x + sas[0].w / 2, z: sy, sm: true },
+    { t: 'A', x: sas[1].x + sas[1].w / 2, z: sy, sm: true },
+    { t: 'B', x: sas[2].x + sas[2].w / 2, z: sy, sm: true },
+    { t: now ? 'HBA330' : 'RISER 1', ...mid(hba), cls: now ? newCls : undefined },
+    { t: '24', ...mid(b24), sm: true },
+    { t: '25', ...mid(b25), sm: true, cls: now ? undefined : oldCls },
+  );
+  if (!now) list.push({ t: rot ? 'PERC' : 'PERC H710P MINI', ...mid(perc), cls: oldCls });
+  if (labels === 'top') list.push({ t: 'RISER 1', x: mid(part('riser-1')).x, z: part('riser-1').z + part('riser-1').d - 10, sm: true });
+}
+const texts = list.map(lbl);
+---
+
+<g class="plan">
+  <path class="face-top" d={box({ x: EAR, z: 0, w: W, d: D })} />
+  <use href={`#${dwg}-plan`} transform={pa.m} />
+
+  {now ? (
+    <Bit on={on('hba330')} id="hba330" label={server.controller.now.card.title} class={newCls}>
+      <path class="tint" d={box(hba)} />
+      <path class="ln-obj" d={box(hba) + ports.map(box).join('')} pathLength="1" />
+    </Bit>
+  ) : (
+    <Bit on={on('perc')} id="perc" label={server.controller.before.card.title} class={oldCls}>
+      <path class="tint" d={box(perc)} />
+      <path class="ln-obj" d={box(perc)} pathLength="1" />
+    </Bit>
+  )}
+
+  <Bit on={on(rearDrive.id)} id={rearDrive.id} label={rearDrive.card.title} class="pool-rpool">
+    <path class="sv-drv" d={box(b24)} />
+  </Bit>
+  {now ? (
+    <path class="sv-empty" d={box(b25)} />
+  ) : (
+    <Bit on={on(server.removed.id)} id={server.removed.id} label={server.removed.card.title} class={oldCls}>
+      <path class="sv-drv" d={box(b25)} />
+    </Bit>
+  )}
+
+  <g class="cbls">
+    <path class="cbl" d={cable(5)} />
+    <Bit on={on('cable-4')} id="cable-4" label={cardOf(4).card.title}>
+      <path class="sv-hit" d={cable(4)} />
+      <path class="cbl" d={cable(4)} />
+    </Bit>
+    {now ? (
+      [2, 3].map((k) => (
+        <Bit on={on(`cable-${k}`)} id={`cable-${k}`} label={`Cable ${k}`} class={newCls}>
+          <path class="sv-hit" d={cable(k as 2 | 3)} />
+          <path class="cbl" d={cable(k as 2 | 3)} />
+        </Bit>
+      ))
+    ) : (
+      <Bit on={on('cable-1')} id="cable-1" label={cardOf(1).card.title} class={oldCls}>
+        <path class="sv-hit" d={cable(1)} />
+        <path class="cbl" d={cable(1)} />
+      </Bit>
+    )}
+  </g>
+
+  {texts.map((l) => (
+    <text class:list={[l.sm ? 'sv-s' : 'sv-t', 'sv-ko', l.cls]} x={l.px} y={l.py} transform={l.tr}>{l.t}</text>
+  ))}
+</g>

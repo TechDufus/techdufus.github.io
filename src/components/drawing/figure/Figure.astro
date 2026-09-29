@@ -1,0 +1,107 @@
+---
+/*
+  Figure: the kit's wrapper for small drawings in posts and pages (the figure tier; see
+  ../README.md). A frameless Sheet with two layouts, a caption in voice, and an optional FIG
+  title strip. The primitives (FlowFigure, StackFigure, CompareFigure, LanesFigure, BarsFigure)
+  build on it; use it directly for a hand-drawn figure in the same frame.
+
+  <Figure id="fig-x" title="…" desc="…" caption="…" size={[680, 240]} narrow={[360, 420]} fig={2}>
+    <g class="fg-w">…wide-only lines…</g>
+    <g class="fg-n">…narrow-only lines…</g>
+    <g {...at([40, 30], [20, 60])}>…a block drawn once, moved between layouts…</g>
+    <Fragment slot="cards"><PartCard … /></Fragment>
+  </Figure>
+
+    size      [w, h] of the wide layout, paper units (= px at the 680px prose column)
+    narrow    [w, h] of the phone layout. Below `bp` px of figure width (default 0.8 × w) the
+              script swaps the viewBox and adds .is-narrow: .fg-w hides, .fg-n shows, .fg-m
+              blocks move to their --n (at() in lib/drawing/figure.ts). Without JS the wide
+              layout pans sideways instead.
+    breakout  wider than the text column: into the right margin on the three-column post layout,
+              centred on narrower screens (never past the page gutter)
+    caption   one short line, in voice (sans, muted, under the drawing)
+    fig       FIG title strip: a number (→ "FIG 3") or a full number ("TD-LAB-02 · FIG 3");
+              omitted = no strip, and the title is only the SVG's accessible name
+    hint      the "Hover or tap anything numbered." cue beside the caption (true or a string)
+    interactive  true when the figure has clickable parts (the SVG becomes role="group")
+    scale rev date   strip fields (default "NTS", "A", none)
+    defs      extra shared defs: 'hatch' | 'hatch-x' | 'rough' (a Stamp needs 'rough')
+    grid      drafting grid behind the drawing (default true)
+  Slots: default (SVG content, paper units), cards (PartCard templates).
+*/
+import Sheet from '../Sheet.astro';
+import Hint from '../Hint.astro';
+import '../../../styles/figure.css';
+import type { P } from '../../../lib/drawing/figure';
+
+interface Props {
+  id: string;
+  title: string;
+  desc: string;
+  caption?: string;
+  size: P;
+  narrow?: P;
+  bp?: number;
+  breakout?: boolean;
+  fig?: number | string;
+  hint?: boolean | string;
+  interactive?: boolean;
+  scale?: string;
+  rev?: string;
+  date?: string;
+  defs?: ('hatch' | 'hatch-x' | 'rough')[];
+  grid?: boolean;
+}
+const {
+  id, title, desc, caption, size, narrow, bp = Math.round(size[0] * 0.8), breakout = false, fig, hint = false,
+  interactive = false, scale = 'NTS', rev = 'A', date = '—', defs = [], grid = true,
+} = Astro.props;
+const [w, h] = size;
+const dwgNo = fig === undefined ? title : typeof fig === 'number' ? `FIG ${fig}` : fig;
+---
+
+<figure
+  class:list={['fg', breakout && 'fg--b', fig === undefined && 'fg--bare']}
+  data-vb={narrow ? `0 0 ${w} ${h}|0 0 ${narrow[0]} ${narrow[1]}|${bp}` : undefined}
+>
+  <Sheet
+    id={id}
+    size={{ w, h }}
+    dwgNo={dwgNo}
+    title={title}
+    desc={desc}
+    scale={scale}
+    rev={rev}
+    date={date}
+    grid={false}
+    defs={grid ? ['grid', ...defs] : defs}
+    titleBlock={fig !== undefined}
+    interactive={interactive}
+  >
+    {grid && <rect class="dwg-gridbg" width="100%" height="100%" />}
+    <slot />
+    <slot name="cards" slot="cards" />
+  </Sheet>
+  {(caption || hint) && (
+    <figcaption class="fg__foot">
+      {caption && <span class="fg__cap">{caption}</span>}
+      {hint && <Hint text={typeof hint === 'string' ? hint : undefined} />}
+    </figcaption>
+  )}
+</figure>
+
+<script>
+  /* Narrow layouts: swap the viewBox and flag the figure below its breakpoint. */
+  const ro = new ResizeObserver((entries) => {
+    for (const e of entries) {
+      const fig = e.target as HTMLElement;
+      const [wide, narrow, bp] = (fig.dataset.vb ?? '').split('|');
+      const on = e.contentRect.width < Number(bp);
+      if (fig.classList.contains('is-narrow') === on && fig.dataset.vbSet) continue;
+      fig.dataset.vbSet = '';
+      fig.classList.toggle('is-narrow', on);
+      fig.querySelector('.dwg__svg')?.setAttribute('viewBox', on ? narrow : wide);
+    }
+  });
+  document.querySelectorAll('.fg[data-vb]').forEach((fig) => ro.observe(fig));
+</script>

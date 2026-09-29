@@ -1,0 +1,177 @@
+---
+/*
+  /lab/r720xd/: Sheet 02 · The server (TD-LAB-02), as built since the PERC H710P Mini → HBA330
+  swap on 2026-09-28. Every number comes from src/data/lab/server.ts; the drawings live in
+  src/components/drawing/server/; the EXPLODED and BEFORE / AFTER panels load from /lab/r720xd/views/
+  (server.ts). Below the sheet: the machine at a glance and the three pools
+  (the text equivalent of the drives and pools on the drawing).
+*/
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Sheet from '../../components/drawing/Sheet.astro';
+import ViewTabs from '../../components/drawing/ViewTabs.astro';
+import LineKey from '../../components/drawing/LineKey.astro';
+import ServerDefs from '../../components/drawing/server/ServerDefs.astro';
+import ServerCards from '../../components/drawing/server/ServerCards.astro';
+import OrthoViews from '../../components/drawing/server/OrthoViews.astro';
+import View from '../../components/drawing/View.astro';
+import { derived, server } from '../../data/lab/server';
+
+const DWG = 'lab02';
+const cpu = server.cpus[0];
+const glance = [
+  { k: 'CPUs', v: `2 × ${cpu.model.replace('Intel Xeon ', '').replace('-', '\u2011')}` },
+  { k: 'Threads', v: String(server.threads) },
+  { k: 'Memory', v: `${server.memory.gb} GB` },
+  { k: 'Storage', v: `${derived.drives} drives in ${server.pools.length} ZFS pools` },
+  { k: 'Controller', v: server.controller.now.name.replace('Dell ', '').replace(' Adapter', '') },
+];
+const layout = (p: (typeof server.pools)[number]) => (p.layout === 'mirror' ? `${p.copies}-way mirror` : 'Single disk');
+const driveAt = (bay: number) => server.drives.find((d) => d.bay === bay)!;
+---
+
+<BaseLayout title="The server · Sheet 02" description="Sheet 02 of my homelab drawings: the Dell PowerEdge R720xd as built, after swapping its PERC H710P Mini for an HBA330. Six drives, three ZFS pools, and what changed.">
+  <div class="pg-server">
+    <section class="wrap srv-hero" aria-labelledby="srv-title">
+      <p class="eyebrow srv-hero__eyebrow">Lab · Sheet 02</p>
+      <h1 class="h1" id="srv-title">The <em>server</em>.</h1>
+      <p class="lede srv-hero__lede">A Dell PowerEdge R720xd that thinks it’s an R720. The RAID card is gone, and ZFS sees every disk.</p>
+      <p class="srv-hero__links">
+        <a class="link link--quiet" href="/lab/"><span aria-hidden="true">←</span> The lab</a>
+        <a class="link link--quiet" href="/lab/rack/">Sheet 01 · The cabinet</a>
+        <a class="link link--quiet" href="/lab/stack/">Sheet 03 · The stack <span class="arrow" aria-hidden="true">→</span></a>
+      </p>
+    </section>
+
+    <div class="srv-wide" data-srv-views="/lab/r720xd/views/">
+      <Sheet
+        id={DWG}
+        dwgNo="TD-LAB-02"
+        title="The server"
+        desc="Dell PowerEdge R720xd as built. Orthographic tab: top view with the cover off, front, rear, detail B of front bays 0 to 7 with the five drives, detail C of the rear flex bays, and the three ZFS pools. Exploded tab: the server taken apart, with the drives pulled out. Before / After tab: the storage controller, cables and rear drives before and after the 2026-09-28 swap, with the data path under each."
+        sheet={[2, 3]}
+        rev="B"
+        date="2026-09-29"
+        checked="TD"
+        revisions={[
+          { rev: 'A', date: '2026-09-28', desc: 'First issue' },
+          { rev: 'B', date: '2026-09-29', desc: 'As built' },
+        ]}
+        interactive
+        hint
+      >
+        <Fragment slot="toolbar">
+          <ViewTabs dwg={DWG} active="ortho" views={[
+            { id: 'ortho', label: 'Orthographic', icon: 'front' },
+            { id: 'exploded', label: 'Exploded', icon: 'iso' },
+            { id: 'history', label: 'Before / After', icon: 'top' },
+          ]} />
+        </Fragment>
+
+        <ServerDefs id={DWG} />
+        <OrthoViews dwg={DWG} active />
+        {/* filled from /lab/r720xd/views/ (ExplodedView, BeforeAfter) by server.ts */}
+        <View dwg={DWG} name="exploded" x={39} y={39} w={1182} h={813} />
+        <View dwg={DWG} name="history" x={39} y={39} w={1182} h={813} />
+
+        <Fragment slot="cards"><ServerCards /></Fragment>
+        <Fragment slot="legend">
+          <LineKey items={[
+            { line: 'obj', label: 'Object' },
+            { line: 'pool-rpool', label: 'rpool' },
+            { line: 'pool-fast', label: 'fast' },
+            { line: 'pool-bulk', label: 'bulk' },
+            { line: 'sem-new', label: 'Went in' },
+            { line: 'sem-removed', label: 'Came out' },
+            { line: 'air-cold', label: 'Cold air' },
+            { line: 'air-hot', label: 'Hot air' },
+          ]} />
+        </Fragment>
+      </Sheet>
+    </div>
+
+    <section class="wrap srv-sec" aria-labelledby="srv-glance">
+      <h2 class="srv-h" id="srv-glance">At a glance</h2>
+      <dl class="srv-glance">
+        {glance.map((g) => <div><dt>{g.k}</dt><dd>{g.v}</dd></div>)}
+      </dl>
+      <p class="srv-quip">Six drives, three pools, twenty empty bays. Plenty of room for bad ideas.</p>
+
+      <h2 class="srv-h srv-h--pools" id="srv-pools">The pools</h2>
+      <ul class="srv-pools" aria-labelledby="srv-pools">
+        {server.pools.map((p) => (
+          <li data-pool={p.id}>
+            <p class="srv-pool__n">{p.id}</p>
+            <p class="srv-pool__m">{layout(p)} · about {p.usableGiB} GiB</p>
+            <p class="srv-pool__h">{p.holds}</p>
+            <ul class="srv-pool__d">
+              {p.bays.map((b) => <li><span>Bay {b}</span> {driveAt(b).card.title}</li>)}
+            </ul>
+          </li>
+        ))}
+      </ul>
+
+      <nav class="srv-next" aria-label="More drawings">
+        <a class="link link--quiet" href="/lab/rack/"><span aria-hidden="true">←</span> Sheet 01 · The cabinet</a>
+        <a class="link link--quiet" href="/blog/from-hardware-raid-to-zfs/">The post: From hardware RAID to ZFS</a>
+        <a class="link link--quiet" href="/lab/stack/">Sheet 03 · The stack <span class="arrow" aria-hidden="true">→</span></a>
+      </nav>
+    </section>
+  </div>
+</BaseLayout>
+
+<style is:global>
+  .pg-server .srv-hero { padding-block: clamp(40px, 6vw, 80px) clamp(28px, 4vw, 44px); }
+  .pg-server .srv-hero__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .pg-server .srv-hero__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
+  .pg-server .srv-hero__lede { margin-top: 20px; max-width: 46ch; }
+  .pg-server .srv-hero__links { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 24px; font-size: var(--fs-sm); }
+  .pg-server .srv-wide { max-width: 1400px; margin-inline: auto; padding-inline: var(--gutter); }
+
+  /* exploded view: faint shroud; the static drawing is the exploded state */
+  .pg-server .xp-see :is(.face-top, .face-front, .face-side) { fill-opacity: .35; }
+  .pg-server .xp-wire .ln-med { stroke: var(--dwg-rule); }
+  /* The drawing's box (outside its pan scroller) drives it: assembled when the page opens, apart
+     as the drawing rises, balloons in before it's fully on screen, so the sheet at rest is always
+     the whole picture. */
+  @supports (animation-timeline: view()) {
+    @media screen and (prefers-reduced-motion: no-preference) {
+      .pg-server .dwg__view { view-timeline: --srv-xp block; }
+      .pg-server .xp { animation: srv-xp linear both; animation-timeline: --srv-xp; animation-range: cover 25% cover 42%; }
+      .pg-server .xp-lbl { animation: srv-fade linear both; animation-timeline: --srv-xp; animation-range: cover 40% cover 46%; }
+    }
+  }
+  @keyframes srv-xp { from { transform: translate(var(--ax, 0px), var(--ay, 0px)); } }
+  @keyframes srv-fade { from { opacity: 0; } }
+
+  /* ---------- below the sheet ---------- */
+  .pg-server .srv-sec { padding-block: clamp(48px, 6vw, 80px) clamp(64px, 8vw, 112px); }
+  .pg-server .srv-h { margin: 0 0 18px; font: 500 .6875rem/1.2 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--gold-light); }
+  .pg-server .srv-h--pools { margin-top: clamp(40px, 5vw, 64px); }
+  .pg-server .srv-glance { display: flex; flex-wrap: wrap; margin: 0; border-block: 1px solid var(--line-2); }
+  .pg-server .srv-glance > div { flex: 1 1 160px; padding: 18px 24px 18px 0; }
+  .pg-server .srv-glance > div + div { padding-left: 24px; border-left: 1px solid var(--line); }
+  .pg-server .srv-glance dt { font: 500 .6875rem/1.2 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+  .pg-server .srv-glance dd { margin: 8px 0 0; font: 400 1.125rem/1.3 var(--font-mono); color: var(--ink); letter-spacing: -.01em; }
+  .pg-server .srv-quip { margin: 20px 0 0; font: italic 1.25rem/1.35 var(--font-display); color: var(--ink-2); }
+  .pg-server [data-pool] { --pc: var(--line-3); }
+  .pg-server [data-pool="rpool"] { --pc: var(--gold); }
+  .pg-server [data-pool="fast"] { --pc: var(--ink); }
+  .pg-server [data-pool="bulk"] { --pc: #8fa3c7; }
+  .pg-server .srv-pools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none; background: var(--line); border: 1px solid var(--line); }
+  .pg-server .srv-pools > li { padding: 20px 22px 18px; background: var(--bg); box-shadow: inset 0 2px 0 var(--pc); }
+  .pg-server .srv-pools p { margin: 0; }
+  .pg-server .srv-pool__n { font: 500 1rem/1 var(--font-mono); color: var(--pc); letter-spacing: .02em; }
+  .pg-server .srv-pool__m { margin-top: 10px !important; font: .75rem/1.5 var(--font-mono); letter-spacing: .04em; color: var(--muted); }
+  .pg-server .srv-pool__h { margin-top: 12px !important; font: italic 1.2rem/1.25 var(--font-display); color: var(--ink); }
+  .pg-server .srv-pool__d { display: grid; gap: 4px; margin: 14px 0 0; padding: 12px 0 0; list-style: none; border-top: 1px solid var(--line); font-size: var(--fs-sm); color: var(--ink-2); }
+  .pg-server .srv-pool__d span { display: inline-block; min-width: 4.5em; font: .75rem var(--font-mono); color: var(--faint); }
+  .pg-server .srv-next { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 32px; margin: 48px 0 0; padding-top: 24px; border-top: 1px solid var(--line-2); }
+  @media (max-width: 760px) {
+    .pg-server .srv-pools { grid-template-columns: minmax(0, 1fr); }
+    .pg-server .srv-glance > div { flex-basis: 45%; padding-left: 0 !important; border-left: 0 !important; }
+  }
+</style>
+
+<script>
+  import '../../components/drawing/server/server';
+</script>

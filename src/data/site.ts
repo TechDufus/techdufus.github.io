@@ -606,21 +606,28 @@ type LabSpecRow = { k: string; v: string; href?: string; note?: string };
 
 type LabPhoto = { src: string; alt: string; width: number; height: number; caption?: string };
 
+/** A drawing card on /lab/: `thumb` picks the SheetThumb. */
+type LabDrawing = { no: string; title: string; href: string; note: string; thumb: 'cabinet' | 'server' | 'stack'; state: 'As built' | 'In progress' };
+
 /**
- * The /lab/ page. Every fact comes from src/content/docs/setup.md, plus the
- * Tailscale Operator (Feb 2026) and Talos (Jun 2025) posts for the changelog.
+ * The /lab/ page copy. The hardware and the stack themselves live in src/data/lab/ (the drawings'
+ * data); this is the words around them, the changelog and the desk.
  */
 export const labSpec: {
-  lastRevised: 'Feb 2026';
-  lastRevisedIso: string;
+  lastRevised: 'Sep 2026';
+  lastRevisedIso: '2026-09';
   status: 'Rebuild in progress';
   headline: string;
   lede: string;
   setupHref: string;
-  hardware: { role: string; name: string; spec?: string; href?: string }[];
-  services: { name: string; note: string }[];
-  servicesCount: '25+';
-  changelog: { date: string; title: string; href?: string; note?: string }[];
+  /** The "Drawn to spec" section: the three sheets, and the posts that use them. */
+  drawings: {
+    lede: string;
+    sheets: LabDrawing[];
+    posts: { title: string; href: string; note: string; thumb: 'path' }[];
+  };
+  /** Newest first. `cta` is the link text (default "Read the post"). */
+  changelog: { date: string; title: string; href?: string; note?: string; cta?: string }[];
   workstation: {
     host: string;
     role: string;
@@ -629,44 +636,77 @@ export const labSpec: {
     terminalStack: string[];
     photo: LabPhoto;
   };
-  gitops: {
-    repo: 'TechDufus/home.io';
-    href: string;
-    tools: string[];
-    motto: 'If I lose a node, I rebuild from git.';
-  };
 } = {
-  lastRevised: 'Feb 2026',
-  lastRevisedIso: '2026-02',
+  lastRevised: 'Sep 2026',
+  lastRevisedIso: '2026-09',
   status: 'Rebuild in progress',
   headline: 'The <em>lab</em>.',
-  lede: "What's running at home right now. It's mid-rebuild, so expect this to change.",
+  lede: 'What runs at home, drawn to spec. It’s mid-rebuild, so anything dashed is next.',
   setupHref: '/docs/setup/',
-  hardware: [
-    { role: 'Compute', name: 'Dell PowerEdge R720xd', spec: '40 threads · 256GB ECC RAM' },
-    { role: 'Network', name: 'UniFi UDM Pro + U7 AP' },
-    { role: 'Storage', name: 'UNAS Pro 8' },
-    { role: 'Edge', name: 'Raspberry Pi 4B', spec: '8GB' }
-  ],
-  services: [
-    { name: 'Immich', note: 'Self-hosted photo and video library.' },
-    { name: 'Dashboards', note: 'Lab dashboards, private to my tailnet.' },
-    { name: 'Self-hosted runners', note: 'CI runners on my own hardware.' },
-    { name: 'Observability stack', note: 'So I can see what broke before I start guessing.' }
-  ],
-  servicesCount: '25+',
+  drawings: {
+    lede: 'The lab as engineering drawings, all generated from one set of data. Two are as built. The stack is still going up.',
+    sheets: [
+      {
+        no: 'TD-LAB-01',
+        title: 'The cabinet',
+        href: '/lab/rack/',
+        note: 'The 42U, top to bottom: a shelf of small stuff, the NAS, the gateway, the server, the spares.',
+        thumb: 'cabinet',
+        state: 'As built'
+      },
+      {
+        no: 'TD-LAB-02',
+        title: 'The server',
+        href: '/lab/r720xd/',
+        note: 'The R720xd inside and out, with an HBA330 where the RAID card used to be.',
+        thumb: 'server',
+        state: 'As built'
+      },
+      {
+        no: 'TD-LAB-03',
+        title: 'The stack',
+        href: '/lab/stack/',
+        note: 'What runs on the metal, in three layers. Lots of dashed lines for now.',
+        thumb: 'stack',
+        state: 'In progress'
+      }
+    ],
+    posts: [
+      {
+        title: 'From hardware RAID to ZFS',
+        href: '/blog/from-hardware-raid-to-zfs/',
+        note: 'The swap, start to finish, with the drawings in it.',
+        thumb: 'path'
+      }
+    ]
+  },
   changelog: [
+    {
+      date: '2026-09-29',
+      title: 'Talos cluster, Flux and friends',
+      href: '/lab/stack/',
+      note: 'Three Talos VMs on Proxmox, built with OpenTofu. Cilium runs the network, and Flux runs the cluster from git.',
+      cta: 'See the stack'
+    },
+    {
+      date: '2026-09-28',
+      title: 'PERC H710P → HBA330, Proxmox on ZFS',
+      href: '/blog/from-hardware-raid-to-zfs/',
+      note: 'Pulled the RAID card, put in an HBA, and reinstalled Proxmox 9.2 on three ZFS pools.'
+    },
     {
       date: '2026-02-20',
       title: 'Cloudflare Tunnels → Tailscale Operator',
       href: '/blog/i-deleted-my-cloudflare-tunnels-tailscale-operator-homelab-k8s/',
-      note: 'Swapped Cloudflare Tunnels for the Tailscale Kubernetes Operator, so a new service is one YAML file in git.'
+      note: 'Swapped Cloudflare Tunnels for the Tailscale Kubernetes Operator, so a new service is one YAML file in git.',
+      cta: 'Read the write-up'
     },
     {
       date: '2025-06-30',
       title: 'Talos Kubernetes on Proxmox, with Terraform',
       href: '/blog/building-a-talos-kubernetes-homelab-on-proxmox-with-terraform/',
-      note: 'An immutable, Kubernetes-only OS on Proxmox, built end to end with Terraform.'
+      note: 'An immutable, Kubernetes-only OS on Proxmox, built end to end with Terraform.',
+      cta: 'Read the build log'
     }
   ],
   workstation: {
@@ -690,11 +730,5 @@ export const labSpec: {
       height: 1639,
       caption: 'Sherlock at the desk · Moonlander front and centre'
     }
-  },
-  gitops: {
-    repo: 'TechDufus/home.io',
-    href: 'https://github.com/TechDufus/home.io',
-    tools: ['Terraform', 'Ansible', 'ArgoCD'],
-    motto: 'If I lose a node, I rebuild from git.'
   }
 };

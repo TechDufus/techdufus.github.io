@@ -1,0 +1,61 @@
+---
+/*
+  View: one view on a sheet: a paper region with its title and scale label, and (with `name`) a
+  tab panel switched by ViewTabs.
+
+  <View dwg="lab01" name="front" x={a.x} y={a.y} w={a.w} h={a.h} title="FRONT ELEVATION"
+        scale={v.scale} active>
+    …paths drawn with the view's projection…
+  </View>
+
+    dwg        the Sheet id (needed with `name`, for the tab ↔ panel ids)
+    name       tab panel name; omit for a view that is always shown
+    active     the panel shown first (exactly one per sheet)
+    x y w h    paper region (places the default label)
+    title      view title, mono caps, double-ruled ("FRONT ELEVATION", "SECTION A–A", "DETAIL B")
+    scale      paper units per mm (printed as "SCALE 1:5") or a literal string ("NOT TO SCALE")
+    note       small line under the scale
+    labelAt    [x, y] of the title's centre (default: bottom centre of the region)
+*/
+import { fmtScale } from '../../lib/drawing/projection';
+import { monoWidth } from '../../lib/drawing/sheet';
+
+interface Props {
+  dwg?: string;
+  name?: string;
+  active?: boolean;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  title?: string;
+  scale?: number | string;
+  note?: string;
+  labelAt?: [number, number];
+}
+const { dwg, name, active = false, x, y, w, h, title, scale, note, labelAt } = Astro.props;
+const f = (v: number): string => String(Math.round(v * 10) / 10);
+const [lx, ly] = labelAt ?? [x + w / 2, y + h - 34];
+const scaleText = scale === undefined ? '' : typeof scale === 'number' ? `SCALE ${fmtScale(scale)}` : scale;
+const tw = title ? monoWidth(title, 13, 0.14) : 0;
+const panel = name && dwg ? { id: `${dwg}-view-${name}`, tab: `${dwg}-tab-${name}` } : null;
+---
+
+<g
+  class="view"
+  id={panel?.id}
+  role={panel ? 'tabpanel' : undefined}
+  aria-labelledby={panel?.tab}
+  data-view-panel={name}
+  data-active={!name || active ? '' : undefined}
+>
+  <slot />
+  {title && (
+    <g class="view__label" style="--p:6">
+      <text class="view__t" x={f(lx)} y={f(ly)}>{title}</text>
+      <path class="view__rule" d={`M${f(lx - tw / 2)} ${f(ly + 5)}h${f(tw)}M${f(lx - tw / 2)} ${f(ly + 8)}h${f(tw)}`} />
+      {scaleText && <text class="view__s" x={f(lx)} y={f(ly + 22)}>{scaleText}</text>}
+      {note && <text class="view__s view__n" x={f(lx)} y={f(ly + 36)}>{note}</text>}
+    </g>
+  )}
+</g>

@@ -1,0 +1,80 @@
+---
+/*
+  URuler: a rack-unit ruler (EIA-310): a rail strip with the three square holes per U, a tick at
+  every U boundary and the U number centred in each unit. Counts upward from the bottom, or
+  downward from the top with `down` (cabinets whose rails put U1 at the top).
+
+  <URuler x={x} y={y} units={42} scale={atScale(1, 10)} />
+  In an iso view, draw it on the front plane:
+  <g transform={iso.faceMatrix('front', [-16, 0, 0])}><URuler x={0} y={0} units={6} scale={1} k={iso.scale} /></g>
+
+    x, y    bottom-left corner of the rail at U `start` (paper units, or local mm in a scaled group)
+    units   how many U to draw
+    scale   paper (or local) units per mm
+    start   number of the lowest U (default 1); with `down`, the number of the top U
+    down    count from the top: U `start` is the top unit and numbers grow downwards
+    side    'left' (default): numbers left of the rail | 'right'
+    every   label every nth U (default 1; use 2 or 5 on tall racks at small scales)
+    holes   draw the square holes (default true; skipped when smaller than 1.5 units)
+    title   heading above the ruler (default "U")
+    k, p, class   as Dim (p default 4)
+*/
+import { U_MM } from '../../lib/drawing/projection';
+
+interface Props {
+  x: number;
+  y: number;
+  units: number;
+  scale: number;
+  start?: number;
+  down?: boolean;
+  side?: 'left' | 'right';
+  every?: number;
+  holes?: boolean;
+  title?: string;
+  k?: number;
+  p?: number;
+  class?: string;
+}
+const { x, y, units, scale, start = 1, down = false, side = 'left', every = 1, holes = true, title = 'U', k = 1, p = 4, class: cls = '' } = Astro.props;
+const f = (v: number): string => String(Math.round(v * 10) / 10);
+const u = U_MM * scale;
+const rw = 15.875 * scale; // EIA rail flange, 5/8 in
+const H = units * u;
+const s = side === 'left' ? -1 : 1;
+const edge = side === 'left' ? x : x + rw;
+const hole = 9.5 * scale;
+const showHoles = holes && hole * k >= 1.5;
+// Ticks and holes as one absolute move then relative steps, to keep tall rulers small.
+const tl = (s * 7) / k;
+const ticks: string[] = [`M${f(edge)} ${f(y)}h${f(tl)}`];
+const sq = `h${f(hole)}v${f(hole)}h${f(-hole)}Z`;
+const holeD: string[] = [];
+const labels: { n: number; y: number }[] = [];
+let hy = y - 6.35 * scale - hole / 2; // top of the lowest hole
+for (let i = 0; i < units; i++) {
+  ticks.push(`m${f(-tl)} ${f(-u)}h${f(tl)}`);
+  if (showHoles) {
+    for (const [j, c] of [6.35, 22.225, 38.1].entries()) {
+      const cy = y - i * u - c * scale - hole / 2;
+      holeD.push(i || j ? `m0 ${f(cy - hy)}${sq}` : `M${f(x + rw / 2 - hole / 2)} ${f(cy)}${sq}`);
+      hy = cy;
+    }
+  }
+  const n = down ? start + units - 1 - i : start + i;
+  if (n % every === 0 || every === 1) labels.push({ n, y: y - i * u - u / 2 });
+}
+const tx = edge + (s * 10) / k;
+---
+
+<g class:list={['uruler', cls]} style={[p !== 4 && `--p:${p}`, k !== 1 && `--dwg-k:${k}`].filter(Boolean).join(';') || undefined}>
+  <path class="ln-thin" d={`M${f(x)} ${f(y)}V${f(y - H)}M${f(x + rw)} ${f(y)}V${f(y - H)}`} pathLength="1" />
+  <path class="ln-dim" d={ticks.join('')} />
+  {showHoles && <path class="uruler__hole" d={holeD.join('')} />}
+  {labels.length > 0 && (
+    <g class="txt-note uruler__n" text-anchor={side === 'left' ? 'end' : undefined}>
+      {labels.map((l) => <text x={f(tx)} y={f(l.y + 3.5 / k)}>{l.n}</text>)}
+    </g>
+  )}
+  {title && <text class="txt-note uruler__t" x={f(x + rw / 2)} y={f(y - H - 8 / k)} text-anchor="middle">{title}</text>}
+</g>

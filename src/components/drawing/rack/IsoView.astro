@@ -1,0 +1,125 @@
+---
+/*
+  Sheet 01 · ISOMETRIC tab: a key plan of the whole 42U cabinet (1:25, door open, right side
+  panel ghosted) and DETAIL A, the boxes at 1:7 as a broken view (./IsoStack.astro): the top of
+  the cabinet, U1 to U15, and the bottom shelf, with the empty units between broken out.
+*/
+import View from '../View.astro';
+import Dim from '../Dim.astro';
+import Leader from '../Leader.astro';
+import URuler from '../URuler.astro';
+import IsoStack from './IsoStack.astro';
+import { atScale, isometric, join } from '../../../lib/drawing/projection';
+import { CAB, HOLES, RAIL_W, slotOf$, slots, yBot, zoneCentre } from './model';
+import { isoStack } from './iso';
+import { OFF_SHEET as OFF } from './dwg';
+
+interface Props {
+  dwg: string;
+  active?: boolean;
+}
+const { dwg, active = false } = Astro.props;
+const f = (v: number): string => String(Math.round(v * 100) / 100);
+
+/* ---------- key plan, 1:30 ---------- */
+const K = isometric({ x: 112, y: 334, scale: atScale(1, 30) });
+const kc = K.box({ x: CAB.x0, y: CAB.y0, z: CAB.z0, w: CAB.w, h: CAB.h, d: CAB.d });
+// Interior faces seen through the ghosted right side and the open door
+const kRear = K.poly([[CAB.x0, CAB.y0, CAB.z1], [CAB.x1, CAB.y0, CAB.z1], [CAB.x1, CAB.y1, CAB.z1], [CAB.x0, CAB.y1, CAB.z1]], true);
+const kLeftIn = K.poly([[CAB.x0, CAB.y0, CAB.z0], [CAB.x0, CAB.y0, CAB.z1], [CAB.x0, CAB.y1, CAB.z1], [CAB.x0, CAB.y1, CAB.z0]], true);
+const roofY = CAB.railTop + 20;
+const kRails = join(...HOLES.flatMap((x) => [0, CAB.railSpan].map((z) => K.poly([[x, 0, z], [x, CAB.railTop, z]]))));
+// Door: hinged on the left of the front, open 90°: the leaf stands in the plane x = x0.
+const doorOpen = K.poly([[CAB.x0, CAB.y0 + 10, CAB.z0], [CAB.x0, CAB.y0 + 10, CAB.z0 - CAB.w], [CAB.x0, CAB.y1 - 10, CAB.z0 - CAB.w], [CAB.x0, CAB.y1 - 10, CAB.z0]], true);
+const glass = join(
+  ...[0.3, 0.42, 0.5].map((t, i) => {
+    const y = CAB.y0 + CAB.h * (0.56 + i * 0.05);
+    return K.poly([[CAB.x0, y, CAB.z0 - CAB.w * t], [CAB.x0, y + 160, CAB.z0 - CAB.w * (t + 0.12)]]);
+  }),
+);
+// A floor-plane circle projects to an axis-aligned ellipse: rx = r·s·√1.5, ry = r·s·√0.5.
+const kSwing = (() => {
+  const [x0, y0] = K.pt(CAB.x1, CAB.y0, CAB.z0);
+  const [x1, y1] = K.pt(CAB.x0, CAB.y0, CAB.z0 - CAB.w);
+  return `M${x0} ${y0}A${f(CAB.w * K.scale * Math.sqrt(1.5))} ${f(CAB.w * K.scale * Math.sqrt(0.5))} 0 0 1 ${x1} ${y1}`;
+})();
+// Everything in the cabinet, one path per face kind (too small for per-box painter's order to show)
+const kBoxes = slots.filter((s) => !s.on).map((s) => K.box({ x: s.plate ? s.plate.x : s.ears ? 0 : s.body.x, y: s.y0 + 0.4, z: s.faceZ, w: s.plate ? s.plate.w : s.ears ? 482.6 : s.body.w, h: s.hU - 0.8, d: s.body.d - s.faceZ + s.body.z }));
+const kDev = {
+  side: join(...kBoxes.map((b) => b.side)),
+  top: join(...kBoxes.map((b) => b.top)),
+  front: join(...kBoxes.map((b) => b.front)),
+  edges: join(...kBoxes.map((b) => b.edges)),
+};
+// Detail A's boundary: around the top of the cabinet, where the boxes are
+const aC = K.pt(241.3, (yBot(14) + CAB.railTop) / 2, 300);
+const aR = 34;
+
+/* ---------- DETAIL A, 1:7 ---------- */
+const k = atScale(1, 7);
+const SX = 356, SY = 608;
+const { hi, lo } = isoStack(SX, SY, k);
+const fl = HOLES[0] - RAIL_W / 2;
+const r7 = slotOf$('r720xd');
+const inj = slotOf$('poe-injector');
+const [pu, pv] = zoneCentre(inj, 'front', 'poe');
+const poe = hi.pt(pu, inj.faceTop - pv, inj.faceZ);
+const [bl, br] = [lo.pt(0, 0, -3), lo.pt(482.6, 0, -3)];
+/** The PoE run climbs from the injector's port to this height, then heads for the callout. */
+const POE_Y = 172;
+/** …clear of the injector's balloon, which sits right above it. */
+const POE_X = poe[0] + 26;
+---
+
+<View dwg={dwg} name="iso" active={active} x={39} y={39} w={798} h={813}>
+  <!-- ======== KEY PLAN ======== -->
+  <View x={46} y={46} w={250} h={360} title="KEY PLAN" scale={K.scale} note="U1 AT THE TOP · DOOR OPEN" labelAt={[128, 380]}>
+    <g style="--p:1">
+      <path class="face" d={kc.outline} />
+      <path class="ln-thin" d={join(kRear, kLeftIn)} />
+      <path class="ln-cons" d={kRails} />
+    </g>
+    <g style="--p:2">
+      <path class="face-side" d={kDev.side} />
+      <path class="face-top" d={kDev.top} />
+      <path class="face-front" d={kDev.front} />
+      <path class="ln-med" d={kDev.edges} />
+    </g>
+    <g style="--p:2">
+      <path class="face-top" d={kc.top} />
+      <path class="ln-obj" d={join(kc.top, K.poly([[CAB.x0, CAB.y0, CAB.z0], [CAB.x0, CAB.y1, CAB.z0]]), K.poly([[CAB.x0, CAB.y0, CAB.z0], [CAB.x1, CAB.y0, CAB.z0], [CAB.x1, CAB.y1, CAB.z0]]), K.poly([[CAB.x1, CAB.y0, CAB.z0], [CAB.x1, CAB.y0, CAB.z1], [CAB.x1, CAB.y1, CAB.z1]]))} pathLength="1" />
+      <path class="ln-med" d={K.poly([[CAB.x0, roofY, CAB.z0], [CAB.x1, roofY, CAB.z0], [CAB.x1, roofY, CAB.z1]])} />
+    </g>
+    <g transform={K.faceMatrix('front', [fl, 0, 0])}>
+      <URuler x={0} y={0} units={CAB.units} start={1} down scale={1} k={K.scale} every={6} title="U" />
+    </g>
+    <g style="--p:4">
+      <path class="ln-phantom" d={join(kc.side, doorOpen)} />
+      <path class="ln-phantom" d={kSwing} />
+      <path class="ln-thin" d={glass} />
+    </g>
+    <path class="ln-thin" d={`M${f(aC[0] - aR)} ${f(aC[1])}a${aR} ${aR} 0 1 0 ${2 * aR} 0a${aR} ${aR} 0 1 0 ${-2 * aR} 0`} style="--p:5" />
+    <text class="txt-label" x={f(aC[0] + aR * 0.74)} y={f(aC[1] - aR * 0.74)} style="--p:6">A</text>
+    <Leader from={K.pt(CAB.x0, CAB.y1 * 0.2, CAB.z0 - CAB.w * 0.95)} to={[64, 64]} end="dot" text={['GLASS DOOR', 'HINGED LEFT']} />
+  </View>
+
+  <!-- ======== DETAIL A, 1:7 ======== -->
+  <View x={170} y={200} w={667} h={652} title="DETAIL A · THE BOXES" scale={k} note="U16–39 EMPTY · BROKEN OUT" labelAt={[704, 812]}>
+    <IsoStack dwg={dwg} x={SX} y={SY} k={k} bx={236} by={[372, 770]} ty={236} />
+
+    <g transform={hi.faceMatrix('right', [482.6, CAB.railTop + 50, 0])}>
+      <Dim a={[0, 0]} b={[CAB.railSpan, 0]} offset={-6} mm={CAB.railSpan} sub="RAIL SPAN" k={k} ext="none" />
+    </g>
+    <Dim a={bl} b={br} offset={-34} mm={482.6} sub="[19.00]" dir="aligned" />
+    <g transform={hi.faceMatrix('right', [r7.body.x + r7.body.w, r7.body.y, 0])}>
+      <Dim a={[0, 0]} b={[r7.body.d, 0]} offset={36} mm={r7.body.d} k={k} />
+    </g>
+
+    <!-- the injector's PoE run to the U7 Pro, off the sheet -->
+    <g class="sem-power" style="--p:5">
+      <path class="ln-net" d={`M${poe[0]} ${poe[1]}l8 8H${POE_X}V${POE_Y}H${OFF.x + 100}V${OFF.y + OFF.h + 9}`} pathLength="1" />
+      <path class="dim-arr" d={`M${OFF.x + 100} ${OFF.y + OFF.h}l-3 9h6Z`} />
+      <text class="txt-label" x={POE_X + 8} y={POE_Y - 7}>POE</text>
+    </g>
+  </View>
+</View>

@@ -1,0 +1,123 @@
+---
+/*
+  FIG 2 · Three pools, no new drives. One block per pool (members, layout, usable size, what it
+  holds) plus the failing drive set aside, each a clickable part with the data's card. Wide: four
+  blocks in a row. Narrow: two by two.
+*/
+import Figure from '../figure/Figure.astro';
+import Balloon from '../Balloon.astro';
+import PartCard from '../PartCard.astro';
+import { derived, driveAt, server } from '../../../data/lab/server';
+import type { Card, Drive, RemovedDrive } from '../../../data/lab/types';
+import { at, rc, wrap, NOTE_CH, type P } from '../../../lib/drawing/figure';
+import { circle } from '../../../lib/drawing/projection';
+import { POOL_CLASS, shortName } from './fig';
+
+const ROW = 24, TOP = 30; // drive row pitch, first row's top (block-local)
+const BIG = TOP + ROW * 3 + 24; // size line baseline
+const glyph = (d: Drive | RemovedDrive, y: number): string =>
+  rc(10, y, 28, 16) + (d.kind === 'hdd' ? circle(21, y + 8, 5.5) + `M31 ${y + 4}v8` : rc(15, y + 5, 6, 6) + rc(24, y + 5, 6, 6));
+
+type Block = { id: string; w: number; wp: P; np: P; c: string; head: string; sub: string; drives: { d: Drive | RemovedDrive; name: string }[]; big: string; foot: string[]; card: Card };
+
+const widths = [180, 150, 150, 130];
+const xs = widths.map((_, i) => 12 + widths.slice(0, i).reduce((s, w) => s + w + 18, 0));
+const nxs = [8, 206, 8, 206];
+const Y0 = 30, NY1 = Y0 + 208;
+
+/** Members by bay; twins get "#1", "#2". */
+const members = (bays: number[]) => {
+  const ds = bays.map((b) => driveAt(b)!);
+  return ds.map((d) => {
+    const name = shortName(d);
+    const twins = ds.filter((x) => shortName(x) === name);
+    return { d, name: twins.length > 1 ? `${name} #${twins.indexOf(d) + 1}` : name };
+  });
+};
+const layout = (p: (typeof server.pools)[number]): string => (p.layout === 'single' ? 'single disk' : p.copies > 2 ? `${p.copies}-way mirror` : 'mirror');
+
+const pools: Block[] = server.pools.map((p, i) => ({
+  id: `pool-${p.id}`,
+  w: widths[i],
+  wp: [xs[i], Y0],
+  np: [nxs[i], i < 2 ? Y0 : NY1],
+  c: POOL_CLASS[p.id],
+  head: p.id,
+  sub: layout(p),
+  drives: members(p.bays),
+  big: `≈ ${p.usableGiB} GiB`,
+  foot: wrap(p.holds, Math.floor(widths[i] / NOTE_CH)),
+  card: p.card,
+}));
+const gone = server.removed;
+const out: Block = {
+  id: 'pool-out',
+  w: widths[3],
+  wp: [xs[3], Y0],
+  np: [nxs[3], NY1],
+  c: 'sem-removed',
+  head: 'set aside',
+  sub: 'not replaced',
+  drives: [{ d: gone, name: shortName(gone) }],
+  big: 'FAILING',
+  foot: ['pulled from', `rear bay ${gone.bay}`],
+  card: gone.card,
+};
+const blocks = [...pools, out];
+const tally = `${derived.drives} drives kept · 0 bought · 1 set aside`;
+/* Narrow: the second row (bulk, set aside) has fewer drives, so its size and notes move up. */
+const lift = (i: number): number => (i < 2 ? 0 : (3 - Math.max(blocks[2].drives.length, blocks[3].drives.length)) * ROW);
+const NH = NY1 + BIG + 18 + 14 * Math.max(blocks[2].foot.length, blocks[3].foot.length) - lift(2) + 34;
+
+const desc =
+  `Three ZFS pools from drives already in the server. ` +
+  pools.map((b) => `${b.head}, ${b.sub}: ${b.drives.map((m) => m.name).join(', ')}, about ${b.big.slice(2)}, for ${b.foot.join(' ').toLowerCase()}.`).join(' ') +
+  ` Set aside: the failing ${shortName(gone)}, pulled from rear bay ${gone.bay}. ${tally.replaceAll(' · ', ', ')}.`;
+---
+
+<Figure
+  id="fig-pools"
+  fig="TD-LAB-02 · FIG 2"
+  rev="B"
+  date="2026-09-29"
+  title="Three pools, no new drives"
+  desc={desc}
+  caption="Every healthy drive gets a job. The one that isn't healthy gets a drawer."
+  size={[680, 262]}
+  narrow={[390, NH]}
+  interactive
+  hint
+>
+  {blocks.map((b, i) => (
+    <g {...at(b.wp, b.np, b.c, '--p:6')}>
+      {b.id === 'pool-out' && (
+        <Fragment>
+          <path class="ln-phantom fg-w" d={`M-9 -14V${BIG + 38}`} style="--p:4" />
+          <path class="ln-phantom fg-n" d={`M-9 -14V${BIG + 38 - lift(i)}`} style="--p:4" />
+        </Fragment>
+      )}
+      <g class="part" data-part={b.id} role="button" tabindex="0" aria-pressed="false" aria-label={b.id === 'pool-out' ? shortName(gone) : b.head}>
+        <rect class="dwg-hit" x="-4" y="-16" width={b.w} height={BIG + 16 + 14 * b.foot.length + 8} />
+        <text class="txt-label">{b.head}</text>
+        <text class="txt-note" y="16">{b.sub}</text>
+        <path
+          class="face ln-med"
+          d={(b.drives.length > 1 ? `M4 ${TOP + 8}V${TOP + 8 + ROW * (b.drives.length - 1)}` + b.drives.map((_, i) => `M4 ${TOP + 8 + ROW * i}h6`).join('') : '') +
+            b.drives.map(({ d }, i) => glyph(d, TOP + ROW * i) + (b.id === 'pool-out' ? `M10 ${TOP + ROW * i}l28 16m0 -16l-28 16` : '')).join('')}
+          pathLength="1"
+          style="--p:2"
+        />
+        {b.drives.map((m, i) => <text class="txt-note" x="46" y={TOP + ROW * i + 12}>{m.name}</text>)}
+        <g {...(lift(i) ? at([0, 0], [0, -lift(i)]) : {})}>
+          <text class="txt-dim" y={BIG}>{b.big}</text>
+          {b.foot.map((t, k) => <text class="txt-note" y={BIG + 18 + k * 14}>{t}</text>)}
+        </g>
+      </g>
+      <Balloon at={[b.w - 16, -4]} n={i + 1} part={b.id} r={9} />
+    </g>
+  ))}
+  <text {...at([12, 248], [8, NH - 14], 'txt-note', '--p:6')}>{tally}</text>
+  <Fragment slot="cards">
+    {blocks.map((b) => <PartCard id={b.id} title={b.card.title} kind={b.card.kind} lines={b.card.lines} />)}
+  </Fragment>
+</Figure>

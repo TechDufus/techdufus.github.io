@@ -1,0 +1,60 @@
+---
+/*
+  ServerExcerpt: Sheet 02 in miniature for /lab or a post: the R720xd's front panel as built,
+  one numbered balloon per drive, each drive a part with its card (what it is, which pool, what
+  the pool holds), pool brackets underneath. A kit <Figure>: it lays out 680 wide and crops to
+  the populated end of the panel on phones.
+
+  <ServerExcerpt />
+  <ServerExcerpt id="lab-bays" caption="Where the drives live." fig="TD-LAB-02 · DETAIL" />
+
+    id        unique on the page (default "r720-bays")
+    caption   one line under it (default in voice; pass "" for none)
+    fig       FIG title strip, as Figure (default none)
+    breakout  as Figure
+*/
+import Figure from '../figure/Figure.astro';
+import ServerDefs from './ServerDefs.astro';
+import ServerCards from './ServerCards.astro';
+import BayStrip from './BayStrip.astro';
+import { H, frontDrives } from './geom';
+
+interface Props {
+  id?: string;
+  caption?: string;
+  fig?: number | string;
+  breakout?: boolean;
+}
+const {
+  id = 'r720-bays',
+  caption = 'Five drives up front, three pools, nineteen empty bays.',
+  fig,
+  breakout = false,
+} = Astro.props;
+const S = 1.3, X = 26, Y = 56;
+const base = Y + S * H + 38;
+const ids = frontDrives.map((d) => d.id);
+---
+
+<Figure
+  id={id}
+  title="The R720xd's front bays, as built"
+  desc="The Dell PowerEdge R720xd's front panel. Bays 0 and 1 hold Gigastone 256 GB SSDs in rpool, bays 2 and 3 Crucial MX500 500 GB SSDs in fast, bay 4 a Crucial MX500 1 TB in bulk. Bays 5 to 23 are empty."
+  caption={caption || undefined}
+  size={[680, base + 14]}
+  narrow={[360, base + 14]}
+  fig={fig}
+  breakout={breakout}
+  interactive
+  hint
+>
+  <ServerDefs id={id} only={['front']} />
+  <BayStrip dwg={id} x={X} y={Y} s={S} nums="in" balloons={24} brackets />
+  <text class="txt-note fg-w" x="654" y={base} text-anchor="end">BAYS 5–23 EMPTY</text>
+  <g class="fg-n">
+    <path class="face" d={`M352 ${Y - 6}H360V${Y + S * H + 6}H352z`} />
+    <path class="ln-thin" d={`M352 ${Y - 6}l-3 ${S * H * 0.35}l6 ${S * H * 0.3}l-6 ${S * H * 0.35 + 12}`} />
+    <text class="txt-note" x="346" y={base} text-anchor="end">5–23 EMPTY</text>
+  </g>
+  <Fragment slot="cards"><ServerCards only={ids} /></Fragment>
+</Figure>

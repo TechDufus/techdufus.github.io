@@ -1,0 +1,32 @@
+---
+/*
+  Every device panel on Sheet 01, drawn once as a <symbol> in face-local mm (u right, v down,
+  origin at the top-left of the 482.6 mm frame) and placed with <use transform=…> in every view:
+  ortho matrices for the elevations, iso faceMatrix() for the isometric.
+    #{dwg}-pf-{device id}   front panel
+    #{dwg}-pr-{device id}   rear panel, as seen from behind
+  Put the <use> inside a .dwg-tex group for texture pens. `face` picks which set to emit: the
+  fronts ship with the page (the isometric uses them), the rears with the lazily loaded views.
+  `lite` (fronts only) drops the finest texture, for the small /lab excerpt.
+*/
+import { frontPanel, rearPanel, slots, type Panel } from './model';
+
+interface Props {
+  dwg: string;
+  face: 'front' | 'rear';
+  lite?: boolean;
+}
+const { dwg, face, lite = false } = Astro.props;
+const faces = slots.map((s) => ({ id: `${dwg}-p${face[0]}-${s.dev.id}`, p: (face === 'front' ? frontPanel(s, lite) : rearPanel(s)) as Panel }));
+---
+
+<defs>
+  {faces.map(({ id, p }) => (
+    <symbol id={id} overflow="visible">
+      {p.obj && <path class="ln-obj" d={p.obj} />}
+      {p.med && <path class="ln-med" d={p.med} />}
+      {p.thin && <path class="ln-thin" d={p.thin} />}
+      {p.hid && <path class="ln-hid" d={p.hid} />}
+    </symbol>
+  ))}
+</defs>

@@ -1,0 +1,61 @@
+---
+/*
+  StackFigure: layers bottom-up, each a band with its items; what builds a layer (the tool) is
+  lettered beside it. Planned items (or a whole planned layer) are dashed phantoms.
+  Wide: bands with the name on the left and the tool on the right. Narrow: full-width bands,
+  name and tool on top, items two to a row.
+
+  <StackFigure id="fig-stack" title="The stack" caption="Three layers. The top one is mostly plans."
+    layers={[
+      { label: 'Bootstrap', sub: 'metal and hypervisor', tool: 'Ansible', items: [{ id: 'pve', label: 'Proxmox VE 9.2' }] },
+      { label: 'Virtual machines', tool: 'OpenTofu', items: [{ id: 'talos', label: 'Talos cluster', sub: '3 VMs' }, { id: 'robomp', label: 'robomp', tone: 'planned' }] },
+      { label: 'Kubernetes', tool: 'Flux', items: [{ id: 'cilium', label: 'Cilium 1.20' }, { id: 'apps', label: 'Apps', sub: 'not decided', tone: 'planned' }] },
+    ]} />
+
+    layers  { label, sub?, tool?, tone?, items: FigNode[] }[]  (layers[0] is the bottom)
+    + FigureBase props (id, title, caption, fig, breakout, hint, desc, scale, rev, date, bp)
+*/
+import Figure from './Figure.astro';
+import Node from './Node.astro';
+import PartCard from '../PartCard.astro';
+import { BREAKOUT, WIDE, at, f, list, rc, say, stackLayout, toneOf, type FigureBase, type StackLayer } from '../../../lib/drawing/figure';
+
+interface Props extends FigureBase {
+  layers: StackLayer[];
+}
+const { layers, desc, hint, ...base } = Astro.props;
+const L = stackLayout(layers, base.breakout ? BREAKOUT : WIDE);
+const cards = L.boxes.filter((b) => b.card);
+const text =
+  desc ??
+  `${layers.length} layers, bottom up. ` +
+    layers.map((l, i) => `Layer ${i + 1}, ${l.label}${l.tool ? ` (${l.tool})` : ''}${l.tone === 'planned' ? ', planned' : ''}: ${list(l.items.map(say)) || 'empty'}.`).join(' ');
+---
+
+<Figure {...base} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0}>
+  {(['w', 'n'] as const).map((k) => (
+    <g class={`fg-${k}`} style="--p:1">
+      {L.bands.map((b) => (
+        <path
+          class:list={[b.layer.tone === 'planned' ? 'ln-phantom' : 'fg-band ln-thin', toneOf(b.layer.tone)]}
+          d={rc(...b[k])}
+          pathLength={b.layer.tone === 'planned' ? undefined : '1'}
+        />
+      ))}
+      {k === 'w' && <path class="ln-thin fg-tick" d={L.bands.map((b) => b.tool?.bracket ?? '').join('')} pathLength="1" style="--p:4" />}
+    </g>
+  ))}
+  <g style="--p:5">
+    {L.bands.map((b) => (
+      <g {...at(b.head.wp, b.head.np, toneOf(b.layer.tone))}>
+        <text class="txt-note">{b.index}</text>
+        {b.head.lines.map((l) => <text class:list={[l.cls, l.cls === 'txt-label' && 'fg-h']} y={f(l.y)}>{l.t}</text>)}
+      </g>
+    ))}
+    {L.bands.map((b) => b.tool && <text {...at(b.tool.wp, b.tool.np, 'txt-label fg-h fg-ne')}>{b.layer.tool}</text>)}
+  </g>
+  {L.boxes.map((b) => <Node box={b} wp={b.wp} np={b.np} />)}
+  <Fragment slot="cards">
+    {cards.map((b) => <PartCard id={b.id} title={b.card!.title} kind={b.card!.kind} lines={b.card!.lines} />)}
+  </Fragment>
+</Figure>

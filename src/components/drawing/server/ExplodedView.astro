@@ -1,0 +1,191 @@
+---
+/*
+  ExplodedView: the R720xd as built, taken apart: isometric (front-right), parts lifted straight
+  up out of the chassis, the five front drives pulled out of their bays, the SAS drive pulled out
+  of rear bay 24 and the PSUs out the back. Every balloon is a kit <Part> with a card
+  (ServerCards); the top cover, shroud and rear cage are named but quiet.
+
+  The static drawing IS the exploded state (fallback, reduced motion, print). With scroll-driven
+  animations, each part's inner g.xp starts at its assembled offset (--ax, --ay, paper px) and
+  comes apart as the sheet scrolls into view; the page supplies that CSS (see r720xd.astro).
+  Needs <ServerDefs id={dwg} /> in the same SVG.
+
+  <ExplodedView dwg="lab02" />
+*/
+import View from '../View.astro';
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import Leader from '../Leader.astro';
+import Stamp from '../Stamp.astro';
+import { isometric, join, type IsoBoxInput, type Pt } from '../../../lib/drawing/projection';
+import { server } from '../../../data/lab/server';
+import {
+  BAY_H, BAY_P, BAY_Y0, D, EAR, EAR_D, H, HANDLES, NUM, STAMP, W, WE, O, R, Vl,
+  bayX, dimmBanks, frontDrives, isoBox, n, part, rearBay, rearDrive, rz,
+} from './geom';
+
+interface Props {
+  dwg: string;
+  active?: boolean;
+}
+const { dwg, active = false } = Astro.props;
+
+const S = 0.55, OX = 250, OY = 600;
+const iso = isometric({ x: OX, y: OY, scale: S, view: 'front-right' });
+const ib = (b: IsoBoxInput) => isoBox(OX, OY, S, b);
+
+/** look: solid (default), see (faint faces), wire (edges only) */
+type XPart = {
+  id: string; label: string; boxes: IsoBoxInput[]; lift?: number; slide?: number;
+  look?: 'see' | 'wire'; cls?: string; tex?: string; anchor: Pt; at: Pt;
+  /** quiet: drawn, named with a leader, not clickable */
+  quiet?: string;
+  /** draw box by box (boxes that overlap on paper), else one path per face kind */
+  split?: boolean;
+};
+
+/** A footprint from the internal layout, as a box of height h starting at y0. */
+const fromPart = (id: string, y0: number, h: number): IsoBoxInput => {
+  const p = part(id);
+  return { x: p.x, y: y0, z: p.z, w: p.w, h, d: p.d };
+};
+const up = (b: IsoBoxInput, L: number): IsoBoxInput => ({ ...b, y: b.y + L });
+
+// Exploded offsets (mm). Assembled = these undone.
+const L = { backplane: 115, fans: 185, dimms: 92, heatsinks: 205, risers: 0, hba: 300, flex: 160, rear: 290, shroud: 330, lid: 450 };
+const PSU_OUT = 60, DRV_OUT = 190, REAR_OUT = 330;
+const bp = up(fromPart('backplane', 4, 79), L.backplane);
+const fans = up(fromPart('fans', 4, 76), L.fans);
+const hs = ['cpu1', 'cpu2'].map((id) => up(fromPart(id, 4, 66), L.heatsinks));
+const all = dimmBanks();
+const banks = [0, 6, 12, 18].map((i) => up({ x: all[i].x, y: 4, z: all[i].z, w: all[i + 5].x + all[i + 5].w - all[i].x, h: 31, d: all[i].d }, L.dimms));
+const risers = ['riser-3', 'riser-2'].map((id) => up(fromPart(id, 4, 78), L.risers));
+const riser1 = up(fromPart('riser-1', 4, 78), L.risers);
+const hba = up(fromPart('hba330', 40, 5), L.hba);
+const flex = up({ ...fromPart('flex-backplane', 44, 42), d: D - part('flex-backplane').z }, L.flex);
+const psus = ['psu-2', 'psu-1'].map((id) => ({ ...fromPart(id, 2, 40), z: part(id).z + PSU_OUT, d: HANDLES - part(id).z }));
+const shroud = up(fromPart('shroud', 40, 45), L.shroud);
+const lid = up({ x: EAR, y: H, z: 0, w: W, h: 2, d: D }, L.lid);
+// the SAS drive, out of rear bay 24 (bay height from the rear face), up and out the back
+const b24 = rearBay(24), rb = rz('rear-bay-24');
+const rear: IsoBoxInput = { x: b24.x + 4, y: H - rb.y - rb.h + 2 + L.rear, z: D + REAR_OUT - 140, w: b24.w - 8, h: rb.h - 4, d: 140 };
+// the five front drives, carriers and all, out of bays 0–4
+const drives = frontDrives.map((d) => ({
+  d, b: { x: bayX(d.bay) + 0.5, y: H - BAY_Y0 - BAY_H, z: -EAR_D - DRV_OUT, w: BAY_P - 1, h: BAY_H, d: 140 } as IsoBoxInput,
+}));
+
+/** Lines along the depth (z) on a box's top face, at the given x offsets: fins, DIMM sticks. */
+const alongZ = (b: IsoBoxInput, xs: number[]) => {
+  const [dx, dy] = iso.slide(b.d - 12);
+  return xs.map((x) => {
+    const [px, py] = iso.pt(b.x + x, b.y + b.h, b.z + 6);
+    return `M${n(px)} ${n(py)}l${n(dx)} ${n(dy)}`;
+  }).join('');
+};
+const fw = fans.w / 6;
+const fanTex = join(...Array.from({ length: 6 }, (_, i) => O((i + 0.5) * fw, fans.h / 2, 25)), ...Array.from({ length: 5 }, (_, i) => Vl((i + 1) * fw, 0, fans.h)));
+const mid = (b: IsoBoxInput): Pt => iso.pt(b.x + b.w / 2, b.y + b.h, b.z + b.d / 2);
+const fins = (b: IsoBoxInput) => alongZ(b, [1, 2, 3, 4, 5].map((i) => (i * b.w) / 6));
+const card = (id: string) => server.internal.parts.find((p) => p.id === id)?.card?.title ?? id;
+
+const parts: XPart[] = [
+  { id: 'psus', label: server.psus.card.title, boxes: psus, slide: PSU_OUT, split: true, anchor: iso.pt(psus[1].x + 40, psus[1].y + psus[1].h, psus[1].z + 170), at: [792, 404] },
+  { id: rearDrive.id, label: rearDrive.card.title, boxes: [rear], lift: L.rear, slide: REAR_OUT, cls: 'pool-rpool', anchor: iso.pt(rear.x + rear.w, rear.y + rear.h, rear.z + 60), at: [650, 96] },
+  { id: 'memory', label: server.memory.card.title, boxes: banks, lift: L.dimms, tex: banks.map((b) => alongZ(b, [10.8, 23.1, 35.4])).join(''), anchor: mid(banks[3]), at: [792, 612] },
+  { id: 'flex', label: '', quiet: 'REAR FLEX CAGE', boxes: [flex], lift: L.flex, anchor: mid(flex), at: [560, 160] },
+  { id: 'risers', label: '', boxes: risers, lift: L.risers, split: true, look: 'see', anchor: [0, 0], at: [0, 0] },
+  { id: 'riser-1', label: card('riser-1'), boxes: [riser1], lift: L.risers, look: 'see', anchor: iso.pt(riser1.x + riser1.w, riser1.y + riser1.h / 2, riser1.z + 40), at: [792, 540] },
+  { id: 'hba330', label: server.controller.now.card.title, boxes: [hba], lift: L.hba, anchor: iso.pt(hba.x + hba.w, hba.y + hba.h, hba.z + hba.d / 2), at: [792, 332] },
+  { id: 'cpu1', label: 'CPU1', boxes: [hs[0]], lift: L.heatsinks, tex: fins(hs[0]), anchor: mid(hs[0]), at: [100, 392] },
+  { id: 'cpu2', label: 'CPU2', boxes: [hs[1]], lift: L.heatsinks, tex: fins(hs[1]), anchor: mid(hs[1]), at: [792, 472] },
+  { id: 'fans', label: server.fans.card.title, boxes: [fans], lift: L.fans, anchor: iso.pt(fans.x + 20, fans.y + fans.h * 0.6, fans.z), at: [100, 472] },
+  { id: 'backplane', label: card('backplane'), boxes: [bp], lift: L.backplane, anchor: iso.pt(bp.x + 40, bp.y + 20, bp.z), at: [100, 552] },
+  { id: 'shroud', label: '', quiet: 'SHROUD', boxes: [shroud], lift: L.shroud, look: 'see', anchor: iso.pt(shroud.x, shroud.y + shroud.h / 2, shroud.z + 60), at: [160, 300] },
+  { id: 'lid', label: '', quiet: 'TOP COVER', boxes: [lid], lift: L.lid, look: 'wire', anchor: iso.pt(lid.x, lid.y + 2, lid.z + 160), at: [160, 196] },
+];
+const ofs = (p: { lift?: number; slide?: number }): string => {
+  const [dx, dy] = p.slide ? iso.slide(-p.slide) : [0, 0];
+  return [dx && `--ax:${dx}px`, `--ay:${n(dy + (p.lift ?? 0) * S)}px`].filter(Boolean).join(';');
+};
+/** One set of face/edge paths per part (merged) or per box (split). */
+const groups = (p: XPart) => (p.split ? p.boxes.map((b) => [ib(b)]) : [p.boxes.map(ib)]).map((qs) => ({
+  top: qs.map((q) => q.top).join(''), side: qs.map((q) => q.side).join(''), front: qs.map((q) => q.front).join(''), edges: qs.map((q) => q.edges).join(''),
+}));
+
+// Chassis: floor, far walls, board footprints, near walls with the front plate
+const cb = ib({ x: EAR, y: 0, z: 0, w: W, h: H, d: D });
+const plate = ib({ x: 0, y: 0, z: -EAR_D, w: WE, h: H, d: EAR_D });
+const floor = ib({ x: EAR, y: 0, z: 0, w: W, h: 1, d: D }).top;
+const farWalls = join(iso.poly([[EAR, 0, 0], [EAR, H, 0], [EAR, H, D], [EAR, 0, D]], true), iso.poly([[EAR, 0, D], [EAR, H, D], [WE - EAR, H, D], [WE - EAR, 0, D]], true));
+const openings = frontDrives.map((d) => R(bayX(d.bay) + 0.5, BAY_Y0, BAY_P - 1, BAY_H)).join('');
+const trail = (b: IsoBoxInput, L0: number) =>
+  [[b.x + 12, b.z + 12], [b.x + b.w - 12, b.z + b.d - 12]].map(([x, z]) => {
+    const [ax, ay] = iso.pt(x, b.y - 6, z);
+    return `M${n(ax)} ${n(ay)}v${n((L0 - 18) * S)}`;
+  }).join('');
+// drive balloons: a row under the pulled-out drives, one leader each
+const drvAt = (i: number): Pt => [118 + i * 30, 740];
+const order = [parts[0], parts[1], 'chassis', ...parts.slice(2), 'drives'] as (XPart | 'chassis' | 'drives')[];
+---
+
+<View dwg={dwg} name="exploded" active={active} x={39} y={39} w={798} h={813} title="EXPLODED AXONOMETRIC" scale="NOT TO SCALE" note="PARTS SEPARATED" labelAt={[438, 790]}>
+  {order.map((p) => {
+    if (p === 'chassis') return (
+      <Part id="server" label={server.identity.card.title} p={1}>
+        <path class="face-top" d={floor} />
+        <g class="dwg-tex" transform={iso.faceMatrix('top', [0, 1, 0])}><use href={`#${dwg}-plan`} /></g>
+        <path class="face-front ln-med" d={farWalls} />
+        <path class="face-side" d={cb.side} />
+        <path class="face-top" d={plate.top} />
+        <path class="face-side" d={plate.side} />
+        <path class="face-front" d={plate.front} />
+        <g class="dwg-tex" transform={iso.faceMatrix('front', [0, H, -EAR_D])}>
+          <use href={`#${dwg}-front`} />
+          <path class="face-side ln-med" d={openings} />
+        </g>
+        <path class="ln-obj" d={join(cb.edges, plate.edges)} pathLength="1" />
+      </Part>
+    );
+    if (p === 'drives') return drives.map(({ d, b }) => {
+      const q = ib(b);
+      return (
+        <Part id={d.id} label={d.card.title} p={2} class={`pool-${d.pool}`}>
+          <g class="xp" style={ofs({ slide: -DRV_OUT })}>
+            <path class="face-side" d={q.side} />
+            <path class="sv-drv" d={q.top + q.front} />
+            <path class="ln-obj" d={q.edges} />
+          </g>
+        </Part>
+      );
+    });
+    const body = (
+      <g class="xp" style={ofs(p)}>
+        {groups(p).map((q) => (
+          <>
+            {p.look !== 'wire' && (p.id === rearDrive.id ? <><path class="face-side" d={q.side} /><path class="sv-drv" d={q.top + q.front} /></> : <><path class="face-side" d={q.side} /><path class="face-top" d={q.top} /><path class="face-front" d={q.front} /></>)}
+            <path class={p.look ? 'ln-med' : 'ln-obj'} d={q.edges} />
+          </>
+        ))}
+        {p.tex && <path class="ln-thin" d={p.tex} />}
+        {p.id === 'fans' && <path class="ln-thin" d={fanTex} transform={iso.faceMatrix('front', [fans.x, fans.y + fans.h, fans.z])} />}
+      </g>
+    );
+    return p.label ? (
+      <Part id={p.id} label={p.label} p={p.id === 'psus' ? 2 : 3} class={[p.cls, p.look && `xp-${p.look}`].filter(Boolean).join(' ') || undefined}>{body}</Part>
+    ) : (
+      <g class={p.look ? `xp-${p.look}` : undefined} style="--p:3">{body}</g>
+    );
+  })}
+
+  <!-- balloons, names and assembly trails (fade in once the parts have separated) -->
+  <g class="xp-lbl">
+    <path class="ln-ctr" d={trail(hba, L.hba - L.risers)} />
+    {parts.filter((p) => p.label).map((p) => <Balloon at={p.at} n={NUM[p.id]} to={p.anchor} part={p.id} />)}
+    {parts.filter((p) => p.quiet).map((p) => <Leader from={p.anchor} to={p.at} text={p.quiet} end="dot" shoulder={8} />)}
+    {drives.map(({ d, b }, i) => (
+      <Balloon at={drvAt(i)} n={NUM[d.id]} to={iso.pt(b.x + b.w / 2, b.y + 6, b.z)} part={d.id} />
+    ))}
+    <Balloon at={[740, 700]} n={NUM.server} to={iso.pt(WE - EAR, H * 0.4, D * 0.45)} part="server" />
+  </g>
+  <Stamp x={1046} y={650} {...STAMP} />
+</View>

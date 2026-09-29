@@ -1,151 +1,38 @@
 ---
 /*
-  /lab/: the homelab + workstation page (mockup design/pro-studio/lab.html).
-  Every fact comes from labSpec (src/data/site.ts, itself from src/content/docs/setup.md),
-  the Tailscale/Talos posts, and live repo metadata. The diagram is server-rendered; a small
-  bundled script adds selection, the phone layout and the hardware "In diagram" jumps.
+  /lab/: the lab is the drawings. The hero's numbers come from src/data/lab/ (the same data the
+  sheets draw); the words around them, the changelog and the desk from labSpec (src/data/site.ts).
+    01 the cabinet   Sheet 01's excerpt (CabinetExcerpt: drawing + devices by role)
+    02 the stack     Sheet 03's excerpt (StackExcerpt)
+    03 drawn to spec the three sheets and the posts that use them
+    04 changelog     05 the desk
+  Both excerpts are kit figures: numbered parts open cards (src/scripts/drawing.ts).
 */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/lab.css';
-import RepoCard from '../components/ui/RepoCard.astro';
+import CabinetExcerpt from '../components/drawing/rack/CabinetExcerpt.astro';
+import StackExcerpt from '../components/drawing/stack/StackExcerpt.astro';
+import SheetThumb from '../components/drawing/rack/SheetThumb.astro';
 import Stat from '../components/ui/Stat.astro';
 import { fmtDate, linkProps } from '../components/ui/format';
 import { labSpec } from '../data/site';
+import { cabinet, derived as rack } from '../data/lab/rack';
+import { server } from '../data/lab/server';
+import { stackItems } from '../data/lab/stack';
 import { getPostMetas } from '../lib/content';
 import { getFeaturedRepos } from '../lib/github';
 
 const [metas, repos] = await Promise.all([getPostMetas(), getFeaturedRepos()]);
 const postByHref = (href?: string) => (href ? metas.find((meta) => meta.href === href) : undefined);
-
-const HOMEIO = labSpec.gitops.href;
-const homeio = repos.find((repo) => repo.url.toLowerCase() === HOMEIO.toLowerCase() || repo.name === 'home.io');
 const dotfilesHref = repos.find((repo) => repo.name === 'dotfiles')?.url ?? 'https://github.com/TechDufus/dotfiles';
 const ws = labSpec.workstation;
+const { drawings } = labSpec;
 
-const [tsEntry, talosEntry] = labSpec.changelog;
-const tsHref = tsEntry?.href ?? '/blog/';
-const talosHref = talosEntry?.href ?? '/blog/';
-const svcTotal = Number.parseInt(labSpec.servicesCount, 10);
-
-/* ---------- Architecture: metal up to access (facts from setup.md + the Feb 2026 post) ---------- */
-/** [term, value, href?]: the detail card renders an optional href as a link (external ones open in a new tab). */
-type Fact = [string, string, string?];
-const SETUP: Fact = ['Source', 'setup notes', labSpec.setupHref];
-const hw = Object.fromEntries(labSpec.hardware.map((row) => [row.role, row]));
-
-type ArchNode = {
-  id: string;
-  label: string;
-  kind?: 'new' | 'more';
-  /** Talos VMs: decorative buttons that select their group node. */
-  group?: string;
-  title?: string;
-  text?: string;
-  facts?: Fact[];
-};
-type ArchLayer = { id: string; n: string; name: string; git: boolean; nodes: ArchNode[] };
-
-const LAYERS: ArchLayer[] = [
-  {
-    id: 'access', n: 'L5', name: 'Access', git: true,
-    nodes: [
-      { id: 'tailscale', label: 'Tailscale Operator', kind: 'new', title: 'Tailscale Operator',
-        text: 'How I reach services, declared in git like everything else.',
-        facts: [['Since', 'Feb 2026'], ['Write-up', 'I deleted my Cloudflare tunnels', tsHref]] },
-      { id: 'traefik', label: 'Traefik ingress', title: 'Traefik',
-        text: 'The cluster’s ingress controller.',
-        facts: [['Role', 'Ingress'], SETUP] }
-    ]
-  },
-  {
-    id: 'apps', n: 'L4', name: 'Services', git: true,
-    nodes: [
-      ...labSpec.services.map((service) => ({
-        id: service.name.toLowerCase().split(' ')[0].replace(/[^a-z]/g, ''),
-        label: service.name,
-        title: service.name,
-        text: service.note,
-        facts: [['Layer', `${labSpec.servicesCount} services`], SETUP] as Fact[]
-      })),
-      { id: 'more', label: `+${svcTotal - labSpec.services.length} more`, kind: 'more', title: `${labSpec.servicesCount} services`,
-        text: 'The rest are declared in home.io too.',
-        facts: [['Total', labSpec.servicesCount], ['Where', 'TechDufus/home.io ↗', HOMEIO]] }
-    ]
-  },
-  {
-    id: 'platform', n: 'L3', name: 'Platform', git: true,
-    nodes: [
-      { id: 'argocd', label: 'ArgoCD', title: 'ArgoCD',
-        text: 'Reconciles the cluster from home.io.',
-        facts: [['Pattern', 'GitOps'], ['Repo', 'home.io ↗', HOMEIO]] },
-      { id: 'metallb', label: 'MetalLB', title: 'MetalLB',
-        text: 'Load-balancer IPs for a bare-metal cluster.',
-        facts: [['Role', 'Load balancing'], SETUP] },
-      { id: 'pihole', label: 'Pi-hole DNS', title: 'Pi-hole',
-        text: 'DNS for the network.',
-        facts: [['Role', 'DNS'], SETUP] },
-      { id: 'storage', label: 'Local + NFS storage', title: 'Storage patterns',
-        text: 'Local and NFS-backed storage patterns for workloads.',
-        facts: [['Pattern', 'Local + NFS-backed'], SETUP] }
-    ]
-  },
-  {
-    id: 'cluster', n: 'L2', name: 'Cluster', git: true,
-    nodes: [
-      { id: 'talos1', label: 'talos', group: 'talos' },
-      { id: 'talos2', label: 'talos', group: 'talos' },
-      { id: 'talos3', label: 'talos', group: 'talos' },
-      { id: 'talos', label: 'Talos Kubernetes <small>×3</small>', title: 'Talos Kubernetes',
-        text: 'Three nodes on Talos, an immutable OS built only for Kubernetes.',
-        facts: [['Nodes', '3'], ['Host', 'Proxmox VE'], ['Build log', 'Talos on Proxmox with Terraform', talosHref]] }
-    ]
-  },
-  {
-    id: 'hv', n: 'L1', name: 'Hypervisor', git: true,
-    nodes: [
-      { id: 'proxmox', label: 'Proxmox VE', title: 'Proxmox VE',
-        text: 'The hypervisor under the Talos cluster.',
-        facts: [['Hosts', 'Talos ×3'], ['Declared', 'Terraform + Ansible, in home.io']] }
-    ]
-  },
-  {
-    id: 'metal', n: 'L0', name: 'Metal', git: false,
-    nodes: [
-      { id: 'r720', label: 'PowerEdge R720xd', title: hw.Compute?.name ?? 'Dell PowerEdge R720xd',
-        text: 'Everything above this line runs on it.',
-        facts: [['Threads', '40'], ['RAM', '256GB ECC']] },
-      { id: 'unas', label: hw.Storage?.name ?? 'UNAS Pro 8', title: hw.Storage?.name ?? 'UNAS Pro 8',
-        text: 'Storage.',
-        facts: [['Role', 'Storage'], SETUP] },
-      { id: 'unifi', label: 'UDM Pro + U7 AP', title: hw.Network?.name ?? 'UniFi UDM Pro + U7 AP',
-        text: 'A UniFi Dream Machine Pro and a U7 access point.',
-        facts: [['Role', 'Network'], ['Vendor', 'UniFi']] },
-      { id: 'pi', label: hw.Edge?.name ?? 'Raspberry Pi 4B', title: hw.Edge?.name ?? 'Raspberry Pi 4B',
-        text: 'The edge box.',
-        facts: [['Role', 'Edge'], ['RAM', hw.Edge?.spec ?? '8GB']] }
-    ]
-  }
-];
-
-const DEFAULT_NODE = 'argocd';
-const defaultLayer = LAYERS.find((layer) => layer.nodes.some((node) => node.id === DEFAULT_NODE));
-const defaultPane = defaultLayer?.nodes.find((node) => node.id === DEFAULT_NODE);
-const layerLabel = (layer: ArchLayer) => `${layer.n} · ${layer.name}${layer.git ? ' · in git' : ''}`;
-/* Detail cards for the client script, as lean JSON: id → [text, facts, title?]. The layer line comes from the
-   node's layer row, and the title is left out when it matches the button text. */
-const plain = (html: string) => html.replace(/<[^>]*>/g, '');
-const archData = JSON.stringify(
-  Object.fromEntries(
-    LAYERS.flatMap((layer) => layer.nodes)
-      .filter((node) => !node.group)
-      .map((node) => [node.id, [node.text, node.facts, ...(node.title === plain(node.label) ? [] : [node.title])]])
-  )
-).replace(/</g, '\\u003c');
-
-/* ---------- Hardware table ---------- */
-const HW_LOCATE: Record<string, string> = { Compute: 'r720', Network: 'unifi', Storage: 'unas', Edge: 'pi' };
-const HW_SPEC: Record<string, string> = { Network: 'Gateway + access point', Storage: 'UniFi NAS' };
-const numify = (text: string) => text.replace(/\b(\d+(?:GB)?)\b/g, '<span class="num">$1</span>');
+/* ---------- Hero: counted from the drawings' data ---------- */
+const talos = stackItems().find((item) => item.id === 'talos-nodes');
+const sheetOf = (thumb: string) => drawings.sheets.find((s) => s.thumb === thumb);
+const cabSheet = sheetOf('cabinet');
+const stackSheet = sheetOf('stack');
 
 /* ---------- Changelog ---------- */
 const splitTitle = (title: string): [string, string, boolean] => {
@@ -155,10 +42,13 @@ const splitTitle = (title: string): [string, string, boolean] => {
   return comma > 0 ? [title.slice(0, comma + 1), title.slice(comma + 2), false] : [title, '', false];
 };
 const changelog = labSpec.changelog.map((item, index) => {
-  const post = postByHref(item.href);
   const [from, to, isArrow] = splitTitle(item.title);
-  return { ...item, post, from, to, isArrow, index, month: item.date.slice(0, 7), when: fmtDate(item.date, 'short') };
+  return { ...item, post: postByHref(item.href), from, to, isArrow, index, when: fmtDate(item.date, 'short') };
 });
+
+/* ---------- Drawn to spec: the posts that use the drawings ---------- */
+const posts = drawings.posts.map((p) => ({ ...p, meta: postByHref(p.href) }));
+const count = (n: number, one: string) => `${n} ${one}${n === 1 ? '' : 's'}`;
 
 /* ---------- Desk ---------- */
 const photo = ws.photo;
@@ -167,142 +57,103 @@ const [photoLead, photoRest] = (photo.caption ?? '').split(' · ');
 
 <BaseLayout
   title="The lab"
-  description={`The homelab and workstation I run every day: Proxmox, Talos Kubernetes, ArgoCD, ${labSpec.servicesCount} services, and a terminal-first desk. Last revised ${labSpec.lastRevised}.`}
+  description={`The homelab as engineering drawings: the cabinet, the R720xd and the stack on top of it (Proxmox, Talos Kubernetes, Flux), plus a terminal-first desk. Last revised ${labSpec.lastRevised}.`}
 >
   <div class="pg-lab">
   <!-- ============ HERO ============ -->
   <section id="top" class="lhero" aria-labelledby="lab-title">
     <div class="wrap">
-      <div class="lhero__grid">
-        <div>
-          <p class="eyebrow lhero__eyebrow" data-reveal>Homelab + workstation</p>
-          <h1 class="display" id="lab-title" data-reveal style="--d:1" set:html={labSpec.headline} />
-          <p class="lede lhero__lede" data-reveal style="--d:2">{labSpec.lede}</p>
-          <p class="lhero__note" data-reveal style="--d:3">
-            <span class="badge badge--live"><i class="dot" aria-hidden="true"></i>Last revised <time datetime={labSpec.lastRevisedIso}>{labSpec.lastRevised}</time> · {labSpec.status.toLowerCase()}</span>
-            <a class="link link--quiet" href={labSpec.setupHref}>Full setup notes <span class="arrow" aria-hidden="true">→</span></a>
-          </p>
-        </div>
-      </div>
+      <p class="eyebrow lhero__eyebrow" data-reveal>Homelab + workstation</p>
+      <h1 class="display" id="lab-title" data-reveal style="--d:1" set:html={labSpec.headline} />
+      <p class="lede lhero__lede" data-reveal style="--d:2">{labSpec.lede}</p>
+      <p class="lhero__note" data-reveal style="--d:3">
+        <span class="badge badge--live"><i class="dot" aria-hidden="true"></i>{labSpec.status} · revised <time datetime={labSpec.lastRevisedIso}>{labSpec.lastRevised}</time></span>
+      </p>
 
       <dl class="stats lhero__stats" data-reveal style="--d:3">
-        <Stat value={3} term="Cluster" label="Talos Kubernetes nodes on Proxmox VE" />
-        <Stat value={256} accent="GB" term="Compute" label="ECC RAM, 40 threads, one R720xd" />
-        <Stat value={svcTotal} accent="+" term="Workloads" label="services, including Immich" />
-        <Stat value={1} term="Source of truth" label="repo to rebuild it:" href={HOMEIO} linkText="home.io" />
+        <Stat value={server.threads} term="Threads" label="threads, two Xeons, one R720xd" />
+        <Stat value={server.memory.gb} accent="GB" term="Memory" label="of RAM in the same box" />
+        <Stat value={server.pools.length} term="ZFS pools" label={`ZFS pools: ${server.pools.map((p) => p.id).join(', ')}`} />
+        {talos?.count && <Stat value={talos.count} term="Cluster" label={`Talos ${talos.version} nodes on Proxmox`} />}
+        <Stat value={rack.uUsed} accent="U" term="Cabinet" label={`of ${cabinet.heightU}U in the cabinet`} />
       </dl>
     </div>
   </section>
 
-  <!-- ============ 01 · ARCHITECTURE ============ -->
-  <section id="architecture" class="section" aria-labelledby="arch-title">
+  <!-- ============ 01 · THE CABINET ============ -->
+  <section id="cabinet" class="section" aria-labelledby="cab-title">
     <div class="wrap">
       <div class="sec-head sec-head--split">
         <div class="sec-head__bar" data-reveal>
           <span class="sec-head__index">01</span>
-          <span class="eyebrow">Architecture</span>
-          <span class="sec-head__aside"><span class="meta">Metal up to access</span></span>
+          <span class="eyebrow">Hardware</span>
+          {cabSheet && <span class="sec-head__aside"><span class="meta">{cabSheet.no} · {cabSheet.state}</span></span>}
         </div>
-        <h2 class="h2 sec-head__title" id="arch-title" data-reveal>How it <em>fits</em>.</h2>
-        <p class="lede" data-reveal style="--d:1">Pick any part for details.</p>
+        <h2 class="h2 sec-head__title" id="cab-title" data-reveal>The <em>cabinet</em>.</h2>
+        <p class="lede" data-reveal style="--d:1">{rack.uUsed}U of {cabinet.heightU}U in use. The rest is air, for now.</p>
       </div>
-
-      <figure class="arch" data-arch data-reveal aria-labelledby="arch-title">
-        <div class="arch__board">
-          <div class="arch__grid" data-arch-grid>
-            <div class="arch__rail" data-arch-rail>
-              <div class="arch__src"><a {...linkProps(HOMEIO)}><strong>home.io</strong> <span class="sr-sm">git repo</span></a></div>
-              <div class="arch__body" aria-hidden="true"><span class="arch__line"><span class="arch__pulse"></span></span><span class="arch__label"><b>Declared</b>{labSpec.gitops.tools.map((tool, i) => (<>{i > 0 && <br />}{tool}</>))}</span></div>
-            </div>
-            {LAYERS.map((layer) => (
-              <div class:list={['arch__layer', { 'is-active': layer === defaultLayer }]} data-layer={layer.id} data-git={layer.git ? '' : undefined}>
-                <span class="arch__k"><i>{layer.n}</i>{layer.name}</span>
-                <div class="arch__nodes">
-                  {layer.nodes.map((node) =>
-                    node.group ? (
-                      <button type="button" class="node node--vm" data-node={node.group} tabindex="-1" aria-hidden="true">{node.label}</button>
-                    ) : (
-                      <button type="button" class:list={['node', node.kind && `node--${node.kind}`]} data-node={node.id} aria-pressed={node.id === DEFAULT_NODE ? 'true' : undefined} set:html={node.label} />
-                    )
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-          <figcaption class="arch__foot" id="arch-cap">
-            <span>{labSpec.servicesCount} services, including Immich, dashboards, self-hosted runners and an observability stack.</span>
-            <span class="arch__legend" aria-hidden="true">
-              <span><i class="sw sw--git"></i>declared in home.io</span>
-              <span><i class="sw sw--new"></i>new Feb 2026</span>
-            </span>
-          </figcaption>
-        </div>
-
-        <script type="application/json" is:inline data-arch-data set:html={archData} />
-
-        <aside class="arch__detail" data-arch-detail aria-live="polite" aria-label="Selected component">
-          <p class="arch__hint"><span class="hide-sm">Hover, focus, or tap a part</span><span class="show-sm">Tap any part</span></p>
-          {defaultLayer && defaultPane && (
-            <>
-              <p class="arch__dlayer">{layerLabel(defaultLayer)}</p>
-              <h3 class="arch__dtitle">{defaultPane.title}</h3>
-              <p class="arch__dtext">{defaultPane.text}</p>
-              <dl class="arch__dfacts">{defaultPane.facts?.map(([k, v, href]) => <div><dt>{k}</dt><dd>{href ? <a {...linkProps(href)}>{v}</a> : v}</dd></div>)}</dl>
-            </>
-          )}
-        </aside>
-      </figure>
+      <CabinetExcerpt id="lab-cab" />
     </div>
   </section>
 
-  <!-- ============ 02 · HARDWARE ============ -->
-  <section id="hardware" class="section" aria-labelledby="hw-title">
+  <!-- ============ 02 · THE STACK ============ -->
+  <section id="stack" class="section" aria-labelledby="stack-title">
     <div class="wrap">
-      <div class="sec-head">
+      <div class="sec-head sec-head--split">
         <div class="sec-head__bar" data-reveal>
           <span class="sec-head__index">02</span>
-          <span class="eyebrow">Hardware</span>
-          <span class="sec-head__aside"><span class="meta">At a glance</span></span>
+          <span class="eyebrow">Software</span>
+          {stackSheet && <span class="sec-head__aside"><span class="meta">{stackSheet.no} · {stackSheet.state}</span></span>}
         </div>
+        <h2 class="h2 sec-head__title" id="stack-title" data-reveal>The <em>stack</em>.</h2>
+        <p class="lede" data-reveal style="--d:1">Metal at the bottom, Kubernetes on top. The top floor is still going up.</p>
       </div>
-      <div class="hw">
-        <div class="hw__intro" data-reveal>
-          <h2 class="h3" id="hw-title">Hardware.</h2>
-        </div>
-        <table class="hw__table" data-reveal style="--d:1">
-          <caption class="sr-only">Homelab hardware</caption>
-          <thead><tr><th scope="col">Role</th><th scope="col">Hardware</th><th scope="col">Specs</th><th scope="col"><span class="sr-only">Diagram</span></th></tr></thead>
-          <tbody>
-            {labSpec.hardware.map((row) => (
-              <tr>
-                <th scope="row">{row.role}</th>
-                <td class="hw__name">{row.name}</td>
-                <td class="hw__spec" set:html={numify(row.spec ?? HW_SPEC[row.role] ?? '')} />
-                <td>{HW_LOCATE[row.role] && <button type="button" class="hw__locate" data-locate={HW_LOCATE[row.role]} aria-label={`Show the ${row.name} in the diagram`}>In diagram <span aria-hidden="true">↑</span></button>}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <div class="lstack"><StackExcerpt id="lab-stack" /></div>
     </div>
   </section>
 
-  <!-- ============ 03 · GITOPS ============ -->
-  <section id="platform" class="section" aria-labelledby="platform-title">
+  <!-- ============ 03 · DRAWN TO SPEC ============ -->
+  <section id="drawings" class="section" aria-labelledby="dts-title">
     <div class="wrap">
-      <div class="sec-head">
+      <div class="sec-head sec-head--split">
         <div class="sec-head__bar" data-reveal>
           <span class="sec-head__index">03</span>
-          <span class="eyebrow">GitOps</span>
-          <span class="sec-head__aside"><a class="meta link link--quiet" {...linkProps(HOMEIO)}>{labSpec.gitops.repo} ↗</a></span>
+          <span class="eyebrow">Drawn to spec</span>
+          <span class="sec-head__aside"><span class="meta">{count(drawings.sheets.length, 'sheet')} · {count(posts.length, 'post')}</span></span>
         </div>
+        <h2 class="h2 sec-head__title" id="dts-title" data-reveal>Drawn to <em>spec</em>.</h2>
+        <p class="lede" data-reveal style="--d:1">{drawings.lede}</p>
       </div>
-      <div class="rebuild">
-        <div data-reveal>
-          <h2 class="h2" id="platform-title">All of it in <em>git</em>.</h2>
-          <p class="rebuild__by">Terraform, Ansible and ArgoCD, all in home.io. {labSpec.gitops.motto}</p>
-        </div>
-        {homeio && <div><RepoCard repo={homeio} why={false} /></div>}
+      <ul class="dts" role="list" data-reveal style="--d:1">
+        {drawings.sheets.map((d) => (
+          <li>
+            <a class="dts__card" href={d.href}>
+              <span class="dts__art"><SheetThumb kind={d.thumb} /></span>
+              <span class="dts__tb">
+                <span class="dts__no">{d.no}<span class:list={['dts__state', { 'is-wip': d.state !== 'As built' }]}>{d.state}</span></span>
+                <span class="dts__t">{d.title}</span>
+                <span class="dts__note">{d.note}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="dts-posts" data-reveal style="--d:2">
+        <h3 class="dts-posts__h">Posts that use them</h3>
+        <ul class="dts-posts__list" role="list">
+          {posts.map((p) => (
+            <li>
+              <a class="dts__card dts__card--post" href={p.href}>
+                <span class="dts__art"><SheetThumb kind={p.thumb} /></span>
+                <span class="dts__tb">
+                  <span class="dts__no">The post{p.meta && <> · {fmtDate(p.meta.date)} · {p.meta.minutes} min</>}</span>
+                  <span class="dts__t">{p.title} <span class="arrow" aria-hidden="true">→</span></span>
+                  <span class="dts__note">{p.note}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   </section>
@@ -324,7 +175,7 @@ const [photoLead, photoRest] = (photo.caption ?? '').split(' · ');
         <ol class="timeline" data-reveal style="--d:1">
           {changelog.map((item) => (
             <li class:list={['timeline__item', 'log__item', { 'is-now': item.index === 0 }]}>
-              <span class="timeline__when"><time datetime={item.month}>{item.when}</time>{item.index === 0 && ' · latest'}</span>
+              <span class="timeline__when"><time datetime={item.date}>{item.when}</time>{item.index === 0 && ' · latest'}</span>
               <h3 class="log__what">
                 {item.href ? (
                   <a href={item.href}>{item.from}{item.to && ' '}{item.to && (item.isArrow ? <><span class="to">→</span> {item.to}</> : <span class="to">{item.to}</span>)}</a>
@@ -335,7 +186,7 @@ const [photoLead, photoRest] = (photo.caption ?? '').split(' · ');
               {item.note && <p>{item.note}</p>}
               {item.href && (
                 <p class="log__links">
-                  <a class="link" href={item.href}>{item.href === tsHref ? 'Read the write-up' : item.href === talosHref ? 'Read the build log' : 'Read the post'} <span class="arrow" aria-hidden="true">→</span></a>
+                  <a class="link" href={item.href}>{item.cta ?? 'Read the post'} <span class="arrow" aria-hidden="true">→</span></a>
                   {item.post && <span class="meta">{fmtDate(item.post.date)} · {item.post.minutes} min</span>}
                 </p>
               )}
@@ -386,116 +237,6 @@ const [photoLead, photoRest] = (photo.caption ?? '').split(' · ');
 </BaseLayout>
 
 <script>
-  // Architecture diagram: select a part (click, focus, mouse hover) to swap the detail card,
-  // which follows the tapped layer on phones. Hardware rows jump to their node. Cards other than
-  // the server-rendered default are built from the [data-arch-data] JSON (id → [text, facts, title?]).
-  const arch = document.querySelector<HTMLElement>('[data-arch]');
-  const grid = arch?.querySelector<HTMLElement>('[data-arch-grid]');
-  const detail = arch?.querySelector<HTMLElement>('[data-arch-detail]');
-
-  if (arch && grid && detail) {
-    type Fact = [string, string, string?];
-    const data: Record<string, [string, Fact[]?, string?]> = JSON.parse(arch.querySelector('[data-arch-data]')?.textContent || '{}');
-    const narrow = window.matchMedia('(max-width: 760px)');
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const layerOf = (id: string) => grid.querySelector(`[data-node="${id}"]`)?.closest<HTMLElement>('.arch__layer') ?? null;
-    let current = grid.querySelector<HTMLElement>('[data-node][aria-pressed="true"]')?.dataset.node ?? null;
-    // Toggle state lives on the real parts; the Talos VM chips are decorative (is-on).
-    grid.querySelectorAll('.node:not(.node--vm)').forEach((button) => {
-      if (!button.hasAttribute('aria-pressed')) button.setAttribute('aria-pressed', 'false');
-    });
-
-    const el = (tag: string, cls = '', text = '') => {
-      const node = document.createElement(tag);
-      if (cls) node.className = cls;
-      if (text) node.textContent = text;
-      return node;
-    };
-    const card = (id: string, layer: HTMLElement) => {
-      const entry = data[id];
-      if (!entry) return null;
-      const [text, facts = [], title = grid.querySelector(`[data-node="${id}"]`)?.textContent ?? ''] = entry;
-      const k = layer.querySelector('.arch__k');
-      const dl = el('dl', 'arch__dfacts');
-      for (const [term, value, href] of facts) {
-        const dd = el('dd', '', href ? '' : value);
-        if (href) {
-          const a = el('a', '', value) as HTMLAnchorElement;
-          a.href = href;
-          if (/^https?:/.test(href)) Object.assign(a, { target: '_blank', rel: 'noopener' });
-          dd.append(a);
-        }
-        const row = el('div');
-        row.append(el('dt', '', term), dd);
-        dl.append(row);
-      }
-      const where = `${k?.firstChild?.textContent} · ${k?.lastChild?.textContent}${layer.hasAttribute('data-git') ? ' · in git' : ''}`;
-      return [el('p', 'arch__dlayer', where), el('h3', 'arch__dtitle', title), el('p', 'arch__dtext', text), dl];
-    };
-
-    // On phones the detail card travels to sit right under the selected layer.
-    const place = () => {
-      const layer = narrow.matches && current ? layerOf(current) : null;
-      if (layer) {
-        if (detail.parentElement !== layer) layer.appendChild(detail);
-      } else if (detail.parentElement !== arch) {
-        arch.appendChild(detail);
-      }
-    };
-
-    const select = (id: string) => {
-      const layer = layerOf(id);
-      const parts = layer && id !== current ? card(id, layer) : null;
-      if (!layer || !parts) return;
-      current = id;
-      // keep the tapped layer still on phones while the card moves
-      const before = narrow.matches ? layer.getBoundingClientRect().top : null;
-      grid.querySelectorAll<HTMLElement>('[data-node]').forEach((button) => {
-        const on = button.dataset.node === id;
-        if (button.hasAttribute('aria-pressed')) button.setAttribute('aria-pressed', String(on));
-        else button.classList.toggle('is-on', on);
-      });
-      grid.querySelectorAll('.arch__layer').forEach((row) => row.classList.toggle('is-active', row === layer));
-      detail.querySelectorAll(':scope > :not(.arch__hint)').forEach((node) => node.remove());
-      detail.append(...parts);
-      detail.classList.remove('is-swap');
-      void detail.offsetWidth;
-      detail.classList.add('is-swap');
-      place();
-      if (before !== null) {
-        const shift = layer.getBoundingClientRect().top - before;
-        if (Math.abs(shift) > 1) window.scrollBy({ top: shift, behavior: 'instant' });
-      }
-    };
-
-    const nodeFrom = (event: Event) => (event.target as Element | null)?.closest<HTMLElement>('[data-node]')?.dataset.node;
-    grid.addEventListener('click', (event) => { const id = nodeFrom(event); if (id) select(id); });
-    grid.addEventListener('focusin', (event) => { const id = nodeFrom(event); if (id) select(id); });
-    // Mouse hover previews; touch relies on the click above (no layout jumps mid-scroll).
-    grid.addEventListener('pointerover', (event) => {
-      if (event.pointerType !== 'mouse' || narrow.matches) return;
-      const id = nodeFrom(event);
-      if (id) select(id);
-    });
-
-    const rail = arch.querySelector('[data-arch-rail]');
-    rail?.addEventListener('mouseenter', () => arch.classList.add('is-rail'));
-    rail?.addEventListener('mouseleave', () => arch.classList.remove('is-rail'));
-
-    document.querySelectorAll<HTMLElement>('[data-locate]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const id = button.dataset.locate ?? '';
-        select(id);
-        arch.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' });
-        const node = grid.querySelector<HTMLElement>(`[data-node="${id}"][aria-pressed]`);
-        if (node) window.setTimeout(() => node.focus({ preventScroll: true }), reduced.matches ? 0 : 500);
-      });
-    });
-
-    narrow.addEventListener('change', place);
-    place();
-  }
-
   // Big JPEGs: lazy, then fade in once decoded.
   document.querySelectorAll<HTMLImageElement>('img[data-lazy]').forEach((img) => {
     const box = img.parentElement;
