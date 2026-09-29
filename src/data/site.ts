@@ -420,12 +420,12 @@ export const featuredRepos: FeaturedRepo[] = [
     name: 'home.io',
     url: 'https://github.com/TechDufus/home.io',
     tag: 'Homelab IaC',
-    status: 'Active',
+    status: 'Archived',
     starsFallback: '35+',
     summary:
-      'Homelab infrastructure-as-code with Terraform + GitOps patterns for repeatable rebuilds and low-drama operations.',
+      'My old homelab as code: Terraform, k3s and Argo CD. Retired in September 2026, when I rebuilt the lab for an AI operator.',
     whyItMatters:
-      'I test ideas here first so production gets a cleaner version.',
+      'Every lesson it taught me the hard way went into the new lab’s plan.',
     fallback: {
       description: 'Home automation.',
       language: 'Shell',
