@@ -7,6 +7,7 @@
   (the text equivalent of the drives and pools on the drawing).
 */
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteMetadata } from '../../data/site';
 import Sheet from '../../components/drawing/Sheet.astro';
 import ViewTabs from '../../components/drawing/ViewTabs.astro';
 import LineKey from '../../components/drawing/LineKey.astro';
@@ -29,7 +30,12 @@ const layout = (p: (typeof server.pools)[number]) => (p.layout === 'mirror' ? `$
 const driveAt = (bay: number) => server.drives.find((d) => d.bay === bay)!;
 ---
 
-<BaseLayout title="The server · Sheet 02" description="Sheet 02 of my homelab drawings: the Dell PowerEdge R720xd as built, after swapping its PERC H710P Mini for an HBA330. Six drives, three ZFS pools, and what changed.">
+<BaseLayout
+  title="The server · Sheet 02"
+  description="Sheet 02 of my homelab drawings: the Dell PowerEdge R720xd as built, after swapping its PERC H710P Mini for an HBA330. Six drives, three ZFS pools, and what changed."
+  ogImage={siteMetadata.media.labSocialImage}
+  ogImageAlt={siteMetadata.media.labSocialImageAlt}
+>
   <div class="pg-server">
     <section class="wrap srv-hero" aria-labelledby="srv-title">
       <p class="eyebrow srv-hero__eyebrow">Lab · Sheet 02</p>

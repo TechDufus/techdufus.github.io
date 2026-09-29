@@ -17,10 +17,15 @@ export const siteMetadata = {
     appleTouchIcon: '/apple-touch-icon.png',
     manifestPath: '/site.webmanifest',
     themeColor: '#0a1122',
-    defaultSocialImage: '/img/social-default.jpg',
-    defaultSocialImageAlt: 'TechDufus homelab desk with terminal-first AI and Kubernetes workflows',
+    defaultSocialImage: '/img/social-default.png',
+    defaultSocialImageAlt:
+      'Duotone portrait of TechDufus beside the gold wordmark and the line “I break things, fix them, and write down what actually worked.”, laid out like an engineering drawing.',
     defaultSocialImageWidth: 1200,
-    defaultSocialImageHeight: 630
+    defaultSocialImageHeight: 630,
+    /** The /lab pages' card (same size as the default): the site drawn as sheet TD-SITE-00. */
+    labSocialImage: '/img/social-lab.png',
+    labSocialImageAlt:
+      'Gold-ink drawing sheet on navy: the TechDufus wordmark with dimension lines, a front elevation of the Dell R720xd with its five drives, and a schedule of writing, the lab and projects.'
   }
 };
 

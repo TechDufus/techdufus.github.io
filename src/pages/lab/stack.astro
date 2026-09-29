@@ -5,6 +5,7 @@
   list per layer, from the same data (src/data/lab/stack.ts).
 */
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteMetadata } from '../../data/site';
 import StackSheet from '../../components/drawing/stack/StackSheet.astro';
 import { stack, stackCounts } from '../../data/lab/stack';
 import { allThings, talos, toolText } from '../../components/drawing/stack/model';
@@ -28,7 +29,12 @@ const rows = (l: (typeof stack)[number]) =>
     }));
 ---
 
-<BaseLayout title="The stack · Sheet 03" description="Sheet 03 of my homelab drawings: what runs on the metal, from Proxmox up to the Kubernetes cluster, drawn as a building section. Solid is running, dashed is next.">
+<BaseLayout
+  title="The stack · Sheet 03"
+  description="Sheet 03 of my homelab drawings: what runs on the metal, from Proxmox up to the Kubernetes cluster, drawn as a building section. Solid is running, dashed is next."
+  ogImage={siteMetadata.media.labSocialImage}
+  ogImageAlt={siteMetadata.media.labSocialImageAlt}
+>
   <div class="pg-stack">
     <section class="wrap stk-hero" aria-labelledby="stk-title">
       <p class="eyebrow stk-hero__eyebrow">Lab · Sheet 03</p>

@@ -6,6 +6,7 @@
   The front, side and rear views load from /lab/rack/views/ (src/components/drawing/rack/rack.ts).
 */
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteMetadata } from '../../data/site';
 import CabinetSheet from '../../components/drawing/rack/CabinetSheet.astro';
 import { DWG, derived, device, links } from '../../components/drawing/rack/model';
 import type { Endpoint } from '../../data/lab/types';
@@ -20,6 +21,8 @@ const medium = { copper: 'Copper', fiber: 'Fiber', 'sfp+': 'SFP+', poe: 'PoE' } 
 <BaseLayout
   title="Sheet 01 · The cabinet"
   description="My homelab's 42U cabinet as an engineering drawing: every box at its U position, front, side and rear views, and the network links between them."
+  ogImage={siteMetadata.media.labSocialImage}
+  ogImageAlt={siteMetadata.media.labSocialImageAlt}
 >
   <div class="pg-rack">
     <section class="wrap rk-hero" aria-labelledby="rk-title">
