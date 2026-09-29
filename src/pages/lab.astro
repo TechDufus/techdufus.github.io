@@ -15,7 +15,7 @@ import StackExcerpt from '../components/drawing/stack/StackExcerpt.astro';
 import SheetThumb from '../components/drawing/rack/SheetThumb.astro';
 import Stat from '../components/ui/Stat.astro';
 import { fmtDate, linkProps } from '../components/ui/format';
-import { labSpec } from '../data/site';
+import { labSpec, siteMetadata } from '../data/site';
 import { cabinet, derived as rack } from '../data/lab/rack';
 import { server } from '../data/lab/server';
 import { stackItems } from '../data/lab/stack';
@@ -58,6 +58,8 @@ const [photoLead, photoRest] = (photo.caption ?? '').split(' · ');
 <BaseLayout
   title="The lab"
   description={`The homelab as engineering drawings: the cabinet, the R720xd and the stack on top of it (Proxmox, Talos Kubernetes, Flux), plus a terminal-first desk. Last revised ${labSpec.lastRevised}.`}
+  ogImage={siteMetadata.media.labSocialImage}
+  ogImageAlt={siteMetadata.media.labSocialImageAlt}
 >
   <div class="pg-lab">
   <!-- ============ HERO ============ -->
