@@ -20,8 +20,8 @@ homelab; never write to it.
 - Never publish anything from "Privacy" below. When in doubt, leave it off. This skill, the site
   repo and its commits are public too: never paste a private value into them, not even as an
   example or a regex (the privacy scan reads the private names from the homelab at run time).
-- Never invent. If the repo doesn't say it, it isn't on the site. No estimates as facts (PLAN's
-  "Size (estimate…)" stays off until the thing is built).
+- Never invent. If the repo doesn't say it, it isn't on the site. No estimates as facts (a planned
+  VM's estimated size stays off until it's built).
 - No provenance or citation clutter, no layer toggles, no CAD readouts, no link to the homelab
   repo (it's private; the site says "one git repo, private for now").
 - Commit locally when verified; ask the owner before pushing or deploying.
@@ -61,19 +61,20 @@ no longer true:
 |---|---|
 | `infra/tofu/talos.tf` `locals` (`talos_version`, `kubernetes_version`, `nodes`) and `proxmox_virtual_environment_vm.talos` (`cpu.cores`, `memory.dedicated` MiB ÷ 1024, `disk.size` GB, `datastore_id` → pool) | `talos-nodes`: `version`, `count`, `vm`, the card's size and "Talos X.Y, running Kubernetes X.Y" line |
 | `talos/schematic.yaml` | the Talos card's Image Factory line (extension names only) |
-| other `infra/tofu/*.tf` VM resources (PLAN §4.3 plans `infra/tofu/vms/` driven by `inventory/vms.yaml`) | `standalone` group items (robomp and any later VM): status, size |
+| other `infra/tofu/*.tf` VM resources (general-purpose VMs are open work in `docs/architecture.md` "Not built") | `standalone` group items (robomp and any later VM): status, size |
 | `kubernetes/flux/platform.yaml` (one Flux `Kustomization` per component) + `kubernetes/platform/<x>/` (HelmRelease/OCIRepository/manifests) | `platform` items: running, `version` |
 | `kubernetes/flux/*.yaml` Kustomizations with `path: ./kubernetes/apps/<app>` + `kubernetes/apps/<app>/` | the `apps` group |
 | `hosts/proxmox/playbook.yml` task names | the `host-config` card (snapshots, SMART, ZFS events, ntfy, node exporter) and any new plant-room item in the `host` group |
 | the Pi's playbook (`hosts/*/playbook.yml`, the folder named after the Pi) | the `rpi` item: "the control node", configured by Ansible. Nothing more about what the Pi runs |
 | `inventory/hardware/*.yml` | `server.ts`: drives (maker, model, size, bay, pool), pools (layout, bays), controller name. Never serials, WWNs, device paths, PCI addresses, firmware or host names |
-| PLAN.md §2 (decisions table), §4.1 (pools), §4.4 (platform layout) | the planned items and their one-line purpose |
-| PLAN.md §4.x "Built YYYY-MM-DD" / "(built YYYY-MM-DD)" markers | running, and the changelog date |
-| PLAN.md §6 phases, §10 open questions | whether something is still planned, decided or dropped |
+| `docs/architecture.md`, "the system as built": Hardware, Proxmox host, Cluster (its versions table and component list), rpi-control | what runs (cross-check with the wiring above) and the versions |
+| `docs/architecture.md` "Not built" (open work, one GitHub issue each) | the planned items |
+| `docs/adr/*.md` (indexed in `docs/adr/README.md`) | why something is in or out; an ADR that replaces a choice makes the old item gone |
+| `PLAN.md`: retired in homelab `da1179d` (2026-09-29). For commits before that, read it with `git -C ../homelab show <commit>:PLAN.md` (§2 decisions, §4.x "Built YYYY-MM-DD" markers, §6 phases) | the same answers, for older history |
 | `Taskfile.yaml` verbs | how a layer is built (the layer `tool` strings: `Ansible`, `OpenTofu`, `Helm, then Flux`) |
 | `mise.toml` | cross-check only: `talosctl`/`kubectl` should match the tofu `talos_version`/`kubernetes_version`. The site prints no CLI versions |
 | `git -C ../homelab log` | changelog dates and what changed |
-| PLAN §2/§4.1, the inventory header ("Proxmox VE 9.2") | `proxmox.version` |
+| `docs/architecture.md` Proxmox host ("Proxmox VE 9.2"), the inventory header | `proxmox.version` |
 
 One site item per thing a reader would recognise. A Kustomization that only supports another one
 folds into that item's card; a new capability that isn't part of an existing item gets its own.
@@ -93,14 +94,18 @@ add the answer here.
 ## Status rules
 
 - **running**: in the committed repo *and* wired (a tofu resource, a Flux Kustomization whose path
-  holds a HelmRelease or manifests, or a playbook task) *and* PLAN.md marks it built. Wired but
-  not marked built: leave it `planned` and mention it in the report.
-- **planned**: only in PLAN's target architecture (§2, §4.x layouts), not wired yet.
-- **gone**: dropped from the plan or removed from the repo (a Kustomization deleted, PLAN or an
-  ADR supersedes it): delete the item. Don't keep it dashed.
-- **Never invent.** If the repo doesn't say, leave it off. PLAN still lists some things the owner
-  has since dropped (a later commit removes them, or an ADR replaces them); when PLAN contradicts
-  itself or the repo, leave the item off and ask.
+  holds a HelmRelease or manifests, or a playbook task) *and* `docs/architecture.md` describes it
+  as built (before `da1179d`: a PLAN "Built" marker). Wired but not described as built: leave it
+  `planned` and mention it in the report.
+- **planned**: listed under "Not built" in `docs/architecture.md` (before `da1179d`: only in
+  PLAN's target architecture), not wired yet.
+- **gone**: removed from the repo, replaced by an ADR, or in neither the as-built sections nor
+  "Not built": delete the item, don't keep it dashed. If it's something the owner chose to show
+  (robomp, say), ask before deleting it.
+- **Never invent.** If the repo doesn't say, leave it off. When the docs, the ADRs and the wiring
+  disagree, leave the item off and ask.
+- **Known problems** (a failing disk, a flaky NIC) aren't published: no health or telemetry on the
+  site. A disk that actually gets replaced is a hardware change.
 - **Versions are major.minor** of the app itself: an image tag (`metrics-server:v0.9.0` → `0.9`),
   a chart that versions with its app (`cilium` 1.20.2 → `1.20`, cert-manager `v1.21.2` →
   `1.21`), or an explicit comment (`0.5.10 # app v0.20.0` → `0.20`). A chart version that isn't
@@ -117,7 +122,7 @@ add the answer here.
    ```sh
    git -C ../homelab log --reverse --date=short --format='%h %ad %s' <marker>..HEAD
    git -C ../homelab log --stat --format='--- %h %s' <marker>..HEAD
-   git -C ../homelab diff <marker>..HEAD -- PLAN.md kubernetes/flux infra/tofu hosts inventory talos mise.toml Taskfile.yaml
+   git -C ../homelab diff <marker>..HEAD -- docs/architecture.md docs/adr kubernetes/flux infra/tofu hosts inventory talos mise.toml Taskfile.yaml
    ```
 
    Nothing listed: the site is current; stop. `kubernetes/platform/` and `kubernetes/apps/` are
@@ -126,9 +131,10 @@ add the answer here.
 3. **Classify each commit** as one of:
    - *stack*: a component, app or VM appeared, went running, changed major.minor, or went away;
    - *hardware*: a drive, bay, pool, controller or cabinet device changed;
-   - *milestone*: PLAN gained a "Built YYYY-MM-DD" marker, or a phase finished;
-   - *none*: fixes, config tweaks, docs, skills, scripts, secrets plumbing, DNS records, network
-     addressing, anything private. Most commits are *none*. If every commit is *none*, only move
+   - *milestone*: `docs/architecture.md` gained something as built, or a "Not built" line went
+     away because it's done (before `da1179d`: PLAN gained a "Built YYYY-MM-DD" marker);
+   - *none*: fixes, config tweaks, doc rewording, skills, scripts, secrets plumbing, DNS records,
+     network addressing, anything private. Most commits are *none*. If every commit is *none*, only move
      the marker (step 9) and commit it as `chore(lab): homelab <short hash>, nothing to sync`.
 4. **Check each candidate** against the source map and the status rules, reading the file at
    `HEAD` (not the diff alone). Write down the site change and the commit that justifies it.
@@ -218,8 +224,8 @@ telemetry, dates of measurement, firmware or serials. For planned things the dra
 }
 ```
 
-Running needs its tofu resource and a PLAN "built" marker; sizes come from the resource, never
-PLAN's estimate. `what` wraps at 15 characters in the pavilion: three lines at most. It
+Running needs its tofu resource and `docs/architecture.md` describing it; sizes come from the
+resource, never an estimate. `what` wraps at 15 characters in the pavilion: three lines at most. It
 draws as a pavilion beside the cluster on the VM floor; see the capacity limit below.
 
 ### Change the Talos node count or size (`talos-nodes`)
@@ -237,7 +243,8 @@ Before changing drives, pools or bays in `server.ts`, freeze the post (next sect
 - **Drives**: add the id to `DriveId` in `types.ts`; add a `drives` entry (`bay` 0–23 front,
   24–25 rear; `pool`; card `kind` like `Bay 5 · SATA SSD`). Bays are derived. Every pool's `bays`
   must equal its drives' bays, in the same order, or `server.ts` throws at load. Update the
-  pool's `usableGiB` and card ("Bays 2 and 3, about 450 GiB.") from the inventory and PLAN §4.1.
+  pool's `usableGiB` and card ("Bays 2 and 3, about 450 GiB.") from the inventory and the pools
+  table in `docs/architecture.md`.
 - **Pools**: a new pool needs the id in `PoolId`, `POOL_CLASS` in
   `src/components/drawing/post/fig.ts`, a `.pool-<id>` colour in `src/styles/drawing.css`, the
   `LineKey` union in `src/components/drawing/LineKey.astro`, and the legend in
@@ -357,11 +364,11 @@ More fixtures and apps grow `/lab/stack/` and `/lab/`.
 
 - One `labSpec.changelog` entry per milestone, **newest first** (index 0 is "latest" on `/lab/`
   and the home page shows it):
-  `{ date: 'YYYY-MM-DD', title, href?, note?, cta? }`. The date is the milestone's: the PLAN
-  "Built" date or the homelab commit date. `href` is a post, or the sheet that shows it
-  (`/lab/stack/`); `cta` is the link text and defaults to "Read the post", so set it for sheets
-  ("See the stack"). Titles: "A → B" for a swap, or "X, Y" (the part after the last ", " is
-  highlighted on `/lab/`).
+  `{ date: 'YYYY-MM-DD', title, href?, note?, cta? }`. The date is the milestone's: the date of
+  the homelab commit that built it (for older history, PLAN's "Built" date). `href` is a post, or
+  the sheet that shows it (`/lab/stack/`); `cta` is the link text and defaults to "Read the post",
+  so set it for sheets ("See the stack"). Titles: "A → B" for a swap, or "X, Y" (the part after
+  the last ", " is highlighted on `/lab/`).
 - Not every sync is a milestone. Version bumps and fixes get no entry.
 - `lastRevised` / `lastRevisedIso` are month-grained (`'Sep 2026'`, `'2026-09'`) and are literal
   types in `labSpec`'s type annotation: change the annotation and the value together.
@@ -398,10 +405,13 @@ ids |= set(re.findall(r'^\s+([\w-]+):\s*\n\s+ansible_host:', inv, re.M))        
 ids |= set(re.findall(r'^\s*([\w-]+)\s*=\s*\{\s*vmid', inv, re.M))                   # VM names
 ids |= set(re.findall(r'\bbucket\s*[=:]?\s*"?([a-z0-9][\w.-]{5,})', every))          # buckets
 names = {n for n in ids if re.search(r'[\d_:.-]', n) and not re.match(r'(?:each|local|var)\.', n)}
-for vault, item in re.findall(r'op://([^/\s\'"`]+)/([^/\n\'"`]+)/', every):          # 1Password vaults and items
-    names |= {x for x in (vault, item) if not re.search(r'[<>…]|^(?:Vault|Item)$', x)}
-for vs in re.findall(r'ALLOWED_VAULTS=\(([^)]*)\)', every): names |= set(vs.split())
-names = {n for n in names if len(n) >= 3 and re.search(r'[A-Za-z0-9]', n)}
+refs = re.findall(r'op://([^/\s\'"`]+)/([^/\n\'"`]+)/', every)                      # 1Password vaults and items
+vaults = {v for v, _ in refs} | {v for vs in re.findall(r'ALLOWED_VAULTS=\(([^)]*)\)', every) for v in vs.split()}
+vaults -= {'Vault', '*'}
+docs = read('*.md', 'docs/**/*.md', '.omp/**/*.md', 'kubernetes/**/*.yaml')
+names |= vaults | {i for _, i in refs} | set(re.findall(r'(?:service account|token|server)\s+`([^`]+)`', docs))
+for v in vaults: names |= {i.strip() for i in re.findall(re.escape(v) + r'/([^/`\'"\n|)]{3,}?)(?=[`\'"\n|)])', docs)}
+names = {n for n in names if len(n) >= 3 and re.search(r'[A-Za-z0-9]', n) and not re.search(r'[<>…]|^(?:Vault|Item)$', n)}
 domains = {h.split('.', 1)[1] for h in names if re.fullmatch(r'[a-z][\w-]*(?:\.[\w-]+){2,}', h)}
 private = [re.compile(r'(?<![\w-])' + re.escape(n) + r'(?![\w-])') for n in names]
 private += [re.compile(r'\b(?:[\w-]+\.)*' + re.escape(d) + r'\b', re.I) for d in domains]
@@ -449,7 +459,10 @@ Then serve the build (`npx astro preview --host 127.0.0.1 --port <free port>`) a
   Before / After).
 - Zero console errors; at 390 the page doesn't scroll sideways
   (`document.documentElement.scrollWidth <= innerWidth`; the sheets pan inside their frame, that's
-  fine). The home stack line wraps cleanly as it grows.
+  fine). The home stack line wraps without overflow as it grows (a hyphenated name such as
+  cert-manager may break at its hyphen at 390; that's the browser, not a bug).
+- Take screenshots with `prefers-reduced-motion: reduce` emulated: otherwise the sheets and
+  excerpts plot in as they scroll into view, and an early shot shows an empty frame.
 - The post, if `server.ts` changed: identical to before (the freeze check).
 
 Stop the preview server when done.
