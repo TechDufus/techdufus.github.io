@@ -42,7 +42,7 @@ if (kind === 'cabinet') {
     thin += rr(x - 8, 0, 16, Y(cut)) + rr(x - 8, Y(resume), 16, H - Y(resume));
     thin += `M${r1(x - 14)} ${r1(brk)}h8l3 -6l4 12l3 -6h8`;
   }
-  for (const id of ['top-shelf', 'rpi-4b', 'fiber-modem', 'poe-injector', 'unas-pro-8', 'udm-pro', 'r720xd'] as const) {
+  for (const id of ['top-shelf', 'rpi-4b', 'ont', 'poe-injector', 'unas-pro-8', 'udm-pro', 'r720xd'] as const) {
     const s = slotOf$(id);
     if (id === 'top-shelf') {
       // the tray, and the two brackets
@@ -58,7 +58,7 @@ if (kind === 'cabinet') {
     if (id === 'unas-pro-8') med += cells(x + 5, t + 10, w - 10, s.faceH * 0.34, 4) + cells(x + 5, t + s.faceH * 0.54, w - 10, s.faceH * 0.34, 4);
     if (id === 'udm-pro') med += rr(x + 6, t + 10, 20, 24) + rr(x + 186, t + 8, 107, 29) + cells(x + 308, t + 9, 64, 26, 4) + rr(x + 386, t + 20, 20, 15);
     if (id === 'rpi-4b') med += rr(x + 4, t + 6, 14, s.faceH - 8) + rr(x + 42, t + 6, 16, s.faceH - 8);
-    if (id === 'fiber-modem') med += `M${r1(x + w * 0.42)} ${r1(t + 5)}h${r1(w * 0.26)}` + cells(x + 8, t + 14, w - 16, s.faceH - 20, 10);
+    if (id === 'ont') med += `M${r1(x + w * 0.42)} ${r1(t + 5)}h${r1(w * 0.26)}` + cells(x + 8, t + 14, w - 16, s.faceH - 20, 10);
     if (id === 'poe-injector') med += rr(x + 8, t + 11, 20, 16) + rr(x + 32, t + 11, 20, 16);
   }
   // the ears of the two bracketed boxes

@@ -74,7 +74,7 @@ export async function GET() {
     },
     rack: {
       text:
-        `A 42U cabinet, and its rails count from the top. Up there is a shelf with the Raspberry Pi 4, the fiber modem and the PoE injector that powers the U7 Pro. Under it: the UNAS Pro 8, the UDM Pro, then the R720xd. A shelf of spares sits at the very bottom, and the rest is air.\n\n` +
+        `A 42U cabinet, and its rails count from the top. Up there is a shelf with the Raspberry Pi 4, the fiber ONT and the PoE injector that powers the U7 Pro. Under it: the UNAS Pro 8, the UDM Pro, then the R720xd. A shelf of spares sits at the very bottom, and the rest is air.\n\n` +
         `It's all drawn to spec. ${sheet('cabinet')} has every box where it sits, ${sheet('server')} opens up the R720xd, and ${sheet('stack')} shows what runs on it. The first two are stamped as built.`,
       cards: cards(SLUG.zfs)
     },

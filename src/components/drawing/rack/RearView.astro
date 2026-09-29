@@ -47,7 +47,7 @@ const brk = (R: Ortho, yb: number): string => {
 };
 
 /* anchor points (paper) */
-const udm = slotOf$('udm-pro'), pi = slotOf$('rpi-4b'), modem = slotOf$('fiber-modem'), inj = slotOf$('poe-injector');
+const udm = slotOf$('udm-pro'), pi = slotOf$('rpi-4b'), ont = slotOf$('ont'), inj = slotOf$('poe-injector');
 const r7 = slotOf$('r720xd'), unas = slotOf$('unas-pro-8');
 /** A front-face zone seen from behind (so hidden): its outline and centre. */
 const hidden = (sl: Slot, id: string, sub?: { i: number; of: number }): { rect: string; c: Pt } => {
@@ -74,9 +74,9 @@ const injPoe = hidden(inj, 'poe');
 const nic1 = rearAt(r7, 'nic-1');
 const [s2, s3] = [rearAt(unas, 'sfp-2'), rearAt(unas, 'sfp-3')];
 const sfp: Pt = [(s2[0] + s3[0]) / 2, s2[1]];
-// the modem's Ethernet is on its end facing the cable way (from behind, its left end)
-const [mx] = hi.pt(mirror(modem.body.x + modem.body.w), 0);
-const modemEth: Pt = [mx, hi.pt(0, modem.body.y + modem.body.h * 0.35)[1]];
+// the ONT's Ethernet is on its end facing the cable way (from behind, its left end)
+const [mx] = hi.pt(mirror(ont.body.x + ont.body.w), 0);
+const ontEth: Pt = [mx, hi.pt(0, ont.body.y + ont.body.h * 0.35)[1]];
 
 /* cable way: vertical lanes left of the rails (the cabinet's right side, seen from behind) */
 const [wayX] = hi.pt(-10, 0);
@@ -87,10 +87,10 @@ const r = {
   server: route(p3.c, nic1, 0),
   nas: route(p11.c, sfp, 1),
   pi: route(p2.c, piEth.c, 2),
-  modem: route(p9.c, modemEth, 3),
+  ont: route(p9.c, ontEth, 3),
   inj: route(udmEnd, injLan.c, 4),
   poe: `M${injPoe.c[0]} ${injPoe.c[1]}H${lane(5)}V${POE_Y}H${OFF.x + 100}V${OFF.y + OFF.h + 9}`,
-  isp: `M${modemEth[0]} ${modemEth[1] - 5}H${lane(6)}V${ISP_Y}`,
+  isp: `M${ontEth[0]} ${ontEth[1] - 5}H${lane(6)}V${ISP_Y}`,
 };
 const flag = `M${lane(6) - 26} ${ISP_Y}h52v-22l-26-13l-26 13Z`;
 const sp = (id: string): string => links.find((l) => l.id === id)?.speed ?? '';
@@ -99,7 +99,7 @@ const LX = 214;
 const label = (i: number, y0: number, y1: number, y: number, text: string[], cls?: string) => ({ from: [lane(i), (y0 + y1) / 2] as Pt, to: [LX, y] as Pt, text, cls });
 const labels = [
   label(2, p2.c[1], piEth.c[1], 300, ['PORT 2 → PI', sp('gw-pi')]),
-  label(3, p9.c[1], modemEth[1], 350, ['PORT 9 · WAN', `→ MODEM · ${sp('gw-modem')}`]),
+  label(3, p9.c[1], ontEth[1], 350, ['PORT 9 · WAN', `→ ONT · ${sp('gw-ont')}`]),
   label(1, p11.c[1], sfp[1], 430, ['SFP+ PORT 11', `→ NAS · ${sp('gw-nas')}`], 'net-10g'),
   label(0, p3.c[1], nic1[1], 560, ['PORT 3 → NIC 1', sp('gw-server')]),
 ];
@@ -152,10 +152,10 @@ const balloons = slots
     <path class="ln-hid" d={join(p2.rect, p3.rect, p9.rect, p11.rect, piEth.rect, injLan.rect, injPoe.rect)} style="--p:4" />
 
     <g class="net-1g">
-      {[r.pi, r.server, r.modem, r.inj].map((d) => <path class="ln-net" d={d} pathLength="1" style="--p:3" />)}
+      {[r.pi, r.server, r.ont, r.inj].map((d) => <path class="ln-net" d={d} pathLength="1" style="--p:3" />)}
       <Particles d={r.pi} kind="net1" n={2} dur={3.4} guide={false} />
       <Particles d={r.server} kind="net1" n={2} dur={3.8} guide={false} />
-      <Particles d={r.modem} kind="net1" n={2} dur={3} guide={false} />
+      <Particles d={r.ont} kind="net1" n={2} dur={3} guide={false} />
       <Particles d={r.inj} kind="net1" n={1} dur={3.6} guide={false} />
       <path class="ln-net" d={r.isp} pathLength="1" style="--p:3" />
       <Particles d={r.isp} kind="net1" n={1} dur={2.4} guide={false} />
