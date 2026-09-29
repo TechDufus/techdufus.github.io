@@ -64,7 +64,7 @@ function intentOf(q: string, d: GuideData): string | undefined {
   if (/oh[\s-]?my[\s-]?claude/.test(s)) return 'omc';
   const repo = d.repos.find((r) => s.includes(r.name.toLowerCase()) && d.answers[`repo:${r.name}`]);
   if (repo) return `repo:${repo.name}`;
-  if (/\b(racks?|cabinet|42u|blueprints?|drawings?)\b/.test(s)) return 'rack';
+  if (/\b(racks?|cabinet|42u|blueprints?|drawings?|sheets?)\b/.test(s)) return 'rack';
   if (/\b(homelab|home lab|lab)\b/.test(s) && /\b(run|running|hardware|stack|server|what'?s in|inside)\b/.test(s)) return 'homelab';
   if (/\b(start|begin|first|recommend\w*|best post)\b/.test(s) && /\b(read|reading|post|posts|blog)\b/.test(s)) return 'start';
   if (/\bhow\b/.test(s) && /\b(ai|agents?|agentic|claude|codex)\b/.test(s) && /\b(work|use|workflow)\b/.test(s)) return 'agents';

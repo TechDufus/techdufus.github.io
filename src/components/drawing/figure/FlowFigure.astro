@@ -1,0 +1,67 @@
+---
+/*
+  FlowFigure: boxes and arrows. Columns come from the edges (longest path from the sources, or a
+  node's `col`); wide runs left → right, narrow runs top → bottom. Edges may carry a short label
+  and particles (dots travelling the edge; paused off screen, gone under reduced motion).
+
+  <FlowFigure id="fig-path" title="The storage path" caption="Same disks, fewer opinions."
+    nodes={[
+      { id: 'disks', label: 'Six disks' },
+      { id: 'hba', label: 'HBA330', sub: 'pass-through', tone: 'new', card: { title: 'Dell HBA330', lines: ['Just passes disks through.'] } },
+      { id: 'zfs', label: 'ZFS' },
+    ]}
+    edges={[{ from: 'disks', to: 'hba', label: 'SAS', particles: true }, { from: 'hba', to: 'zfs' }]} />
+
+    nodes   { id, label, sub?, tone?, card?, n?, col? }[]  (tone: default | new | removed | keep | planned)
+    edges   { from, to, label?, tone?, particles?: boolean | 1–4 }[]
+    + FigureBase props (id, title, caption, fig, breakout, hint, desc, scale, rev, date, bp)
+*/
+import Figure from './Figure.astro';
+import Node from './Node.astro';
+import PartCard from '../PartCard.astro';
+import { BREAKOUT, WIDE, at, f, flowLayout, list, say, toneOf, type FigureBase, type FlowEdge, type FlowNode } from '../../../lib/drawing/figure';
+
+interface Props extends FigureBase {
+  nodes: FlowNode[];
+  edges: FlowEdge[];
+}
+const { nodes, edges, desc, hint, ...base } = Astro.props;
+const L = flowLayout(nodes, edges, base.breakout ? BREAKOUT : WIDE);
+const cards = L.boxes.filter((b) => b.card);
+const name = (id: string): string => nodes.find((n) => n.id === id)?.label ?? id;
+const text =
+  desc ??
+  `${list(nodes.map(say))}. ` + edges.map((e) => `${name(e.from)} to ${name(e.to)}${e.label ? ` (${e.label})` : ''}${e.tone === 'planned' ? ', planned' : ''}`).join('; ') + '.';
+const dots = (e: FlowEdge): number => (e.tone === 'planned' || !e.particles ? 0 : e.particles === true ? 3 : Math.max(1, Math.min(4, e.particles)));
+---
+
+<Figure {...base} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0}>
+  {(['w', 'n'] as const).map((k) => (
+    <g class={`fg-${k}`}>
+      {L.edges.map((e) => {
+        const planned = e.tone === 'planned';
+        const n = dots(e);
+        return (
+          <g class:list={['fg-edge', toneOf(e.tone)]} style="--p:3">
+            <path class={planned ? 'ln-phantom' : 'ln-med'} d={e[k].d} pathLength={planned ? undefined : '1'} />
+            <path class="fg-arr" d={e[k].head} />
+            {n > 0 && (
+              <g class:list={['flow', !e.tone || e.tone === 'default' ? 'net-10g' : '']} style={`--path:path('${e[k].d}');--dur:3.2s`}>
+                {Array.from({ length: n }, (_, i) => <circle class="dwg-pt" r="2.3" style={i ? `--i:${f(i / n)}` : undefined} />)}
+              </g>
+            )}
+          </g>
+        );
+      })}
+    </g>
+  ))}
+  {L.boxes.map((b) => <Node box={b} wp={b.wp} np={b.np} />)}
+  <g style="--p:5">
+    {L.edges.filter((e) => e.label).map((e) => (
+      <text {...at(e.w.lab!, e.n.lab!, `txt-note fg-c fg-ko ${toneOf(e.tone)}`.trim())} dy="3.6">{e.label}</text>
+    ))}
+  </g>
+  <Fragment slot="cards">
+    {cards.map((b) => <PartCard id={b.id} title={b.card!.title} kind={b.card!.kind} lines={b.card!.lines} />)}
+  </Fragment>
+</Figure>

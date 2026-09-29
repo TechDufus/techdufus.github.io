@@ -6,7 +6,7 @@
  *                (A3 = 1260 × 891, see sheet.ts), so text sizes and pen weights are chosen in
  *                paper units and stay the same on every view.
  *   model space  millimetres of the real object. x = width (left → right), y = height (up),
- *                z = depth (front → back), matching `Mm` in src/data/hardware/types.ts.
+ *                z = depth (front → back), matching `Mm` in src/data/lab/types.ts.
  *
  * Every view is placed on the paper with one projection helper. Its `scale` is paper units per
  * model millimetre, so a view at 1:5 on a standard sheet has scale = atScale(1, 5) = 0.6.
@@ -15,7 +15,6 @@
  *   front.pt(482.6, 88.9)          // → [x, y] paper point of the top-right corner
  *   front.len(44.45)               // → 66.675 paper units (1U at 1:2)
  *   <g transform={front.matrix}>…drawn in mm…</g>   // reuse an mm drawing in this view
- *   <g data-mm={front.matrix}>     // lets the CAD status bar read the cursor back in mm
  *
  *   const iso = isometric({ x: 300, y: 600, scale: atScale(1, 5), view: 'front-right' });
  *   const b = iso.box({ x: 0, y: 0, z: 0, w: 482.6, h: 88.9, d: 700 });
@@ -112,7 +111,7 @@ export type Ortho = {
   /** Model points → paper path. */
   poly: (points: readonly Pt[], close?: boolean) => string;
   scale: number;
-  /** SVG transform mapping this view's model mm onto the paper (for drawings made in mm, and data-mm). */
+  /** SVG transform mapping this view's model mm onto the paper (for drawings made in mm). */
   matrix: string;
 };
 
@@ -166,10 +165,8 @@ export type Iso = {
    *   right  u = +z, v = −y   origin = front top-right corner       [x + w, y + h, z]
    *   left   u = −z, v = −y   origin = back top-left corner         [x, y + h, z + d]
    *   rear   u = −x, v = −y   origin = back top-right corner        [x + w, y + h, z + d]
-   * `yUp: true` flips v to point up (v = +y, or +z on the top face) with the origin on the bottom
-   * edge instead: use that form for `data-mm` so the status bar reads heights upwards.
    */
-  faceMatrix: (face: IsoFace, origin: Pt3, yUp?: boolean) => string;
+  faceMatrix: (face: IsoFace, origin: Pt3) => string;
   /** Paper vector for 1 model mm along each axis. */
   axes: { x: Pt; y: Pt; z: Pt };
   /** Paper translation for moving `mm` along the depth axis (−mm = out of the front, on rails). */
@@ -217,7 +214,7 @@ export function isometric({ x, y, scale, view = 'front-right' }: { x: number; y:
     return { top, front, side, edges, outline, hidden, c };
   };
 
-  const faceMatrix = (face: IsoFace, [ox, oy, oz]: Pt3, yUp = false): string => {
+  const faceMatrix = (face: IsoFace, [ox, oy, oz]: Pt3): string => {
     const neg = (p: Pt): Pt => [-p[0], -p[1]];
     // [u axis, v axis] as paper vectors per mm, for v pointing down on that face.
     const axesOf: Record<IsoFace, [Pt, Pt]> = {
@@ -227,8 +224,7 @@ export function isometric({ x, y, scale, view = 'front-right' }: { x: number; y:
       left: [neg(ez), neg(ey)],
       rear: [neg(ex), neg(ey)],
     };
-    const [u, vDown] = axesOf[face];
-    const v = yUp ? neg(vDown) : vDown;
+    const [u, v] = axesOf[face];
     const [e, f] = pt(ox, oy, oz);
     return matrix([u[0], u[1], v[0], v[1], e, f]);
   };

@@ -1,45 +1,115 @@
 /**
- * Drawing kit behaviour, bundled once per page by Sheet.astro; wires every figure[data-dwg] on
- * load (later ones: initDrawings(root)).
- *   tabs    [role=tab][data-view] ↔ [data-view-panel]: click, ←/→/Home/End; the shown panel
- *           gets data-active and re-plots quickly.
- *   layers  [data-layer-toggle] flips aria-pressed and data-off on [data-layer=<id>] in the figure.
- *   parts   [data-part]: click/Enter/Space toggles aria-pressed (one id per figure; same-id parts
- *           select together; Esc clears) and dispatches bubbling `dwg:select` {dwg, id, selected}.
- *           Balloons [data-balloon-for=<id>] get .is-hot with their part.
- *   plot    figure[data-plot] pending → run (≥ 15% on screen) → done; status bar PLOTTING… n%.
- *   motion  .is-idle off screen, html.dwg-paused in a hidden tab: particles pause. Reduced
- *           motion skips to the final state.
- *   cursor  fine pointers: X/Y mm from the hovered [data-mm], U from data-u0/-u1, zone from
- *           data-frame/-zones, title/scale from data-view-title/-scale.
- *   pan     .dwg__view.is-pannable when the SVG overflows (hint, focusable region), .is-panned.
+ * Drawing kit behaviour (tabs, parts, cards, plot, motion, pan), bundled once by Sheet.astro.
+ * Wires every figure[data-dwg] on load; later ones: initDrawings(root). The hooks and the card
+ * contract are in src/components/drawing/README.md.
  */
 
-type Mat = number[];
+type Open = { fig: HTMLElement; part: HTMLElement; off: () => void; ret: HTMLElement };
 
 const doc = document;
-const U_MM = 44.45;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 const coarse = matchMedia('(pointer: coarse)');
-const mats = new WeakMap<Element, Mat | null>();
 let io: IntersectionObserver | null = null;
 
-const n1 = (v: number): string => (Math.abs(v) < 0.05 ? '0.0' : v.toFixed(1));
 const cssMs = (el: Element, name: string, fallback: number): number =>
   parseFloat(getComputedStyle(el).getPropertyValue(name)) || fallback;
+const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.min(v, Math.max(lo, hi)));
+const shown = (el: Element): boolean => el.getBoundingClientRect().width > 0;
 
-/** Parse matrix(a,b,c,d,e,f) once and keep its inverse. */
-function inverse(el: Element): Mat | null {
-  if (mats.has(el)) return mats.get(el) ?? null;
-  const m = (el.getAttribute('data-mm') ?? '').match(/-?[\d.]+(?:e-?\d+)?/g)?.map(Number);
-  let inv: Mat | null = null;
-  if (m && m.length === 6) {
-    const [a, b, c, d, e, f] = m;
-    const det = a * d - b * c;
-    if (det) inv = [d / det, -b / det, -c / det, a / det, (c * f - d * e) / det, (b * e - a * f) / det];
+/* ---------- the part card (one per page) ---------- */
+let card: HTMLElement | null = null;
+let body: HTMLElement;
+let open: Open | null = null;
+let hideT = 0;
+
+function cardEl(): HTMLElement {
+  if (card) return card;
+  const c = (card = doc.createElement('div'));
+  c.className = 'dwg-card';
+  c.id = 'dwg-card';
+  c.setAttribute('role', 'dialog');
+  c.tabIndex = -1;
+  c.hidden = true;
+  c.innerHTML =
+    '<button type="button" class="dwg-card__x" aria-label="Close"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2 2 10"/></svg></button><div class="dwg-card__b"></div>';
+  body = c.lastElementChild as HTMLElement;
+  c.firstElementChild?.addEventListener('click', () => closeCard(true));
+  c.addEventListener('keydown', (e) => {
+    const f = [...c.querySelectorAll<HTMLElement>('a[href],button')];
+    const a = doc.activeElement;
+    if (e.key === 'Escape' || (e.key === 'Tab' && (e.shiftKey ? a === c || a === f[0] : a === f[f.length - 1]))) {
+      e.preventDefault();
+      closeCard(true);
+    }
+  });
+  doc.addEventListener('click', (e) => {
+    const t = e.target as Element;
+    if (open && !c.contains(t) && !t.closest?.('[data-part],[data-balloon-for]')) closeCard(doc.activeElement === doc.body);
+  });
+  addEventListener('resize', place);
+  doc.body.append(c);
+  return c;
+}
+
+/** Popover beside the part (right, left, below, above: first that fits), or the bottom sheet. */
+function place(): void {
+  if (!open || !card) return;
+  const c = card;
+  const sheet = coarse.matches || innerWidth <= 640;
+  c.classList.toggle('is-sheet', sheet);
+  const r = open.part.getBoundingClientRect();
+  if (sheet) {
+    c.style.left = c.style.top = '';
+    const d = Math.min(r.bottom - (innerHeight - c.offsetHeight - 16), r.top - 80);
+    if (d > 0) scrollBy({ top: d, behavior: reduce.matches ? 'auto' : 'smooth' });
+    return;
   }
-  mats.set(el, inv);
-  return inv;
+  const vw = doc.documentElement.clientWidth, vh = innerHeight, g = 16, m = 12;
+  const L = Math.max(r.left, 0), R = Math.min(r.right, vw), T = Math.max(r.top, 0), B = Math.min(r.bottom, vh);
+  const w = c.offsetWidth, h = c.offsetHeight;
+  let x: number, y: number, side: string;
+  if (R + g + w <= vw - m) (x = R + g), (side = 'r');
+  else if (L - g - w >= m) (x = L - g - w), (side = 'l');
+  else (x = clamp((L + R - w) / 2, m, vw - w - m)), (side = B + g + h <= vh - m ? 'b' : 't');
+  if (side === 'r' || side === 'l') y = clamp((T + B - h) / 2, m, vh - h - m);
+  else y = side === 'b' ? B + g : Math.max(m, T - g - h);
+  c.dataset.side = side;
+  c.style.left = `${x + scrollX}px`;
+  c.style.top = `${y + scrollY}px`;
+  c.style.setProperty('--a', `${side === 'r' || side === 'l' ? clamp((T + B) / 2 - y, 14, h - 14) : clamp((L + R) / 2 - x, 14, w - 14)}px`);
+}
+
+function showCard(fig: HTMLElement, part: HTMLElement, id: string, off: () => void, ret: HTMLElement): void {
+  const sel = `template[data-card="${id}"]`;
+  const tpl = (fig.querySelector(sel) ?? doc.querySelector(sel)) as HTMLTemplateElement | null;
+  if (!tpl) return;
+  const c = cardEl();
+  clearTimeout(hideT);
+  body.replaceChildren(tpl.content.cloneNode(true));
+  const n = fig.querySelector(`[data-balloon-for="${id}"] .balloon__n`)?.textContent;
+  if (n) body.prepend(Object.assign(doc.createElement('b'), { className: 'dwg-card__n', textContent: n }));
+  const t = body.querySelector('.dwg-card__t');
+  c.setAttribute('aria-label', part.getAttribute('aria-label') ?? id);
+  if (t) c.setAttribute('aria-labelledby', (t.id = 'dwg-card-t'));
+  else c.removeAttribute('aria-labelledby');
+  open = { fig, part, off, ret };
+  c.hidden = false;
+  c.classList.remove('is-open');
+  place();
+  part.addEventListener('transitionend', place, { once: true });
+  requestAnimationFrame(() => c.classList.add('is-open'));
+  c.focus({ preventScroll: true });
+}
+
+function closeCard(focus: boolean): void {
+  const o = open;
+  if (!o || !card) return;
+  const c = card;
+  open = null;
+  c.classList.remove('is-open');
+  hideT = window.setTimeout(() => (c.hidden = true), reduce.matches ? 0 : 200);
+  o.off();
+  if (focus) o.ret.focus({ preventScroll: true });
 }
 
 function init(fig: HTMLElement): void {
@@ -48,52 +118,22 @@ function init(fig: HTMLElement): void {
   const svg = fig.querySelector<SVGSVGElement>('.dwg__svg');
   if (!svg) return;
   const q = <T extends Element>(sel: string): T[] => [...fig.querySelectorAll<T>(sel)];
-  const cell = (k: string): HTMLElement | null => fig.querySelector(`[data-st="${k}"]`);
-  const put = (k: string, text: string): void => {
-    const el = cell(k);
-    if (el && el.textContent !== text) el.textContent = text;
-  };
-  const status = fig.querySelector<HTMLElement>('.dwg-status');
 
   /* ---------- plot ---------- */
   let plotting = 0;
-  const progress = (k: number): void => {
-    put('pct', k < 1 ? `PLOTTING… ${Math.round(k * 100)}%` : 'PLOT COMPLETE · 100%');
-    status?.style.setProperty('--plot', k.toFixed(3));
-    status?.classList.toggle('is-plotting', k < 1);
-  };
   const plot = (target: Element, ms: number): void => {
-    if (reduce.matches) {
-      target.setAttribute('data-plot', 'done');
-      progress(1);
-      return;
-    }
+    if (reduce.matches) return void target.setAttribute('data-plot', 'done');
     const box = svg.getBoundingClientRect();
     if (box.width) fig.style.setProperty('--dwg-u', (svg.viewBox.baseVal.width / box.width).toFixed(4));
     target.setAttribute('data-plot', 'run');
     const run = ++plotting;
-    const t0 = performance.now();
-    const tick = (now: number): void => {
-      if (run !== plotting) return;
-      const k = Math.min(1, (now - t0) / ms);
-      progress(k);
-      if (k < 1) requestAnimationFrame(tick);
-      else target.setAttribute('data-plot', 'done');
-    };
-    requestAnimationFrame(tick);
+    setTimeout(() => run === plotting && target.setAttribute('data-plot', 'done'), ms);
   };
   if (reduce.matches) plot(fig, 0);
-  else progress(0);
 
   /* ---------- tabs ---------- */
   const tabs = q<HTMLButtonElement>('[role="tab"][data-view]');
   const panelOf = (t: HTMLElement): SVGElement | null => fig.querySelector(`[data-view-panel="${t.dataset.view}"]`);
-  let base: Element | null = null;
-  let baseLabel = 'MODEL';
-  const describe = (v: Element | null): void => {
-    put('view', v?.getAttribute('data-view-title') || baseLabel);
-    put('scale', v?.getAttribute('data-view-scale') || 'SCALE AS NOTED');
-  };
   const show = (tab: HTMLButtonElement, focus: boolean): void => {
     for (const t of tabs) {
       const on = t === tab;
@@ -102,10 +142,7 @@ function init(fig: HTMLElement): void {
       panelOf(t)?.toggleAttribute('data-active', on);
     }
     if (focus) tab.focus();
-    base = panelOf(tab);
-    baseLabel = (tab.textContent ?? '').trim().toUpperCase();
-    describe(base);
-    const p = base;
+    const p = panelOf(tab);
     if (p && fig.dataset.plot === 'done') plot(p, cssMs(fig, '--dwg-replot-ms', 1200));
   };
   for (const t of tabs) {
@@ -118,36 +155,18 @@ function init(fig: HTMLElement): void {
       show(tabs[(to + tabs.length) % tabs.length], true);
     });
   }
-  const first = tabs.find((t) => t.getAttribute('aria-selected') === 'true');
-  if (first) baseLabel = (first.textContent ?? '').trim().toUpperCase();
-  base = fig.querySelector('[data-view-panel][data-active]') ?? fig.querySelector('[data-view-title]');
-  describe(base);
 
-  /* ---------- layers ---------- */
-  for (const b of q<HTMLButtonElement>('[data-layer-toggle]')) {
-    const apply = (): void => {
-      const on = b.getAttribute('aria-pressed') !== 'false';
-      for (const el of q(`[data-layer="${b.dataset.layerToggle}"]`)) el.toggleAttribute('data-off', !on);
-    };
-    apply();
-    b.addEventListener('click', () => {
-      b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') === 'false'));
-      apply();
-    });
-  }
-
-  /* ---------- parts ---------- */
-  // Parts sharing an id (the same box in several views) select together. A selected part with a
-  // rail is drawn last in its group while it is out, so the slid box sits on top in iso views.
+  /* ---------- parts ---------- (a selected part with a --rail is drawn last in its group) */
   let selected: string | null = null;
+  let lit: string | null = null;
   const home = new Map<Element, Node | null>();
-  const same = (id: string): Element[] => q(`[data-part="${id}"]`);
+  const same = (id: string): HTMLElement[] => q(`[data-part="${id}"]`);
   const hot = (id: string, on: boolean): void => {
     for (const b of q(`[data-balloon-for="${id}"]`)) b.classList.toggle('is-hot', on);
   };
-  const lift = (p: Element, on: boolean): void => {
+  const lift = (p: HTMLElement, on: boolean): void => {
     const g = p.parentNode;
-    if (!g || !(p as SVGElement).style?.getPropertyValue('--rail')) return;
+    if (!g || !p.style?.getPropertyValue('--rail')) return;
     const f = doc.activeElement === p;
     if (on && !home.has(p)) {
       home.set(p, p.nextSibling);
@@ -157,105 +176,116 @@ function init(fig: HTMLElement): void {
       home.delete(p);
       setTimeout(() => p.getAttribute('aria-pressed') !== 'true' && g.insertBefore(p, n?.parentNode === g ? n : null), reduce.matches ? 0 : 820);
     }
-    if (f) (p as SVGElement).focus({ preventScroll: true });
+    if (f) p.focus({ preventScroll: true });
   };
   const set = (id: string, on: boolean): void => {
     for (const p of same(id)) {
       p.setAttribute('aria-pressed', String(on));
+      if (p.hasAttribute('aria-expanded')) p.setAttribute('aria-expanded', String(on && open?.fig === fig));
       lift(p, on);
     }
-    hot(id, on);
+    hot(id, on || id === lit);
   };
-  const toggle = (part: Element): void => {
+  const emit = (el: Element, id: string, on: boolean): void => {
+    el.dispatchEvent(new CustomEvent('dwg:select', { bubbles: true, detail: { dwg: fig.dataset.dwg, id, selected: on } }));
+  };
+  const drop = (): void => {
+    const id = selected;
+    if (!id) return;
+    selected = null;
+    set(id, false);
+    emit(same(id)[0] ?? fig, id, false);
+  };
+  const toggle = (part: HTMLElement, ret = part): void => {
     const id = part.getAttribute('data-part') ?? '';
     const on = selected !== id;
-    if (on && selected) set(selected, false);
-    set(id, on);
-    selected = on ? id : null;
-    part.dispatchEvent(new CustomEvent('dwg:select', { bubbles: true, detail: { dwg: fig.dataset.dwg, id, selected: on } }));
+    if (open?.fig === fig) closeCard(false);
+    drop();
+    if (!on) return;
+    selected = id;
+    if (lit === id) tag(null);
+    showCard(fig, part, id, drop, ret);
+    set(id, true);
+    emit(part, id, true);
   };
-  const partOf = (e: Event): Element | null => (e.target as Element | null)?.closest?.('[data-part]') ?? null;
+  for (const p of q<HTMLElement>('[data-part]')) {
+    const id = p.dataset.part;
+    if (doc.querySelector(`template[data-card="${id}"]`)) {
+      p.setAttribute('aria-haspopup', 'dialog');
+      p.setAttribute('aria-expanded', 'false');
+    }
+  }
+  const idOf = (t: EventTarget | null): [string | null, HTMLElement | null] => {
+    const el = (t as Element | null)?.closest?.('[data-part],[data-balloon-for]') as HTMLElement | null;
+    return el && fig.contains(el) ? [el.dataset.part ?? el.dataset.balloonFor ?? null, el.dataset.part ? el : null] : [null, null];
+  };
   fig.addEventListener('click', (e) => {
-    const part = partOf(e);
-    if (part) toggle(part);
+    const [id, part] = idOf(e.target);
+    const p = part ?? (id ? same(id).find(shown) : null);
+    // an HTML row with data-balloon-for gets focus back when its card closes
+    const b = (e.target as Element).closest?.('[data-balloon-for]');
+    if (p) toggle(p, b instanceof HTMLElement ? b : p);
   });
   fig.addEventListener('keydown', (e) => {
-    const part = partOf(e);
+    const [, part] = idOf(e.target);
     if (part && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault();
       toggle(part);
-    } else if (e.key === 'Escape' && selected) toggle(same(selected)[0] ?? fig);
+    } else if (e.key === 'Escape' && selected && !open) drop();
   });
-  const hover = (on: boolean) => (e: Event): void => {
-    const id = partOf(e)?.getAttribute('data-part');
-    if (id && id !== selected) hot(id, on);
-  };
-  fig.addEventListener('pointerover', hover(true));
-  fig.addEventListener('pointerout', hover(false));
-  fig.addEventListener('focusin', hover(true));
-  fig.addEventListener('focusout', hover(false));
 
-  /* ---------- cursor readout ---------- */
-  const frame = fig.dataset.frame?.split(',').map(Number);
-  const zones = fig.dataset.zones?.split(',').map(Number);
-  let pending: PointerEvent | null = null;
-  const blank = (): void => {
-    put('xy', 'X ——— Y ———');
-    put('u', 'U ——');
+  /* name tag + hover light */
+  const view = fig.querySelector<HTMLElement>('.dwg__view');
+  let tagEl: HTMLElement | null = null;
+  const tag = (p: HTMLElement | null): void => {
+    const label = p?.getAttribute('aria-label');
+    if (!p || !label || !view) return void tagEl?.classList.remove('is-on');
+    const t = (tagEl ??= view.appendChild(Object.assign(doc.createElement('span'), { className: 'dwg-tag' })));
+    t.setAttribute('aria-hidden', 'true');
+    t.textContent = label;
+    const r = p.getBoundingClientRect(), v = view.getBoundingClientRect();
+    const below = r.top < 48;
+    const half = t.offsetWidth / 2 + 4;
+    t.style.left = `${clamp(r.left + r.width / 2 - v.left, half, v.width - half)}px`;
+    t.style.top = `${below ? Math.min(r.bottom, v.bottom, innerHeight - 40) - v.top + 10 : r.top - v.top - 10}px`;
+    t.classList.toggle('is-below', below);
+    t.classList.add('is-on');
   };
-  const read = (): void => {
-    const e = pending;
-    pending = null;
-    const ctm = svg.getScreenCTM();
-    if (!e || !ctm) return;
-    const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
-    let zone = '——';
-    if (frame && zones) {
-      const cx = Math.floor(((p.x - frame[0]) / frame[2]) * zones[0]);
-      const cy = Math.floor(((p.y - frame[1]) / frame[3]) * zones[1]);
-      if (cx >= 0 && cy >= 0 && cx < zones[0] && cy < zones[1]) zone = String.fromCharCode(65 + cy) + (cx + 1);
+  const light = (id: string | null, p: HTMLElement | null): void => {
+    if (lit && lit !== id) {
+      hot(lit, lit === selected);
+      for (const el of same(lit)) el.classList.remove('is-lit');
     }
-    put('zone', `ZONE ${zone}`);
-    const t = e.target as Element;
-    describe(t.closest?.('[data-view-title]') ?? base);
-    const host = t.closest?.('[data-mm]');
-    const m = host ? inverse(host) : null;
-    if (!host || !m) return blank();
-    const x = m[0] * p.x + m[2] * p.y + m[4];
-    const y = m[1] * p.x + m[3] * p.y + m[5];
-    put('xy', `X ${n1(x)}  Y ${n1(y)} mm`);
-    const u0 = host.getAttribute('data-u0');
-    put('u', u0 === null ? 'U ——' : `U ${((y - Number(u0)) / U_MM + Number(host.getAttribute('data-u1') ?? 1)).toFixed(2)}`);
+    lit = id;
+    if (id) {
+      hot(id, true);
+      for (const el of same(id)) el.classList.add('is-lit');
+    }
+    tag(id && id !== selected ? p ?? same(id).find(shown) ?? null : null);
   };
-  if (!coarse.matches && status) {
-    svg.addEventListener('pointermove', (e) => {
-      if (e.pointerType === 'touch') return;
-      if (!pending) requestAnimationFrame(read);
-      pending = e;
-    });
-    svg.addEventListener('pointerleave', () => {
-      pending = null;
-      blank();
-      put('zone', 'ZONE ——');
-      describe(base);
-    });
-  }
+  fig.addEventListener('pointerover', (e) => {
+    if (e.pointerType === 'touch') return;
+    const [id, p] = idOf(e.target);
+    if (id && id !== lit) light(id, p);
+  });
+  fig.addEventListener('pointerout', (e) => {
+    if (lit && idOf(e.relatedTarget)[0] !== lit) light(null, null);
+  });
+  fig.addEventListener('focusin', (e) => {
+    const [id, p] = idOf(e.target);
+    if (id && (e.target as Element).matches(':focus-visible')) light(id, p);
+  });
+  fig.addEventListener('focusout', () => lit && light(null, null));
 
   /* ---------- pan ---------- */
-  const view = fig.querySelector<HTMLElement>('.dwg__view');
   const pan = fig.querySelector<HTMLElement>('.dwg__pan');
   if (view && pan) {
     const measure = (): void => {
       const on = pan.scrollWidth > pan.clientWidth + 2;
       view.classList.toggle('is-pannable', on);
-      if (on) {
-        pan.tabIndex = 0;
-        pan.setAttribute('role', 'region');
-        pan.setAttribute('aria-label', 'Drawing (scrolls sideways)');
-      } else {
-        pan.removeAttribute('tabindex');
-        pan.removeAttribute('role');
-        pan.removeAttribute('aria-label');
+      for (const [k, v] of [['tabindex', '0'], ['role', 'region'], ['aria-label', 'Drawing (scrolls sideways)']]) {
+        if (on) pan.setAttribute(k, v);
+        else pan.removeAttribute(k);
       }
     };
     measure();

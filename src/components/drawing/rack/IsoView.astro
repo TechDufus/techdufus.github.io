@@ -1,19 +1,18 @@
 ---
 /*
-  Sheet 01 · ISOMETRIC tab: a key plan of the whole 42U cabinet (1:20, door open, right side
-  panel ghosted) and DETAIL A, the stack at 1:6 with every device's front panel mapped onto its
-  front face (the shared <symbol>s from PanelDefs). Devices are Parts: selecting one slides it out
-  of the front along the depth axis (the Pi lifts off its shelf instead).
+  Sheet 01 · ISOMETRIC tab: a key plan of the whole 42U cabinet (1:25, door open, right side
+  panel ghosted) and DETAIL A, the boxes at 1:7 as a broken view (./IsoStack.astro): the top of
+  the cabinet, U1 to U15, and the bottom shelf, with the empty units between broken out.
 */
 import View from '../View.astro';
-import Part from '../Part.astro';
 import Dim from '../Dim.astro';
 import Leader from '../Leader.astro';
-import Balloon from '../Balloon.astro';
 import URuler from '../URuler.astro';
-import Particles from '../Particles.astro';
-import { U_MM, atScale, isometric, join, type Iso } from '../../../lib/drawing/projection';
-import { CAB, HOLES, balloonOf, dev, racked, slotOf$, slots, stack, type Slot } from './model';
+import IsoStack from './IsoStack.astro';
+import { atScale, isometric, join } from '../../../lib/drawing/projection';
+import { CAB, HOLES, RAIL_W, slotOf$, slots, yBot, zoneCentre } from './model';
+import { isoStack } from './iso';
+import { OFF_SHEET as OFF } from './dwg';
 
 interface Props {
   dwg: string;
@@ -22,18 +21,14 @@ interface Props {
 const { dwg, active = false } = Astro.props;
 const f = (v: number): string => String(Math.round(v * 100) / 100);
 
-/* ---------- key plan, 1:25 ---------- */
-const K = isometric({ x: 150, y: 350, scale: atScale(1, 25) });
-const cab = { x: CAB.x0, y: CAB.y0, z: CAB.z0, w: CAB.w, h: CAB.h, d: CAB.d };
-const kc = K.box(cab);
+/* ---------- key plan, 1:30 ---------- */
+const K = isometric({ x: 112, y: 334, scale: atScale(1, 30) });
+const kc = K.box({ x: CAB.x0, y: CAB.y0, z: CAB.z0, w: CAB.w, h: CAB.h, d: CAB.d });
 // Interior faces seen through the ghosted right side and the open door
 const kRear = K.poly([[CAB.x0, CAB.y0, CAB.z1], [CAB.x1, CAB.y0, CAB.z1], [CAB.x1, CAB.y1, CAB.z1], [CAB.x0, CAB.y1, CAB.z1]], true);
 const kLeftIn = K.poly([[CAB.x0, CAB.y0, CAB.z0], [CAB.x0, CAB.y0, CAB.z1], [CAB.x0, CAB.y1, CAB.z1], [CAB.x0, CAB.y1, CAB.z0]], true);
-const kRightGhost = kc.side;
 const roofY = CAB.railTop + 20;
-const kRails = join(
-  ...[HOLES[0], HOLES[1]].flatMap((x) => [0, CAB.railSpan].map((z) => K.poly([[x, 0, z], [x, CAB.railTop, z]]))),
-);
+const kRails = join(...HOLES.flatMap((x) => [0, CAB.railSpan].map((z) => K.poly([[x, 0, z], [x, CAB.railTop, z]]))));
 // Door: hinged on the left of the front, open 90°: the leaf stands in the plane x = x0.
 const doorOpen = K.poly([[CAB.x0, CAB.y0 + 10, CAB.z0], [CAB.x0, CAB.y0 + 10, CAB.z0 - CAB.w], [CAB.x0, CAB.y1 - 10, CAB.z0 - CAB.w], [CAB.x0, CAB.y1 - 10, CAB.z0]], true);
 const glass = join(
@@ -46,95 +41,45 @@ const glass = join(
 const kSwing = (() => {
   const [x0, y0] = K.pt(CAB.x1, CAB.y0, CAB.z0);
   const [x1, y1] = K.pt(CAB.x0, CAB.y0, CAB.z0 - CAB.w);
-  const rx = CAB.w * K.scale * Math.sqrt(1.5), ry = CAB.w * K.scale * Math.sqrt(0.5);
-  return `M${x0} ${y0}A${f(rx)} ${f(ry)} 0 0 1 ${x1} ${y1}`;
+  return `M${x0} ${y0}A${f(CAB.w * K.scale * Math.sqrt(1.5))} ${f(CAB.w * K.scale * Math.sqrt(0.5))} 0 0 1 ${x1} ${y1}`;
 })();
-// The stack in the key plan: one path per face kind (too small for per-box painter's order to show)
-const kBoxes = [...racked.map((s) => K.box({ x: s.body.x, y: s.y0 + 0.4, z: s.faceZ, w: s.body.w, h: s.hU - 0.8, d: s.body.d - s.faceZ })), K.box(slotOf$('rpi-4b').body)];
+// Everything in the cabinet, one path per face kind (too small for per-box painter's order to show)
+const kBoxes = slots.filter((s) => !s.on).map((s) => K.box({ x: s.plate ? s.plate.x : s.ears ? 0 : s.body.x, y: s.y0 + 0.4, z: s.faceZ, w: s.plate ? s.plate.w : s.ears ? 482.6 : s.body.w, h: s.hU - 0.8, d: s.body.d - s.faceZ + s.body.z }));
 const kDev = {
   side: join(...kBoxes.map((b) => b.side)),
   top: join(...kBoxes.map((b) => b.top)),
   front: join(...kBoxes.map((b) => b.front)),
   edges: join(...kBoxes.map((b) => b.edges)),
 };
-// Detail A boundary around the stack
-const aC = K.pt(241.3, (stack.from - 1 + stack.to + 1) / 2 * U_MM, 300);
-const aR = 44;
+// Detail A's boundary: around the top of the cabinet, where the boxes are
+const aC = K.pt(241.3, (yBot(14) + CAB.railTop) / 2, 300);
+const aR = 34;
 
-/* ---------- DETAIL A, 1:6 ---------- */
-const D = isometric({ x: 262, y: 1036, scale: atScale(1, 6) });
-const k = D.scale;
-const U0 = (stack.from - 2) * U_MM; // one spare U below the stack
-const U1 = (stack.to + 3) * U_MM; // room for the Pi and a spare U above
-const railW = 15.875;
-const rails = {
-  fl: HOLES[0] - railW / 2,
-  fr: HOLES[1] - railW / 2,
-};
-const brk = (x: number, z: number, y: number, w: number): string => {
-  // zig-zag break across a rail flange at height y (front plane at depth z)
-  const m = x + w / 2;
-  return D.poly([[x - 4, y, z], [m - 3, y, z], [m, y + 6, z], [m + 3, y - 6, z], [m + 6, y, z], [x + w + 4, y, z]]);
-};
-const rearRails = join(...[rails.fl, rails.fr].map((x) => D.poly([[x, U0, CAB.railSpan], [x + railW, U0, CAB.railSpan], [x + railW, U1, CAB.railSpan], [x, U1, CAB.railSpan]], true)));
-const sideRails = join(
-  ...[0, 1].map((i) => {
-    const x = i ? HOLES[1] + railW / 2 : HOLES[0] - railW / 2;
-    return join(D.poly([[x, U0, 0], [x, U0, CAB.railSpan]]), D.poly([[x, U1, 0], [x, U1, CAB.railSpan]]));
-  }),
-);
-
-// Rack brackets (UDM Pro, UNAS Pro 8) are 3 mm plates: the panel symbol draws them in the face.
-type Boxes = { body: ReturnType<Iso['box']>; plate?: ReturnType<Iso['box']> };
-const boxesOf = (s: Slot): Boxes => ({
-  body: D.box(s.body),
-  plate: s.plate ? D.box({ x: s.plate.x, y: s.faceTop - s.plate.h, z: s.plate.z, w: s.plate.w, h: s.plate.h, d: s.plate.t }) : undefined,
-});
-const items = slots.map((s) => ({
-  s,
-  b: boxesOf(s),
-  rail: s.lift ? ([0, -s.lift * k] as [number, number]) : D.slide(-s.travel),
-  tex: D.faceMatrix('front', [0, s.faceTop, s.faceZ]),
-}));
-
-// Airflow over the two boxes whose direction the vendor imagery supports (front to back)
+/* ---------- DETAIL A, 1:7 ---------- */
+const k = atScale(1, 7);
+const SX = 356, SY = 608;
+const { hi, lo } = isoStack(SX, SY, k);
+const fl = HOLES[0] - RAIL_W / 2;
 const r7 = slotOf$('r720xd');
-const un = slotOf$('unas-pro-8');
-const topOf = (s: Slot) => s.body.y + s.body.h + 2;
-const midOf = (s: Slot) => s.body.y + s.body.h / 2;
-const air = (s: Slot, x: number) => ({
-  cold: D.poly([[x, midOf(s), -300], [x, midOf(s), s.faceZ - 6]]),
-  hot: D.poly([[x, midOf(s), s.body.z + s.body.d + 6], [x, midOf(s), s.body.z + s.body.d + 200]]),
-});
-const airR = air(r7, 300);
-const r7Out = {
-  body: D.box({ ...r7.body, z: r7.body.z - r7.travel }),
-  plate: D.box({ x: r7.plate!.x, y: r7.faceTop - r7.plate!.h, z: r7.plate!.z - r7.travel, w: r7.plate!.w, h: r7.plate!.h, d: r7.plate!.t }),
-};
-const airU = air(un, 300);
-
-// Balloons down the left, pointing at each front face
-const bx = 176;
-const faceMid = (s: Slot): [number, number] => D.pt(s.faceX + Math.min(60, s.faceW * 0.3), s.faceTop - s.faceH * 0.5, s.faceZ);
-// the Pi sits far back on its shelf: point at its top, so its leader clears the shelf's
-const anchorOf = (s: Slot): [number, number] => (s.lift ? D.pt(s.body.x + s.body.w * 0.3, s.body.y + s.body.h, s.body.z + s.body.d * 0.8) : faceMid(s));
-const balloonY = (i: number): number => 500 + i * 44;
-const top2bottom = [...slots].sort((a, b) => b.y0 - a.y0 || a.n - b.n);
-
-const stackTop = stack.to * U_MM;
-const stackBot = (stack.from - 1) * U_MM;
+const inj = slotOf$('poe-injector');
+const [pu, pv] = zoneCentre(inj, 'front', 'poe');
+const poe = hi.pt(pu, inj.faceTop - pv, inj.faceZ);
+const [bl, br] = [lo.pt(0, 0, -3), lo.pt(482.6, 0, -3)];
+/** The PoE run climbs from the injector's port to this height, then heads for the callout. */
+const POE_Y = 172;
+/** …clear of the injector's balloon, which sits right above it. */
+const POE_X = poe[0] + 26;
 ---
 
 <View dwg={dwg} name="iso" active={active} x={39} y={39} w={798} h={813}>
   <!-- ======== KEY PLAN ======== -->
-  <View x={46} y={46} w={300} h={400} title="KEY PLAN" scale={K.scale} note="CABINET NOMINAL · ASSUMED" labelAt={[140, 442]}
-        mm={K.faceMatrix('front', [0, 0, 0], true)} u0={0} uStart={1}>
+  <View x={46} y={46} w={250} h={360} title="KEY PLAN" scale={K.scale} note="U1 AT THE TOP · DOOR OPEN" labelAt={[128, 380]}>
     <g style="--p:1">
       <path class="face" d={kc.outline} />
       <path class="ln-thin" d={join(kRear, kLeftIn)} />
       <path class="ln-cons" d={kRails} />
     </g>
-    <g data-layer="devices" style="--p:2">
+    <g style="--p:2">
       <path class="face-side" d={kDev.side} />
       <path class="face-top" d={kDev.top} />
       <path class="face-front" d={kDev.front} />
@@ -145,110 +90,36 @@ const stackBot = (stack.from - 1) * U_MM;
       <path class="ln-obj" d={join(kc.top, K.poly([[CAB.x0, CAB.y0, CAB.z0], [CAB.x0, CAB.y1, CAB.z0]]), K.poly([[CAB.x0, CAB.y0, CAB.z0], [CAB.x1, CAB.y0, CAB.z0], [CAB.x1, CAB.y1, CAB.z0]]), K.poly([[CAB.x1, CAB.y0, CAB.z0], [CAB.x1, CAB.y0, CAB.z1], [CAB.x1, CAB.y1, CAB.z1]]))} pathLength="1" />
       <path class="ln-med" d={K.poly([[CAB.x0, roofY, CAB.z0], [CAB.x1, roofY, CAB.z0], [CAB.x1, roofY, CAB.z1]])} />
     </g>
-    <g transform={K.faceMatrix('front', [HOLES[0] - railW / 2, 0, 0])}>
-      <URuler x={0} y={0} units={CAB.units} scale={1} k={K.scale} every={6} title="U" />
+    <g transform={K.faceMatrix('front', [fl, 0, 0])}>
+      <URuler x={0} y={0} units={CAB.units} start={1} down scale={1} k={K.scale} every={6} title="U" />
     </g>
     <g style="--p:4">
-      <path class="ln-phantom" d={join(kRightGhost, doorOpen)} />
+      <path class="ln-phantom" d={join(kc.side, doorOpen)} />
       <path class="ln-phantom" d={kSwing} />
       <path class="ln-thin" d={glass} />
     </g>
-    <g data-layer="labels">
-      <path class="ln-thin" d={`M${f(aC[0] - aR)} ${f(aC[1])}a${aR} ${aR} 0 1 0 ${2 * aR} 0a${aR} ${aR} 0 1 0 ${-2 * aR} 0`} style="--p:5" />
-      <text class="txt-label" x={f(aC[0] + aR * 0.72)} y={f(aC[1] - aR * 0.72)} style="--p:6">A</text>
-      <Leader from={K.pt(CAB.x0, CAB.y1 * 0.2, CAB.z0 - CAB.w * 0.95)} to={[72, 64]} end="dot" text={['DOOR OPEN 90°', 'GLASS']} prov="inferred" />
-      <Leader from={K.pt(CAB.x1, CAB.y1 * 0.8, CAB.z1 * 0.6)} to={[296, 110]} end="dot" text={['SIDE PANEL', 'GHOSTED']} />
-    </g>
+    <path class="ln-thin" d={`M${f(aC[0] - aR)} ${f(aC[1])}a${aR} ${aR} 0 1 0 ${2 * aR} 0a${aR} ${aR} 0 1 0 ${-2 * aR} 0`} style="--p:5" />
+    <text class="txt-label" x={f(aC[0] + aR * 0.74)} y={f(aC[1] - aR * 0.74)} style="--p:6">A</text>
+    <Leader from={K.pt(CAB.x0, CAB.y1 * 0.2, CAB.z0 - CAB.w * 0.95)} to={[64, 64]} end="dot" text={['GLASS DOOR', 'HINGED LEFT']} />
   </View>
 
-  <!-- ======== DETAIL A, 1:6 ======== -->
-  <View x={150} y={260} w={687} h={592} title="DETAIL A · THE STACK" scale={k} note={`U${stack.from}–${stack.to + 1} · POSITIONS ASSUMED`} labelAt={[700, 806]}
-        mm={D.faceMatrix('front', [0, 0, 0], true)} u0={0} uStart={1}>
-    <!-- rear rails, side members -->
-    <g style="--p:1">
-      <path class="ln-thin" d={rearRails} />
-      <path class="ln-cons" d={sideRails} />
-    </g>
-    <!-- front rails with the U ruler -->
-    <g transform={D.faceMatrix('front', [rails.fl, 0, 0])}>
-      <URuler x={0} y={-U0} units={Math.round((U1 - U0) / U_MM)} start={stack.from - 1} scale={1} k={k} title="U" />
-    </g>
-    <path class="ln-thin" d={join(D.poly([[rails.fr, U0, 0], [rails.fr, U1, 0]]), D.poly([[rails.fr + railW, U0, 0], [rails.fr + railW, U1, 0]]))} />
-    <path class="ln-thin" d={join(brk(rails.fl, 0, U0, railW), brk(rails.fr, 0, U0, railW), brk(rails.fl, 0, U1, railW), brk(rails.fr, 0, U1, railW))} style="--p:4" />
+  <!-- ======== DETAIL A, 1:7 ======== -->
+  <View x={170} y={200} w={667} h={652} title="DETAIL A · THE BOXES" scale={k} note="U16–39 EMPTY · BROKEN OUT" labelAt={[704, 812]}>
+    <IsoStack dwg={dwg} x={SX} y={SY} k={k} bx={236} by={[372, 770]} ty={236} />
 
-    <g data-layer="devices">
-      {items.map(({ s, b, rail, tex }) => (
-        <Part id={s.dev.id} label={`${balloonOf(s.dev.id)}. ${s.dev.name}`} rail={rail} p={2}>
-          <path class="face-side" d={b.body.side} />
-          <path class="face-top" d={b.body.top} />
-          {!b.plate && <path class="face-front" d={b.body.front} />}
-          {s.dev.id === 'shelf' && (
-            <path class="ln-thin" d={join(...Array.from({ length: 9 }, (_, i) => D.poly([[40 + i * 48, topOf(s) - 2, 20], [40 + i * 48, topOf(s) - 2, s.body.d - 20]])))} />
-          )}
-          <path class="ln-obj" d={b.body.edges} pathLength="1" />
-          {b.plate && (
-            <>
-              <path class="face-top" d={b.plate.top} />
-              <path class="face-side" d={b.plate.side} />
-              <path class="face-front" d={b.plate.front} />
-            </>
-          )}
-          <g class="dwg-tex"><use href={`#${dwg}-pf-${s.dev.id}`} transform={tex} /></g>
-          {b.plate && <path class="ln-obj" d={b.plate.edges} pathLength="1" />}
-        </Part>
-      ))}
+    <g transform={hi.faceMatrix('right', [482.6, CAB.railTop + 50, 0])}>
+      <Dim a={[0, 0]} b={[CAB.railSpan, 0]} offset={-6} mm={CAB.railSpan} sub="RAIL SPAN" k={k} ext="none" />
+    </g>
+    <Dim a={bl} b={br} offset={-34} mm={482.6} sub="[19.00]" dir="aligned" />
+    <g transform={hi.faceMatrix('right', [r7.body.x + r7.body.w, r7.body.y, 0])}>
+      <Dim a={[0, 0]} b={[r7.body.d, 0]} offset={36} mm={r7.body.d} k={k} />
     </g>
 
-    <g class="rk-ghost" style="--p:4" data-layer="labels">
-      <path class="ln-phantom" d={join(r7Out.body.outline, r7Out.plate.outline)} />
-      <Leader from={D.pt(80, r7.faceTop - r7.plate!.h, r7.plate!.z - r7.travel)} to={[150, 800]} end="arrow" text={['PULLED OUT', 'ON RAILS']} />
-    </g>
-
-    <g data-layer="airflow">
-      <Particles d={airR.cold} kind="cold" n={3} dur={3.2} guide={false} />
-      <Particles d={airR.hot} kind="hot" n={3} dur={3.2} />
-      <Particles d={airU.cold} kind="cold" n={2} dur={3.6} guide={false} />
-      <Particles d={airU.hot} kind="hot" n={2} dur={3.6} />
-    </g>
-
-    <g data-layer="dims">
-      <g transform={D.faceMatrix('right', [482.6, stackTop + 60, 0])}>
-        <Dim a={[0, 0]} b={[CAB.railSpan, 0]} offset={-6} mm={CAB.railSpan} k={k} prov="assumed" ext="none" />
-      </g>
-      <g transform={D.faceMatrix('front', [0, stackBot, r7.faceZ])}>
-        <Dim a={[0, 0]} b={[482.6, 0]} offset={80} mm={482.6} sub="[19.00]" k={k} prov="vendor" />
-      </g>
-      <g transform={D.faceMatrix('right', [r7.body.x + r7.body.w, r7.body.y, 0])}>
-        <Dim a={[0, 0]} b={[r7.body.d, 0]} offset={40} mm={r7.body.d} k={k} prov="vendor" />
-      </g>
-    </g>
-
-    <g data-layer="labels">
-      {top2bottom.map((s, i) => (
-        <Balloon at={[bx, balloonY(i)]} n={s.n} to={anchorOf(s)} end="dot" part={s.dev.id} />
-      ))}
-      <Leader from={D.pt(rails.fl + railW, U1 - 20, 0)} to={[318, 318]} end="dot" text={['FRONT RAIL', 'EIA-310 · U RULER']} />
+    <!-- the injector's PoE run to the U7 Pro, off the sheet -->
+    <g class="sem-power" style="--p:5">
+      <path class="ln-net" d={`M${poe[0]} ${poe[1]}l8 8H${POE_X}V${POE_Y}H${OFF.x + 100}V${OFF.y + OFF.h + 9}`} pathLength="1" />
+      <path class="dim-arr" d={`M${OFF.x + 100} ${OFF.y + OFF.h}l-3 9h6Z`} />
+      <text class="txt-label" x={POE_X + 8} y={POE_Y - 7}>POE</text>
     </g>
   </View>
-
-  <!-- ======== elsewhere: off-sheet callouts ======== -->
-  <g data-layer="devices">
-    {(['u7-pro', 'flex-mini'] as const).map((id, i) => {
-      const d = dev(id);
-      const x = 640, y = 176 + i * 66;
-      return (
-        <Part id={id} label={`${balloonOf(id)}. ${d.name}, kept elsewhere`}>
-          <path class="face" d={`M${x} ${y}h184v48h-184Z`} />
-          <path class="ln-hid" d={`M${x} ${y}h184v48h-184Z`} />
-          <text class="txt-label" x={x + 36} y={y + 20}>{d.short}</text>
-          <text class="txt-note" x={x + 36} y={y + 36}>{id === 'u7-pro' ? 'CEILING OR WALL' : 'AT THE DESK'}</text>
-          <path class="ln-med" d={`M${x + 156} ${y + 24}h18M${x + 168} ${y + 18}l6 6-6 6`} />
-        </Part>
-      );
-    })}
-    {(['u7-pro', 'flex-mini'] as const).map((id, i) => (
-      <Balloon at={[656, 200 + i * 66]} n={balloonOf(id)} part={id} />
-    ))}
-    <text class="txt-note" x="640" y="150">KEPT ELSEWHERE · OFF SHEET</text><text class="txt-note" x="640" y="164">UPLINKS NOT DOCUMENTED</text>
-  </g>
 </View>

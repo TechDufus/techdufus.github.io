@@ -1,0 +1,291 @@
+---
+/*
+  Sheet 03 · SECTION A–A: the stack drawn as a building section. Layer 1 is the foundation (the
+  R720xd below grade on its ZFS footings, Proxmox at ground level, the host config as a plant
+  room), with the gateway, NAS and control node as site services. Layer 2 is the floor of VMs:
+  one room per Talos node, standalone VMs as pavilions. Layer 3 is the cluster: a tower on the
+  Talos rooms, Cilium as its floor, the platform as fixtures, the apps storey on top. What builds
+  each layer is lettered at the side as a construction note. Solid = running, phantom = planned,
+  straight from src/data/lab/stack.ts (see ./model.ts).
+*/
+import View from '../View.astro';
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import Dim from '../Dim.astro';
+import Particles from '../Particles.astro';
+import Fixture from './Fixture.astro';
+import { f, rc, wrap } from '../../../lib/drawing/figure';
+import {
+  DWG, controllerName, cpuCount, cpuModel, driveCount, fixtureLines, group, groupThings, layer, memoryGB, planned,
+  pools, tagOf, talos, thing, threads, toolText, type Thing,
+} from './model';
+
+interface Props {
+  active?: boolean;
+}
+const { active = false } = Astro.props;
+
+/* ---- the site: x across, y down; grade is y = G ---- */
+const X0 = 268; // building, left
+const XR = 932; // building, right (the R720xd's footprint)
+const RW = 136; // one Talos room
+const G = 550; // grade
+const SLAB = 6;
+const n = talos.count;
+const TX1 = X0 + n * RW; // tower, right
+
+// layer 1 · bootstrap
+const r720 = thing('r720xd');
+const zfs = thing('zfs');
+const pve = thing('proxmox');
+const hostItems = groupThings('host').filter((t) => t.id !== 'proxmox');
+const pi = thing('rpi');
+const udm = thing('udm-pro');
+const unas = thing('unas');
+// layer 2 · virtual machines
+const nodes = thing(talos.id);
+const solos = groupThings('standalone');
+// layer 3 · kubernetes: Cilium is the tower's floor; everything else is a fixture (running first)
+const cilium = thing('cilium');
+const fixtures = groupThings('platform').filter((t) => t.id !== 'cilium');
+const appsGroup = group('apps');
+const apps = groupThings('apps');
+const appsSlot = apps.length ? null : thing('apps');
+
+/* ---- storeys, bottom up ---- */
+const PX_T = G - 60; // Proxmox storey top
+const VM_T = PX_T - 110; // VM storey top
+const CIL_T = VM_T - 16; // Cilium floor top
+const COLS = 4, FW = (n * RW - 24 - (COLS - 1) * 8) / COLS, FH = 42, FG = 8;
+const rows = (k: number) => Math.max(1, Math.ceil(k / COLS));
+const grid = (k: number) => rows(k) * FH + (rows(k) - 1) * FG;
+const PL_T = CIL_T - (22 + grid(fixtures.length) + 12); // platform storey top
+const AP_T = PL_T - SLAB - (apps.length ? 22 + grid(apps.length) + 12 : 50); // apps storey top
+const ROOF_T = AP_T - SLAB;
+const B_B = G + 72; // basement floor
+const FT_T = B_B + SLAB; // footings, top
+const FT_B = FT_T + 30;
+const topRunning = !appsSlot && apps.some((a) => !planned(a));
+
+const cell = (i: number, top: number) => ({
+  x: X0 + 12 + (i % COLS) * (FW + FG),
+  y: top + 22 + Math.floor(i / COLS) * (FH + FG),
+});
+const fx = fixtures.map((t, i) => ({ t, ...cell(i, PL_T) }));
+const ax = apps.map((t, i) => ({ t, ...cell(i, AP_T) }));
+
+// footings: the three pools, widths in proportion to their size
+const inner = XR - X0 - 2 * SLAB - 28, gap = 12;
+const k = (inner - gap * (pools.length - 1)) / pools.reduce((s, p) => s + p.usableGiB, 0);
+let px = X0 + SLAB + 14;
+const feet = pools.map((p) => {
+  const w = p.usableGiB * k;
+  const r = { p, x: px, w };
+  px += w + gap;
+  return r;
+});
+
+// standalone VMs: pavilions on the VM floor beside the tower
+const PW = 120;
+const pav = solos.map((t, i) => ({ t, x: TX1 + 16 + i * (PW + 16), lines: wrap(t.item?.what ?? '', 15) }));
+if (pav.length && pav[pav.length - 1].x + PW > XR) throw new Error('stack section: too many standalone VMs for the VM floor');
+const PLANT = 112; // host config plant room(s), right end of the Proxmox storey
+const plants = hostItems.map((t, i) => ({ t, x: XR - (hostItems.length - i) * PLANT }));
+const pveR = plants.length ? plants[0].x : XR;
+
+// site services, right of the building
+const UX = 962, UW = 118, UNAS_T = G - 48 - 44, UDM_T = G - 48;
+const HX = 1106, HW = 82, HUT_T = G - 50;
+// the control node's reach: a construction line over the site buildings into the plant room
+const arc = (() => {
+  const p0 = [HX + 30, HUT_T - 6], c1 = [HX + 30, UNAS_T - 110], c2 = [XR + 36, UNAS_T - 110], p3 = [XR + 3, PX_T + 26];
+  const L = Math.hypot(p3[0] - c2[0], p3[1] - c2[1]);
+  const u = [(p3[0] - c2[0]) / L, (p3[1] - c2[1]) / L];
+  const b = [p3[0] - u[0] * 9, p3[1] - u[1] * 9];
+  const at = (t: number, i: number) => (1 - t) ** 3 * p0[i] + 3 * (1 - t) ** 2 * t * c1[i] + 3 * (1 - t) * t * t * c2[i] + t ** 3 * p3[i];
+  return {
+    d: `M${p0.map(f).join(' ')}C${[...c1, ...c2].map(f).join(' ')} ${f(b[0])} ${f(b[1])}`,
+    head: `M${f(p3[0])} ${f(p3[1])}L${f(b[0] - u[1] * 3.4)} ${f(b[1] + u[0] * 3.4)}L${f(b[0] + u[1] * 3.4)} ${f(b[1] - u[0] * 3.4)}Z`,
+    mid: [at(0.5, 0), at(0.5, 1)],
+  };
+})();
+
+// construction notes (left) and the brackets they hang from
+const BRK = 252;
+// each note sits mid-layer; the bootstrap note sits below grade, clear of the ground line
+const notes = [
+  { l: layer('kubernetes'), top: ROOF_T, bot: VM_T, cy: (ROOF_T + VM_T) / 2 },
+  { l: layer('vms'), top: VM_T, bot: PX_T, cy: (VM_T + PX_T) / 2 },
+  { l: layer('bootstrap'), top: PX_T, bot: FT_B, cy: G + 48 },
+];
+
+// earth: below grade, left and right of the building, with the basement and footings cut out
+const EB = FT_B + 18;
+const earth = `M${BRK + 6} ${G}H${X0}V${FT_B}H${XR}V${G}H1205V${EB}H${BRK + 6}Z`;
+
+const vcpu = n * talos.vm.vcpu, ram = n * talos.vm.ramGiB;
+const room = (t: Thing) => (planned(t) ? 'ln-phantom stk-void' : 'face-front ln-obj');
+const up = (s: string) => s.toUpperCase();
+---
+
+<View dwg={DWG} name="section" active={active} x={40} y={40} w={1180} h={810} title="SECTION A–A" scale="NOT TO SCALE" note="POOLS DRAWN TO SIZE" labelAt={[560, 748]}>
+  <!-- earth and grade -->
+  <path class="stk-earth" d={earth} />
+  <path class="ln-obj" d={`M56 ${G}H${X0}M${XR} ${G}H1205`} pathLength="1" style="--p:1" />
+
+  <!-- construction notes: what builds each layer -->
+  <g class="stk-notes" style="--p:2">
+    <path class="ln-thin" d={notes.map((b) => `M${BRK - 8} ${f(b.top + 3)}h8V${f(b.bot - 3)}h-8`).join('')} pathLength="1" />
+    {notes.map((b) => {
+      const { cy } = b;
+      return (
+        <g>
+          <text class="stk-idx" x={BRK - 20} y={f(cy - 22)}>{String(b.l.n).padStart(2, '0')}</text>
+          <text class="txt-label stk-h" x={BRK - 20} y={f(cy - 2)}>{up(b.l.title)}</text>
+          <text class="txt-note" x={BRK - 20} y={f(cy + 18)}>BUILT WITH</text>
+          <text class="txt-label" x={BRK - 20} y={f(cy + 33)}>{up(toolText(b.l.tool))}</text>
+        </g>
+      );
+    })}
+  </g>
+
+  <!-- ===== layer 1 · bootstrap ===== -->
+  <Part id={r720.id} label={tagOf(r720)} p={1}>
+    <path class="hatch ln-med" d={rc(X0, G, SLAB, B_B - G + SLAB) + rc(XR - SLAB, G, SLAB, B_B - G + SLAB) + rc(X0, B_B, XR - X0, SLAB)} />
+    <rect class="face-side ln-obj" x={X0 + SLAB} y={G} width={XR - X0 - 2 * SLAB} height={B_B - G} pathLength="1" />
+    <text class="txt-label" x={X0 + 20} y={G + 26}>{up(r720.card.title)}</text>
+    <text class="txt-note" x={X0 + 20} y={G + 44}>{cpuCount} × {up(cpuModel)} · {threads} THREADS · {memoryGB} GB</text>
+    <text class="txt-note" x={X0 + 20} y={G + 60}>{up(controllerName)} · {driveCount} DRIVES · BELOW GRADE</text>
+  </Part>
+  <Balloon at={[XR - 22, G + 20]} n={r720.n} part={r720.id} r={9} />
+
+  <Part id={zfs.id} label={tagOf(zfs)} p={2}>
+    {feet.map((ft) => (
+      <g>
+        <rect class="hatch ln-obj" x={f(ft.x)} y={FT_T} width={f(ft.w)} height={FT_B - FT_T} pathLength="1" />
+        <text class="txt-label stk-ko stk-c" x={f(ft.x + ft.w / 2)} y={FT_T + 19.5}>{up(ft.p.id)}</text>
+      </g>
+    ))}
+  </Part>
+  <Balloon at={[XR + 30, FT_B + 4]} to={[XR - SLAB - 20, FT_B - 8]} n={zfs.n} part={zfs.id} />
+  {feet.map((ft) => <Dim a={[ft.x, FT_B]} b={[ft.x + ft.w, FT_B]} offset={22} text={`≈ ${ft.p.usableGiB} GiB`} ext="both" />)}
+
+  <Part id={pve.id} label={tagOf(pve)} p={2}>
+    <path class="hatch ln-med" d={rc(X0, G - SLAB, XR - X0, SLAB) + rc(X0, PX_T - SLAB, XR - X0, SLAB)} />
+    <rect class="face-front ln-obj" x={X0} y={PX_T} width={pveR - X0} height={G - SLAB - PX_T} pathLength="1" />
+    <text class="txt-label" x={X0 + 16} y={PX_T + 22}>{up(pve.card.title)}</text>
+    <text class="txt-note" x={X0 + 16} y={PX_T + 38}>{up(pve.item?.what ?? '')}</text>
+  </Part>
+  <Balloon at={[pveR - 18, PX_T + 16]} n={pve.n} part={pve.id} r={9} />
+  {plants.map(({ t, x }) => (
+    <Fragment>
+      <Part id={t.id} label={tagOf(t)} p={3} class={planned(t) ? 'stk-pl' : undefined}>
+        <rect class={room(t)} x={x} y={PX_T} width={PLANT} height={G - SLAB - PX_T} pathLength={planned(t) ? undefined : '1'} />
+        <rect class="dwg-hit" x={x} y={PX_T} width={PLANT} height={G - SLAB - PX_T} />
+        {fixtureLines(t, 11).map((l, i) => <text class="stk-fx" x={x + 10} y={PX_T + 20 + i * 12}>{up(l)}</text>)}
+        <text class="txt-note" x={x + 10} y={G - SLAB - 8}>PLANT ROOM</text>
+      </Part>
+      <Balloon at={[x + PLANT - 16, PX_T + 16]} n={t.n} part={t.id} r={9} />
+    </Fragment>
+  ))}
+
+  <!-- site services: the gateway and the NAS (stacked, as in the cabinet), the control node -->
+  <path class="hatch ln-med" d={rc(UX - 4, UNAS_T - SLAB, UW + 8, SLAB)} style="--p:2" />
+  <Part id={pi.id} label={tagOf(pi)} p={3}>
+    <path class="face-front ln-obj" d={`M${HX} ${G}V${HUT_T}L${HX + HW} ${HUT_T - 10}V${G}Z`} pathLength="1" />
+    {fixtureLines(pi, 9).map((l, i) => <text class="stk-fx" x={HX + 9} y={HUT_T + 16 + i * 12}>{up(l)}</text>)}
+    <text class="txt-note" x={HX + 9} y={G - 7}>CONTROL</text>
+  </Part>
+  <Balloon at={[HX + HW + 14, HUT_T + 8]} n={pi.n} part={pi.id} r={9} />
+  <Part id={udm.id} label={tagOf(udm)} p={3}>
+    <rect class="face-front ln-obj" x={UX} y={UDM_T} width={UW} height={G - UDM_T} pathLength="1" />
+    <text class="stk-fx" x={UX + 10} y={UDM_T + 19}>{up(udm.item?.name ?? '')}</text>
+    <text class="txt-note" x={UX + 10} y={UDM_T + 34}>GATEWAY</text>
+  </Part>
+  <Balloon at={[UX + UW - 15, UDM_T + 15]} n={udm.n} part={udm.id} r={9} />
+  <Part id={unas.id} label={tagOf(unas)} p={3}>
+    <rect class="face-front ln-obj" x={UX} y={UNAS_T} width={UW} height={UDM_T - UNAS_T} pathLength="1" />
+    <text class="stk-fx" x={UX + 10} y={UNAS_T + 19}>{up(unas.item?.name ?? '')}</text>
+    <text class="txt-note" x={UX + 10} y={UNAS_T + 34}>NAS</text>
+  </Part>
+  <Balloon at={[UX + UW - 15, UNAS_T + 15]} n={unas.n} part={unas.id} r={9} />
+
+  <!-- services under grade: network ducts; the control node reaches the host with Ansible -->
+  <g class="stk-duct">
+    <path class="stk-trench" d={`M${UX + 30} ${G}V${G + 40}H${XR}M${HX + 30} ${G}V${G + 22}H${UX + UW - 24}V${G}`} />
+    <Particles d={`M${UX + 30} ${G}V${G + 40}H${XR}`} kind="net1" n={3} dur={3.2} />
+    <Particles d={`M${HX + 30} ${G}V${G + 22}H${UX + UW - 24}V${G}`} kind="net1" n={2} dur={2.6} />
+    <text class="txt-note stk-ko stk-nc" x={XR + 10} y={G + 58}>1 GbE</text>
+  </g>
+  <g class="stk-ctl" style="--p:4">
+    <path class="ln-hid" d={arc.d} pathLength="1" />
+    <path class="stk-arr" d={arc.head} />
+    <text class="txt-label stk-ko stk-c" x={f(arc.mid[0])} y={f(arc.mid[1] - 10)}>ANSIBLE</text>
+  </g>
+
+  <!-- ===== layer 2 · virtual machines ===== -->
+  <Part id={nodes.id} label={tagOf(nodes)} p={3}>
+    {Array.from({ length: n }, (_, i) => {
+      const x = X0 + i * RW;
+      return (
+        <g>
+          <rect class={room(nodes)} x={x} y={VM_T} width={RW} height={PX_T - SLAB - VM_T} pathLength="1" />
+          <text class="txt-label" x={x + 12} y={VM_T + 24}>TALOS {i + 1}</text>
+          <text class="txt-note stk-nc" x={x + 12} y={VM_T + 46}>{talos.vm.vcpu} vCPU</text>
+          <text class="txt-note stk-nc" x={x + 12} y={VM_T + 61}>{talos.vm.ramGiB} GiB RAM</text>
+          <text class="txt-note" x={x + 12} y={VM_T + 76}>{talos.vm.diskGB} GB · {up(talos.vm.pool)}</text>
+        </g>
+      );
+    })}
+  </Part>
+  {Array.from({ length: n }, (_, i) => <Balloon at={[X0 + (i + 1) * RW - 16, VM_T + 18]} n={nodes.n} part={nodes.id} r={9} />)}
+  {pav.map(({ t, x, lines }) => (
+    <Fragment>
+      <Part id={t.id} label={tagOf(t)} p={3} class={planned(t) ? 'stk-pl' : undefined}>
+        <rect class={room(t)} x={x} y={VM_T + 12} width={PW} height={PX_T - SLAB - VM_T - 12} pathLength={planned(t) ? undefined : '1'} />
+        <rect class="dwg-hit" x={x} y={VM_T + 12} width={PW} height={PX_T - SLAB - VM_T - 12} />
+        <text class="txt-label" x={x + 12} y={VM_T + 36}>{up(t.item?.name ?? t.name)}</text>
+        {lines.map((l, i) => <text class="txt-note" x={x + 12} y={VM_T + 56 + i * 14}>{up(l)}</text>)}
+      </Part>
+      <Balloon at={[x + PW - 16, VM_T + 28]} n={t.n} part={t.id} r={9} />
+    </Fragment>
+  ))}
+
+  <!-- ===== layer 3 · kubernetes: the tower on the Talos rooms ===== -->
+  <Part id={cilium.id} label={tagOf(cilium)} p={3} class={planned(cilium) ? 'stk-pl' : undefined}>
+    <rect class={planned(cilium) ? 'ln-phantom stk-void' : 'face-top ln-obj'} x={X0} y={CIL_T} width={n * RW} height={VM_T - CIL_T} pathLength="1" />
+    {!planned(cilium) && <Particles d={`M${X0 + 8} ${CIL_T + 8}H${TX1 - 8}`} kind="net10" n={3} dur={4.2} guide={false} />}
+  </Part>
+  <Balloon at={[TX1 + 26, CIL_T - 12]} to={[TX1 - 10, CIL_T + 8]} n={cilium.n} part={cilium.id} />
+  <text class="txt-label" x={TX1 + 44} y={CIL_T - 14}>{up(cilium.card.title)}</text>
+  <text class="txt-note" x={TX1 + 44} y={CIL_T + 1}>THE CLUSTER’S FLOOR</text>
+
+  <g style="--p:2">
+    <rect class="ln-obj" x={X0} y={PL_T} width={n * RW} height={CIL_T - PL_T} pathLength="1" />
+    <path class="hatch ln-med" d={rc(X0, PL_T - SLAB, n * RW, SLAB)} />
+    <text class="txt-note" x={X0 + 12} y={PL_T + 15}>{up(group('platform').title)}</text>
+  </g>
+  {fx.map(({ t, x, y }) => <Fixture t={t} x={x} y={y} w={FW} h={FH} />)}
+
+  <!-- the top storey: apps, when there are any; until then an empty bay -->
+  {appsSlot ? (
+    <Fragment>
+      <Part id={appsSlot.id} label={tagOf(appsSlot)} p={4} class="stk-pl">
+        <rect class="ln-phantom stk-void" x={X0} y={AP_T} width={n * RW} height={PL_T - SLAB - AP_T} />
+        <path class="ln-phantom" d={`M${X0} ${AP_T}L${TX1} ${PL_T - SLAB}M${X0} ${PL_T - SLAB}L${TX1} ${AP_T}`} />
+        <rect class="dwg-hit" x={X0} y={AP_T} width={n * RW} height={PL_T - SLAB - AP_T} />
+        <text class="txt-label stk-ko stk-c" x={(X0 + TX1) / 2} y={AP_T + 22}>{up(appsSlot.name)}</text>
+        <text class="txt-note stk-ko stk-c" x={(X0 + TX1) / 2} y={AP_T + 38}>NOTHING YET</text>
+      </Part>
+      <Balloon at={[TX1 - 16, AP_T + 16]} n={appsSlot.n} part={appsSlot.id} r={9} />
+    </Fragment>
+  ) : (
+    <Fragment>
+      <rect class={topRunning ? 'ln-obj' : 'ln-phantom'} x={X0} y={AP_T} width={n * RW} height={PL_T - SLAB - AP_T} />
+      <text class="txt-note" x={X0 + 12} y={AP_T + 15}>{up(appsGroup.title)}</text>
+      {ax.map(({ t, x, y }) => <Fixture t={t} x={x} y={y} w={FW} h={FH} />)}
+    </Fragment>
+  )}
+  <path class={topRunning ? 'hatch ln-med' : 'ln-phantom'} d={rc(X0 - 8, ROOF_T, n * RW + 16, SLAB)} style="--p:4" />
+  <Dim a={[X0, ROOF_T]} b={[TX1, ROOF_T]} offset={-22} text={`${n} × TALOS · ${vcpu} vCPU · ${ram} GiB`} />
+</View>

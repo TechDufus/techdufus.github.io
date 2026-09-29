@@ -1,0 +1,65 @@
+---
+/*
+  CompareFigure: two or three rows (before / after), each a short left-to-right flow, nodes
+  aligned by position so the rows read against each other. A row may carry a rubber stamp
+  ("DONE", "PLANNED"). Wide: rows stacked. Narrow: the rows become columns, flowing down.
+
+  <CompareFigure id="fig-swap" title="The swap" caption="Same disks. Fewer layers between them and ZFS."
+    rows={[
+      { label: 'Before', note: 'hardware RAID', nodes: [{ id: 'd1', label: 'Seven disks' }, { id: 'perc', label: 'PERC H710P', tone: 'removed' }, { id: 'vd', label: 'Virtual disks', tone: 'removed' }] },
+      { label: 'After', note: '2026-09-28', stamp: { text: 'AS BUILT', tone: 'ok' },
+        nodes: [{ id: 'd2', label: 'Six disks', tone: 'keep' }, { id: 'hba', label: 'HBA330', tone: 'new' }, { id: 'zfs', label: 'ZFS', tone: 'new' }] },
+    ]} />
+
+    rows    { label, note?, nodes: FigNode[], stamp?: string | { text, sub?, tone?: 'warn' | 'ok' | 'wip' } }[]
+    stamp   shorthand for a stamp on the last row
+    + FigureBase props (id, title, caption, fig, breakout, hint, desc, scale, rev, date, bp)
+*/
+import Figure from './Figure.astro';
+import Node from './Node.astro';
+import PartCard from '../PartCard.astro';
+import Stamp from '../Stamp.astro';
+import { BREAKOUT, WIDE, at, compareLayout, list, say, type CompareRow, type FigureBase, type StampSpec } from '../../../lib/drawing/figure';
+
+interface Props extends FigureBase {
+  rows: CompareRow[];
+  stamp?: StampSpec;
+}
+const { rows: rows0, stamp, desc, hint, ...base } = Astro.props;
+const rows = stamp ? rows0.map((r, i) => (i === rows0.length - 1 ? { ...r, stamp } : r)) : rows0;
+const L = compareLayout(rows, base.breakout ? BREAKOUT : WIDE);
+const cards = L.boxes.filter((b) => b.card);
+const text =
+  desc ??
+  rows.map((r) => `${r.label}${r.note ? ` (${r.note})` : ''}: ${list(r.nodes.map(say))}.`).join(' ') +
+    rows.filter((r) => r.stamp).map((r) => ` ${r.label} is stamped ${typeof r.stamp === 'string' ? r.stamp : r.stamp!.text}.`).join('');
+---
+
+<Figure {...base} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0} defs={L.rows.some((r) => r.stamp) ? ['rough'] : []}>
+  {(['w', 'n'] as const).map((k) => (
+    <g class={`fg-${k}`}>
+      <path class="ln-thin" d={L.rules[k]} style="--p:1" />
+      <g class="fg-edge" style="--p:3">
+        <path class="ln-med" d={L.arrows[k]} pathLength="1" />
+        <path class="fg-arr" d={L.arrows.heads[k]} />
+      </g>
+    </g>
+  ))}
+  {L.boxes.map((b) => <Node box={b} wp={b.wp} np={b.np} />)}
+  <g style="--p:5">
+    {L.rows.map((r) => (
+      <g {...at(r.wp, r.np)}>
+        <text class="view__t">{r.row.label.toUpperCase()}</text>
+        {r.row.note && <text class="txt-note" y="16">{r.row.note}</text>}
+      </g>
+    ))}
+  </g>
+  {L.rows.map((r) => r.stamp && (
+    <g {...at(r.stamp.wp, r.stamp.np)}>
+      <Stamp x={0} y={0} text={r.stamp.text} sub={r.stamp.sub} tone={r.stamp.tone} />
+    </g>
+  ))}
+  <Fragment slot="cards">
+    {cards.map((b) => <PartCard id={b.id} title={b.card!.title} kind={b.card!.kind} lines={b.card!.lines} />)}
+  </Fragment>
+</Figure>

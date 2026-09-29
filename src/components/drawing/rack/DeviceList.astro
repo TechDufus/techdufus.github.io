@@ -1,0 +1,63 @@
+---
+/*
+  Sheet 01 · the device schedule: the cabinet's gear grouped Compute / Network / Storage / Edge
+  (devicesByRole()), with the balloon number and the U. Each name is a button with
+  data-balloon-for, so drawing.ts treats it like a balloon: hovering or focusing it lights the
+  part, clicking it selects the part and opens its card, and focus comes back here when the card
+  closes. It must sit inside the drawing's figure (a Sheet's `aside` slot, or its `legend`).
+
+    shelves  add a Shelves group (the shelves and what's on them), so every balloon has a row
+    compact  the /lab excerpt: sized in px instead of the sheet's paper units
+    prefix   part-id prefix, when the drawing's parts are prefixed (the excerpt: "{id}-")
+*/
+import { balloonOf, devicesByRole, devices, uText } from './model';
+
+interface Props {
+  shelves?: boolean;
+  compact?: boolean;
+  prefix?: string;
+}
+const { shelves = false, compact = false, prefix = '' } = Astro.props;
+const groups = [
+  ...devicesByRole(),
+  ...(shelves ? [{ role: 'shelf', label: 'Shelves', devices: devices.filter((d) => d.role === 'shelf') }] : []),
+];
+---
+
+<table class:list={['rk-list', compact && 'rk-list--x']}>
+  <caption>{compact ? 'The gear' : 'Schedule'}</caption>
+  <thead><tr><th scope="col">No</th><th scope="col">Device</th><th scope="col">U</th></tr></thead>
+  {groups.map((g) => (
+    <tbody>
+      <tr class="rk-list__g"><th scope="rowgroup" colspan="3">{g.label}</th></tr>
+      {g.devices.map((d) => (
+        <tr>
+          <td class="rk-list__n"><span>{balloonOf(d.id)}</span></td>
+          <th scope="row"><button type="button" data-balloon-for={prefix + d.id}>{d.name}</button></th>
+          <td class="rk-list__u">{uText(d)}</td>
+        </tr>
+      ))}
+    </tbody>
+  ))}
+</table>
+
+<style is:global>
+  .rk-list{--s:var(--pu,1.1px);width:calc(100% - var(--s)*14);border-collapse:collapse;font:calc(var(--s)*10.5)/1.25 var(--font-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
+  .rk-list caption{margin:0 0 calc(var(--s)*10);text-align:left;font-weight:500;letter-spacing:.18em;color:var(--gold-light);text-decoration:underline 1px var(--gold);text-underline-offset:calc(var(--s)*4)}
+  .rk-list thead th{padding:0 0 calc(var(--s)*5);font-weight:500;font-size:calc(var(--s)*8.5);letter-spacing:.14em;color:var(--faint);text-align:left;border-bottom:1px solid var(--dwg-rule)}
+  .rk-list thead th:last-child,.rk-list__u{text-align:right;white-space:nowrap}
+  .rk-list__g th{padding:calc(var(--s)*12) 0 calc(var(--s)*4);font-weight:500;font-size:calc(var(--s)*8.5);letter-spacing:.16em;color:var(--gold);text-align:left}
+  .rk-list tbody tr:not(.rk-list__g){position:relative;border-top:1px solid color-mix(in srgb,var(--gold) 12%,transparent)}
+  .rk-list :is(td,th){padding-block:calc(var(--s)*4.5)}
+  .rk-list tbody th{font-weight:400;text-align:left}
+  .rk-list__n{width:calc(var(--s)*30);padding-left:calc(var(--s)*1)}
+  .rk-list__n span{display:inline-grid;place-items:center;width:calc(var(--s)*17);height:calc(var(--s)*17);border:1px solid var(--dwg-dim,var(--line-3));border-radius:50%;font-weight:500;font-size:calc(var(--s)*9);letter-spacing:0;color:var(--gold-light)}
+  .rk-list button{all:unset;cursor:pointer;color:var(--ink);text-decoration:underline 1px transparent;text-underline-offset:calc(var(--s)*3.5);transition:color var(--t-1) ease,text-decoration-color var(--t-1) ease}
+  .rk-list button::after{content:"";position:absolute;inset:0}
+  .rk-list button:focus-visible{outline:1px solid var(--gold);outline-offset:calc(var(--s)*3)}
+  .rk-list button.is-hot{color:var(--gold-pale);text-decoration-color:var(--gold)}
+  .rk-list tr:has(.is-hot){background:color-mix(in srgb,var(--gold) 9%,transparent)}
+  .rk-list tr:has(.is-hot) .rk-list__n span{border-color:var(--gold-pale);color:var(--gold-pale)}
+  .rk-list--x{--s:1.2px}
+  .rk-list--x caption{color:var(--faint);text-decoration:none}
+</style>

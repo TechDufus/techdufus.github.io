@@ -1,21 +1,27 @@
 ---
 /*
-  OrthoViews: Sheet 02's ORTHOGRAPHIC tab, third-angle: TOP VIEW (cover off, as found) above
-  the FRONT, the REAR beside it, DETAIL B (front bays 0–7, suggested pools) and DETAIL C (rear
-  flex bays and PSUs). Needs <ServerDefs id={dwg} /> in the same SVG. A3 paper units.
+  OrthoViews: Sheet 02's ORTHOGRAPHIC tab, as built: the TOP VIEW (cover off) above the FRONT,
+  the REAR beside it, DETAIL B (the populated front bays, big enough to click), DETAIL C (the
+  rear flex bays and PSUs) and the ZFS POOLS tree. The details come first in the DOM: a balloon
+  click opens its card beside the first part with that id, and the balloons live there. Drives, pools, the HBA330, its two cables,
+  the NICs and the PSUs are parts. Needs <ServerDefs id={dwg} /> in the same SVG and
+  <ServerCards /> on the page. A3 paper units.
 
   <OrthoViews dwg="lab02" active />
 */
 import View from '../View.astro';
 import Dim from '../Dim.astro';
-import Leader from '../Leader.astro';
+import Part from '../Part.astro';
 import Balloon from '../Balloon.astro';
 import Particles from '../Particles.astro';
-import { atScale, join, ortho } from '../../../lib/drawing/projection';
-import { r720xd } from '../../../data/hardware/r720xd';
+import Stamp from '../Stamp.astro';
+import BayStrip from './BayStrip.astro';
+import PlanView from './PlanView.astro';
+import { atScale, join } from '../../../lib/drawing/projection';
+import { server } from '../../../data/lab/server';
 import {
-  BAY_H, BAY_N, BAY_P, BAY_Y0, BEZEL, D, EAR, EAR_D, H, HANDLES, OVERALL, W, WE,
-  P, R, bayX, mx, n, part, routes, rz, suggestedFront,
+  BEZEL, D, EAR, EAR_D, H, HANDLES, NUM, OVERALL, STAMP, W, WE,
+  P, R, bayX, driveShort, mx, n, part, place, planAt, pools, rearCarrier, rearDrive, rj, routes, rz,
 } from './geom';
 
 interface Props {
@@ -26,200 +32,159 @@ const { dwg, active = false } = Astro.props;
 
 const s = atScale(1, 4); // 0.75
 const X0 = 64, YF = 612, YT = 668, XR = X0 + s * WE + 44 + s * EAR; // rear body left
-const m = (sc: number, x: number, y: number) => `matrix(${sc},0,0,${sc},${n(x)},${n(y)})`;
-/** plan (x, z) → paper */
-const pl = (x: number, z: number): [number, number] => [X0 + s * x, YF - s * z];
+const top = planAt(X0, YF, s);
+const pl = top.pt;
 /** front face (u, v) → paper */
 const fr = (u: number, v: number): [number, number] => [X0 + s * u, YT + s * v];
 /** rear face (u from the body's left seen from behind, v) → paper */
 const rr = (u: number, v: number): [number, number] => [XR + s * u, YT + s * v];
 
-// Detail B: the left ear and bays 0–7 at 1:2; Detail C: rear flex bays + PSUs at 1:2
-const SD = atScale(1, 2);
-const B = { x: 520, y: 158, u1: bayX(8) };
-const C0 = rz('slot-6').x - 4, C1 = rz('psu-2').x + rz('psu-2').w + 6;
-const C = { x: 536, y: 412, ox: 536 - SD * C0 };
-
-const pools = ['rpool', 'fast', 'bulk'] as const;
-const tintFront = (u0: number, v0: number, sc: number, ox: number, oy: number, maxBay = BAY_N) =>
-  Object.fromEntries(pools.map((pool) => [pool, suggestedFront.filter((b) => b.pool === pool && b.bay < maxBay)
-    .map((b) => R(ox + sc * (bayX(b.bay) + 0.5 - u0), oy + sc * (BAY_Y0 - v0), sc * (BAY_P - 1), sc * BAY_H)).join('')]));
-const tintMain = tintFront(0, 0, s, X0, YT);
-const tintB = tintFront(0, 0, SD, B.x, B.y, 8);
-
-// bay numbers: one <text> with a glyph-per-x list (each glyph centred on its own x)
-const numsAt = (x0: number, pitch: number, count: number, adv: number) => {
-  let t = '', xs: string[] = [];
-  for (let i = 0; i < count; i++) {
-    const c = x0 + (i + 0.5) * pitch, d = String(i);
-    t += d;
-    xs.push(...(d.length === 1 ? [n(c)] : [n(c - adv / 2), n(c + adv / 2)]));
-  }
-  return { t, x: xs.join(' ') };
-};
-const numsMain = numsAt(X0 + s * bayX(0), s * BAY_P, BAY_N, 5.6);
-const numsB = numsAt(B.x + SD * bayX(0), SD * BAY_P, 8, 7.6);
-
+// top view balloons: the HBA330 and its two cables, from the right
+const hba = part('hba330');
 const rt = routes();
-const cable = (k: 1 | 4 | 5) => rt[k].map((p) => P(p.map(([x, z]) => pl(x, z)))).join('');
-const perc = part('perc'), hba = part('hba330'), jsx = part('j-sasx8');
-const sasA1 = part('sas-a1'), sasA = part('sas-a'), sasB = part('sas-b');
-// connector letters sit in the clear band between the cable runs and the connectors
-const bpY = pl(0, 88)[1] + 16;
+const hbaTip = pl(hba.x + hba.w, hba.z + hba.d / 2);
+const c2 = rt[2][0], c3 = rt[3][0];
+const c2x = pl(c2[3][0], 0)[0], c3x = pl(c3[3][0], 0)[0];
 
 const airX = mx(0.5);
 const cold = P([pl(airX - 60, -30), pl(airX - 60, 168)]);
 const hot = P([pl(airX - 60, 405), pl(airX - 60, 735)]);
 
-const nic1 = rz('nic-1');
-const nicOut = rr(nic1.x + nic1.w / 2, nic1.y + nic1.h);
-const rb = [rz('rear-bay-l'), rz('rear-bay-r')];
-const cx = (u: number) => C.ox + SD * u;
-const cy = (v: number) => C.y + SD * v;
-const psu = [rz('psu-1'), rz('psu-2')];
-const wattUnknown = r720xd.psus.wattage.value === null;
+// Detail B: the left ear and bays 0–7 at 1:1.5
+const SB = atScale(1, 1.5);
+const B = { x: 520, y: 166, u1: bayX(8) + 1.5 };
+
+// Detail C: rear flex bays + PSUs at 1:2
+const SC = atScale(1, 2);
+const C0 = rz('rear-bay-24').x - 6, C1 = rz('psu-2').x + rz('psu-2').w + 6;
+const C = { x: 908, y: 178 };
+const cx = (u: number) => C.x + SC * (u - C0);
+const cy = (v: number) => C.y + SC * v;
+const bay24 = rz('rear-bay-24'), bay25 = rz('rear-bay-25');
+const car24 = rz('rear-bay-24');
+const carrier = { x: cx(car24.x + 10), y: cy(car24.y + 2.5), w: SC * (car24.w - 12.5), h: SC * (car24.h - 5) };
+const psuA = rz('psu-1'), psuB = rz('psu-2');
+
+// rear view: NICs and the drive in bay 24
+const nics = ['nic-1', 'nic-2', 'nic-3', 'nic-4'];
+const n1 = rz('nic-1'), n4 = rz('nic-4');
+const nicOut = rr(n1.x + n1.w / 2, n1.y + n1.h);
+const nicBox = R(...rr(n1.x - 2, n1.y - 2), s * (n4.x + n4.w - n1.x + 4), s * (n1.h + 4));
+
+// ZFS pools: a tree per pool
+const T = { x: 500, y: 474, col: 240, row: 20 };
+const drive = (bay: number) => server.drives.find((d) => d.bay === bay)!;
+const layout = (p: (typeof pools)[number]) => (p.layout === 'mirror' ? `${p.copies}-WAY MIRROR` : 'ONE DISK');
 ---
 
-<View dwg={dwg} name="ortho" active={active} x={39} y={39} w={798} h={813}>
-  <!-- ================= TOP VIEW (cover off) ================= -->
-  <View x={39} y={48} w={440} h={600} title="TOP VIEW · COVER OFF" scale={s} labelAt={[240, 58]}
-        mm={ortho({ x: X0, y: YF, scale: s, flipY: true }).matrix}>
-    <g data-layer="parts" style="--p:1">
-      <path class="face-top" d={R(X0 + s * EAR, YF - s * D, s * W, s * D)} />
-      <use href={`#${dwg}-plan`} transform={m(s, X0, YF)} />
-      <path class="ln-obj" d={R(...pl(perc.x, perc.z + perc.d), s * perc.w, s * perc.d)} pathLength="1" />
-      <path class="ln-phantom" d={join(R(...pl(0, -EAR_D), s * WE, s * (BEZEL - EAR_D)), R(...pl(hba.x, hba.z + hba.d), s * hba.w, s * hba.d))} style="--p:4" />
-    </g>
-    <g class="cbls" data-layer="cables" style="--p:3">
-      <path class="cbl" d={cable(1)} />
-      <path class="cbl" d={join(cable(4), cable(5))} />
-      <g class="ctag">
-        <text x={n(pl(420.1, 0)[0])} y={n(pl(0, 250)[1] + 4)}>1</text>
-        <text x={n(pl(41.4, 0)[0])} y={n(pl(0, 250)[1] + 4)}>4</text>
-      </g>
-    </g>
-    <g data-layer="air">
-      <Particles d={cold} kind="cold" n={3} dur={3} />
-      <Particles d={hot} kind="hot" n={3} dur={3} />
-    </g>
-    <g data-layer="labels" class="nt">
-      <text x={pl(152, 0)[0]} y={pl(0, 330)[1]}>CPU 1</text>
-      <text x={pl(322, 0)[0]} y={pl(0, 330)[1]}>CPU 2</text>
-      {/* in the gap above the fans; the cold-air line runs through the space after FAN */}
-      <text x={pl(228.5, 0)[0]} y={pl(0, 153)[1]}>FAN WALL · 6 FANS</text>
-      <text x={pl(236, 0)[0]} y={pl(0, 385)[1]}>SHROUD (PHANTOM)</text>
-      <text x={pl(316, 0)[0]} y={pl(0, 435)[1]}>PERC H710P MINI</text>
-      <text x={pl(385, 0)[0]} y={pl(0, 640)[1]}>RISER 1</text>
-      <text x={pl(264, 0)[0]} y={pl(0, 640)[1]}>RISER 2</text>
-      <text transform={`translate(${n(pl(186, 0)[0] + 3)} ${n(pl(0, 590)[1])}) rotate(-90)`}>RISER 3</text>
-      <text x={pl(121, 0)[0]} y={pl(0, 600)[1]}>PSU 1</text>
-      <text x={pl(58, 0)[0]} y={pl(0, 600)[1]}>PSU 2</text>
-      <g class="sm">
-        <text x={pl(sasA1.x + sasA1.w / 2 + 12, 0)[0]} y={bpY}>A1</text>
-        <text x={pl(sasA.x + sasA.w / 2 + 3, 0)[0]} y={bpY}>A</text>
-        <text x={pl(sasB.x + sasB.w / 2 + 3, 0)[0]} y={bpY}>B</text>
-        <text x={pl(364, 0)[0]} y={bpY}>BACKPLANE · EXPANDER</text>
-        <text x={pl(hba.x + hba.w / 2, 0)[0]} y={pl(0, 588)[1]}>HBA330</text>
-        <text x={pl(hba.x + hba.w / 2, 0)[0]} y={pl(0, 570)[1]}>PLANNED</text>
-        <text x={pl(jsx.x + jsx.w / 2, 0)[0]} y={pl(0, 489)[1]}>J_SASX8</text>
-        <text x={pl(236, 0)[0]} y={pl(0, 188)[1]}>24 DIMM SLOTS · APPROX.</text>
-      </g>
-    </g>
-    <g data-layer="dims">
-      <Dim a={pl(WE - EAR, 0)} b={pl(WE - EAR, D)} offset={24} mm={D} prov="vendor" />
-      <Dim a={pl(120, HANDLES)} b={[pl(WE - EAR, 0)[0], pl(0, -BEZEL)[1]]} dir="v" offset={pl(WE - EAR, 0)[0] - pl(120, 0)[0] + 50} mm={OVERALL} prov="inferred" />
-    </g>
-  </View>
-
-  <!-- ================= FRONT ================= -->
-  <View x={39} y={654} w={420} h={198} title="FRONT" scale={s} labelAt={[X0 + (s * WE) / 2, 806]}
-        mm={ortho({ x: X0, y: YT + s * H, scale: s, flipY: true }).matrix}>
-    <path class="ln-cons" d={join(P([pl(0, -BEZEL), fr(0, -14)]), P([pl(WE, -BEZEL), fr(WE, -14)]))} />
-    <g data-layer="parts" style="--p:1">
-      <path class="face-front" d={R(X0, YT, s * WE, s * H)} />
-    </g>
-    <g data-layer="pools">
-      {pools.map((p) => <path class={`tint pool-${p}`} d={tintMain[p]} />)}
-    </g>
-    <g data-layer="parts" style="--p:2"><use href={`#${dwg}-front`} transform={m(s, X0, YT)} /></g>
-    <g data-layer="labels">
-      <text class="nums" x={numsMain.x} y={YT - 5} text-anchor="middle">{numsMain.t}</text>
-      <path class="ln-thin" d={R(...fr(-3, -3), s * (bayX(8) + 5), s * (H + 6))} style="--p:4" />
-      <text class="txt-label" x={X0 - 12} y={YT - 1}>B</text>
-    </g>
-    <g data-layer="dims">
-      <Dim a={fr(0, H)} b={fr(WE, H)} offset={22} mm={WE} prov="vendor" />
-      <Dim a={fr(WE, 0)} b={fr(WE, H)} offset={20} mm={H} sub="2U" prov="vendor" />
-    </g>
-  </View>
-
-  <!-- ================= REAR ================= -->
-  <View x={470} y={600} w={367} h={252} title="REAR" scale={s} labelAt={[XR + (s * W) / 2, 806]}
-        mm={ortho({ x: XR, y: YT + s * H, scale: s, flipY: true }).matrix}>
-    <g data-layer="parts" style="--p:1">
-      <path class="face-front" d={R(XR, YT, s * W, s * H)} />
-      <path class="ln-thin" d={join(R(XR - s * EAR, YT, s * EAR, s * H), R(XR + s * W, YT, s * EAR, s * H))} />
-    </g>
-    <g data-layer="parts" style="--p:2"><use href={`#${dwg}-rear`} transform={m(s, XR, YT)} /></g>
-    <g class="net-1g" data-layer="cables" style="--p:3">
-      <path class="ln-net" d={P([nicOut, [nicOut[0], 776]])} pathLength="1" />
-    </g>
-    <g data-layer="labels">
-      {/* riser 1's label ends over its slots, riser 2's starts over its own: 13 glyphs ≈ 75 wide */}
-      <g class="nt sm">
-        <text x={n(rr(rz('slot-1').x + rz('slot-1').w, 0)[0] - 37.5)} y={YT - 5}>RISER 1 · 1–3</text>
-        <text x={n(rr(rz('slot-4').x, 0)[0] + 37.5)} y={YT - 5}>RISER 2 · 4–5</text>
-        <text x={n(rr(rz('slot-6').x + rz('slot-6').w / 2, 0)[0])} y={YT - 5}>RISER 3 · 6</text>
-      </g>
-      <text class="txt-note" x={nicOut[0] + 6} y={772}>NIC 1 → GATEWAY · 1 GbE</text>
-      <path class="ln-thin" d={R(...rr(C0, 2), s * (C1 - C0), s * (H - 4))} style="--p:4" />
-      <text class="txt-label" x={rr(C1, 0)[0] - 4} y={YT - 5} text-anchor="end">C</text>
-    </g>
-  </View>
-
+<View dwg={dwg} name="ortho" active={active} x={39} y={39} w={1182} h={813}>
   <!-- ================= DETAIL B: bays 0–7 ================= -->
-  <View x={500} y={100} w={330} h={270} title="DETAIL B" scale={SD} note="SUGGESTED LAYOUT · VIF" labelAt={[B.x + (SD * B.u1) / 2, 322]}
-        mm={ortho({ x: B.x, y: B.y + SD * H, scale: SD, flipY: true }).matrix}>
-    <clipPath id={`${dwg}-clip-b`}><rect x={B.x - 2} y={B.y - 2} width={SD * B.u1 + 2} height={SD * H + 4} /></clipPath>
-    <g data-layer="parts" style="--p:1"><path class="face-front" d={R(B.x, B.y, SD * B.u1, SD * H)} /></g>
-    <g data-layer="pools">
-      {pools.map((p) => <path class={`tint pool-${p}`} d={tintB[p]} />)}
-    </g>
-    <g data-layer="parts" clip-path={`url(#${dwg}-clip-b)`} style="--p:2"><use href={`#${dwg}-front`} transform={m(SD, B.x, B.y)} /></g>
-    <g data-layer="labels">
-      <text class="nums nums--b" x={numsB.x} y={B.y - 6} text-anchor="middle">{numsB.t}</text>
-    </g>
-    <g data-layer="pools" style="--p:4">
-      {[['rpool', 0, 1], ['fast', 2, 3], ['bulk', 4, 4]].map(([pool, a, b]) => {
-        const x0 = B.x + SD * (bayX(a as number) + 1), x1 = B.x + SD * (bayX((b as number) + 1) - 1);
-        return (
-          <g class={`pool-${pool}`}>
-            <path class="ln-obj" d={`M${n(x0)} ${B.y - 22}v-6H${n(x1)}v6`} />
-            <text class="txt-label" x={n(x0)} y={B.y - 34}>{String(pool).toUpperCase()}</text>
-          </g>
-        );
-      })}
-    </g>
-    <g data-layer="labels">
-      <Leader from={[B.x + SD * 7.7, B.y + SD * 15.3]} to={[B.x - 8, B.y + 100]} end="dot" text={['POWER']} shoulder={6} />
-      <text class="txt-note" x={n(B.x + SD * B.u1)} y={B.y + SD * H + 18} text-anchor="end">5–23 EMPTY</text>
-    </g>
+  <View x={500} y={100} w={380} h={330} title="DETAIL B" scale={SB} labelAt={[B.x + (SB * B.u1) / 2, 404]}>
+    <BayStrip dwg={dwg} x={B.x} y={B.y} s={SB} to={7} nums="in" letter balloons={132} brackets />
   </View>
 
   <!-- ================= DETAIL C: rear flex bays + PSUs ================= -->
-  <View x={500} y={372} w={330} h={226} title="DETAIL C" scale={SD} note="WHICH BAY IS 24 · VIF" labelAt={[C.x + (SD * (C1 - C0)) / 2, 576]}
-        mm={ortho({ x: C.ox, y: C.y + SD * H, scale: SD, flipY: true }).matrix}>
-    <clipPath id={`${dwg}-clip-c`}><rect x={C.x} y={C.y - 2} width={SD * (C1 - C0)} height={SD * H + 4} /></clipPath>
-    <g data-layer="parts" style="--p:1"><path class="face-front" d={R(C.x, C.y, SD * (C1 - C0), SD * H)} /></g>
-    <g data-layer="parts" clip-path={`url(#${dwg}-clip-c)`} style="--p:2"><use href={`#${dwg}-rear`} transform={m(SD, C.ox, C.y)} /></g>
-    <g data-layer="labels">
-      {rb.map((b, i) => (
-        <text class="txt-label" x={n(cx(b.x + b.w / 2 + 4))} y={n(cy(b.y + b.h / 2) + 4)} text-anchor="middle">{i ? '25?' : '24?'}</text>
-      ))}
-      <Balloon at={[cx((rb[0].x + rb[0].w + rb[1].x) / 2), C.y - 22]} n="?" to={[cx((rb[0].x + rb[0].w + rb[1].x) / 2), cy(rb[0].y)]} end="arrow" />
-      {psu.map((p, i) => (
-        <text class="txt-note" x={n(cx(p.x + p.w / 2 - 8))} y={n(cy(p.y + p.h) + 16)} text-anchor="middle">PSU {i + 1} · {wattUnknown ? '? W' : ''}</text>
-      ))}
+  <View x={890} y={130} w={330} h={250} title="DETAIL C" scale={SC} labelAt={[C.x + (SC * (C1 - C0)) / 2, 340]}>
+    <clipPath id={`${dwg}-clip-c`}><path d={R(C.x, C.y - 2, SC * (C1 - C0), SC * H + 4)} /></clipPath>
+    <path class="face-front" d={R(C.x, C.y, SC * (C1 - C0), SC * H)} />
+    <g clip-path={`url(#${dwg}-clip-c)`}><use href={`#${dwg}-rear`} transform={place(SC, C.x - SC * C0, C.y)} /></g>
+    <Part id="psus" label={server.psus.card.title}>
+      <path class="dwg-hit" d={join(R(cx(psuA.x), cy(psuA.y), SC * psuA.w, SC * psuA.h), R(cx(psuB.x), cy(psuB.y), SC * psuB.w, SC * psuB.h))} />
+    </Part>
+    <Part id={rearDrive.id} label={rearDrive.card.title} class="pool-rpool">
+      <path class="sv-drv" d={R(carrier.x, carrier.y, carrier.w, carrier.h)} />
+      <text class="sv-lt sv-ko" x={n(carrier.x + carrier.w / 2)} y={n(carrier.y + carrier.h / 2 + 3.2)} text-anchor="middle">{driveShort(rearDrive)}</text>
+    </Part>
+    <path class="sv-empty" d={rearCarrier(25)} transform={place(SC, C.x - SC * C0, C.y)} />
+    <text class="sv-s" x={n(cx(bay25.x + bay25.w / 2 + 5))} y={n(cy(bay25.y + bay25.h / 2) + 3)}>EMPTY</text>
+    <g class="sv-s">
+      <text x={n(cx(bay24.x + bay24.w / 2))} y={C.y - 6}>BAY 24</text>
+      <text x={n(cx(bay25.x + bay25.w / 2))} y={C.y - 6}>BAY 25</text>
+      <text x={n(cx(psuA.x + psuA.w / 2 - 8))} y={n(cy(H) + 14)}>PSU 1</text>
+      <text x={n(cx(psuB.x + psuB.w / 2 - 8))} y={n(cy(H) + 14)}>PSU 2</text>
     </g>
+    <Balloon at={[cx(bay24.x + bay24.w / 2) - 40, 146]} n={NUM[rearDrive.id]} to={[carrier.x + 12, carrier.y + 4]} part={rearDrive.id} />
+    <Balloon at={[cx(C1) + 16, cy(psuB.y + psuB.h / 2) + 40]} n={NUM.psus} to={[cx(psuB.x + psuB.w) - 8, cy(psuB.y + psuB.h) - 6]} part="psus" />
   </View>
+
+  <!-- ================= ZFS POOLS ================= -->
+  <View x={480} y={440} w={740} h={200} title="ZFS POOLS" scale="AS BUILT" labelAt={[T.x + T.col * 1.5 - 20, 610]}>
+    {pools.map((p, i) => {
+      const x = T.x + i * T.col, y = T.y;
+      const rows = p.bays.map((b) => drive(b));
+      const last = y + 32 + (rows.length - 1) * T.row;
+      return (
+        <g class={`pool-${p.id}`}>
+          <Part id={p.id} label={p.id}>
+            <path class="dwg-hit" d={R(x - 12, y - 12, T.col - 30, 36)} />
+            <text class="txt-label" x={x + 22} y={y + 4}>{p.id.toUpperCase()}</text>
+            <text class="txt-note" x={x + 22} y={y + 18}>{layout(p)} · ≈ {p.usableGiB} <tspan class="sv-nc">GiB</tspan></text>
+          </Part>
+          <Balloon at={[x, y]} n={NUM[p.id]} part={p.id} />
+          <path class="ln-med" d={`M${x} ${y + 11}V${last}` + rows.map((_, j) => `M${x} ${y + 32 + j * T.row}h14`).join('')} />
+          {rows.map((d, j) => {
+            const ry = y + 32 + j * T.row;
+            return (
+              <Part id={d.id} label={d.card.title}>
+                <path class="dwg-hit" d={R(x + 16, ry - 9, T.col - 50, 18)} />
+                <path class="sv-drv" d={R(x + 22, ry - 4.5, 12, 9)} />
+                <text class="txt-note sv-row" x={x + 42} y={ry + 3.8}>BAY {d.bay} · {driveShort(d)}</text>
+              </Part>
+            );
+          })}
+          <text class="txt-note" x={x + 22} y={last + 26}>{p.holds.toUpperCase()}</text>
+        </g>
+      );
+    })}
+  </View>
+  <!-- ================= TOP VIEW (cover off) ================= -->
+  <View x={39} y={48} w={440} h={600} title="TOP VIEW · COVER OFF" scale={s} labelAt={[240, 58]}>
+    <PlanView dwg={dwg} x={X0} y={YF} s={s} click={['hba330', 'cable-2', 'cable-3', rearDrive.id]} />
+    <path class="ln-phantom" d={R(...pl(0, -EAR_D), s * WE, s * (BEZEL - EAR_D))} style="--p:4" />
+    <Particles d={cold} kind="cold" n={3} dur={3} />
+    <Particles d={hot} kind="hot" n={3} dur={3} />
+    <Balloon at={[494, hbaTip[1]]} n={NUM.hba330} to={hbaTip} part="hba330" />
+    <Balloon at={[494, 330]} n={NUM['cable-3']} to={[c3x, 330]} part="cable-3" />
+    <Balloon at={[494, 384]} n={NUM['cable-2']} to={[c2x, 384]} part="cable-2" />
+    <Dim a={pl(WE - EAR, 0)} b={pl(WE - EAR, D)} offset={24} mm={D} />
+    <Dim a={pl(120, HANDLES)} b={[pl(WE - EAR, 0)[0], pl(0, -BEZEL)[1]]} dir="v" offset={pl(WE - EAR, 0)[0] - pl(120, 0)[0] + 50} mm={OVERALL} />
+  </View>
+
+  <!-- ================= FRONT ================= -->
+  <View x={39} y={654} w={420} h={198} title="FRONT" scale={s} labelAt={[X0 + (s * WE) / 2, 806]}>
+    <path class="ln-cons" d={join(P([pl(0, -BEZEL), fr(0, -14)]), P([pl(WE, -BEZEL), fr(WE, -14)]))} />
+    <BayStrip dwg={dwg} x={X0} y={YT} s={s} nums />
+    <path class="ln-thin" d={R(...fr(-3, -14), s * (bayX(8) + 5), s * (H + 17))} style="--p:4" />
+    <text class="txt-label" x={X0 - 12} y={YT - 1}>B</text>
+    <Dim a={fr(0, H)} b={fr(WE, H)} offset={22} mm={WE} />
+    <Dim a={fr(WE, 0)} b={fr(WE, H)} offset={20} mm={H} sub="2U" />
+  </View>
+
+  <!-- ================= REAR ================= -->
+  <View x={470} y={640} w={367} h={212} title="REAR" scale={s} labelAt={[XR + (s * W) / 2, 806]}>
+    <path class="face-front" d={R(XR, YT, s * W, s * H)} />
+    <path class="ln-thin" d={join(R(XR - s * EAR, YT, s * EAR, s * H), R(XR + s * W, YT, s * EAR, s * H))} />
+    <use href={`#${dwg}-rear`} transform={place(s, XR, YT)} />
+    <Part id={rearDrive.id} label={rearDrive.card.title} class="pool-rpool">
+      <path class="sv-drv" d={R(...rr(car24.x + 10, car24.y + 2.5), s * (car24.w - 12.5), s * (car24.h - 5))} />
+    </Part>
+    <Part id="nics" label={server.nics.card.title}>
+      <path class="dwg-hit" d={nicBox} />
+      <path class="ln-med" d={nics.map(rj).join('')} transform={place(s, XR, YT)} />
+    </Part>
+    <g class="net-1g">
+      <path class="ln-net" d={P([nicOut, [nicOut[0], 776]])} pathLength="1" />
+      <text class="txt-note" x={nicOut[0] + 6} y={772}>NIC 1 → GATEWAY · 1 GbE</text>
+    </g>
+    <Balloon at={[rr(n4.x + n4.w, 0)[0] + 26, 752]} n={NUM.nics} to={rr(n4.x + n4.w / 2, n4.y + n4.h)} part="nics" />
+    <g class="sv-s">
+      <text x={n(rr(rz('slot-1').x + rz('slot-1').w / 2, 0)[0])} y={YT - 5}>RISER 1</text>
+      <text x={n(rr(rz('slot-4').x + rz('slot-4').w / 2, 0)[0])} y={YT - 5}>RISER 2</text>
+      <text x={n(rr(rz('slot-6').x + rz('slot-6').w / 2, 0)[0])} y={YT - 5}>RISER 3</text>
+    </g>
+    <path class="ln-thin" d={R(...rr(C0, 2), s * (C1 - C0), s * (H - 4))} style="--p:4" />
+    <text class="txt-label" x={rr(C1, 0)[0] - 4} y={YT - 5} text-anchor="end">C</text>
+  </View>
+
+  <Stamp x={1046} y={650} {...STAMP} />
 </View>

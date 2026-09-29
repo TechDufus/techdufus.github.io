@@ -1,147 +1,182 @@
 ---
 /*
-  Sheet 01 · REAR tab: REAR ELEVATION of the stack at 1:4 (as seen from behind) with the four
-  documented links only. The gateway's ports are on its front face, so they are drawn hidden;
-  routes are schematic, through a cable way beside the rails. Power: nameplate maximum per box.
+  Sheet 01 · REAR tab: REAR ELEVATION at 1:5 as seen from behind, broken like the isometric
+  (U1–15, then U40–42), with the documented links and packets running along them. The gateway's
+  ports, the Pi's and the injector's are on their front faces, so they're drawn hidden; the routes
+  are schematic, up and down a cable way beside the rails (the photo's cables run down that side).
+  Two links leave the sheet: the fiber to the ISP, and the injector's PoE run to the U7 Pro.
 */
 import View from '../View.astro';
+import Part from '../Part.astro';
 import Leader from '../Leader.astro';
+import Balloon from '../Balloon.astro';
 import Particles from '../Particles.astro';
 import Dim from '../Dim.astro';
-import { RACK_19_MM, U_MM, atScale, join, matrix, ortho } from '../../../lib/drawing/projection';
-import { derived, links, slotOf$, slots, stack, zoneCentre, type Slot } from './model';
+import { RACK_19_MM, atScale, join, matrix, ortho, type Ortho, type Pt } from '../../../lib/drawing/projection';
+import { CAB, HOLES, RAIL_W, links, slotOf$, slots, yBot, yTop, zoneCentre, type Slot } from './model';
+import { BREAK } from './iso';
+import { OFF_SHEET as OFF } from './dwg';
 
 interface Props {
   dwg: string;
 }
 const { dwg } = Astro.props;
 
-const R = ortho({ x: 262, y: 700 + (stack.from - 1) * U_MM * atScale(1, 4), scale: atScale(1, 4), flipY: true });
-const s = R.scale;
-const place = (sl: Slot): string => {
-  const [x, y] = R.pt(0, sl.body.y + sl.body.h);
-  return matrix([s, 0, 0, s, x, y]);
-};
+/* two runs at 1:5, the lower one raised to sit a short gap under the break */
+const k = atScale(1, 5);
+const OX = 356, TOP = 214;
+const cutHi = yBot(BREAK.upper), cutLo = yTop(BREAK.lower);
+const hi = ortho({ x: OX, y: TOP + CAB.railTop * k, scale: k, flipY: true });
+const lo = ortho({ x: OX, y: TOP + (CAB.railTop - cutHi + BREAK.gap + cutLo) * k, scale: k, flipY: true });
+const of = (sl: Slot): Ortho => (sl.y0 < cutHi ? lo : hi);
 const mirror = (x: number): number => RACK_19_MM - x;
-const bodyRect = (sl: Slot): string => R.rect(mirror(sl.body.x + sl.body.w), sl.body.y, sl.body.w, sl.body.h);
-const udm = slotOf$('udm-pro'), r7 = slotOf$('r720xd'), un = slotOf$('unas-pro-8'), pi = slotOf$('rpi-4b');
+const place = (sl: Slot): string => {
+  const [x, y] = of(sl).pt(0, sl.faceTop);
+  return matrix([k, 0, 0, k, x, y]);
+};
 
-/** A front-face zone of the UDM Pro / Pi, as seen from behind (hidden), in paper. */
-const frontZone = (sl: Slot, id: string, sub?: { i: number; of: number }): { rect: string; c: [number, number] } => {
+/* rails from behind, with zig-zag breaks */
+const rails = join(
+  ...([[hi, cutHi, CAB.railTop], [lo, 0, cutLo]] as [Ortho, number, number][]).flatMap(([R, y0, y1]) =>
+    HOLES.map((x) => R.rect(mirror(x) - RAIL_W / 2, y0, RAIL_W, y1 - y0)),
+  ),
+);
+const brk = (R: Ortho, yb: number): string => {
+  const [x0, y] = R.pt(-14, yb), [x1] = R.pt(RACK_19_MM + 14, yb), m = (x0 + x1) / 2;
+  return `M${x0} ${y}H${m - 6}l3 -7l6 14l3 -7H${x1}`;
+};
+
+/* anchor points (paper) */
+const udm = slotOf$('udm-pro'), pi = slotOf$('rpi-4b'), modem = slotOf$('fiber-modem'), inj = slotOf$('poe-injector');
+const r7 = slotOf$('r720xd'), unas = slotOf$('unas-pro-8');
+/** A front-face zone seen from behind (so hidden): its outline and centre. */
+const hidden = (sl: Slot, id: string, sub?: { i: number; of: number }): { rect: string; c: Pt } => {
   const z = sl.dev.panels!.front!.zones.find((q) => q.id === id)!;
-  let x0 = z.x0, x1 = z.x1;
-  if (sub) {
-    const w = (z.x1 - z.x0) / sub.of;
-    x0 = z.x0 + w * sub.i;
-    x1 = x0 + w;
-  }
-  const u0 = sl.faceX + x0 * sl.faceW, u1 = sl.faceX + x1 * sl.faceW;
-  const yTop = sl.faceTop - z.y0 * sl.faceH, yBot = sl.faceTop - z.y1 * sl.faceH;
-  const rect = R.rect(mirror(u1), yBot, u1 - u0, yTop - yBot);
-  return { rect, c: R.pt(mirror((u0 + u1) / 2), (yTop + yBot) / 2) };
+  const w = (z.x1 - z.x0) / (sub?.of ?? 1);
+  const u0 = sl.faceX + (z.x0 + w * (sub?.i ?? 0)) * sl.faceW, u1 = u0 + w * sl.faceW;
+  const yT = sl.faceTop - z.y0 * sl.faceH, yB = sl.faceTop - z.y1 * sl.faceH;
+  const R = of(sl);
+  return { rect: R.rect(mirror(u1), yB, u1 - u0, yT - yB), c: R.pt(mirror((u0 + u1) / 2), (yT + yB) / 2) };
 };
-const rearZone = (sl: Slot, id: string): [number, number] => {
+const rearAt = (sl: Slot, id: string): Pt => {
   const [u, v] = zoneCentre(sl, 'rear', id);
-  return R.pt(u, sl.body.y + sl.body.h - v);
+  return of(sl).pt(u, sl.faceTop - v);
 };
-const p2 = frontZone(udm, 'lan-bottom', { i: 0, of: 4 });
-const p3 = frontZone(udm, 'lan-top', { i: 1, of: 4 });
-const p9 = frontZone(udm, 'wan-9');
-const p11 = frontZone(udm, 'sfp-11');
-const piEth = frontZone(pi, 'eth');
-const nic1 = rearZone(r7, 'nic-1');
-const sfp = rearZone(un, 'sfp-2');
+const p2 = hidden(udm, 'lan-bottom', { i: 0, of: 4 });
+const p3 = hidden(udm, 'lan-top', { i: 1, of: 4 });
+const p9 = hidden(udm, 'wan-9');
+const p11 = hidden(udm, 'sfp-11');
+// the injector's feed: which gateway port isn't recorded, so it leaves the gateway's end, unlabelled
+const udmEnd: Pt = hi.pt(mirror(udm.body.x + udm.body.w), udm.body.y + udm.body.h * 0.3);
+const piEth = hidden(pi, 'eth');
+const injLan = hidden(inj, 'lan');
+const injPoe = hidden(inj, 'poe');
+const nic1 = rearAt(r7, 'nic-1');
+const [s2, s3] = [rearAt(unas, 'sfp-2'), rearAt(unas, 'sfp-3')];
+const sfp: Pt = [(s2[0] + s3[0]) / 2, s2[1]];
+// the modem's Ethernet is on its end facing the cable way (from behind, its left end)
+const [mx] = hi.pt(mirror(modem.body.x + modem.body.w), 0);
+const modemEth: Pt = [mx, hi.pt(0, modem.body.y + modem.body.h * 0.35)[1]];
 
-// Cable way: a vertical channel left of the rails (as seen from behind), schematic.
-const [wayX] = R.pt(-26, 0);
-const labelX = 196;
+/* cable way: vertical lanes left of the rails (the cabinet's right side, seen from behind) */
+const [wayX] = hi.pt(-10, 0);
 const lane = (i: number): number => wayX - i * 9;
-const route = (from: [number, number], to: [number, number], i: number, dy = 0): string => {
-  const x = lane(i);
-  return `M${from[0]} ${from[1]}H${x}V${to[1] + dy}H${to[0]}${dy ? `V${to[1]}` : ''}`;
+const route = (from: Pt, to: Pt, i: number): string => `M${from[0]} ${from[1]}H${lane(i)}V${to[1]}H${to[0]}`;
+const ISP_Y = 140, POE_Y = 168;
+const r = {
+  server: route(p3.c, nic1, 0),
+  nas: route(p11.c, sfp, 1),
+  pi: route(p2.c, piEth.c, 2),
+  modem: route(p9.c, modemEth, 3),
+  inj: route(udmEnd, injLan.c, 4),
+  poe: `M${injPoe.c[0]} ${injPoe.c[1]}H${lane(5)}V${POE_Y}H${OFF.x + 100}V${OFF.y + OFF.h + 9}`,
+  isp: `M${modemEth[0]} ${modemEth[1] - 5}H${lane(6)}V${ISP_Y}`,
 };
-// WAN runs up the cable way and off the sheet, to an off-sheet connector flag.
-const flagY = 300;
-const wan = `M${p9.c[0]} ${p9.c[1]}H${lane(3)}V${flagY + 2}`;
-const flag = `M${lane(3) - 30} ${flagY}h60v-24l-30-14l-30 14Z`;
-const routes = {
-  pi: route(p2.c, piEth.c, 0),
-  nic: route(p3.c, nic1, 1),
-  sfp: route(p11.c, sfp, 2),
-  wan,
-};
-const linkOf = (to: string) => links.find((l) => l.to.device === to)!;
-const lPi = linkOf('rpi-4b'), lR7 = linkOf('r720xd'), lUn = linkOf('unas-pro-8'), lWan = linkOf('isp');
-
-// Power (nameplate maximum, not measured): leader from each inlet to a column on the right
-const colX = 660;
-const power = [
-  { sl: pi, at: R.pt(mirror(pi.body.x + pi.body.w / 2), pi.body.y + pi.body.h / 2), text: [`PI · ${pi.dev.maxPower?.value} W`, 'SUPPLY RATING'], prov: pi.dev.maxPower?.prov },
-  { sl: udm, at: rearZone(udm, 'ac'), text: [`UDM PRO · ${udm.dev.maxPower?.value} W MAX`], prov: udm.dev.maxPower?.prov },
-  { sl: un, at: rearZone(un, 'psu-1'), text: [`UNAS PRO 8 · ${un.dev.maxPower?.value} W MAX`, 'INCL. 225 W FOR DRIVES'], prov: un.dev.maxPower?.prov },
-  { sl: r7, at: rearZone(r7, 'psu-2'), text: ['R720xd · ? W', 'PSU 495 / 750 / 1100 W'], prov: 'measured' as const },
+const flag = `M${lane(6) - 26} ${ISP_Y}h52v-22l-26-13l-26 13Z`;
+const sp = (id: string): string => links.find((l) => l.id === id)?.speed ?? '';
+// link labels: a column of leaders left of the cable way, each from the middle of its lane
+const LX = 214;
+const label = (i: number, y0: number, y1: number, y: number, text: string[], cls?: string) => ({ from: [lane(i), (y0 + y1) / 2] as Pt, to: [LX, y] as Pt, text, cls });
+const labels = [
+  label(2, p2.c[1], piEth.c[1], 300, ['PORT 2 → PI', sp('gw-pi')]),
+  label(3, p9.c[1], modemEth[1], 350, ['PORT 9 · WAN', `→ MODEM · ${sp('gw-modem')}`]),
+  label(1, p11.c[1], sfp[1], 430, ['SFP+ PORT 11', `→ NAS · ${sp('gw-nas')}`], 'net-10g'),
+  label(0, p3.c[1], nic1[1], 560, ['PORT 3 → NIC 1', sp('gw-server')]),
 ];
-const range = derived.nameplateRangeW.value;
+
+/* balloons: the top shelf and its things in a row above the rails, leaders straight down; the
+   racked boxes in a column right of the rails; the bottom run left of them (the cable way stops
+   above the break) */
+const BX = { hi: hi.pt(RACK_19_MM, 0)[0] + 32, lo: hi.pt(0, 0)[0] - 50 };
+const ROW_Y = hi.pt(0, CAB.railTop)[1] - 30;
+const topShelf = slotOf$('top-shelf');
+const inRow = (sl: Slot): boolean => sl === topShelf || sl.on === topShelf.dev.id;
+let lastX = -Infinity;
+const row = slots
+  .filter(inRow)
+  .map((sl) => ({ sl, to: sl.on ? hi.pt(mirror(sl.body.x + sl.body.w / 2), sl.body.y + sl.body.h - 3) : hi.pt(mirror(sl.body.x + sl.body.w * 0.06), sl.body.y + sl.body.h - 2) }))
+  .sort((a, b) => a.to[0] - b.to[0])
+  .map((b) => ({ ...b, at: [(lastX = Math.max(b.to[0], lastX + 30)), ROW_Y] as Pt }));
+const last = { hi: -Infinity, lo: -Infinity };
+const balloons = slots
+  .filter((sl) => !inRow(sl))
+  .map((sl) => {
+    const run = of(sl) === lo ? ('lo' as const) : ('hi' as const);
+    const f = run === 'lo' ? (sl.on ? 0.9 : 0.97) : sl.on ? 0.5 : sl.dev.role === 'shelf' ? 0.1 : 0.12;
+    // the spare drive by its top edge, so its leader clears the coil of cables beside it
+    const y = sl.dev.id === 'spare-drive' ? sl.body.y + sl.body.h - 2 : sl.body.y + sl.body.h / 2;
+    return { sl, run, to: of(sl).pt(mirror(sl.body.x + sl.body.w * f), y) };
+  })
+  .sort((a, b) => Math.round(a.to[1] / 12) - Math.round(b.to[1] / 12) || (a.run === 'lo' ? b.to[0] - a.to[0] : a.to[0] - b.to[0]))
+  .map((b) => ({ ...b, at: [BX[b.run], (last[b.run] = Math.max(b.to[1] - 24, last[b.run] + 29))] as Pt }));
 ---
 
 <View dwg={dwg} name="rear" x={39} y={39} w={798} h={813}>
-  <View x={46} y={260} w={600} h={580} title="REAR ELEVATION" scale={s} note="AS SEEN FROM BEHIND · LINKS SCHEMATIC" labelAt={[443, 800]}
-        mm={R.matrix} u0={0} uStart={1}>
+  <View x={46} y={130} w={600} h={720} title="REAR ELEVATION" scale={k} note="SEEN FROM BEHIND · ROUTES SCHEMATIC" labelAt={[486, 804]}>
     <g style="--p:1">
-      <path class="ln-thin" d={join(R.rect(0.8, (stack.from - 2) * U_MM, 15.9, (stack.to - stack.from + 3) * U_MM), R.rect(465.9, (stack.from - 2) * U_MM, 15.9, (stack.to - stack.from + 3) * U_MM))} />
-      <path class="ln-ctr" d={R.poly([[241.3, (stack.from - 2) * U_MM], [241.3, (stack.to + 2) * U_MM]])} style="--p:4" />
+      <path class="ln-thin" d={rails} />
+      <path class="ln-thin" d={join(brk(hi, cutHi), brk(lo, cutLo))} />
+      <path class="ln-ctr" d={join(hi.poly([[241.3, cutHi - 10], [241.3, CAB.railTop + 16]]), lo.poly([[241.3, -16], [241.3, cutLo + 10]]))} style="--p:4" />
     </g>
-    <g data-layer="devices">
-      {slots.map((sl) => (
-        <g>
-          <path class="face-front" d={bodyRect(sl)} />
-          <g class="dwg-tex"><use href={`#${dwg}-pr-${sl.dev.id}`} transform={place(sl)} /></g>
-        </g>
-      ))}
-      <path class="ln-hid" d={join(p2.rect, p3.rect, p9.rect, p11.rect, piEth.rect)} style="--p:4" />
+    <g>
+      {slots.map((sl) => {
+        const R = of(sl);
+        return (
+          <Part id={sl.dev.id} label={sl.dev.short} p={2}>
+            {sl.dev.id !== 'patch-cables' && <path class="face-front" d={R.rect(mirror(sl.body.x + sl.body.w), sl.body.y, sl.body.w, sl.body.h)} />}
+            <g class="dwg-tex"><use href={`#${dwg}-pr-${sl.dev.id}`} transform={place(sl)} /></g>
+          </Part>
+        );
+      })}
     </g>
+    <path class="ln-hid" d={join(p2.rect, p3.rect, p9.rect, p11.rect, piEth.rect, injLan.rect, injPoe.rect)} style="--p:4" />
 
-    <g data-layer="network">
-      <g class="net-1g">
-        <path class="ln-net" d={routes.pi} pathLength="1" style="--p:3" />
-        <Particles d={routes.pi} kind="net1" n={2} dur={3.4} guide={false} />
-        <path class="ln-net" d={routes.nic} pathLength="1" style="--p:3" />
-        <Particles d={routes.nic} kind="net1" n={2} dur={3.8} guide={false} />
-        <path class="ln-net" d={routes.wan} pathLength="1" style="--p:3" />
-        <Particles d={routes.wan} kind="net1" n={2} dur={2.6} guide={false} />
-        <path class="ln-med" d={flag} />
-        <text class="txt-label" x={lane(3)} y={flagY - 8} text-anchor="middle">ISP</text>
-      </g>
-      <g class="net-10g">
-        <path class="ln-net" d={routes.sfp} pathLength="1" style="--p:3" />
-        <Particles d={routes.sfp} kind="net10" n={3} dur={2.2} guide={false} />
-      </g>
-      <Leader from={[lane(3) + 30, flagY - 12]} to={[lane(3) + 44, flagY - 12]} end="none" shoulder={0} text={[`WAN · PORT 9 · ${lWan.speed}`, 'TO THE ISP · OFF SHEET']} prov={lWan.prov} />
-      <Leader from={piEth.c} to={[labelX, 420]} end="dot" text={[`PI ETH · ${lPi.speed}`, 'ON ITS FRONT']} prov={lPi.prov} />
-      <Leader from={p2.c} to={[labelX, 488]} end="dot" text={['UDM PRO PORTS', 'ON ITS FRONT']} prov="vendor" />
-      <Leader from={sfp} to={[labelX, 566]} end="dot" text={[`SFP+ · ${lUn.speed}`, 'UNAS PORT 2 OR 3']} prov={lUn.prov} class="net-10g" />
-      <Leader from={nic1} to={[labelX, 650]} end="dot" text={[`NIC 1 · ${lR7.speed}`, 'R720xd, WITH iDRAC']} prov={lR7.prov} />
+    <g class="net-1g">
+      {[r.pi, r.server, r.modem, r.inj].map((d) => <path class="ln-net" d={d} pathLength="1" style="--p:3" />)}
+      <Particles d={r.pi} kind="net1" n={2} dur={3.4} guide={false} />
+      <Particles d={r.server} kind="net1" n={2} dur={3.8} guide={false} />
+      <Particles d={r.modem} kind="net1" n={2} dur={3} guide={false} />
+      <Particles d={r.inj} kind="net1" n={1} dur={3.6} guide={false} />
+      <path class="ln-net" d={r.isp} pathLength="1" style="--p:3" />
+      <Particles d={r.isp} kind="net1" n={1} dur={2.4} guide={false} />
+      <path class="ln-med" d={flag} />
+      <text class="txt-label" x={lane(6)} y={ISP_Y - 9} text-anchor="middle">ISP</text>
+      <text class="txt-note" x={lane(6) + 34} y={ISP_Y - 9}>FIBER · OFF SHEET</text>
     </g>
+    <g class="net-10g">
+      <path class="ln-net" d={r.nas} pathLength="1" style="--p:3" />
+      <Particles d={r.nas} kind="net10" n={2} dur={2.2} guide={false} />
+    </g>
+    <g class="sem-power">
+      <path class="ln-net" d={r.poe} pathLength="1" style="--p:3" />
+      <path class="dim-arr" d={`M${OFF.x + 100} ${OFF.y + OFF.h}l-3 9h6Z`} />
+      <Particles d={r.poe} kind="power" n={2} dur={3.2} guide={false} />
+      <text class="txt-label" x={OFF.x + 108} y={POE_Y - 7}>POE → U7 PRO</text>
+    </g>
+    {labels.map((l) => <Leader from={l.from} to={l.to} end="dot" text={l.text} class={l.cls} />)}
 
-    <g data-layer="power" class="sem-power">
-      {power.map((p, i) => (
-        <Leader from={p.at} to={[colX, 400 + i * 62]} end="dot" text={p.text} prov={p.prov} />
-      ))}
-    </g>
+    <Dim a={lo.pt(0, 0)} b={lo.pt(RACK_19_MM, 0)} offset={26} mm={RACK_19_MM} sub="[19.00]" />
 
-    <g data-layer="dims">
-      <Dim a={R.pt(0, (stack.from - 1) * U_MM)} b={R.pt(RACK_19_MM, (stack.from - 1) * U_MM)} offset={30} mm={RACK_19_MM} sub="[19.00]" />
-    </g>
+    {[...row, ...balloons].map(({ sl, to, at }) => <Balloon at={at} n={sl.n} to={to} end="dot" part={sl.dev.id} />)}
   </View>
-
-  <g data-layer="notes">
-    <text class="txt-label" x="60" y="96">NOT SHOWN</text>
-    <text class="txt-note" x="60" y="114">OTHER LINKS AREN’T DOCUMENTED: THE U7 PRO</text>
-    <text class="txt-note" x="60" y="129">AND FLEX MINI UPLINKS, PATCH PANEL RUNS,</text>
-    <text class="txt-note" x="60" y="144">POWER CORDS. ROUTES HERE ARE SCHEMATIC.</text>
-  </g>
-  <g data-layer="power" class="sem-power">
-    <text class="txt-label" x="646" y="668">Σ {range.min}–{range.max} W</text>
-    <text class="txt-note" x="646" y="684">NAMEPLATE RANGE · NOT MEASURED</text>
-  </g>
 </View>

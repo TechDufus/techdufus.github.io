@@ -32,12 +32,14 @@ const PAGES = [
   { page: 'blog/index.html' },
   { page: 'docs/index.html' },
   { page: 'contact/index.html' },
-  { page: 'lab/index.html' },
+  { page: 'lab/index.html', html: DRAWING_HTML },
   { page: 'projects/index.html' },
   { page: 'lab/rack/index.html', html: DRAWING_HTML },
   { page: 'lab/r720xd/index.html', html: DRAWING_HTML },
+  { page: 'lab/stack/index.html', html: DRAWING_HTML },
   { page: 'blog/from-hardware-raid-to-zfs/index.html', html: DRAWING_HTML },
-  { page: 'lab/rack/views/index.html', html: LAZY_HTML }
+  { page: 'lab/rack/views/index.html', html: LAZY_HTML },
+  { page: 'lab/r720xd/views/index.html', html: LAZY_HTML }
 ];
 const kb = (bytes) => Number((bytes / 1024).toFixed(2));
 const sizeOf = (buffer) => ({ raw: buffer.length, gzip: gzipSync(buffer).length });

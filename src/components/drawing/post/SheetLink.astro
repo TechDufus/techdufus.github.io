@@ -3,19 +3,19 @@
   SheetLink: the card at the end of the post that points to Sheet 02 (TD-LAB-02), with a tiny
   front elevation of the R720xd drawn from its dimensions and bay count.
 */
-import { devices } from '../../../data/hardware/rack';
-import { r720xd } from '../../../data/hardware/r720xd';
-import { f } from './fig';
+import { device } from '../../../data/lab/rack';
+import { server } from '../../../data/lab/server';
+import { f } from '../../../lib/drawing/figure';
 
-const href = devices.find((d) => d.id === 'r720xd')?.sheetHref ?? '/lab/r720xd/';
-const { before, after } = r720xd.controllers;
-const { body, earsWidth } = r720xd.dims;
+const href = device('r720xd').sheetHref ?? '/lab/r720xd/';
+const { before, now } = server.controller;
+const { body, earsWidth } = server.dims;
 
 /* thumbnail: front elevation, ears included, fitted to 150 units wide */
-const k = 150 / earsWidth.value;
-const W = earsWidth.value * k, H = body.value.h * k, ear = ((earsWidth.value - body.value.w) / 2) * k;
+const k = 150 / earsWidth;
+const W = earsWidth * k, H = body.h * k, ear = ((earsWidth - body.w) / 2) * k;
 const X = 5, Y = 8;
-const n = r720xd.bays.front.value;
+const n = server.bays.front;
 const bayW = (W - 2 * ear - 4) / n;
 const bays = Array.from({ length: n + 1 }, (_, i) => `M${f(X + ear + 2 + i * bayW)} ${f(Y + 3)}v${f(H - 6)}`).join('');
 const outline = `M${X} ${Y}h${f(W)}v${f(H)}h${f(-W)}Z M${f(X + ear)} ${Y}v${f(H)}M${f(X + W - ear)} ${Y}v${f(H)}`;
@@ -27,9 +27,9 @@ const outline = `M${X} ${Y}h${f(W)}v${f(H)}h${f(-W)}Z M${f(X + ear)} ${Y}v${f(H)
     <path class="pf-card__b" d={bays} />
   </svg>
   <span class="pf-card__txt">
-    <span class="pf-card__meta">TD-LAB-02 · Sheet 2 of 2 · Rev A · Checked —</span>
+    <span class="pf-card__meta">TD-LAB-02 · Sheet 2 of 3 · Rev B · Checked TD</span>
     <span class="pf-card__t">The server</span>
-    <span class="pf-card__d">The R720xd inside and out, including the planned {before.name} → {after.id.toUpperCase()} swap.</span>
+    <span class="pf-card__d">The R720xd inside and out, after the {before.name} → {now.id.toUpperCase()} swap.</span>
     <span class="pf-card__go">Open Sheet 02 <span class="arrow" aria-hidden="true">→</span></span>
   </span>
 </a>

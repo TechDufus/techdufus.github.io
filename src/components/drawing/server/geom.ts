@@ -5,10 +5,8 @@
  * seen from the front (0 … 482.4), y = height from the chassis bottom, z = depth from the rack
  * flange towards the rear (the front ears sit at z −18 … 0).
  *
- * Every overall size comes from r720xd.dims (Dell Technical Guide Fig 18). Panel features come
- * from the zones in rack.ts (traced from the Owner's Manual) and the internals from
- * r720xd.internal (fractions traced from Owner's Manual Fig 69/78 via the swap runbook). Those
- * internal positions are approximate: the drawings say so.
+ * Sizes come from server.dims, panel features from the zones in src/data/lab/rack.ts, and the
+ * internals from server.internal (schematic fractions, not to scale).
  *
  * The path builders return compact `d` strings (relative moves, 0.1 mm) in model mm, so one
  * drawing can be placed in any view with a transform (see ServerDefs.astro):
@@ -16,22 +14,21 @@
  *   rearPanel()   as seen from behind: u → from the left of the body, v ↓
  *   planPaths()   top view, cover off: u = model x, v = −z (rear up, front ears at v 0 … 18)
  */
-import { r720xd } from '../../../data/hardware/r720xd';
-import { devices } from '../../../data/hardware/rack';
-import type { Cable, InternalPart, PanelZone } from '../../../data/hardware/types';
-import { join } from '../../../lib/drawing/projection';
+import { server } from '../../../data/lab/server';
+import type { CableN, Drive, PanelZone, PoolId } from '../../../data/lab/types';
+import { join, type Pt } from '../../../lib/drawing/projection';
 
 /* ------------------------------------------------------------------ sizes (mm) */
-const { body, earsWidth, earDepth, bezelDepth, toPsuHandles, overallDepth } = r720xd.dims;
-export const W = body.value.w; // 444.0 body width
-export const H = body.value.h; // 87.3
-export const D = body.value.d; // 684.0 flange → rear wall
-export const WE = earsWidth.value; // 482.4 over the ears
+const { body, earsWidth, earDepth, bezelDepth, toPsuHandles, overallDepth } = server.dims;
+export const W = body.w; // 444.0 body width
+export const H = body.h; // 87.3
+export const D = body.d; // 684.0 flange → rear wall
+export const WE = earsWidth; // 482.4 over the ears
 export const EAR = (WE - W) / 2; // 19.2 each side
-export const EAR_D = earDepth.value; // 18 in front of the flange
-export const BEZEL = bezelDepth.value; // 32 with the bezel
-export const HANDLES = toPsuHandles.value; // 723 flange → PSU handles
-export const OVERALL = overallDepth.value; // 755 bezel → handles
+export const EAR_D = earDepth; // 18 in front of the flange
+export const BEZEL = bezelDepth; // 32 with the bezel
+export const HANDLES = toPsuHandles; // 723 flange → PSU handles
+export const OVERALL = overallDepth; // 755 bezel → handles
 
 /* ------------------------------------------------------------------ compact paths */
 /** 0.1 mm precision, no trailing zeros, no "-0". */
@@ -48,6 +45,10 @@ export const O = (cx: number, cy: number, r: number): string =>
 export const Hl = (x: number, y: number, w: number): string => `M${n(x)} ${n(y)}h${n(w)}`;
 /** Vertical line from (x, y), length h. */
 export const Vl = (x: number, y: number, h: number): string => `M${n(x)} ${n(y)}v${n(h)}`;
+/** Scale factors to 4 places (n() would round 0.75 to 0.8). */
+export const k4 = (v: number): string => String(Math.round(v * 1e4) / 1e4);
+/** `matrix(s,0,0,s,x,y)`: a face drawn in mm, placed at (x, y) at scale s. */
+export const place = (s: number, x: number, y: number): string => `matrix(${k4(s)},0,0,${k4(s)},${n(x)},${n(y)})`;
 
 /**
  * Compact front-right isometric box (the kit's isometric() projection): faces and edges as
@@ -71,12 +72,9 @@ export function isoBox(x0: number, y0: number, s: number, b: { x: number; y: num
 }
 
 /* ------------------------------------------------------------------ panels (rack.ts zones) */
-const dev = devices.find((d) => d.id === 'r720xd');
-if (!dev?.panels?.front || !dev.panels.rear) throw new Error('r720xd panels missing from rack.ts');
 const zoneMap = (zones: PanelZone[]): Record<string, PanelZone> => Object.fromEntries(zones.map((z) => [z.id, z]));
-export const frontZones = zoneMap(dev.panels.front.zones);
-export const rearZones = zoneMap(dev.panels.rear.zones);
-export const panelProv = { front: dev.panels.front, rear: dev.panels.rear };
+const frontZones = zoneMap(server.panels.front.zones);
+const rearZones = zoneMap(server.panels.rear.zones);
 
 /** A front zone in face mm (u from the left ear edge, v from the top). */
 const fz = (id: string) => {
@@ -91,12 +89,14 @@ export const rz = (id: string) => {
 
 /* ------------------------------------------------------------------ front bays */
 const BAYS = fz('bays');
-export const BAY_N = r720xd.bays.front.value; // 24
+export const BAY_N = server.bays.front; // 24
 export const BAY_P = BAYS.w / BAY_N; // ≈ 18.5 mm pitch
 export const BAY_Y0 = BAYS.y;
 export const BAY_H = BAYS.h;
 /** Left edge (face mm) of front bay i (0 = far left, as Dell numbers them). */
 export const bayX = (i: number): number => BAYS.x + i * BAY_P;
+/** A front bay's carrier opening in face mm. */
+export const bayRect = (i: number): string => R(bayX(i) + 0.5, BAY_Y0, BAY_P - 1, BAY_H);
 
 /** Front panel, face-local mm. Groups so a view can pen them differently. */
 export function frontPanel() {
@@ -133,7 +133,7 @@ export function rearPanel() {
   const vf = rz('vflash'), hd = rz('handle');
   const bay = (id: string) => {
     const b = rz(id);
-    return R(b.x, b.y, b.w, b.h) + O(b.x + 5, b.y + b.h / 2, 2.4) + R(b.x + 11, b.y + 3, b.w - 14, b.h - 6);
+    return R(b.x, b.y, b.w, b.h) + O(b.x + 5, b.y + b.h / 2, 2.4);
   };
   const psu = (id: string) => {
     const p = rz(id);
@@ -143,10 +143,6 @@ export function rearPanel() {
       R(p.x + 6, cy - 6, 13, 12) + // AC inlet
       O(p.x + p.w - fr - 7, cy, fr) + Hl(p.x + p.w - 2 * fr - 7, cy, 2 * fr) + Vl(p.x + p.w - fr - 7, cy - fr, 2 * fr)
     );
-  };
-  const rj = (id: string) => {
-    const p = rz(id);
-    return R(p.x, p.y, p.w, p.h) + R(p.x + p.w / 2 - 2.5, p.y + p.h - 2.6, 5, 2.6);
   };
   const trap = (id: string) => {
     const p = rz(id);
@@ -164,33 +160,48 @@ export function rearPanel() {
   return {
     outline: R(0, 0, W, H),
     slots: join(slots, R(vf.x, vf.y, vf.w, vf.h), R(hd.x, hd.y, hd.w, hd.h)),
-    bays: bay('rear-bay-l') + bay('rear-bay-r'),
+    bays: bay('rear-bay-24') + bay('rear-bay-25'),
     psus: psu('psu-1') + psu('psu-2'),
     io,
-    nics: ['nic-1', 'nic-2', 'nic-3', 'nic-4'].map(rj).join(''),
   };
 }
+/** An RJ45 jack on the rear face (NICs, iDRAC). */
+export const rj = (id: string): string => {
+  const p = rz(id);
+  return R(p.x, p.y, p.w, p.h) + R(p.x + p.w / 2 - 2.5, p.y + p.h - 2.6, 5, 2.6);
+};
+/** The drive carrier inside a rear bay opening (face mm, seen from behind). */
+export const rearCarrier = (bay: 24 | 25): string => {
+  const b = rz(`rear-bay-${bay}`);
+  return R(b.x + 10, b.y + 2.5, b.w - 12.5, b.h - 5);
+};
 
 /* ------------------------------------------------------------------ internals (plan) */
-const IN = r720xd.internal;
+const IN = server.internal;
 /** Data fractions (front at the top, left = server's right) → model x, z mm. */
 export const mx = (fx: number): number => EAR + (1 - fx) * W;
 export const mz = (fzr: number): number => fzr * D;
 export type Box2 = { x: number; z: number; w: number; d: number };
 /** An internal part as a model-mm footprint (x from the left ear edge, z from the flange). */
-export function part(id: string): Box2 & { p: InternalPart } {
+export function part(id: string): Box2 {
   const p = IN.parts.find((q) => q.id === id);
   if (!p) throw new Error(`no internal part ${id}`);
   const x0 = mx(p.x[1]), x1 = mx(p.x[0]);
-  return { x: x0, z: mz(p.z[0]), w: x1 - x0, d: mz(p.z[1]) - mz(p.z[0]), p };
+  return { x: x0, z: mz(p.z[0]), w: x1 - x0, d: mz(p.z[1]) - mz(p.z[0]) };
 }
 /** Plan rect (u = x, v = −z) for a footprint. */
-const PR = (b: Box2): string => R(b.x, -b.z - b.d, b.w, b.d);
+export const PR = (b: Box2): string => R(b.x, -b.z - b.d, b.w, b.d);
 
 /**
- * DIMM banks: six slots each side of each CPU, sticks running front → back (with the airflow).
- * Positions are inferred from the R720 board layout (12 slots per processor); not traced.
+ * The two rear flex bays in plan: they sit over the PSUs, bay 24 over PSU 1 and bay 25 over
+ * PSU 2 (the same pairing the rear face shows): a 2.5″ carrier's length in from the rear wall.
  */
+export function rearBay(bay: 24 | 25): Box2 {
+  const psu = part(bay === 24 ? 'psu-1' : 'psu-2');
+  return { x: psu.x + 3, z: D - 128, w: psu.w - 6, d: 124 };
+}
+
+/** DIMM banks: six slots each side of each CPU, sticks running front → back (with the airflow). */
 export function dimmBanks(): Box2[] {
   const out: Box2[] = [];
   const pitch = 8.2, stick = 5.2, len = 133, gap = 4;
@@ -205,9 +216,9 @@ export function dimmBanks(): Box2[] {
   return out;
 }
 
-export const FANS = r720xd.fans.count.value; // 6
+export const FANS = server.fans.count; // 6
 
-/** The plan (cover off), model mm with v = −z. Groups by pen. */
+/** The plan (cover off), model mm with v = −z. Groups by pen. Neither controller is in it. */
 export function planPaths() {
   const bp = part('backplane'), fans = part('fans'), shroud = part('shroud'), ret = part('retention');
   const cpus = ['cpu1', 'cpu2'].map(part);
@@ -224,8 +235,10 @@ export function planPaths() {
     fins: cpus.map((c) => Array.from({ length: 7 }, (_, i) => Vl(c.x + ((i + 1) * c.w) / 8, -c.z - c.d + 2, c.d - 4)).join('')).join(''),
     dimms: dimmBanks().map(PR).join(''),
     risers: join(...['riser-1', 'riser-2', 'riser-3'].map((id) => PR(part(id)))),
-    // bodies to the rear wall, then the handle loop out to HANDLES (Fig 18 Zc)
+    // bodies to the rear wall, then the handle loop out to HANDLES
     psus: join(...psus.map(PR), ...psus.map((b) => `M${n(b.x + 10)} ${n(-D)}v${n(-(HANDLES - D))}h${n(b.w - 20)}v${n(HANDLES - D)}`)),
+    /** the rear flex cage over the PSUs */
+    flex: join(PR(rearBay(24)), PR(rearBay(25))),
     retention: PR(ret),
     shroud: PR(shroud),
     /** centre lines through the sockets */
@@ -234,35 +247,61 @@ export function planPaths() {
 }
 
 /** Cable routes in model mm ([x, z] points), per cable. */
-export function routes(): Record<Cable['n'], [number, number][][]> {
-  const out = {} as Record<Cable['n'], [number, number][][]>;
+export function routes(): Record<CableN, [number, number][][]> {
+  const out = {} as Record<CableN, [number, number][][]>;
   for (const r of IN.routes) out[r.cable] = r.paths.map((path) => path.map(([x, z]): [number, number] => [mx(x), mz(z)]));
   return out;
 }
 
-/* ------------------------------------------------------------------ pools & bays */
-/** Suggested front-bay layout: the runbook's tidy suggestion (assumed), not where the drives are today. */
-export const suggestedFront = r720xd.drives
-  .filter((d) => d.suggestedBay && d.suggestedBay.value < BAY_N)
-  .map((d) => ({ bay: d.suggestedBay!.value, pool: d.pool, drive: d.id }));
+/**
+ * A plan placed on paper at scale s: (x, y) is the paper point of model (x 0, z 0), the left
+ * ear at the rack flange. rot = false: rear up, front down (the top view). rot = true: turned
+ * 90°, front at the left, the server's left side at the top (the storage path reads left to
+ * right).
+ */
+export function planAt(x: number, y: number, s: number, rot = false) {
+  const pt = (mx: number, mz: number): Pt => (rot ? [x + s * mz, y + s * mx] : [x + s * mx, y - s * mz]);
+  return {
+    pt,
+    /** transform for drawings in plan mm (u = x, v = −z) */
+    m: rot ? `matrix(0,${k4(s)},${k4(-s)},0,${n(x)},${n(y)})` : place(s, x, y),
+    /** a model polyline on paper */
+    line: (pts: [number, number][]) => P(pts.map(([a, b]) => pt(a, b))),
+    /** a footprint as a paper rectangle (any rotation) */
+    box: (b: Box2): string => {
+      const [x0, y0] = pt(b.x, b.z), [x1, y1] = pt(b.x + b.w, b.z + b.d);
+      return R(Math.min(x0, x1), Math.min(y0, y1), Math.abs(x1 - x0), Math.abs(y1 - y0));
+    },
+    /** centre of a footprint on paper */
+    mid: (b: Box2): Pt => pt(b.x + b.w / 2, b.z + b.d / 2),
+  };
+}
 
-/* ------------------------------------------------------------------ exploded view: parts list */
-const t = r720xd.temperatures, fanRpm = r720xd.fans.rpm.value, mass = r720xd.dims.mass.value;
-const fanNote = `${fanRpm[0].toLocaleString('en-US')}–${fanRpm[1].toLocaleString('en-US')} rpm with the PERC in.`;
-export type BomItem = { n: number; id: string; name: string; qty: string; note: string; prov: 'measured' | 'vendor' | 'owner' | 'inferred' | 'assumed'; asOf?: string; state?: 'new' | 'removed' };
-/** Balloon numbers on the exploded view, top of the stack first. Facts from r720xd.ts. */
-export const explodedBom: BomItem[] = [
-  { n: 1, id: 'lid', name: 'Top cover', qty: '1', note: 'Drawn see-through so the rest shows.', prov: 'vendor' },
-  { n: 2, id: 'shroud', name: 'Cooling shroud', qty: '1', note: 'Over both CPUs and all 24 DIMM slots.', prov: 'inferred' },
-  { n: 3, id: 'fans', name: 'Fan assembly', qty: String(FANS), note: fanNote, prov: 'measured', asOf: r720xd.fans.rpm.asOf },
-  { n: 4, id: 'heatsinks', name: 'Heatsink + Xeon E5-2690 v2', qty: '2', note: `10 cores, 130 W each. ${t.cpuC.value[0]} and ${t.cpuC.value[1]} °C.`, prov: 'measured', asOf: t.cpuC.asOf },
-  { n: 5, id: 'dimms', name: 'DIMM slots', qty: String(r720xd.memory.slots.value), note: '256 GB in my notes, 125 GiB usable measured. Unresolved.', prov: 'owner' },
-  { n: 6, id: 'hba330', name: 'Dell HBA330 (J7TNV)', qty: '1', note: 'Planned: riser 1, slot 2. Arrived 2026-09-28.', prov: 'owner', asOf: '2026-09-28', state: 'new' },
-  { n: 7, id: 'risers', name: 'Risers 1–3', qty: '3', note: 'Six slots, all empty today.', prov: 'measured', asOf: r720xd.pcie.note.asOf },
-  { n: 8, id: 'perc', name: 'PERC H710P Mini', qty: '1', note: 'Leaving. RAID only, no pass-through.', prov: 'vendor', state: 'removed' },
-  { n: 9, id: 'flex', name: 'Rear flex bays + backplane', qty: '2 bays', note: '24 good, 25 failing. Which side is which: unknown.', prov: 'measured', asOf: r720xd.bays.rearNumbering.asOf },
-  { n: 10, id: 'psus', name: 'Power supplies', qty: String(r720xd.psus.count.value), note: 'Redundant, both OK. Wattage unknown.', prov: 'measured', asOf: r720xd.psus.count.asOf },
-  { n: 11, id: 'backplane', name: 'Backplane + SAS expander', qty: '1', note: 'SAS B, SAS A and SAS A1 on its back.', prov: 'vendor' },
-  { n: 12, id: 'sleds', name: 'Drive carriers', qty: String(BAY_N), note: 'Five SSDs up front. Which bays: not recorded.', prov: 'measured', asOf: '2026-09-28' },
-  { n: 13, id: 'chassis', name: 'Chassis + system board', qty: '1', note: `${mass.max} kg fully loaded, ${mass.empty} kg empty.`, prov: 'vendor' },
-];
+/* ------------------------------------------------------------------ drives & pools */
+export const pools = server.pools;
+export const POOL_IDS: PoolId[] = pools.map((p) => p.id);
+/** Front drives, bay order. */
+export const frontDrives: Drive[] = server.drives.filter((d) => d.bay < BAY_N).sort((a, b) => a.bay - b.bay);
+export const rearDrive = server.drives.find((d) => d.bay === 24)!;
+/** Lettering on a carrier: "GIGASTONE 256 GB", "MX500 1 TB", "ST300MP0004". */
+export const driveShort = (d: { maker: string; model: string; sizeGB: number; interface: string }): string =>
+  d.interface === 'SAS' ? d.model : `${d.maker === 'Crucial' ? 'MX500' : d.maker} ${d.sizeGB >= 1000 ? `${d.sizeGB / 1000} TB` : `${d.sizeGB} GB`}`.toUpperCase();
+
+/** Sheet 02's stamp. Each view sets it down where it has room (Stamp.astro). */
+export const STAMP = { text: 'AS BUILT', sub: `SWAP DONE · ${server.swapDate}`, tone: 'ok' as const };
+
+/* ------------------------------------------------------------------ balloon numbers */
+/**
+ * One numbering for the whole sheet: a part keeps its number in every view it appears in, and
+ * the card shows it. Drives by bay, then the pools, then what the swap added, then the machine,
+ * then what the swap took out.
+ */
+export const NUM: Record<string, number> = Object.fromEntries(
+  [
+    ...frontDrives.map((d) => d.id), rearDrive.id,
+    ...POOL_IDS,
+    'hba330', 'cable-2', 'cable-3', 'nics',
+    'server', 'cpu1', 'cpu2', 'memory', 'fans', 'backplane', 'riser-1', 'psus',
+    'perc', 'cable-1', 'cable-4', server.removed.id,
+  ].map((id, i) => [id, i + 1]),
+);

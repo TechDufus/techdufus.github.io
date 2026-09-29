@@ -3,20 +3,16 @@
   Leader: a callout line from a feature to a note (ISO 128 / ASME style: sloped leg, horizontal
   shoulder, text at the shoulder end, vertically centred).
 
-  <Leader from={[x, y]} to={[kx, ky]} text={['PSU 2', '750 W']} end="dot" prov="assumed" />
+  <Leader from={[x, y]} to={[kx, ky]} text={['PSU 2', '750 W']} end="dot" />
 
     from    the feature (paper units): 'arrow' ends on an outline, 'dot' inside a surface
     to      the knee where the shoulder starts; the shoulder runs away from `from`
     text    one line or several; mono caps (.txt-label, first line) and .txt-note (the rest)
     end     'arrow' (default) | 'dot' | 'none'
     shoulder  shoulder length (default 14)
-    prov    provenance mark after the first line
     k, p, class   as Dim (p default 6)
 */
 import type { Pt } from '../../lib/drawing/projection';
-import { monoWidth } from '../../lib/drawing/sheet';
-import type { Provenance } from '../../lib/drawing/prov';
-import ProvMark from './ProvMark.astro';
 
 interface Props {
   from: Pt;
@@ -24,12 +20,11 @@ interface Props {
   text?: string | string[];
   end?: 'arrow' | 'dot' | 'none';
   shoulder?: number;
-  prov?: Provenance;
   k?: number;
   p?: number;
   class?: string;
 }
-const { from, to, text, end = 'arrow', shoulder = 14, prov, k = 1, p = 6, class: cls = '' } = Astro.props;
+const { from, to, text, end = 'arrow', shoulder = 14, k = 1, p = 6, class: cls = '' } = Astro.props;
 const lines = text === undefined ? [] : Array.isArray(text) ? text : [text];
 const f = (v: number): string => String(Math.round(v * 10) / 10);
 const side = to[0] >= from[0] ? 1 : -1;
@@ -47,8 +42,6 @@ const FS = 12 / k, LH = 15 / k;
 const tx = knee2[0] + side * (4 / k);
 const top = to[1] - ((lines.length - 1) * LH) / 2 + FS * 0.36;
 const anchor = side > 0 ? undefined : 'end';
-const w0 = lines[0] ? monoWidth(lines[0], FS, 0.08) : 0;
-const pmX = side > 0 ? tx + w0 + 4 / k : tx - w0 - 14 / k;
 ---
 
 <g class:list={['leader', cls]} style={[p !== 6 && `--p:${p}`, k !== 1 && `--dwg-k:${k}`].filter(Boolean).join(';') || undefined}>
@@ -58,5 +51,4 @@ const pmX = side > 0 ? tx + w0 + 4 / k : tx - w0 - 14 / k;
   {lines.map((line, i) => (
     <text class={i ? 'txt-note' : 'txt-label'} x={f(tx)} y={f(top + i * LH)} text-anchor={anchor}>{line}</text>
   ))}
-  {prov && lines[0] && <ProvMark x={pmX} y={top - FS * 0.78} prov={prov} k={k} />}
 </g>

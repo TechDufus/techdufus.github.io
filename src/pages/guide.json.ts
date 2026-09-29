@@ -1,6 +1,8 @@
 // Build-time data for the scripted site guide (src/scripts/guide.ts fetches it on first open).
 // Every answer is written from real site content. Mini-markup: [label](href) links, blank line = paragraph.
 import { business, featuredProject, featuredReposAsOf, labSpec, siteMetadata } from '../data/site';
+import { server } from '../data/lab/server';
+import { stackItems } from '../data/lab/stack';
 import { getPostMetas, postStats } from '../lib/content';
 import { getFeaturedRepos } from '../lib/github';
 
@@ -8,7 +10,6 @@ type Answer = { text: string; cards: string[] };
 
 const SLUG = {
   talos: 'building-a-talos-kubernetes-homelab-on-proxmox-with-terraform',
-  tailscale: 'i-deleted-my-cloudflare-tunnels-tailscale-operator-homelab-k8s',
   omc: 'oh-my-claude-batteries-included-enhancements-for-claude-code',
   aijob: 'ai-already-took-my-job',
   obsidian: 'deploying-obsidian-sync-for-my-ai-agents',
@@ -28,14 +29,23 @@ export async function GET() {
   const omc = featured.find((r) => r.name === 'oh-my-claude');
   const omcUrl = omc?.url ?? 'https://github.com/TechDufus/oh-my-claude';
   const kanbanUrl = featured.find((r) => r.name === 'openkanban')?.url ?? 'https://github.com/TechDufus/openkanban';
+  // The lab, from the drawings' data (src/data/lab/) and labSpec.
+  const items = stackItems();
+  const pve = items.find((i) => i.id === 'proxmox');
+  const talos = items.find((i) => i.id === 'talos-nodes');
+  const running = items.filter((i) => i.status === 'running').length;
+  const sheet = (thumb: string) => {
+    const s = labSpec.drawings.sheets.find((x) => x.thumb === thumb);
+    return s ? `[Sheet ${s.no.slice(-2)} · ${s.title}](${s.href})` : '';
+  };
 
   const answers: Record<string, Answer> = {
     homelab: {
       text:
-        `One Dell PowerEdge R720xd (40 threads, 256GB ECC) running Proxmox, which hosts a 3-node Talos Kubernetes cluster. ArgoCD does the GitOps, and everything is declared in [home.io](${labSpec.gitops.href}) with Terraform + Ansible.\n\n` +
-        `On top of that: ${labSpec.servicesCount} services, including Immich, dashboards, self-hosted runners and an observability stack. UniFi UDM Pro + U7 AP for the network, a UNAS Pro 8 for storage. Since Feb 2026, access runs through the Tailscale Operator instead of Cloudflare Tunnels.\n\n` +
-        `${labSpec.gitops.motto} Status as of ${labSpec.lastRevised}: ${labSpec.status.toLowerCase()}. The full tour is on the [lab page](/lab/), and the long version is in the [setup doc](${labSpec.setupHref}).`,
-      cards: cards(SLUG.talos, SLUG.tailscale)
+        `One Dell PowerEdge R720xd (${server.threads} threads, ${server.memory.gb} GB) running Proxmox VE ${pve?.version ?? ''} on ZFS. OpenTofu puts ${talos?.count ?? 3} Talos VMs on it, and those are the Kubernetes cluster. Cilium runs its network, and Flux runs everything else from git.\n\n` +
+        `Ansible configures the host, and a Raspberry Pi 4 on the top shelf is the control node. A UDM Pro runs the network and a UNAS Pro 8 holds the storage. All of it is declared in one git repo, private for now.\n\n` +
+        `As of ${labSpec.lastRevised} it's ${labSpec.status.toLowerCase()}: ${running} things running, the rest still on paper. The [lab page](/lab/) has the drawings, and ${sheet('stack')} shows what runs where.`,
+      cards: cards(SLUG.zfs, SLUG.talos)
     },
     omc: {
       text:
@@ -64,8 +74,8 @@ export async function GET() {
     },
     rack: {
       text:
-        `A 42U cabinet. Top to bottom: a Raspberry Pi 4 on a shelf, a 24-port patch panel, the UDM Pro, the UNAS Pro 8 and the R720xd.\n\n` +
-        `I drew it from the vendor specs. [Sheet 01 · The cabinet](/lab/rack/) has every box at its U position, the links and the airflow, and [Sheet 02 · The server](/lab/r720xd/) opens up the R720xd. The U positions are a best guess until I measure, so both sheets are stamped preliminary.`,
+        `A 42U cabinet, and its rails count from the top. Up there is a shelf with the Raspberry Pi 4, the fiber modem and the PoE injector that powers the U7 Pro. Under it: the UNAS Pro 8, the UDM Pro, then the R720xd. A shelf of spares sits at the very bottom, and the rest is air.\n\n` +
+        `It's all drawn to spec. ${sheet('cabinet')} has every box where it sits, ${sheet('server')} opens up the R720xd, and ${sheet('stack')} shows what runs on it. The first two are stamped as built.`,
       cards: cards(SLUG.zfs)
     },
     hire: {
@@ -96,12 +106,7 @@ export async function GET() {
       minutes: p.minutes
     })),
     repos: featured.map((r) => ({ name: r.name, url: r.url, stars: r.stars })),
-    lab: {
-      status: labSpec.status,
-      lastRevised: labSpec.lastRevised,
-      servicesCount: labSpec.servicesCount,
-      gitops: { repo: labSpec.gitops.repo, href: labSpec.gitops.href, motto: labSpec.gitops.motto }
-    },
+    lab: { status: labSpec.status, lastRevised: labSpec.lastRevised },
     prompts: [
       { q: "What's running in your homelab?", a: 'homelab' },
       { q: 'What is oh-my-claude?', a: 'omc' },

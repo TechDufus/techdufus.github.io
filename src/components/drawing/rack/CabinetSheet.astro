@@ -1,22 +1,27 @@
 ---
 /*
-  TD-LAB-01 · Sheet 1 of 2 · The cabinet. The whole A3 sheet: view tabs (isometric, front
-  elevation, side section, rear + links), layers, the shared panel symbols, notes, revisions
-  and the stamp. Every line comes from src/data/hardware/rack.ts via ./model.ts.
+  TD-LAB-01 · Sheet 1 of 3 · The cabinet, as built. The whole A3 sheet: view tabs (isometric,
+  front, side, rear), the shared panel symbols, the U7 Pro off-sheet callout, the device schedule
+  in the right column, the part cards, revisions and the stamp. Every line comes from
+  src/data/lab/rack.ts via ./model.ts.
 
   Only the isometric ships inline. The front, side and rear views (and the rear panel symbols)
   are rendered at build time into the partial page /lab/rack/views/ and moved into their empty
   tab panels by ./rack.ts, on idle or on first use, which keeps the page HTML inside budget.
-  Without JS the tabs are hidden and only the isometric shows, as before.
+  Without JS the tabs are hidden and only the isometric shows.
 */
 import Sheet from '../Sheet.astro';
 import ViewTabs from '../ViewTabs.astro';
-import LayerPanel from '../LayerPanel.astro';
+import View from '../View.astro';
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import PartCard from '../PartCard.astro';
+import LineKey from '../LineKey.astro';
 import PanelDefs from './PanelDefs.astro';
 import IsoView from './IsoView.astro';
-import View from '../View.astro';
-import LineKey from '../LineKey.astro';
-import ProvLegend from '../ProvLegend.astro';
+import DeviceList from './DeviceList.astro';
+import { ORDER, balloonOf, device, elsewhere } from './model';
+import { OFF_SHEET as OFF } from './dwg';
 
 interface Props {
   id?: string;
@@ -24,31 +29,24 @@ interface Props {
 const { id = 'lab01' } = Astro.props;
 /** Tab panels filled from /lab/rack/views/ (see the header). */
 const LAZY = ['front', 'side', 'rear'] as const;
-
-const notes = [
-  'All dimensions in millimetres unless noted.',
-  { text: 'U positions not surveyed — verify in field.', prov: 'assumed' as const },
-  { text: 'Cabinet is a nominal 42U enclosure (APC AR3100 size). Make and size unknown.', prov: 'assumed' as const },
-  { text: 'Patch panel and shelf seen in a Nov 2024 photo. Still there? Unknown.', prov: 'inferred' as const },
-  { text: 'Power is nameplate maximum, not measured.', prov: 'vendor' as const },
-  { text: 'Airflow per vendor docs. Arrows only where it is documented.', prov: 'inferred' as const },
-  'Provenance marks per legend.',
-];
 ---
 
 <Sheet
   id={id}
   dwgNo="TD-LAB-01"
   title="The cabinet"
-  sheet={[1, 2]}
-  rev="A"
-  date="2026-09-28"
-  desc="The 42U cabinet and everything in it. Isometric: a key plan of the whole cabinet with the door open, and detail A, the stack at 1:6: a Raspberry Pi on a shelf at U25, the shelf at U24, a patch panel at U23, a UniFi UDM Pro at U22, a UNAS Pro 8 at U20 to 21 and a Dell R720xd at U18 to 19. Front elevation at 1:10 with the U ruler, 35U free. Side section with device depths, clearances and airflow. Rear with the four documented network links. U positions are assumed."
-  revisions={[{ rev: 'A', date: '2026-09-28', desc: 'First issue' }]}
-  notes={notes}
-  stamp={{ text: 'PRELIMINARY', sub: 'NOT FOR CONSTRUCTION', x: 486, y: 232 }}
+  sheet={[1, 3]}
+  rev="B"
+  date="2026-09-29"
+  checked="TD"
+  desc="The 42U cabinet as built, its rails numbered from the top. A shelf at U1 to 2 holds a Raspberry Pi 4, the fiber modem and a PoE injector. A UniFi UNAS Pro 8 sits at U8 to 9, a UniFi Dream Machine Pro at U10, U11 to 12 are empty, and a Dell PowerEdge R720xd is at U13 to 14. A shelf at U41 to 42 holds a spare drive and a coil of patch cables. The U7 Pro access point lives off the sheet, powered by the injector. Views: isometric, front elevation, side section and rear with the network links."
+  revisions={[
+    { rev: 'A', date: '2026-09-28', desc: 'First issue' },
+    { rev: 'B', date: '2026-09-29', desc: 'As built' },
+  ]}
+  stamp={{ text: 'AS BUILT', tone: 'ok', x: 1036, y: 640 }}
   interactive
-  statusScale="SCALE 1:6"
+  hint
 >
   <Fragment slot="toolbar">
     <ViewTabs
@@ -61,40 +59,52 @@ const notes = [
         { id: 'rear', label: 'Rear', icon: 'rear' },
       ]}
     />
-    <LayerPanel
-      layers={[
-        { id: 'devices', label: 'Devices', line: 'obj' },
-        { id: 'labels', label: 'Labels', line: 'lead' },
-        { id: 'dims', label: 'Dimensions', line: 'dim' },
-        { id: 'network', label: 'Network', line: 'net-10g' },
-        { id: 'airflow', label: 'Airflow', line: 'air-cold' },
-        { id: 'power', label: 'Power', line: 'sem-power' },
-        { id: 'notes', label: 'Notes', line: 'thin' },
-        { id: 'grid', label: 'Grid', line: 'cons' },
-      ]}
-    />
   </Fragment>
 
   <PanelDefs dwg={id} face="front" />
   <IsoView dwg={id} active />
   {LAZY.map((name) => <View dwg={id} name={name} x={39} y={39} w={798} h={813} />)}
 
+  <!-- off sheet, in every view -->
+  <g style="--p:5">
+    <text class="txt-note" x={OFF.x} y={OFF.y - 10}>OFF SHEET</text>
+    {elsewhere.map((d) => (
+      <>
+        <Part id={d.id} label={d.short}>
+          <path class="face" d={`M${OFF.x} ${OFF.y}h${OFF.w}v${OFF.h}h${-OFF.w}Z`} />
+          <path class="ln-hid" d={`M${OFF.x} ${OFF.y}h${OFF.w}v${OFF.h}h${-OFF.w}Z`} />
+          <text class="txt-label" x={OFF.x + 40} y={OFF.y + 21}>{d.short}</text>
+          <text class="txt-note" x={OFF.x + 40} y={OFF.y + 37}>CEILING OR WALL · POE</text>
+        </Part>
+        <Balloon at={[OFF.x + 20, OFF.y + OFF.h / 2]} n={balloonOf(d.id)} part={d.id} />
+      </>
+    ))}
+  </g>
+
+  <Fragment slot="aside"><DeviceList shelves /></Fragment>
+
+  <Fragment slot="cards">
+    {ORDER.map(device).map((d) => (
+      <PartCard id={d.id} title={d.card.title} kind={d.card.kind} lines={d.card.lines}>
+        {d.sheetHref && <a class="link" href={d.sheetHref}>Sheet 02 · the server <span aria-hidden="true">→</span></a>}
+      </PartCard>
+    ))}
+  </Fragment>
+
   <Fragment slot="legend">
     <LineKey
       items={[
         { line: 'obj', label: 'Object' },
         { line: 'hid', label: 'Hidden' },
-        { line: 'phantom', label: 'Alternate position' },
+        { line: 'phantom', label: 'Phantom' },
         { line: 'ctr', label: 'Centre' },
         { line: 'dim', label: 'Dimension' },
-        { line: 'hatch', label: 'Section' },
         { line: 'net-10g', label: '10 GbE' },
         { line: 'net-1g', label: '1 GbE' },
+        { line: 'sem-power', label: 'PoE' },
         { line: 'air-cold', label: 'Cold air' },
         { line: 'air-hot', label: 'Hot air' },
-        { line: 'sem-power', label: 'Power' },
       ]}
     />
-    <ProvLegend />
   </Fragment>
 </Sheet>

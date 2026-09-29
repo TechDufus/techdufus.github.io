@@ -1,22 +1,8 @@
 /* ==========================================================================
-   drawing.css · gold-ink blueprint kit. Loaded only via components/drawing/Sheet.astro.
-   20 KB budget, so rules are compact. Props: component headers · JS: scripts/drawing.ts.
+   drawing.css · gold-ink blueprint kit. Loaded via components/drawing/Sheet.astro; the contract
+   (classes, tokens, data attributes) is in components/drawing/README.md. ≤ 24 KB, so compact.
    Paper units = viewBox (3 = 1 printed mm); strokes are non-scaling px; --dwg-k keeps
-   lettering at paper size inside scaled (iso) groups.
-   LINES  .ln-{obj,med,hid,ctr,phantom,cut,cut-end,dim,lead,cons,thin,frame,flow,net} .dim-arr
-          .dwg-tex (thin pens). pathLength="1" only on solid lines: those get pen-plotted.
-   FILLS  .face .face-{top,front,side} .hatch .hatch-x .tint
-   TEXT   .txt-{dim,label,note,zone,title} .txt-dim--sub .view__t .view__s
-   SEMANTIC (group; sets --dwg-obj/--flow) .sem-{new,removed,keep,power}
-          .pool-{rpool,fast,bulk} .net-{10g,1g} .air-{cold,hot}
-   PARTS  .part (+[aria-pressed=true] → --rail) .balloon.is-hot .pm--{prov} .prov--{prov}
-   HTML   .dwg-tabs .dwg-tab .dwg-layers .dwg-layer .dwg-st .dwg-key .dwg-mono
-   STATE  [data-plot=pending|run|done] [data-active] [data-off] .is-idle html.dwg-paused
-          .dwg-stackonly · --p:N plot step (0 frame … 7 stamp)
-   TOKENS --dwg-{paper,paper-2,obj,hid,ctr,dim,cons,rule,frame,hatch-ink,text,text-hi,
-          grid-minor,grid-major,face-top,face-front,face-side,steel,amber,new,removed,stamp,
-          w-obj,w-frame,w-med,w-thin,plot-dur,plot-step,plot-ms,replot-ms,pan-min} --flow;
-          from Sheet: --dwg-{grid,hatch,hatch-x,rough,vw,vh}
+   lettering at paper size inside scaled (iso) groups. pathLength="1" lines get pen-plotted.
    ========================================================================== */
 
 .dwg{
@@ -87,22 +73,16 @@
 .view__rule{stroke:var(--gold-light);--sw:.9px}
 .balloon__ring{stroke:var(--dwg-dim)}
 .balloon__n,.uruler__t{font-weight:500;fill:var(--gold-light)}
-.dim text,.balloon__n,.pm text{text-anchor:middle}
+.dim text,.balloon__n{text-anchor:middle}
 .uruler{--p:4}.dim{--p:5}.balloon,.leader{--p:6}
+.dwg [data-balloon-for]{cursor:pointer}
 .balloon.is-hot{--dwg-dim:var(--gold-pale)}
 .balloon.is-hot .balloon__ring{fill:color-mix(in srgb,var(--gold) 22%,var(--dwg-paper))}
 .uruler__hole{fill:none;stroke:var(--dwg-hid);stroke-width:.6;vector-effect:non-scaling-stroke}
 
-/* provenance marks (SVG) */
-.pm rect{fill:none;stroke:var(--dwg-text);stroke-width:.8px;vector-effect:non-scaling-stroke}
-.pm text{font-size:7.5px;font-weight:500;fill:var(--dwg-text-hi)}
-.pm--measured rect{fill:var(--gold-light);stroke:var(--gold-light)}
-.pm--measured text{fill:var(--dwg-paper)}
-.pm--inferred rect,.pm--assumed rect{stroke-dasharray:2 1.6}
-.pm--assumed text{fill:var(--muted)}
-
 /* stamp */
 .stamp--ok{--stamp:var(--dwg-new)}
+.stamp--wip{--stamp:var(--dwg-amber)}
 .stamp__ink{filter:var(--dwg-rough);opacity:.88;transform-box:fill-box;transform-origin:center}
 .stamp rect{fill:none;stroke:var(--stamp,var(--dwg-stamp))}
 .stamp .stamp__b1{stroke-width:2.4}
@@ -124,14 +104,13 @@
 .air-hot{--flow:var(--dwg-amber)}
 :is(.sem-new,.sem-removed,.sem-power,.pool-fast,.pool-bulk,.air-cold,.air-hot) :is(.txt-label,.txt-dim){fill:var(--flow)}
 
-/* ---------- 5. Parts, views, layers ---------- */
+/* ---------- 5. Parts and views ---------- */
 .part{cursor:pointer;transition:transform 800ms var(--ease-io)}
-.part:is(:hover,:focus-visible,[aria-pressed="true"]){--dwg-obj:var(--gold-pale);--dwg-face-top:color-mix(in srgb,var(--gold) 15%,var(--bg));--dwg-face-front:color-mix(in srgb,var(--gold) 8%,var(--bg));--dwg-face-side:color-mix(in srgb,var(--gold) 5%,var(--bg-deep))}
+.part:is(.is-lit,:focus-visible,[aria-pressed="true"]){--dwg-obj:var(--gold-pale);--dwg-face-top:color-mix(in srgb,var(--gold) 15%,var(--bg));--dwg-face-front:color-mix(in srgb,var(--gold) 8%,var(--bg));--dwg-face-side:color-mix(in srgb,var(--gold) 5%,var(--bg-deep));--dwg-paper:color-mix(in srgb,var(--gold) 14%,var(--bg))}
+.part:is(.is-lit,:focus-visible){--flow:var(--gold-pale);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--gold) 60%,transparent))}
 .part:focus-visible{outline:none;filter:drop-shadow(0 0 1.5px var(--gold-pale)) drop-shadow(0 0 6px var(--gold))}
 .part[aria-pressed="true"]{transform:var(--rail,none)}
 .dwg [data-view-panel]:not([data-active]){display:none}
-.dwg [data-layer]{transition:opacity var(--t-2) ease,visibility 0s}
-.dwg [data-layer][data-off]{opacity:0;visibility:hidden;transition:opacity var(--t-2) ease,visibility 0s var(--t-2)}
 
 /* ---------- 6. Plot (pen draw-in) and particles ---------- */
 .dwg-pt{fill:var(--flow);offset-path:var(--path);offset-rotate:0deg;offset-distance:0%}
@@ -155,48 +134,28 @@
 @keyframes dwg-flow{from{offset-distance:0%;opacity:0}12%,86%{opacity:1}to{offset-distance:100%;opacity:0}}
 @keyframes dwg-nudge{50%{transform:translateX(5px)}}
 
-/* ---------- 7. Toolbar: view tabs + layer list ---------- */
-.dwg__bar,.dwg-status{display:flex;flex-wrap:wrap;background:var(--surface);font:.6875rem var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
-.dwg__bar{justify-content:space-between;gap:0 24px;padding:0 14px;border-bottom:1px solid var(--line-2)}
-.dwg-tabs,.dwg-layers{display:flex;flex-wrap:wrap}
-.dwg-tab,.dwg-layer{position:relative;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:0;background:none;color:var(--muted);font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer;transition:color var(--t-1) ease}
-.dwg-tab:hover,.dwg-layer:hover{color:var(--ink)}
-.dwg-tab:focus-visible,.dwg-layer:focus-visible{outline-offset:-4px}
+/* ---------- 7. Toolbar: view tabs ---------- */
+.dwg__bar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:0 24px;padding:0 14px;border-bottom:1px solid var(--line-2);background:var(--surface);font:.6875rem var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+.dwg-tabs{display:flex;flex-wrap:wrap}
+.dwg-tab{position:relative;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:0;background:none;color:var(--muted);font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer;transition:color var(--t-1) ease}
+.dwg-tab:hover{color:var(--ink)}
+.dwg-tab:focus-visible{outline-offset:-4px}
 .dwg-tab svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.2}
 .dwg-tab[aria-selected="true"]{color:var(--gold-light)}
 .dwg-tab::after{content:"";position:absolute;inset:auto 12px -1px;height:2px;background:var(--gold-line);transform:scaleX(0);transition:transform var(--t-2) var(--ease-out)}
 .dwg-tab[aria-selected="true"]::after{transform:none}
 html:not(.js) .dwg-tabs{display:none}
-.dwg-layers__h{align-self:center;padding-right:6px;color:var(--faint)}
-.dwg-layer{padding:0 9px;gap:7px}
-.dwg-layer[aria-pressed="true"]{color:var(--ink-2)}
-.dwg-layer svg{flex:none;fill:none;stroke:currentColor}
-.dwg-layer__eye{flex:none;width:15px;height:15px;background:currentColor;-webkit-mask:var(--eye) center/contain no-repeat;mask:var(--eye) center/contain no-repeat;--eye:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.2'%3E%3Cpath d='M1.5 8s2.4-4.2 6.5-4.2S14.5 8 14.5 8s-2.4 4.2-6.5 4.2S1.5 8 1.5 8z'/%3E%3Ccircle cx='8' cy='8' r='1.9'/%3E%3C/svg%3E")}
-.dwg-layer[aria-pressed="false"] .dwg-layer__eye{--eye:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.2'%3E%3Cpath d='M1.5 8s2.4-4.2 6.5-4.2S14.5 8 14.5 8s-2.4 4.2-6.5 4.2S1.5 8 1.5 8zM2.5 13.5l11-11'/%3E%3Ccircle cx='8' cy='8' r='1.9'/%3E%3C/svg%3E")}
-.dwg-layer[aria-pressed="false"] .dwg-layer__sw{opacity:.35}
 
-/* swatches (LayerPanel, LineKey) draw with the real line classes (lineSwatch() in lib/drawing/sheet.ts) */
-.dwg-layer__sw,.dwg-key__sw{width:22px;height:8px;overflow:visible}
-:is(.dwg-layer__sw,.dwg-key__sw) .ln-ctr{stroke-dasharray:9 2 2 2}
-
-/* ---------- 8. Status bar ---------- */
-.dwg-status{--plot:1;letter-spacing:.1em;color:var(--faint);border-top:1px solid var(--line-2);font-variant-numeric:tabular-nums}
-.dwg-st{padding:7px 14px;border-right:1px solid var(--line);white-space:pre}
-.dwg-st--view,.dwg-status.is-plotting .dwg-st--plot{color:var(--gold-light)}
-.dwg-st--xy{min-width:25ch;color:var(--ink-2)}
-.dwg-st--u{min-width:10ch;color:var(--ink-2)}
-.dwg-st--plot{position:relative;margin-left:auto;border:0;border-left:1px solid var(--line);min-width:23ch;overflow:hidden}
-.dwg-st--plot i{position:absolute;inset:auto 0 0;height:2px;background:var(--gold-line);transform:scaleX(var(--plot));transform-origin:left}
-@media (pointer:coarse){.dwg-st:is(.dwg-st--xy,.dwg-st--u,.dwg-st--zone){display:none}}
+/* LineKey swatches draw with the real line classes (lineSwatch() in lib/drawing/sheet.ts) */
+.dwg-key__sw{width:22px;height:8px;overflow:visible}
+.dwg-key__sw .ln-ctr{stroke-dasharray:9 2 2 2}
 @container dwg (max-width:640px){
-  .dwg-st:is(.dwg-st--xy,.dwg-st--u,.dwg-st--zone){display:none}
-  .dwg-tabs,.dwg-layers{flex:1 1 100%;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-14px;padding-inline:5px}
-  .dwg-tab,.dwg-layer{flex:none}
-  .dwg-tab{padding:0 9px;gap:6px}
+  .dwg-tabs{flex:1 1 100%;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-14px;padding-inline:5px}
+  .dwg-tab{flex:none;padding:0 9px;gap:6px}
   .dwg-tab::after{inset:auto 9px 0}
 }
 
-/* ---------- 9. Sheet furniture (overlay on wide sheets, lettered in --pu) ---------- */
+/* ---------- 8. Sheet furniture (overlay on wide sheets, lettered in --pu) ---------- */
 .dwg__furn{position:absolute;inset:0;pointer-events:none}
 .dwg__furn>*{position:absolute;left:var(--x);top:var(--y);width:var(--w);height:var(--h,auto);margin:0;pointer-events:auto;box-sizing:border-box}
 .dwg-tb,.dwg-rev caption{border:var(--dwg-w-frame) solid var(--dwg-frame)}
@@ -217,11 +176,6 @@ html:not(.js) .dwg-tabs{display:none}
 .dwg-rev :is(th,td){padding:calc(var(--pu)*4) calc(var(--pu)*7);border:1px solid var(--dwg-rule);text-align:left;vertical-align:top}
 .dwg-rev td:first-child{color:var(--gold-light)}
 .dwg-rev td:nth-child(3){white-space:nowrap}
-.dwg-notes{font:calc(var(--pu)*10.5)/1.5 var(--font-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
-.dwg-notes__h{margin:0 0 calc(var(--pu)*8);font-weight:500;letter-spacing:.18em;color:var(--gold-light);text-decoration:underline 1px var(--gold);text-underline-offset:calc(var(--pu)*4)}
-.dwg-notes ol{margin:0;padding:0;list-style:none;counter-reset:n}
-.dwg-notes li{counter-increment:n;position:relative;padding-left:calc(var(--pu)*24);margin-bottom:calc(var(--pu)*5)}
-.dwg-notes li::before{content:counter(n) ".";position:absolute;left:0;color:var(--gold-light)}
 
 /* frameless figure: title strip is a line of HTML under the drawing */
 .dwg--figure .dwg__furn{position:static;display:flex;flex-wrap:wrap;gap:12px 24px;padding:12px 14px;border-top:1px solid var(--line-2);--pu:1.1px}
@@ -234,7 +188,7 @@ html:not(.js) .dwg-tabs{display:none}
 .dwg--figure .tb-no{order:-1}
 .dwg--figure .tb-no dd{font-size:calc(var(--pu)*11.5);color:var(--gold-light)}
 
-/* ---------- 10. Narrow: the drawing pans, furniture drops under it ---------- */
+/* ---------- 9. Narrow: the drawing pans, furniture drops under it ---------- */
 .dwg__hint{position:absolute;left:12px;bottom:12px;margin:0;display:none;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--accent-line);border-radius:var(--r-pill);background:var(--bg-deep);font:500 .6875rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-light);pointer-events:none;transition:opacity var(--t-2) ease}
 .dwg__hint svg{width:22px;height:9px;fill:none;stroke:currentColor;stroke-width:1.3}
 .dwg__view.is-pannable .dwg__hint{display:inline-flex}
@@ -246,23 +200,52 @@ html:not(.js) .dwg-tabs{display:none}
   .dwg--sheet .dwg-tb{order:-2;grid-template:"proj proj proj mono" "title title title title" "scale units sheet rev" "date date drawn chk" "no no no no"/1.3fr 1fr 1fr 1fr}
   .dwg--sheet .dwg-tb>div{gap:6px;padding:9px 10px}
   .dwg--sheet .dwg-tb dd{white-space:normal;overflow:visible;overflow-wrap:anywhere}
-  .dwg--sheet .dwg-notes{order:-1}
+  .dwg--sheet .dwg-aside{order:-1}
   .dwg--sheet .dwg-stackonly{display:inline}
 }}
 
-/* ---------- 11. Legends and provenance chips (HTML) ---------- */
+/* ---------- 10. Legend (HTML) ---------- */
 .dwg__legend{display:flex;flex-wrap:wrap;gap:20px 48px;padding:16px 16px 18px;border-top:1px solid var(--line-2)}
 .dwg-key__h{margin:0 0 10px;font:500 .6875rem/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
 .dwg-key__list{display:flex;flex-wrap:wrap;gap:8px 20px;margin:0;padding:0;list-style:none;font-size:var(--fs-sm);color:var(--ink-2)}
 .dwg-key__list li{display:inline-flex;align-items:center;gap:8px}
 .dwg-key__list strong{font-weight:500;color:var(--ink)}
-.prov{display:inline-flex;align-items:center;gap:6px;font:500 .6875rem/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;vertical-align:.1em}
-.prov b{display:inline-grid;place-items:center;width:1.45em;height:1.45em;border:1px solid var(--ink-2);border-radius:2px;font-weight:500;font-size:.9em;color:var(--ink);letter-spacing:0}
-.prov--measured b{background:var(--gold-light);border-color:var(--gold-light);color:var(--on-accent)}
-.prov--owner b{border-radius:50%}
-.prov--inferred b,.prov--assumed b{border-style:dashed}
-.prov--assumed b{color:var(--muted)}
-.prov__src{color:var(--ink-2);text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px;text-transform:none;letter-spacing:0}
+
+/* ---------- 11. Name tag, part card, cue ---------- */
+.dwg-tag{position:absolute;z-index:3;left:0;top:0;padding:5px 9px;border:1px solid var(--gold);background:var(--bg-deep);font:500 .6875rem/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold-pale);white-space:nowrap;pointer-events:none;opacity:0;transform:translate(-50%,-100%);transition:opacity var(--t-1) ease}
+.dwg-tag.is-below{transform:translate(-50%,0)}
+.dwg-tag.is-on{opacity:1}
+.dwg-tag::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:9px;background:var(--gold)}
+.dwg-tag.is-below::after{top:auto;bottom:100%}
+.dwg-card{position:absolute;z-index:80;top:0;left:0;width:min(304px,calc(100vw - 24px));padding:15px 44px 17px 17px;border:1px solid var(--accent-line);border-top:2px solid var(--gold);background:var(--surface);box-shadow:0 18px 48px -12px rgba(0,0,0,.6);color:var(--ink-2);font-size:var(--fs-sm);line-height:1.45;opacity:0;transform:translateY(6px);transition:opacity .16s ease,transform .24s var(--ease-out)}
+.dwg-card.is-open{opacity:1;transform:none}
+.dwg-card:focus{outline:none}
+.dwg-card::before{content:"";position:absolute;background:var(--gold)}
+.dwg-card:is([data-side="r"],[data-side="l"])::before{top:var(--a);width:16px;height:1px}
+.dwg-card[data-side="r"]::before{right:100%}
+.dwg-card[data-side="l"]::before{left:100%}
+.dwg-card:is([data-side="b"],[data-side="t"])::before{left:var(--a);width:1px;height:16px}
+.dwg-card[data-side="b"]::before{bottom:100%}
+.dwg-card[data-side="t"]::before{top:100%}
+.dwg-card__x{position:absolute;top:6px;right:6px;display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;background:none;color:var(--muted);cursor:pointer}
+.dwg-card__x:hover{color:var(--ink)}
+.dwg-card__x svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.4}
+.dwg-card__n{float:left;display:grid;place-items:center;width:22px;height:22px;margin:-3px 9px 0 0;border:1px solid var(--gold);border-radius:50%;font:500 .75rem/1 var(--font-mono);color:var(--gold-light)}
+.dwg-card__k{margin:0;font:500 .6875rem/1.4 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.dwg-card__t{clear:both;margin:10px 0 0;font:italic 1.5rem/1.1 var(--font-display);color:var(--gold-light);text-wrap:balance}
+.dwg-card__l{display:grid;gap:5px;margin:11px 0 0;padding:0;list-style:none}
+.dwg-card__l li{position:relative;padding-left:16px}
+.dwg-card__l li::before{content:"";position:absolute;left:0;top:.7em;width:8px;height:1px;background:var(--gold)}
+.dwg-card.is-sheet{position:fixed;inset:auto 0 0;width:auto;max-height:70vh;overflow-y:auto;padding:22px 60px calc(22px + env(safe-area-inset-bottom)) 20px;border-width:2px 0 0;transform:translateY(100%);transition-duration:.16s,.3s}
+.dwg-card.is-sheet.is-open{transform:none}
+.dwg-card.is-sheet::before{left:50%;top:7px;width:36px;height:3px;margin-left:-18px;border-radius:2px;background:var(--line-3)}
+.dwg-card.is-sheet .dwg-card__x{top:8px;right:8px;width:44px;height:44px}
+.dwg-cue{display:inline-flex;align-items:center;gap:8px;margin:0;font:.6875rem/1.3 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.dwg-cue svg{flex:none;width:15px;height:15px;fill:none;stroke:var(--gold);stroke-width:1}
+.dwg-cue text{font:500 9px var(--font-mono);fill:var(--gold-light);stroke:none;text-anchor:middle}
+.dwg__bar .dwg-cue{margin-left:auto;padding:13px 0}
+html:not(.js) .dwg-cue{display:none}
+@media (prefers-reduced-motion:reduce){.dwg-card,.dwg-tag{transition:none}}
 
 /* ---------- 12. Print: black ink on white paper ---------- */
 @media print{
@@ -270,10 +253,8 @@ html:not(.js) .dwg-tabs{display:none}
     --dwg-hid:#000;--dwg-dim:#000;--dwg-rule:#000;--dwg-frame:#000;--dwg-steel:#000;--dwg-amber:#000;--dwg-new:#000;--dwg-removed:#000;--dwg-stamp:#000;
     --dwg-face-top:#fff;--dwg-face-front:#fff;--dwg-face-side:#fff;border:0;background:#fff;color:#000;break-inside:avoid}
   .dwg__svg{background:#fff;min-width:0}
-  .dwg :is(.dwg__bar,.dwg-status,.dwg__hint,.dwg-pt,.dwg-gridbg,.dwg-stackonly){display:none}
+  .dwg :is(.dwg__bar,.dwg__hint,.dwg-pt,.dwg-gridbg,.dwg-stackonly,.dwg-tag),.dwg-card{display:none}
   .dwg .part{transition:none}
   .dwg :is(.stamp__ink,.part){filter:none}
-  .dwg .pm--measured text{fill:#fff}
-  .dwg .prov--measured b{color:#fff}
   .dwg__legend{border-color:#000}
 }

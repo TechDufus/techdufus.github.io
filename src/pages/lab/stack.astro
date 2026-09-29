@@ -1,0 +1,109 @@
+---
+/*
+  /lab/stack/: Sheet 03 · The stack (TD-LAB-03). What runs on the metal, in three layers, drawn as
+  a building section (src/components/drawing/stack/). Below the sheet: the text equivalent, one
+  list per layer, from the same data (src/data/lab/stack.ts).
+*/
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import StackSheet from '../../components/drawing/stack/StackSheet.astro';
+import { stack, stackCounts } from '../../data/lab/stack';
+import { allThings, talos, toolText } from '../../components/drawing/stack/model';
+
+const counts = stackCounts();
+const glance = [
+  { k: 'Layers', v: String(stack.length) },
+  { k: 'Running', v: String(counts.running) },
+  { k: 'Planned', v: String(counts.planned) },
+  { k: 'Talos nodes', v: String(talos.count) },
+];
+// one row per numbered thing, in balloon order (the same numbers as the drawing)
+const rows = (l: (typeof stack)[number]) =>
+  allThings()
+    .filter((t) => t.layer === l)
+    .map((t) => ({
+      n: t.n,
+      name: t.item ? (t.item.version ? `${t.item.name} ${t.item.version}` : t.item.name) : t.group.title,
+      what: t.item?.what ?? t.card.lines[0],
+      status: t.status,
+    }));
+---
+
+<BaseLayout title="The stack · Sheet 03" description="Sheet 03 of my homelab drawings: what runs on the metal, from Proxmox up to the Kubernetes cluster, drawn as a building section. Solid is running, dashed is next.">
+  <div class="pg-stack">
+    <section class="wrap stk-hero" aria-labelledby="stk-title">
+      <p class="eyebrow stk-hero__eyebrow">Lab · Sheet 03</p>
+      <h1 class="h1" id="stk-title">The <em>stack</em>.</h1>
+      <p class="lede stk-hero__lede">What runs on the metal, layer by layer. Dashed is next.</p>
+      <p class="stk-hero__links">
+        <a class="link link--quiet" href="/lab/"><span aria-hidden="true">←</span> The lab</a>
+        <a class="link link--quiet" href="/lab/rack/">Sheet 01 · The cabinet <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="link link--quiet" href="/lab/r720xd/">Sheet 02 · The server <span class="arrow" aria-hidden="true">→</span></a>
+      </p>
+    </section>
+
+    <div class="stk-wide">
+      <StackSheet />
+    </div>
+
+    <section class="wrap stk-sec" aria-labelledby="stk-layers">
+      <h2 class="stk-h" id="stk-layers">Layer by layer</h2>
+      <dl class="stk-glance">
+        {glance.map((g) => <div><dt>{g.k}</dt><dd>{g.v}</dd></div>)}
+      </dl>
+      <div class="stk-layers">
+        {[...stack].reverse().map((l) => (
+          <section class="stk-layer" aria-labelledby={`stk-l${l.n}`}>
+            <h3 id={`stk-l${l.n}`}><span>{String(l.n).padStart(2, '0')}</span> {l.title}</h3>
+            <p class="stk-layer__tool">Built with {toolText(l.tool)}</p>
+            <ul>
+              {rows(l).map((r) => (
+                <li class:list={[r.status === 'planned' && 'is-planned']}>
+                  <span class="stk-layer__n" aria-hidden="true">{r.n}</span>
+                  <b>{r.name}</b>
+                  <span class="stk-layer__what">{r.what}</span>
+                  <span class="stk-layer__st">{r.status}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+      <p class="stk-next">
+        <a class="link" href="/lab/rack/">Sheet 01 · The cabinet <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="link" href="/lab/r720xd/">Sheet 02 · The server <span class="arrow" aria-hidden="true">→</span></a>
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style is:global>
+  .pg-stack .stk-hero { padding-block: clamp(40px, 6vw, 80px) clamp(28px, 4vw, 44px); }
+  .pg-stack .stk-hero__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .pg-stack .stk-hero__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
+  .pg-stack .stk-hero__lede { margin-top: 20px; max-width: 46ch; }
+  .pg-stack .stk-hero__links { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 24px; font-size: var(--fs-sm); }
+  .pg-stack .stk-wide { max-width: 1400px; margin-inline: auto; padding-inline: var(--gutter); }
+
+  .pg-stack .stk-sec { padding-block: clamp(56px, 7vw, 96px) clamp(64px, 8vw, 112px); }
+  .pg-stack .stk-h, .pg-stack .stk-glance dt, .pg-stack .stk-layer__tool, .pg-stack .stk-layer__st { font: 500 .6875rem/1.2 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
+  .pg-stack .stk-h { margin: 0 0 20px; color: var(--gold-light); }
+  .pg-stack .stk-glance { display: flex; flex-wrap: wrap; gap: 1px; margin: 0 0 40px; background: var(--line); border: 1px solid var(--line); }
+  .pg-stack .stk-glance div { flex: 1 1 140px; padding: 14px 18px; background: var(--bg); }
+  .pg-stack .stk-glance dt { color: var(--faint); }
+  .pg-stack .stk-glance dd { margin: 8px 0 0; font: 400 1.5rem/1.1 var(--font-mono); color: var(--gold-light); }
+  .pg-stack .stk-layers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px clamp(28px, 4vw, 56px); }
+  .pg-stack .stk-layer h3 { margin: 0; font: italic 1.6rem/1.15 var(--font-display); color: var(--ink); }
+  .pg-stack .stk-layer h3 span { margin-right: 6px; font: 500 .8125rem var(--font-mono); color: var(--gold-light); vertical-align: .2em; }
+  .pg-stack .stk-layer__tool { margin: 8px 0 16px; color: var(--faint); }
+  .pg-stack .stk-layer ul { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line-2); }
+  .pg-stack .stk-layer li { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 2px 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: var(--fs-sm); }
+  .pg-stack .stk-layer__n { grid-row: span 2; font: 500 .75rem/1.6 var(--font-mono); color: var(--gold-light); }
+  .pg-stack .stk-layer b { grid-column: 2; font-weight: 500; color: var(--ink); }
+  .pg-stack .stk-layer__what { grid-column: 2; color: var(--muted); }
+  .pg-stack .stk-layer__st { grid-column: 3; grid-row: 1; align-self: baseline; color: var(--ok); }
+  .pg-stack .is-planned b { color: var(--ink-2); }
+  .pg-stack .is-planned .stk-layer__st { color: var(--faint); }
+  .pg-stack .is-planned .stk-layer__st::before { content: ""; display: inline-block; width: 14px; margin-right: 6px; vertical-align: .3em; border-top: 1px dashed currentColor; }
+  .pg-stack .stk-next { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 32px; margin: 48px 0 0; padding-top: 24px; border-top: 1px solid var(--line-2); }
+  @media (max-width: 960px) { .pg-stack .stk-layers { grid-template-columns: minmax(0, 1fr); } }
+</style>

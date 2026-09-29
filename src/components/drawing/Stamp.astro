@@ -9,7 +9,8 @@
     x, y     centre (paper units)
     text     main line, sub = second smaller line
     rotate   degrees (default −6)
-    tone     'warn' (default, rubber-stamp red = --dwg-stamp) | 'ok' (e.g. "AS BUILT")
+    tone     'warn' (default, rubber-stamp red = --dwg-stamp: "PRELIMINARY") | 'ok' (green:
+             "AS BUILT") | 'wip' (amber: "IN PROGRESS")
     p        plot order (default 7: last)
 */
 import { monoWidth } from '../../lib/drawing/sheet';
@@ -20,7 +21,7 @@ interface Props {
   text: string;
   sub?: string;
   rotate?: number;
-  tone?: 'warn' | 'ok';
+  tone?: 'warn' | 'ok' | 'wip';
   p?: number;
 }
 const { x, y, text, sub, rotate = -6, tone = 'warn', p = 7 } = Astro.props;

@@ -1,0 +1,66 @@
+/* ==========================================================================
+   figure.css · the figure tier (components/drawing/figure/), loaded only by Figure.astro, on
+   top of drawing.css. Contract: components/drawing/README.md.
+   LAYOUT .fg .fg--b (breakout) .fg--bare (no FIG strip) .is-narrow · .fg-w .fg-n .fg-m (--n)
+   TEXT   .fg-c .fg-e (anchor) · .fg-nc .fg-ns .fg-ne (anchor in the narrow layout) · .fg-ko
+          (knock-out over a line) · .fg-h (heading ink)
+   TONES  .fg-keep .fg-planned (+ kit .sem-new .sem-removed) · PARTS .fg-node .fg-edge .fg-arr
+          .fg-band .fg-hand .fg-grow
+   ========================================================================== */
+
+.fg{margin:0}
+.prose .fg{margin-block:2.4em 2.6em}
+.fg .dwg{--flow:var(--gold)}
+.js .fg .dwg__svg{min-width:0}
+.fg>figcaption.fg__foot{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;max-width:none;margin:12px 0 0;font:.9375rem/1.55 var(--font-sans);color:var(--muted);text-wrap:pretty}
+.fg__cap{flex:1 1 30ch;max-width:62ch}
+.fg__foot .dwg-cue{flex:none}
+
+/* two layouts (the swap is Figure.astro's script) */
+.fg-n{display:none}
+.fg.is-narrow>*{max-width:440px;margin-inline:auto}
+.fg.is-narrow .fg-n{display:inline}
+.fg.is-narrow .fg-w{display:none}
+.fg.is-narrow .fg-m{transform:var(--n)}
+
+/* lettering */
+.fg-c{text-anchor:middle}
+.fg-e{text-anchor:end}
+.fg.is-narrow .fg-nc{text-anchor:middle}
+.fg.is-narrow .fg-ns{text-anchor:start}
+.fg.is-narrow .fg-ne{text-anchor:end}
+.fg-ko{paint-order:stroke;stroke:var(--dwg-paper);stroke-width:6px;stroke-linejoin:round}
+.fg .fg-h{fill:var(--gold-light);font-weight:500}
+.fg .txt-label{letter-spacing:.06em}
+
+/* tones: default is the kit's gold ink; new/removed are the kit's sem-* */
+.fg-keep{--dwg-obj:var(--ink-2);--flow:var(--ink-2)}
+.fg-keep .txt-label{fill:var(--ink)}
+.fg-planned{--dwg-obj:var(--gold);--flow:var(--muted)}
+.fg-planned :is(.txt-label,.txt-note){fill:var(--muted)}
+.fg-planned .face{fill:transparent}
+.fg-planned .ln-phantom{opacity:.8;stroke-dasharray:14 4 3 4}
+.fg-planned .fg-grow{fill:transparent;stroke-dasharray:6 4}
+:is(.sem-new,.sem-removed) .txt-note{fill:color-mix(in srgb,var(--flow) 70%,var(--muted))}
+
+/* edges, bands, hand-offs */
+.fg-arr{fill:var(--dwg-obj)}
+.fg-edge .ln-med{--sw:1px}
+.fg-edge.fg-planned .ln-phantom{opacity:.7;stroke-dasharray:6 4}
+.fg-band{fill:color-mix(in srgb,var(--gold) 3.5%,transparent);stroke:var(--dwg-rule)}
+.fg-hand{--dwg-obj:var(--gold-pale);--flow:var(--gold-pale)}
+.fg-hand .fg-arr,.fg-dia{fill:var(--gold-pale)}
+.fg-dia{stroke:var(--dwg-paper);stroke-width:2px;paint-order:stroke}
+.fg-tick{stroke:var(--dwg-rule)}
+
+/* bars grow in from zero with the plot */
+.fg-grow{transform-box:fill-box;transform-origin:0 50%}
+@media screen and (prefers-reduced-motion:no-preference){
+  .js .fg [data-plot="pending"] .fg-grow{transform:scaleX(0)}
+  .fg [data-plot="run"] .fg-grow{animation:fg-grow 1.1s var(--ease-out) calc(var(--p,1)*var(--dwg-plot-step) + 250ms) both}
+}
+@keyframes fg-grow{from{transform:scaleX(0)}}
+
+/* breakout: the post grid is rail · 680px column · empty margin from 1120px up (blog/[slug]) */
+@media (min-width:1120px){.prose .fg--b{width:min(920px,calc(50vw + 340px - var(--gutter)))}}
+@media (max-width:1119.98px){.prose .fg--b{--bw:min(920px,calc(100vw - 2*var(--gutter)));width:var(--bw);margin-inline:calc((100% - var(--bw))/2)}}

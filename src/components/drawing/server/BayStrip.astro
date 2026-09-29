@@ -1,0 +1,92 @@
+---
+/*
+  BayStrip: the R720xd's front panel with the drives in it, as built: bays 0–4 tinted by pool,
+  each drive a clickable kit <Part> (its id is the drive id from src/data/lab/server.ts, its name
+  tag the drive's name), 5–23 empty. Optional bay numbers, carrier lettering, a balloon per
+  drive and pool brackets underneath. Needs <ServerDefs id={dwg} /> (front at least) in the same
+  SVG, and the drives' <PartCard>s (ServerCards) on the page.
+
+  <BayStrip dwg="lab02" x={64} y={668} s={0.75} />                              front view, 1:4
+  <BayStrip dwg="lab02" x={520} y={150} s={2} to={7} nums letter balloons={118} brackets />
+
+    dwg        the ServerDefs id
+    x, y       paper point of the panel's top-left corner (the left ear's outer edge)
+    s          paper units per mm
+    to         last bay drawn (crops the panel just after it; default: the whole panel)
+    nums       bay numbers: true = over the bays, 'in' = inside each carrier, under its latch
+    letter     drive names lettered up the carriers (big scales only)
+    balloons   paper y of a row of numbered balloons, one per drive (needs a bay pitch ≥ 24)
+    brackets   pool brackets and names under the bays
+    num        balloon numbers by part id (default: the sheet's NUM)
+*/
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import { BAY_H, BAY_N, BAY_P, BAY_Y0, H, NUM, R, WE, bayX, driveShort, frontDrives, n, place, pools } from './geom';
+
+interface Props {
+  dwg: string;
+  x: number;
+  y: number;
+  s: number;
+  to?: number;
+  nums?: boolean | 'in';
+  letter?: boolean;
+  balloons?: number;
+  brackets?: boolean;
+  num?: Record<string, number>;
+}
+const { dwg, x, y, s, to = BAY_N - 1, nums = false, letter = false, balloons, brackets = false, num = NUM } = Astro.props;
+const crop = to < BAY_N - 1;
+const u1 = crop ? bayX(to + 1) + 1.5 : WE;
+const clip = `${dwg}-bays-${n(x)}-${n(y)}`.replace(/\./g, '_');
+const bx = (u: number) => x + s * u;
+const top = y + s * BAY_Y0;
+const drives = frontDrives.filter((d) => d.bay <= to);
+const cx = (bay: number) => bx(bayX(bay) + BAY_P / 2);
+
+// bay numbers: one <text>, one x per glyph (two-digit numbers split around the bay centre)
+const adv = s >= 1.5 ? 7.6 : 5.6;
+const glyphs = Array.from({ length: to + 1 }, (_, i) => String(i));
+const numX = glyphs.flatMap((g, i) => (g.length === 1 ? [n(cx(i))] : [n(cx(i) - adv / 2), n(cx(i) + adv / 2)])).join(' ');
+
+const bracketY = y + s * H + 10;
+const poolRows = brackets
+  ? pools.map((p) => ({ p, bays: p.bays.filter((b) => b <= to) })).filter((r) => r.bays.length)
+  : [];
+---
+
+<g class="bays">
+  <path class="face-front" d={R(x, y, s * u1, s * H)} />
+  {crop && <clipPath id={clip}><path d={R(x - 2, y - 2, s * u1 + 2, s * H + 4)} /></clipPath>}
+  <g clip-path={crop ? `url(#${clip})` : undefined}><use href={`#${dwg}-front`} transform={place(s, x, y)} /></g>
+  {crop && <path class="ln-thin" d={`M${n(bx(u1))} ${n(y - 4)}l-3 ${n(s * H * 0.3)}l6 ${n(s * H * 0.3)}l-6 ${n(s * H * 0.4 + 8)}`} />}
+
+  {drives.map((d) => {
+    const x0 = bx(bayX(d.bay) + 0.5), w = s * (BAY_P - 1);
+    return (
+      <Part id={d.id} label={d.card.title} class={`pool-${d.pool}`}>
+        <path class="sv-drv" d={R(x0, top, w, s * BAY_H)} />
+        {letter && (
+          <text class="sv-lt sv-ko" transform={`translate(${n(x0 + w / 2 + 3.2)} ${n(top + s * BAY_H - 10)}) rotate(-90)`}>{driveShort(d)}</text>
+        )}
+      </Part>
+    );
+  })}
+
+  {nums && <text class="sv-s" x={numX} y={n(nums === 'in' ? top + s * 12 : y - 5)}>{glyphs.join('')}</text>}
+
+  {balloons !== undefined && drives.map((d) => (
+    <Balloon at={[cx(d.bay), balloons]} n={num[d.id]} to={[cx(d.bay), top + 6]} part={d.id} />
+  ))}
+
+  {poolRows.map(({ p, bays }) => {
+    const a = bx(bayX(bays[0]) + 1.5), b = bx(bayX(bays[bays.length - 1] + 1) - 1.5);
+    const label = p.id.toUpperCase();
+    return (
+      <g class={`pool-${p.id}`}>
+        <path class="ln-obj" d={`M${n(a)} ${n(bracketY)}v6H${n(b)}v-6`} />
+        <text class="txt-label" x={n((a + b) / 2)} y={n(bracketY + 22)} text-anchor="middle">{label}</text>
+      </g>
+    );
+  })}
+</g>

@@ -1,0 +1,195 @@
+---
+/*
+  CabinetExcerpt: Sheet 01 in small, for /lab (or a post). The front elevation of the part of the
+  cabinet that's used: U1 to U14 with the rails counting down from the top, a break, then the
+  bottom shelf at U41–42. The gear is numbered with the full sheet's balloon numbers and opens
+  the same cards; the U7 Pro is an off-sheet callout fed by the injector. The device list
+  (Compute / Network / Storage / Edge) sits beside the drawing when there's room, under it when
+  there isn't; its rows select their parts. A link to the full sheet closes it.
+  Everything comes from src/data/lab/rack.ts through ./model.ts. It's a frameless kit Sheet, so it
+  works on its own on any page.
+
+  <CabinetExcerpt />
+  <CabinetExcerpt id="lab-cab" caption="…" href="/lab/rack/" />
+
+    id       unique on the page (default "lab-cab"); prefixes the part and card ids and the
+             panel symbols, so it never clashes with the full sheet or another drawing
+    caption  one line under it, in voice (pass "" for none)
+    href     the full sheet (default "/lab/rack/")
+*/
+import Sheet from '../Sheet.astro';
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import PartCard from '../PartCard.astro';
+import URuler from '../URuler.astro';
+import Dim from '../Dim.astro';
+import Particles from '../Particles.astro';
+import PanelDefs from './PanelDefs.astro';
+import DeviceList from './DeviceList.astro';
+import { join, ortho, type Ortho, type Pt } from '../../../lib/drawing/projection';
+import { CAB, HOLES, RAIL_W, balloonOf, devicesByRole, elsewhere, faceRect, free, placeFront, slotOf$, slots, yBot, yTop, zoneCentre, type Slot } from './model';
+
+interface Props {
+  id?: string;
+  caption?: string;
+  href?: string;
+}
+const {
+  id = 'lab-cab',
+  caption = 'Everything lives in the top 14U, except a shelf of spares at the bottom.',
+  href = '/lab/rack/',
+} = Astro.props;
+const pid = (dev: string): string => `${id}-${dev}`;
+const f = (v: number): string => String(Math.round(v * 10) / 10);
+
+/* ---------- layout (paper units) ---------- */
+const W = 440, S = 0.54, RX = 62, TOP = 96, GAP = 30, LAST = 14;
+const hi = ortho({ x: RX, y: TOP + CAB.railTop * S, scale: S, flipY: true });
+const hiBot = hi.pt(0, yBot(LAST))[1];
+const lo = ortho({ x: RX, y: hiBot + GAP + yTop(CAB.units - 1) * S, scale: S, flipY: true });
+const loTop = hiBot + GAP, loBot = lo.pt(0, 0)[1];
+const H = Math.ceil(loBot + 54);
+const viewOf = (sl: Slot): Ortho => (sl.y0 < yBot(LAST) ? lo : hi);
+const shown = slots.filter((sl) => sl.y0 >= yBot(LAST) || sl.y0 < yTop(CAB.units - 1));
+const listed = new Set(devicesByRole().flatMap((g) => g.devices.map((d) => d.id)));
+const upperFree = free.filter((r) => r.y0 >= yBot(LAST));
+const skipped = CAB.units - 2 - LAST;
+
+/* rails: left ruler counts down, right rail plain; each run ends in a zig-zag at the break */
+const railX = hi.pt(HOLES[0] - RAIL_W / 2, 0)[0], railX2 = hi.pt(HOLES[1] - RAIL_W / 2, 0)[0], rw = RAIL_W * S;
+const zig = (x: number, y: number): string => `M${f(x - 4)} ${f(y)}h${f(rw / 2 + 1)}l2 -5l3 10l2 -5h${f(rw / 2 + 1)}`;
+const breaks = [railX, railX2].map((x) => zig(x, hiBot + 5) + zig(x, loTop - 5)).join('');
+
+/* balloons: the top shelf's things in a row above the cabinet, the racked boxes in a column right of it */
+const BX = 382, ROW_Y = TOP - 26;
+const balloons = shown
+  .filter((sl) => listed.has(sl.dev.id))
+  .map((sl) => {
+    const v = viewOf(sl);
+    if (sl.on) {
+      const x = sl.faceX + sl.faceW / 2;
+      return { sl, at: [v.pt(x, 0)[0], ROW_Y] as Pt, to: v.pt(x, sl.faceTop - 5) };
+    }
+    const to = v.pt(sl.faceX + sl.faceW * 0.88, sl.faceTop - sl.faceH / 2);
+    return { sl, at: [BX, to[1]] as Pt, to };
+  });
+
+/* the U7 Pro, off the sheet: a dashed box top right, the injector's PoE run climbing to it */
+const OFF = { x: 318, y: 12, w: 112, h: 40 };
+const inj = slotOf$('poe-injector');
+const [pu, pv] = zoneCentre(inj, 'front', 'poe');
+const poe = hi.pt(pu, inj.faceTop - pv);
+const POE_X = 350;
+const poeRun = `M${f(poe[0])} ${f(poe[1])}H${POE_X}V${OFF.y + OFF.h + 8}`;
+
+const desc =
+  'The front of the 42U cabinet, rails numbered from the top. A shelf at U1 to 2 holds a Raspberry Pi 4, the fiber modem and a PoE injector; U3 to 7 are empty; a UniFi UNAS Pro 8 sits at U8 to 9, a UniFi Dream Machine Pro at U10, U11 to 12 are empty, and a Dell PowerEdge R720xd is at U13 to 14. ' +
+  `U15 to 40 are empty and broken out; a shelf at U41 to 42 holds a spare drive and patch cables. The U7 Pro access point is off the sheet, powered by the injector. Each numbered part opens a card.`;
+---
+
+<div class="rkx">
+  <Sheet
+    id={id}
+    size={{ w: W, h: H }}
+    dwgNo="TD-LAB-01"
+    title="The cabinet"
+    desc={desc}
+    titleBlock={false}
+    defs={['grid', 'hatch']}
+    panMin={300}
+    interactive
+    hint
+  >
+    <PanelDefs dwg={id} face="front" lite />
+
+    <!-- empty units in the used run, hatched and labelled -->
+    <g class="rkx-free" style="--p:4">
+      <path class="hatch" d={join(...upperFree.map((r) => hi.rect(0, r.y0, 482.6, r.y1 - r.y0)))} />
+      <path class="ln-phantom" d={join(...upperFree.map((r) => hi.rect(0, r.y0, 482.6, r.y1 - r.y0)))} />
+      {upperFree.map((r) => {
+        const [cx, cy] = hi.pt(241.3, (r.y0 + r.y1) / 2);
+        return (
+          <>
+            <path class="face" d={`M${f(cx - 34)} ${f(cy - 9)}h68v18h-68Z`} />
+            <text class="txt-note" x={f(cx)} y={f(cy + 4)} text-anchor="middle">{r.n}U FREE</text>
+          </>
+        );
+      })}
+    </g>
+
+    <!-- rails, the break and the centre line -->
+    <URuler x={railX} y={hiBot} units={LAST} start={1} down scale={S} holes={false} title="U" />
+    <URuler x={railX2} y={hiBot} units={LAST} scale={S} holes={false} side="right" every={999} title="" />
+    <URuler x={railX} y={loBot} units={2} start={CAB.units - 1} down scale={S} holes={false} title="" />
+    <URuler x={railX2} y={loBot} units={2} scale={S} holes={false} side="right" every={999} title="" />
+    <g style="--p:4">
+      <path class="ln-thin" d={breaks} />
+      <text class="txt-note" x={f(hi.pt(241.3, 0)[0])} y={f(hiBot + GAP / 2 + 4)} text-anchor="middle">U{LAST + 1}–{CAB.units - 2} · {skipped}U EMPTY</text>
+    </g>
+    <path class="ln-ctr" d={`M${f(hi.pt(241.3, 0)[0])} ${TOP - 10}V${f(hiBot + 4)}M${f(hi.pt(241.3, 0)[0])} ${f(loTop - 4)}V${f(loBot + 10)}`} style="--p:4" />
+
+    <!-- the gear -->
+    <g>
+      {shown.map((sl) => {
+        const v = viewOf(sl);
+        const body = (
+          <>
+            <path class="face-front" d={faceRect(v, sl)} />
+            <g class="dwg-tex"><use href={`#${id}-pf-${sl.dev.id}`} transform={placeFront(v, sl)} /></g>
+          </>
+        );
+        return listed.has(sl.dev.id) ? <Part id={pid(sl.dev.id)} label={sl.dev.short} p={2}>{body}</Part> : <g style="--p:2">{body}</g>;
+      })}
+    </g>
+
+    <!-- off sheet -->
+    <g class="sem-power" style="--p:5">
+      <path class="ln-net" d={poeRun} pathLength="1" />
+      <path class="dim-arr" d={`M${POE_X} ${OFF.y + OFF.h}l-3 8h6Z`} />
+    </g>
+    <Particles d={poeRun} kind="power" n={2} dur={2.8} r={2} guide={false} />
+    {elsewhere.map((d) => (
+      <g style="--p:5">
+        <Part id={pid(d.id)} label={d.short}>
+          <path class="face" d={`M${OFF.x} ${OFF.y}h${OFF.w}v${OFF.h}h${-OFF.w}Z`} />
+          <path class="ln-hid" d={`M${OFF.x} ${OFF.y}h${OFF.w}v${OFF.h}h${-OFF.w}Z`} />
+          <text class="txt-label" x={OFF.x + 36} y={OFF.y + 18}>{d.short}</text>
+          <text class="txt-note" x={OFF.x + 36} y={OFF.y + 31}>OFF SHEET</text>
+        </Part>
+        <Balloon at={[OFF.x + 18, OFF.y + OFF.h / 2]} n={balloonOf(d.id)} part={pid(d.id)} />
+      </g>
+    ))}
+
+    <Dim a={lo.pt(0, 0)} b={lo.pt(482.6, 0)} offset={24} mm={482.6} sub="[19.00]" />
+
+    {balloons.map((b) => <Balloon at={b.at} n={b.sl.n} to={b.to} end="dot" part={pid(b.sl.dev.id)} />)}
+
+    <Fragment slot="cards">
+      {devicesByRole().flatMap((g) => g.devices).map((d) => (
+        <PartCard id={pid(d.id)} title={d.card.title} kind={d.card.kind} lines={d.card.lines}>
+          {d.sheetHref && <a class="link" href={d.sheetHref}>Sheet 02 · the server <span aria-hidden="true">→</span></a>}
+        </PartCard>
+      ))}
+    </Fragment>
+
+    <Fragment slot="legend"><DeviceList compact prefix={`${id}-`} /></Fragment>
+  </Sheet>
+  <p class="rkx__foot">
+    {caption && <span>{caption}</span>}
+    <a class="link" href={href}>Sheet 01 · The cabinet <span class="arrow" aria-hidden="true">→</span></a>
+  </p>
+</div>
+
+<style is:global>
+  .rkx{container:rkx/inline-size}
+  .rkx .dwg__legend{display:block;padding:18px 18px 22px}
+  .rkx .rk-list{width:100%;max-width:520px}
+  .rkx .rkx-free .hatch{opacity:.45}
+  .rkx__foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 24px;margin:12px 0 0;font:.9375rem/1.55 var(--font-sans);color:var(--muted)}
+  .rkx__foot .link{font-size:var(--fs-sm)}
+  @container rkx (min-width:720px){
+    .rkx .dwg{display:grid;grid-template-columns:minmax(0,480px) minmax(0,1fr)}
+    .rkx .dwg__bar{grid-column:1/-1}
+    .rkx .dwg__legend{border-top:0;border-left:1px solid var(--line-2);padding:26px clamp(20px,3cqw,40px)}
+  }
+</style>

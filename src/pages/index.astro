@@ -30,6 +30,10 @@ import {
   siteMetadata,
   topics
 } from '../data/site';
+import { devicesByRole } from '../data/lab/rack';
+import { server } from '../data/lab/server';
+import { stack, stackItems } from '../data/lab/stack';
+import type { ListedRole } from '../data/lab/types';
 import { getPostMetas, postStats } from '../lib/content';
 import { featuredReposNote, getFeaturedRepos } from '../lib/github';
 
@@ -82,10 +86,34 @@ const trust = heroCopy.trust.map((item, i) => {
 });
 const secondaryCta = business.enabled ? heroCopy.ctas.waitlist : heroCopy.ctas.lab;
 
-const gitopsName = labSpec.gitops.repo.split('/').pop() ?? labSpec.gitops.repo;
-const hardwareRows = labSpec.hardware.map((row) => ({ k: row.role, v: row.name, note: row.spec, href: row.href }));
+// Lab: the stack line and the hardware readout come from the drawings' data (src/data/lab/).
+const item = (id: string) => stackItems().find((i) => i.id === id);
+const pve = item('proxmox');
+const talos = item('talos-nodes');
+const platform = (stack.find((l) => l.id === 'kubernetes')?.groups ?? []).flatMap((g) => g.items).filter((i) => i.status === 'running');
+const stackLine = [
+  pve && { text: `${pve.name} ${pve.version ?? ''}`.trim(), sub: ' on ZFS' },
+  talos && { text: `Talos ×${talos.count ?? 1}` },
+  platform.length > 0 && { text: platform.map((i) => i.name).join(' · ') }
+].filter((s): s is { text: string; sub?: string } => !!s);
+const roleNote: Record<ListedRole, string | undefined> = {
+  compute: `${server.threads} threads · ${server.memory.gb} GB`,
+  network: item('udm-pro')?.what,
+  storage: item('unas')?.what,
+  edge: item('rpi')?.what
+};
+// Branded gear only (the ISP's modem and the PoE injector stay on the cabinet sheet); one device → its full name.
+const hardwareRows = devicesByRole().map(({ role, label, devices }) => {
+  const named = devices.filter((d) => d.maker);
+  return {
+    k: label,
+    v: named.length === 1 ? named[0].name : named.map((d) => d.short).join(' + '),
+    note: roleNote[role],
+    href: named[0]?.sheetHref ?? '/lab/rack/'
+  };
+});
 const latestChange = labSpec.changelog[0];
-const [changeFrom, changeTo] = latestChange ? latestChange.title.split(/\s*->\s*/) : [];
+const [changeFrom, changeTo] = latestChange ? latestChange.title.split(/\s*(?:->|→)\s*/) : [];
 
 const aboutQuote = homeOperatingStyle[0];
 
@@ -261,14 +289,12 @@ const businessCss = [
       <p
         class="lab__stackline"
         data-reveal
-        aria-label={`Stack: Proxmox, then Talos Kubernetes times three, then ArgoCD with GitOps via ${gitopsName}, then ${labSpec.servicesCount} services including Immich. Tailscale Operator for access.`}
+        aria-label={`Stack: ${stackLine.map((s) => s.text + (s.sub ?? '')).join(', then ')}. The rest is next.`}
       >
-        <span>Proxmox</span><span class="to" aria-hidden="true">→</span>
-        <span>Talos Kubernetes ×3</span><span class="to" aria-hidden="true">→</span>
-        <span>ArgoCD <span class="muted">(GitOps via {gitopsName})</span></span><span class="to" aria-hidden="true">→</span>
-        <span>{labSpec.servicesCount} services <span class="muted">incl. Immich</span></span>
-        <span class="muted" aria-hidden="true">·</span>
-        <span>Tailscale Operator <span class="muted">for access</span></span>
+        {stackLine.map((s, i) => (
+          <>{i > 0 && <span class="to" aria-hidden="true">→</span>}<span>{s.text}{s.sub && <span class="muted">{s.sub}</span>}</span></>
+        ))}
+        <span class="muted"><span aria-hidden="true">· </span>the rest is next</span>
       </p>
 
       <div class="lab__grid">

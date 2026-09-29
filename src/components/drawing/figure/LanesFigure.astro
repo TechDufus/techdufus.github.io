@@ -1,0 +1,67 @@
+---
+/*
+  LanesFigure: swimlanes × steps (who does what, in order). Steps take the next column unless
+  they set `col` (same col = at the same time). When the lane changes from one step to the next,
+  that's a hand-off: a heavier pale-gold line, a diamond where it crosses into the new lane, and
+  the step's `handoff` text beside it. Wide: lanes are rows. Narrow: lanes are columns.
+
+  <LanesFigure id="fig-lanes" title="Me and the agent" caption="Hands on the left, SSH on the right."
+    lanes={[{ id: 'me', label: 'Me', sub: 'hands' }, { id: 'agent', label: 'Agent', sub: 'over SSH' }]}
+    steps={[
+      { id: 's1', lane: 'me', label: 'Swap the card' },
+      { id: 's2', lane: 'me', label: 'Install Proxmox' },
+      { id: 's3', lane: 'agent', label: 'Build the pools', handoff: '“Proxmox is up”' },
+    ]} />
+
+    lanes   { id, label, sub?, tone? }[]  (top to bottom wide, left to right narrow)
+    steps   { id, lane, label, sub?, tone?, card?, n?, col?, handoff? }[]  (in order)
+    + FigureBase props (id, title, caption, fig, breakout, hint, desc, scale, rev, date, bp)
+*/
+import Figure from './Figure.astro';
+import Node from './Node.astro';
+import PartCard from '../PartCard.astro';
+import { BREAKOUT, WIDE, at, lanesLayout, say, toneOf, type FigureBase, type Lane, type LaneStep } from '../../../lib/drawing/figure';
+
+interface Props extends FigureBase {
+  lanes: Lane[];
+  steps: LaneStep[];
+}
+const { lanes, steps, desc, hint, ...base } = Astro.props;
+const L = lanesLayout(lanes, steps, base.breakout ? BREAKOUT : WIDE);
+const cards = L.boxes.filter((b) => b.card);
+const laneName = (id: string): string => lanes.find((l) => l.id === id)?.label ?? id;
+const text =
+  desc ??
+  `${lanes.length} lanes: ${lanes.map((l) => l.label).join(', ')}. In order: ` +
+    steps.map((s, i) => `${i && steps[i - 1].lane !== s.lane ? `hand-off${s.handoff ? ` (${s.handoff})` : ''} to ` : ''}${laneName(s.lane)}: ${say(s)}`).join('; ') + '.';
+---
+
+<Figure {...base} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0}>
+  {(['w', 'n'] as const).map((k) => (
+    <g class={`fg-${k}`}>
+      <path class="ln-thin" d={L.rules[k]} style="--p:1" />
+      <g class="fg-edge" style="--p:3">
+        <path class="ln-med" d={L.links[k]} pathLength="1" />
+        <path class="fg-arr" d={L.links.heads[k]} />
+      </g>
+      <g class="fg-hand" style="--p:4">
+        <path class="ln-obj" d={L.hands[k]} pathLength="1" />
+        <path class="fg-arr" d={L.hands.heads[k]} />
+        <path class="fg-dia" d={L.hands.dia[k]} />
+      </g>
+    </g>
+  ))}
+  {L.boxes.map((b) => <Node box={b} wp={b.wp} np={b.np} />)}
+  <g style="--p:5">
+    {L.lanes.map((l) => (
+      <g {...at(l.wp, l.np, `fg-nc ${toneOf(l.lane.tone)}`.trim())}>
+        <text class="view__t">{l.lane.label.toUpperCase()}</text>
+        {l.lane.sub && <text class="txt-note" y="16">{l.lane.sub}</text>}
+      </g>
+    ))}
+    {L.hands.labels.map((h) => <text {...at(h.wp, h.np, `txt-note fg-hand fg-h fg-ko${h.end ? ' fg-ne' : ''}`)}>{h.t}</text>)}
+  </g>
+  <Fragment slot="cards">
+    {cards.map((b) => <PartCard id={b.id} title={b.card!.title} kind={b.card!.kind} lines={b.card!.lines} />)}
+  </Fragment>
+</Figure>

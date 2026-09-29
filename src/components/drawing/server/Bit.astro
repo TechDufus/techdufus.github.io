@@ -1,0 +1,19 @@
+---
+/*
+  Bit: a kit <Part> when `on`, otherwise a plain group with the same class, so one drawing can
+  make a piece clickable in one view and leave it quiet in another.
+
+  <Bit on={clickable.has('hba330')} id="hba330" label="Dell HBA330" class="sem-new">…</Bit>
+*/
+import Part from '../Part.astro';
+
+interface Props {
+  on: boolean;
+  id: string;
+  label: string;
+  class?: string;
+}
+const { on, id, label, class: cls } = Astro.props;
+---
+
+{on ? <Part id={id} label={label} class={cls}><slot /></Part> : <g class={cls}><slot /></g>}

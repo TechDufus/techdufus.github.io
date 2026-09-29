@@ -1,36 +1,30 @@
 ---
 /*
-  FIG 3 · Bay map: the 24 front bays (0 far left → 23 far right) in the suggested layout, and the
-  two rear flex bays, whose left/right order is not documented. Wide: one row, rear at the right.
-  Narrow: the front row broken in two (drafting break lines), rear and key below.
+  FIG 3 · Bay map, as built: the 24 front bays (0 far left → 23 far right) and the two rear flex
+  bays, from server.bays. Every filled bay is a clickable part; its bay number is its balloon.
+  Wide: one row, rear at the right. Narrow: the front row broken in two (drafting break lines),
+  rear and key below.
 */
-import PostFigure from './PostFigure.astro';
-import ProvMark from '../ProvMark.astro';
-import { r720xd } from '../../../data/hardware/r720xd';
-import type { Drive } from '../../../data/hardware/types';
-import { at, cls, glyphRun, Pen, rc, shortName, wNote, type P } from './fig';
+import Figure from '../figure/Figure.astro';
+import Balloon from '../Balloon.astro';
+import PartCard from '../PartCard.astro';
+import { driveAt, server } from '../../../data/lab/server';
+import { at, Pen, rc, wNote, type P } from '../../../lib/drawing/figure';
+import { bayName, glyphRun, POOL_CLASS, shortName } from './fig';
 
-const FRONT = r720xd.bays.front.value;
+const FRONT = server.bays.front;
 const HALF = FRONT / 2;
 const PITCH = 27, BW = 23, BH = 80, EAR = 24;
-/** Fits a rotated 80-unit carrier: "Gigastone", "MX500 500", "MX500 1TB". */
-const bayName = (d: Drive): string => {
-  const s = shortName(d).replace(/ #\d/, '').replace(/ (\d+) GB$/, ' $1').replace(/ (\d+) TB$/, ' $1TB');
-  return s.length > 10 ? s.split(' ')[0] : s;
-};
-const bySlot = new Map<number, Drive>();
-for (const d of r720xd.drives) {
-  const slot = d.suggestedBay?.value ?? d.bay.value;
-  if (slot !== null && slot !== undefined) bySlot.set(slot, d);
-}
-const rear = [FRONT, FRONT + 1].map((n) => ({ n, d: bySlot.get(n) }));
-const filled = [...Array(FRONT).keys()].filter((n) => bySlot.has(n)).length;
+const rear = server.bays.list.filter((b) => b.face === 'rear').map((b) => ({ n: b.n, d: driveAt(b.n) }));
+const filled = server.drives.filter((d) => d.bay < FRONT);
+const partId = (n: number): string => `bay-${n}`;
 
 /* Front bays: two groups of 12 (they move independently in the narrow layout). Local x of bay i
    within its group keeps the wide position; the narrow layout shifts the second group back. */
 const PX = 24; // panel left, wide
 const bx = (i: number): number => PX + EAR + i * PITCH + (PITCH - BW) / 2;
 const Y = 44; // bay top, wide
+const NUM = Y + BH + 28; // bay number baseline
 // Narrow: row 1 panel at (9, 48), row 2 at (33, 180); both rows' first bay lands at x 35.
 const groups = [0, 1].map((g) => ({
   bays: Array.from({ length: HALF }, (_, k) => g * HALF + k),
@@ -51,7 +45,6 @@ const key = [
   { c: 'pool-fast', t: 'fast' },
   { c: 'pool-bulk', t: 'bulk' },
   { c: '', t: 'empty' },
-  { c: 'sem-removed', t: 'removed' },
 ];
 let kx = 0;
 const keyItems = key.map((k) => {
@@ -59,78 +52,93 @@ const keyItems = key.map((k) => {
   kx += 22 + wNote(k.t) + 18;
   return { ...k, x };
 });
+const drives = [...filled, ...server.drives.filter((d) => d.bay >= FRONT)];
 const desc =
-  `Suggested layout of the ${FRONT} front bays (0 far left to ${FRONT - 1} far right): ` +
-  [...bySlot].filter(([n]) => n < FRONT).map(([n, d]) => `${n} ${shortName(d)} (${d.pool})`).join(', ') +
-  `; ${filled} to ${FRONT - 1} empty. Today's positions are not recorded. Rear flex bays: ` +
-  rear.map(({ n, d }) => `${n} ${d ? `${shortName(d)}, ${d.fate === 'remove' ? 'comes out' : 'kept'}` : 'empty'}`).join('; ') +
-  `; which side is which is not documented.`;
+  `As built. The ${FRONT} front bays, 0 far left to ${FRONT - 1} far right: ` +
+  filled.map((d) => `${d.bay} ${shortName(d)} (${d.pool})`).join(', ') +
+  `; ${filled.length} to ${FRONT - 1} empty. Rear flex bays: ` +
+  rear.map(({ n, d }) => `${n} ${d ? `${shortName(d)} (${d.pool})` : 'empty'}`).join('; ') + '.';
 ---
 
-<PostFigure
+<Figure
   id="fig-bays"
-  n={3}
-  title="Bay map, suggested"
+  fig="TD-LAB-02 · FIG 3"
+  rev="B"
+  date="2026-09-29"
+  title="Bay map, as built"
   desc={desc}
-  caption="A suggestion, not a survey. ZFS won't care where anything sits. I might."
+  caption="Five SSDs up front, one spinner out back, and twenty bays of optimism."
   size={[900, 214]}
-  narrow={[390, 496]}
+  narrow={[390, 462]}
   breakout
+  interactive
+  hint
 >
   <!-- panel outlines -->
-  <path class="ln-obj pf-w" d={panel(PX, Y - 10, FRONT, true, true) + holes(PX, Y - 10) + holes(PX + panelW - EAR, Y - 10)} pathLength="1" style="--p:1" />
-  <path class="ln-obj pf-n" d={panel(9, 48, HALF, true, false) + holes(9, 48) + panel(33, 180, HALF, false, true) + holes(33 + HALF * PITCH, 180)} pathLength="1" style="--p:1" />
+  <path class="ln-obj fg-w" d={panel(PX, Y - 10, FRONT, true, true) + holes(PX, Y - 10) + holes(PX + panelW - EAR, Y - 10)} pathLength="1" style="--p:1" />
+  <path class="ln-obj fg-n" d={panel(9, 48, HALF, true, false) + holes(9, 48) + panel(33, 180, HALF, false, true) + holes(33 + HALF * PITCH, 180)} pathLength="1" style="--p:1" />
 
   {groups.map((g) => {
-    const pen = new Pen();
+    const empty = new Pen();
+    const nums: [number, string][] = [];
     for (const n of g.bays) {
-      const d = bySlot.get(n);
-      const x = bx(n);
-      pen.add(d ? `tint ln-med ${cls(d)}` : 'ln-thin', rc(x, Y, BW, BH) + (d ? '' : `M${x + 5} ${Y + BH - 9}h${BW - 10}`));
+      if (driveAt(n)) continue;
+      empty.add('ln-thin', rc(bx(n), Y, BW, BH) + `M${bx(n) + 5} ${Y + BH - 9}h${BW - 10}`);
+      nums.push([bx(n) + BW / 2, String(n)]);
     }
-    const nums = glyphRun(g.bays.map((n) => [bx(n) + BW / 2, String(n)]));
+    const run = glyphRun(nums);
     return (
       <g {...at([0, 0], g.np)}>
-        {pen.list.map(({ c, d }) => <path class={c} d={d} style="--p:2" pathLength={c === 'ln-thin' ? undefined : '1'} />)}
-        <g class="pf-c" style="--p:6">
-          {g.bays.filter((n) => bySlot.has(n)).map((n) => {
-            const d = bySlot.get(n)!;
-            return <text class:list={['pf-bt', cls(d)]} transform={`translate(${bx(n) + BW / 2 + 4} ${Y + BH / 2}) rotate(-90)`}>{bayName(d)}</text>;
-          })}
-          <text class="txt-note" x={nums.x} y={Y + BH + 28}>{nums.t}</text>
-        </g>
+        {empty.list.map(({ c, d }) => <path class={c} d={d} style="--p:2" />)}
+        {g.bays.map((n) => {
+          const d = driveAt(n);
+          if (!d) return null;
+          const x = bx(n);
+          return (
+            <Fragment>
+              <g class={`part ${POOL_CLASS[d.pool]}`} data-part={partId(n)} role="button" tabindex="0" aria-pressed="false" aria-label={shortName(d)}>
+                <path class="tint ln-med" d={rc(x, Y, BW, BH)} pathLength="1" style="--p:2" />
+                <text class="pm-bt fg-c" transform={`translate(${x + BW / 2 + 4} ${Y + BH / 2}) rotate(-90)`} style="--p:6">{bayName(d)}</text>
+              </g>
+              <Balloon at={[x + BW / 2, NUM - 4]} n={n} part={partId(n)} r={10} />
+            </Fragment>
+          );
+        })}
+        <text class="txt-note fg-c" x={run.x} y={NUM} style="--p:6">{run.t}</text>
       </g>
     );
   })}
 
-  <g style="--p:6">
-    <text {...at([24, 22], [9, 20], 'view__t')}>FRONT · {FRONT} BAYS</text>
-    <g {...at([184, 22], [9, 38])}>
-      <text class="txt-note">suggested layout · today's bays unknown</text>
-      <ProvMark x={wNote("suggested layout · today's bays unknown") + 6} y={-8.5} prov="assumed" />
-    </g>
-  </g>
+  <text {...at([24, 22], [9, 30], 'view__t', '--p:6')}>FRONT · {FRONT} BAYS</text>
 
   <!-- rear flex bays -->
   <g {...at([750, 22], [9, 330])}>
     <text class="view__t" style="--p:6">REAR · FLEX</text>
-    {rear.map(({ n, d }, i) => (
-      <g class={d && cls(d)}>
-        <path class="tint ln-med" d={rc(i * 76, 24, 70, 24) + `M${i * 76 + 58} 29v14`} pathLength="1" style="--p:2" />
-        <text class="txt-label pf-c" x={i * 76 + 26} y="40" style="--p:6">{n}?</text>
-        <text class="txt-note" x={i * 76} y="66" style="--p:6">{d ? (d.fate === 'remove' ? 'out' : 'keep') : 'empty'}</text>
-      </g>
-    ))}
-    <path class="ln-phantom" d="M35 19q38 -12 76 0" style="--p:4" />
-    <g style="--p:6">
-      <text class="txt-note" y="92">left/right not</text>
-      <text class="txt-note" y="106">documented</text>
-      <text class="txt-label" y="126">verify in field</text>
-    </g>
+    {rear.map(({ n, d }, i) => {
+      const x = i * 76;
+      return d ? (
+        <Fragment>
+          <g class={`part ${POOL_CLASS[d.pool]}`} data-part={partId(n)} role="button" tabindex="0" aria-pressed="false" aria-label={shortName(d)}>
+            <path class="tint ln-med" d={rc(x, 24, 70, 24) + `M${x + 58} 29v14`} pathLength="1" style="--p:2" />
+            <text class="pm-bt" x={x + 8} y="40" style="--p:6">15k SAS</text>
+          </g>
+          <Balloon at={[x + 35, 68]} n={n} part={partId(n)} r={10} />
+          <text class="txt-note fg-c" x={x + 35} y="98" style="--p:6">{d.pool}</text>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <path class="ln-thin" d={rc(x, 24, 70, 24) + `M${x + 58} 29v14`} style="--p:2" />
+          <g style="--p:6">
+            <text class="txt-note fg-c" x={x + 35} y="72">{n}</text>
+            <text class="txt-note fg-c" x={x + 35} y="98">empty</text>
+          </g>
+        </Fragment>
+      );
+    })}
   </g>
 
   <!-- key -->
-  <g {...at([24, 196], [9, 482], '', '--p:6')}>
+  <g {...at([24, 196], [9, 448], '', '--p:6')}>
     {keyItems.map((k) => (
       <g class={k.c || undefined}>
         <path class={k.c ? 'tint ln-med' : 'face ln-thin'} d={rc(k.x, -9, 16, 10)} />
@@ -138,4 +146,12 @@ const desc =
       </g>
     ))}
   </g>
-</PostFigure>
+
+  <Fragment slot="cards">
+    {drives.map((d) => <PartCard id={partId(d.bay)} title={d.card.title} kind={d.card.kind} lines={d.card.lines} />)}
+  </Fragment>
+</Figure>
+
+<style is:global>
+  .fg .pm-bt { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; fill: var(--dwg-obj); }
+</style>

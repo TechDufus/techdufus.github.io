@@ -1,19 +1,21 @@
 ---
 /*
   Tiny gold-ink thumbnails for the /lab "Drawn to spec" cards, generated from the same data as
-  the sheets but with a fraction of the line work (no kit CSS on /lab, so the styles live here).
-    kind="stack"   Sheet 01: the stack's front faces between two rails, U17 to U26
-    kind="server"  Sheet 02: the R720xd's front face, 24 carriers and both ears
-    kind="path"    the post: FIG 1 in miniature. Disks → PERC → virtual disks → Proxmox (dashed,
-                   leaving) over disks → HBA330 → ZFS → Proxmox (the plan)
+  the sheets but with a fraction of the line work (no kit CSS needed, so the styles live here).
+    kind="cabinet"  Sheet 01: the cabinet's front faces from U1 to U14 between two rails, the
+                    empty U3–7 broken out
+    kind="server"   Sheet 02: the R720xd's front face, 24 carriers and both ears
+    kind="stack"    Sheet 03: the three layers as storeys, one box per thing, planned ones dashed
+    kind="path"     the post: disks → PERC → virtual disks → Proxmox (red, dashed: gone) over
+                    disks → HBA330 → ZFS pools → Proxmox (green: what went in)
   Decorative: the card's text names the sheet, so the SVG is aria-hidden.
 */
-import { U_MM } from '../../../lib/drawing/projection';
-import { HOLES, rr, slotOf$, stack } from './model';
-import { r720xd } from '../../../data/hardware/r720xd';
+import { HOLES, rr, slotOf$, yBot, yTop } from './model';
+import { server } from '../../../data/lab/server';
+import { stack } from '../../../data/lab/stack';
 
 interface Props {
-  kind: 'stack' | 'server' | 'path';
+  kind: 'cabinet' | 'server' | 'stack' | 'path';
 }
 const { kind } = Astro.props;
 const r1 = (n: number): string => String(Math.round(n * 10) / 10);
@@ -26,26 +28,41 @@ const cells = (x: number, y: number, w: number, h: number, n: number): string =>
 };
 
 let vb = '', obj = '', med = '', thin = '', hid = '', gone = '', add = '';
-if (kind === 'stack') {
-  const lo = (stack.from - 2) * U_MM, hi = (stack.to + 2) * U_MM;
-  const Y = (y: number): number => hi - y; // model y up → svg y down, top of the strip at 0
-  vb = `-24 -6 530.6 ${r1(hi - lo + 12)}`;
-  const rails = HOLES.map((x) => rr(x - 8, 0, 16, hi - lo)).join('');
-  thin = rails;
-  for (const id of ['r720xd', 'unas-pro-8', 'udm-pro', 'patch-panel', 'shelf', 'rpi-4b']) {
+if (kind === 'cabinet') {
+  // U1–2 (the top shelf) and U8–14, with U3–7 broken out: everything above the break drops by
+  // the empty run less a short gap. Model y is up; the strip's top is paper y 0.
+  const cut = yBot(2), resume = yTop(8), GAP = 26;
+  const drop = cut - resume - GAP, top = yTop(1) - drop, lo = yBot(14);
+  const Y = (y: number): number => top - (y >= cut ? y - drop : y);
+  const H = top - lo;
+  vb = `-24 -6 530.6 ${r1(H + 12)}`;
+  const brk = Y(cut) + GAP / 2;
+  // rails, each broken with a zig-zag across the gap
+  for (const x of HOLES) {
+    thin += rr(x - 8, 0, 16, Y(cut)) + rr(x - 8, Y(resume), 16, H - Y(resume));
+    thin += `M${r1(x - 14)} ${r1(brk)}h8l3 -6l4 12l3 -6h8`;
+  }
+  for (const id of ['top-shelf', 'rpi-4b', 'fiber-modem', 'poe-injector', 'unas-pro-8', 'udm-pro', 'r720xd'] as const) {
     const s = slotOf$(id);
-    const top = Y(s.faceTop);
+    if (id === 'top-shelf') {
+      // the tray, and the two brackets
+      obj += rr(s.body.x, Y(s.body.y + s.body.h), s.body.w, s.body.h);
+      thin += rr(0, Y(s.faceTop), s.ears!.w, s.faceH) + rr(482.6 - s.ears!.w, Y(s.faceTop), s.ears!.w, s.faceH);
+      continue;
+    }
+    const t = Y(s.faceTop);
     const x = s.plate ? s.plate.x : s.faceX;
     const w = s.plate ? s.plate.w : s.faceW;
-    obj += rr(x, top, w, s.faceH);
-    if (id === 'r720xd') med += cells(x + 19, top + 5, w - 38, s.faceH - 10, 24);
-    if (id === 'unas-pro-8') med += cells(x + 5, top + 8, w - 10, s.faceH / 2 - 10, 4) + cells(x + 5, top + s.faceH / 2 + 3, w - 10, s.faceH / 2 - 10, 4);
-    if (id === 'udm-pro') med += rr(x + 6, top + 10, 20, 24) + rr(x + 190, top + 8, 100, 29) + cells(x + 310, top + 9, 70, 26, 4) + rr(x + 386, top + 20, 16, 15);
-    if (id === 'patch-panel') med += cells(x + 36, top + 16, w - 72, 14, 24);
-    if (id === 'rpi-4b') med += rr(x + 3, top + 4, 16, 12);
+    obj += rr(x, t, w, s.faceH);
+    if (id === 'r720xd') med += cells(x + 19, t + 5, w - 38, s.faceH - 10, 24);
+    if (id === 'unas-pro-8') med += cells(x + 5, t + 10, w - 10, s.faceH * 0.34, 4) + cells(x + 5, t + s.faceH * 0.54, w - 10, s.faceH * 0.34, 4);
+    if (id === 'udm-pro') med += rr(x + 6, t + 10, 20, 24) + rr(x + 186, t + 8, 107, 29) + cells(x + 308, t + 9, 64, 26, 4) + rr(x + 386, t + 20, 20, 15);
+    if (id === 'rpi-4b') med += rr(x + 4, t + 6, 14, s.faceH - 8) + rr(x + 42, t + 6, 16, s.faceH - 8);
+    if (id === 'fiber-modem') med += `M${r1(x + w * 0.42)} ${r1(t + 5)}h${r1(w * 0.26)}` + cells(x + 8, t + 14, w - 16, s.faceH - 20, 10);
+    if (id === 'poe-injector') med += rr(x + 8, t + 11, 20, 16) + rr(x + 32, t + 11, 20, 16);
   }
   // the ears of the two bracketed boxes
-  for (const id of ['unas-pro-8', 'udm-pro']) {
+  for (const id of ['unas-pro-8', 'udm-pro'] as const) {
     const s = slotOf$(id);
     const t = Y(s.y0 + s.hU - 0.4);
     thin += rr(0, t, s.faceX, s.hU - 0.8) + rr(482.6 - s.faceX, t, s.faceX, s.hU - 0.8);
@@ -57,10 +74,34 @@ if (kind === 'stack') {
   obj = rr(0, 0, w, h) + `M19.3 0v${r1(h)}M${r1(w - 19.3)} 0v${r1(h)}`;
   med = cells(19.3, 5, w - 38.6, h - 10, 24);
   thin = rr(5, 10, 9, 9) + rr(5, 28, 9, 12) + rr(w - 13, 9, 8, 18) + rr(w - 13, 36, 8, 6);
+} else if (kind === 'stack') {
+  // Storeys bottom up (layer 1 at the bottom), a box per item (an empty planned slot is one
+  // dashed box), in up to two rows; a bracket on the left of each storey and the ground under it.
+  const X0 = 40, W = 440, FH = 62, SLAB = 12, PAD = 10, G = 6;
+  const floors = [...stack].reverse();
+  const Hh = floors.length * (FH + SLAB);
+  vb = `-6 -6 ${X0 + W + 12} ${Hh + 20}`;
+  floors.forEach((l, i) => {
+    const y = i * (FH + SLAB);
+    obj += rr(X0, y, W, FH);
+    thin += rr(X0, y + FH, W, SLAB - 4) + `M${X0 - 10} ${y + 6}h6v${FH - 12}h-6`;
+    const boxes = l.groups.flatMap((g) => (g.items.length ? g.items.map((it) => it.status === 'planned') : [true]));
+    const rows = boxes.length > 6 ? 2 : 1;
+    const per = Math.ceil(boxes.length / rows);
+    const bw = (W - 2 * PAD - G * (per - 1)) / per;
+    const bh = (FH - 2 * PAD - G * (rows - 1)) / rows;
+    boxes.forEach((planned, j) => {
+      const b = rr(X0 + PAD + (j % per) * (bw + G), y + PAD + Math.floor(j / per) * (bh + G), bw, bh);
+      if (planned) hid += b;
+      else med += b;
+    });
+  });
+  // ground line with short hatch strokes under the bottom storey
+  thin += `M${X0 - 20} ${Hh}H${X0 + W + 6}` + Array.from({ length: 24 }, (_, i) => `M${X0 - 12 + i * 19} ${Hh}l-7 7`).join('');
 } else {
-  // Two rows, as FIG 1: every drive before, the kept ones after; 4 virtual disks (the OS's view,
-  // controllers.before.status.note, measured 2026-09-25) against one line per pool.
-  const all = r720xd.drives.length, kept = r720xd.drives.filter((d) => d.fate !== 'remove').length;
+  // Two rows, as the post's FIG 1: every drive before (the pulled SAS drive included), the kept
+  // ones after; 4 virtual disks (the OS's view before) against one line per pool.
+  const kept = server.drives.length, all = kept + 1;
   const H = 60, BW = 90, X = [70, 200, 330], rows = [36, 146];
   vb = `-6 -6 ${X[2] + BW + 12} ${rows[1] + H / 2 + 12}`;
   const disks = (y: number, n: number): string =>
@@ -75,7 +116,7 @@ if (kind === 'stack') {
   hid = wires(X[0], a, 4) + wires(X[1], a, 4) + rr(X[1], a - H / 2, BW, H);
   gone = rr(X[0], a - H / 2, BW, H);
   add = rr(X[0], b - H / 2, BW, H);
-  med = wires(X[0], b, kept) + wires(X[1], b, r720xd.pools.length);
+  med = wires(X[0], b, kept) + wires(X[1], b, server.pools.length);
   obj = rr(X[2], a - H / 2, BW, H) + rr(X[1], b - H / 2, BW, H) + rr(X[2], b - H / 2, BW, H);
 }
 ---

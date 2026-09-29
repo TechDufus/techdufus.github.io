@@ -1,0 +1,98 @@
+---
+/*
+  BeforeAfter: Sheet 02's BEFORE / AFTER tab, the history of 2026-09-28 side by side. Two plans
+  (cover off, turned 90° so the storage path reads left to right, front to rear):
+    before  PERC H710P Mini, cable 1, the failing SAS drive in rear bay 25
+    after   HBA330 in riser 1, cables 2 and 3 to SAS A and SAS B, rear bay 25 empty
+  each over its data-path strip, then the change list. What the swap took out is red, what it
+  brought in green; cable 4 and the drive in bay 24 are in both, clickable in AFTER only. Needs <ServerDefs id={dwg} />
+  in the same SVG and <ServerCards /> on the page.
+
+  <BeforeAfter dwg="lab02" />
+*/
+import View from '../View.astro';
+import Balloon from '../Balloon.astro';
+import Stamp from '../Stamp.astro';
+import PlanView from './PlanView.astro';
+import DataPath from './DataPath.astro';
+import { atScale } from '../../../lib/drawing/projection';
+import { server } from '../../../data/lab/server';
+import { HANDLES, NUM, STAMP, WE, n, part, planAt, rearBay, rearDrive, routes, type Box2 } from './geom';
+
+interface Props {
+  dwg: string;
+  active?: boolean;
+}
+const { dwg, active = false } = Astro.props;
+
+const s = atScale(1, 4);
+const Y0 = 162, PW = s * HANDLES;
+const sides = [
+  { state: 'before' as const, x: 78, title: 'BEFORE', note: `UNTIL ${server.swapDate}`, click: ['perc', 'cable-1', server.removed.id] },
+  { state: 'now' as const, x: 666, title: 'AFTER', note: `AS BUILT ${server.swapDate}`, click: undefined },
+];
+const rt = routes();
+const hba = part('hba330'), perc = part('perc');
+const b24 = rearBay(24), b25 = rearBay(25);
+const BY = Y0 + s * WE + 26; // balloon row under the plans
+const TY = Y0 - 26; // balloon row over them
+
+type B = { id: string; at: [number, number]; to: [number, number] };
+const balloons = (x: number, state: 'before' | 'now'): B[] => {
+  const { pt } = planAt(x, Y0, s, true);
+  const edge = (b: Box2): [number, number] => pt(b.x + b.w, b.z + b.d / 2);
+  const c4 = pt(rt[4][0][2][0], 330);
+  const list: B[] = [];
+  if (state === 'before') {
+    const c1 = pt(rt[1][0][3][0], 260);
+    list.push(
+      { id: 'perc', at: [edge(perc)[0], BY], to: edge(perc) },
+      { id: 'cable-1', at: [c1[0], BY], to: c1 },
+      { id: server.removed.id, at: [pt(0, b25.z + 30)[0], TY], to: pt(b25.x + 8, b25.z + 30) },
+    );
+  } else {
+    const c2 = pt(rt[2][0][3][0], 200), c3 = pt(rt[3][0][3][0], 290);
+    list.push(
+      { id: 'cable-4', at: [c4[0], TY], to: c4 },
+      { id: rearDrive.id, at: [pt(0, b24.z + b24.d - 20)[0], TY], to: pt(b24.x + 8, b24.z + b24.d - 20) },
+      { id: 'hba330', at: [edge(hba)[0], BY], to: edge(hba) },
+      { id: 'cable-3', at: [c3[0], BY], to: c3 },
+      { id: 'cable-2', at: [c2[0], BY], to: c2 },
+    );
+  }
+  return list;
+};
+const changes = [
+  { sign: '−', t: 'PERC H710P MINI AND CABLE 1', cls: 'sem-removed' },
+  { sign: '−', t: `${server.removed.model}, REAR BAY ${server.removed.bay} (FAILING)`, cls: 'sem-removed' },
+  { sign: '+', t: 'HBA330 IN RISER 1', cls: 'sem-new' },
+  { sign: '+', t: 'CABLES 2 AND 3 TO BACKPLANE SAS A AND SAS B', cls: 'sem-new' },
+  { sign: '=', t: 'CABLE 4, THE FLEX-BAY DRIVE, EVERYTHING ELSE', cls: '' },
+];
+---
+
+<View dwg={dwg} name="history" active={active} x={39} y={39} w={1182} h={813}>
+  {sides.map((sd) => (
+    <View x={sd.x - 20} y={Y0 - 40} w={PW + 30} h={s * WE + 150} title={sd.title} scale={s} note={sd.note}
+          labelAt={[sd.x + PW / 2 - 40, Y0 + s * WE + 58]}>
+      <PlanView dwg={dwg} x={sd.x} y={Y0} s={s} rot state={sd.state} tone labels="swap" click={sd.click} />
+      <text class="sv-s" transform={`translate(${n(sd.x - 22)} ${n(Y0 + (s * WE) / 2)}) rotate(-90)`}>FRONT</text>
+      {balloons(sd.x, sd.state).map((b) => <Balloon at={b.at} n={NUM[b.id]} to={b.to} part={b.id} />)}
+    </View>
+  ))}
+
+  <text class="txt-note" x={sides[0].x} y="634">DATA PATH</text>
+  <DataPath x={sides[0].x} y={642} w={PW - 20} state="before" />
+  <DataPath x={sides[1].x} y={642} w={PW - 20} state="after" flow />
+
+  <g class="chg">
+    <text class="txt-note" x={sides[0].x} y="720">CHANGES · {server.swapDate}</text>
+    {changes.map((c, i) => (
+      <g class={c.cls || undefined}>
+        <text class="txt-label" x={sides[0].x} y={n(744 + i * 20)}>{c.sign}</text>
+        <text class="txt-label" x={sides[0].x + 20} y={n(744 + i * 20)}>{c.t}</text>
+      </g>
+    ))}
+  </g>
+  <Stamp x={690} y={776} {...STAMP} />
+</View>

@@ -1,0 +1,142 @@
+---
+/*
+  Sheet 03 · PLAN: the Talos cluster from above, inside its Proxmox host. One room per node, a
+  shared corridor through them (Cilium), one API endpoint above them, and each node's VM disk
+  landing on the `fast` pool below, pool and disks drawn to the same scale. The cut line A–A is
+  where SECTION A–A is taken. Numbers match the section (same things, same balloons); the API
+  endpoint isn't in the data, so it takes the next number and its card lives in ./model.ts.
+*/
+import View from '../View.astro';
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import Dim from '../Dim.astro';
+import Particles from '../Particles.astro';
+import { f, rc } from '../../../lib/drawing/figure';
+import { API_ID, DWG, allThings, planned, pool, tagOf, talos, thing } from './model';
+
+interface Props {
+  active?: boolean;
+}
+const { active = false } = Astro.props;
+
+const pve = thing('proxmox');
+const nodes = thing(talos.id);
+const cilium = thing('cilium');
+const zfs = thing('zfs');
+const csi = thing('proxmox-csi');
+const fast = pool(talos.vm.pool);
+const apiN = allThings().length + 1;
+const n = talos.count;
+
+// host outline (walls cut in plan, hatched)
+const H = { x: 100, y: 130, w: 820, h: 540 }, WALL = 10;
+// node rooms
+const NW = 200, NG = 50, NY = 300, NH = 170;
+const nx0 = H.x + H.w / 2 - (n * NW + (n - 1) * NG) / 2;
+const nodeX = Array.from({ length: n }, (_, i) => nx0 + i * (NW + NG));
+const cx = (i: number) => nodeX[i] + NW / 2;
+const midX = H.x + H.w / 2;
+// the shared corridor (Cilium) through every room
+const CY = 424, CH = 18;
+// the API endpoint
+const A = { x: midX, y: 232, r: 22 };
+// the pool, to scale: the pool's width is its size; each VM disk is its size in the same units
+const P = { x: nodeX[0], y: 510, w: n * NW + (n - 1) * NG, h: 96 };
+const gib = (gb: number) => (gb * 1e9) / 2 ** 30;
+const kx = P.w / fast.usableGiB;
+const DW = gib(talos.vm.diskGB) * kx, DY = P.y + 16, DH = 40;
+const diskX = Array.from({ length: n }, (_, i) => cx(i) - DW / 2);
+// Proxmox CSI volumes: in the pool, between the first two disks
+const vx = (diskX[0] + DW + (diskX[1] ?? P.x + P.w)) / 2;
+const CUT = 400;
+const cls = (t: { status: 'running' | 'planned' }) => (planned(t) ? 'stk-pl' : undefined);
+---
+
+<View dwg={DWG} name="cluster" active={active} x={40} y={40} w={1180} h={810} title="PLAN · THE CLUSTER" scale="NOT TO SCALE" note="POOL AND DISKS DRAWN TO SIZE" labelAt={[560, 716]}>
+  <Part id="c-proxmox" label={tagOf(pve)} p={1}>
+    <path class="hatch ln-obj" fill-rule="evenodd" d={rc(H.x, H.y, H.w, H.h) + rc(H.x + WALL, H.y + WALL, H.w - 2 * WALL, H.h - 2 * WALL)} pathLength="1" />
+    <text class="txt-label" x={H.x + 28} y={H.y + 40}>{pve.card.title.toUpperCase()}</text>
+    <text class="txt-note" x={H.x + 28} y={H.y + 56}>THE HOST · ONE R720XD</text>
+  </Part>
+  <Balloon at={[H.x + H.w - 32, H.y + 32]} n={pve.n} part="c-proxmox" r={9} />
+
+  <!-- the API endpoint: one address, held by one node at a time -->
+  <g style="--p:4">
+    <path class="ln-hid" d={nodeX.map((_, i) => `M${A.x} ${A.y + A.r}L${f(cx(i))} ${NY}`).join('')} />
+    <path class="ln-med" d={`M46 ${A.y}H${A.x - A.r - 2}`} pathLength="1" />
+    <path class="stk-arr" d={`M${A.x - A.r - 1} ${A.y}l-9-3.4v6.8Z`} />
+    <Particles d={`M46 ${A.y}H${A.x - A.r - 4}`} kind="net1" n={2} dur={2.8} guide={false} />
+    <text class="txt-note stk-nc" x={46} y={A.y - 10}>kubectl</text>
+  </g>
+  <Part id={API_ID} label="Kubernetes API" p={3}>
+    <circle class="face-top ln-obj" cx={A.x} cy={A.y} r={A.r} pathLength="1" />
+    <text class="txt-label stk-c" x={A.x} y={A.y + 4.5}>API</text>
+  </Part>
+  <Balloon at={[A.x + A.r + 22, A.y - 20]} to={[A.x + A.r * 0.7, A.y - A.r * 0.7]} n={apiN} part={API_ID} />
+  <text class="txt-label" x={A.x + A.r + 40} y={A.y + 2}>KUBERNETES API</text>
+  <text class="txt-note" x={A.x + A.r + 40} y={A.y + 18}>ONE ENDPOINT FOR ALL {n}</text>
+
+  <!-- the nodes -->
+  <Part id="c-talos" label={tagOf(nodes)} p={2}>
+    {nodeX.map((x, i) => (
+      <g>
+        <rect class={planned(nodes) ? 'ln-phantom stk-void' : 'face-front ln-obj'} x={f(x)} y={NY} width={NW} height={NH} pathLength="1" />
+        <text class="txt-label" x={f(x + 16)} y={NY + 28}>TALOS {i + 1}</text>
+        <text class="txt-note" x={f(x + 16)} y={NY + 48}>CONTROL PLANE</text>
+        <text class="txt-note" x={f(x + 16)} y={NY + 63}>+ WORKLOADS</text>
+        <text class="txt-note stk-nc" x={f(x + 16)} y={NY + 82}>{talos.vm.vcpu} vCPU · {talos.vm.ramGiB} GiB</text>
+      </g>
+    ))}
+  </Part>
+  {nodeX.map((x) => <Balloon at={[x + NW - 18, NY + 20]} n={nodes.n} part="c-talos" r={9} />)}
+
+  <!-- Cilium: one corridor through every room -->
+  <Part id="c-cilium" label={tagOf(cilium)} p={3} class={cls(cilium)}>
+    <rect class={planned(cilium) ? 'ln-phantom stk-void' : 'face-top ln-med'} x={H.x + WALL} y={CY} width={H.w - 2 * WALL} height={CH} />
+    {!planned(cilium) && <Particles d={`M${H.x + WALL + 6} ${CY + CH / 2}H${H.x + H.w - WALL - 6}`} kind="net10" n={3} dur={4.6} guide={false} />}
+  </Part>
+  <Balloon at={[H.x + H.w + 34, CY + CH / 2]} to={[H.x + H.w - WALL - 8, CY + CH / 2]} n={cilium.n} part="c-cilium" />
+  <text class="txt-label" x={H.x + H.w + 54} y={CY + CH / 2 - 2}>{cilium.card.title.toUpperCase()}</text>
+  <text class="txt-note" x={H.x + H.w + 54} y={CY + CH / 2 + 14}>ONE NETWORK</text>
+
+  <!-- cut line for SECTION A–A -->
+  <g class="stk-cut" style="--p:5">
+    <path class="ln-cut" d={`M${H.x - 40} ${CUT}H${H.x + H.w + 40}`} />
+    <path class="ln-cut-end" d={`M${H.x - 40} ${CUT}h22M${H.x + H.w + 40} ${CUT}h-22`} />
+    <path class="stk-arr" d={`M${H.x - 29} ${CUT - 20}l-3.4 9h6.8ZM${H.x + H.w + 29} ${CUT - 20}l-3.4 9h6.8Z`} />
+    <path class="ln-med" d={`M${H.x - 29} ${CUT}V${CUT - 12}M${H.x + H.w + 29} ${CUT}V${CUT - 12}`} />
+    <text class="stk-cutl" x={H.x - 29} y={CUT - 26}>A</text>
+    <text class="stk-cutl" x={H.x + H.w + 29} y={CUT - 26}>A</text>
+  </g>
+
+  <!-- each node's disk, down onto the pool -->
+  <g style="--p:4">
+    <path class="ln-med" d={nodeX.map((_, i) => `M${f(cx(i))} ${NY + NH}V${DY - 2}`).join('')} pathLength="1" />
+    <path class="stk-arr" d={nodeX.map((_, i) => `M${f(cx(i))} ${DY - 1}l-3.4-9h6.8Z`).join('')} />
+  </g>
+  <Part id="c-fast" label={fast.card.title} p={2}>
+    <rect class="stk-pool ln-obj" x={P.x} y={P.y} width={P.w} height={P.h} pathLength="1" />
+    <text class="txt-label" x={P.x + 12} y={P.y + P.h - 26}>{fast.id.toUpperCase()}</text>
+    <text class="txt-note" x={P.x + 12} y={P.y + P.h - 11}>{fast.layout.toUpperCase()} · BAYS {fast.bays.join(' + ')}</text>
+  </Part>
+  <Balloon at={[P.x + P.w + 30, P.y + P.h - 12]} to={[P.x + P.w - 6, P.y + P.h - 20]} n={zfs.n} part="c-fast" />
+  <g style="--p:3">
+    {diskX.map((x, i) => (
+      <g>
+        <rect class="face-front ln-obj" x={f(x)} y={DY} width={f(DW)} height={DH} pathLength="1" />
+        <text class="stk-fx stk-c" x={f(x + DW / 2)} y={DY + 24}>DISK {i + 1}</text>
+      </g>
+    ))}
+  </g>
+  {diskX.map((x) => <Dim a={[x, DY + DH]} b={[x + DW, DY + DH]} offset={P.y + P.h - DY - DH + 22} text={`${talos.vm.diskGB} GB`} ext="both" />)}
+  <Dim a={[P.x, P.y + P.h]} b={[P.x + P.w, P.y + P.h]} offset={46} text={`≈ ${fast.usableGiB} GiB`} />
+
+  <Part id="c-proxmox-csi" label={tagOf(csi)} p={3} class={cls(csi)}>
+    {[0, 1, 2].map((i) => (
+      <rect class={planned(csi) ? 'ln-phantom stk-void' : 'face-top ln-med'} x={f(vx - 38 + i * 26)} y={DY + 9} width={22} height={22} />
+    ))}
+    <rect class="dwg-hit" x={f(vx - 44)} y={DY} width={88} height={DH + 14} />
+    <text class="stk-fx stk-c" x={f(vx)} y={DY + DH + 12}>CSI VOLUMES</text>
+  </Part>
+  <Balloon at={[vx + 30, P.y - 16]} to={[vx + 22, DY + 8]} n={csi.n} part="c-proxmox-csi" r={9} />
+</View>

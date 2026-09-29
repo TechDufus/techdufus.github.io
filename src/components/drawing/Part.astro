@@ -1,14 +1,17 @@
 ---
 /*
-  Part: a selectable part of a drawing. Keyboard reachable (Tab, then Enter/Space; Esc clears),
-  lights up on hover/focus, and slides out "on rails" while selected. drawing.ts toggles
-  aria-pressed (one selected part per drawing) and dispatches `dwg:select` on it (bubbles):
+  Part: a clickable part of a drawing. Keyboard reachable (Tab, then Enter/Space; Esc clears),
+  gold highlight and a name tag (its label) on hover/focus, slides out "on rails" while
+  selected, and opens its card when a <PartCard id={id}> exists (see ./README.md). drawing.ts
+  toggles aria-pressed (one selected part per drawing) and dispatches `dwg:select` (bubbles):
     detail = { dwg: string, id: string, selected: boolean }
+  Give every Part a numbered Balloon with part={id}: numbered = clickable.
 
-  <Part id="r720xd" label="Dell PowerEdge R720xd, 2U" rail={iso.slide(-300)}>…paths…</Part>
+  <Part id="r720xd" label="Dell PowerEdge R720xd" rail={iso.slide(-300)}>…paths…</Part>
 
-    id      part id (the `id` in dwg:select; balloons with part={id} light up with it)
-    label   accessible name (the part's name, not an instruction)
+    id      part id (the `id` in dwg:select; balloons with part={id} light up with it and
+            select it when clicked; the card template with data-card={id} is its card)
+    label   accessible name and hover name tag (the part's short name, not an instruction)
     rail    [dx, dy] paper translation while selected (iso.slide(−mm) pulls it out of the front)
     p       plot order for the part's own lines (inherited by children; optional)
     class   extra classes (e.g. "sem-removed")

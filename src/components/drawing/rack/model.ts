@@ -1,32 +1,37 @@
 /**
- * Sheet 01 · The cabinet: model-space geometry (mm) derived from src/data/hardware/rack.ts, and
- * the panel path generators that turn each device's `panels` zones into line work.
+ * Sheet 01 · The cabinet: model-space geometry (mm) derived from src/data/lab/rack.ts, and the
+ * panel path generators that turn each device's `panels` zones into line work.
  *
  * Model axes follow the kit: x = width (0 = left edge of the 19″ panel frame, as seen from the
- * front), y = height (0 = bottom of U1), z = depth (0 = the front rail's mounting plane, + to the
- * back). Panel drawings are face-local (u right, v down, mm) with the origin at the top-left of
- * the 482.6 mm frame, so one drawing fits every view: ortho for elevations, faceMatrix for iso.
- *
- * Cabinet placement values not in the data (rail set-back, door leaf thickness) are marked
- * ASSUMED here and on the sheet.
+ * front), y = height (0 = the bottom of the rails, i.e. the bottom of U42, since this cabinet
+ * counts its units from the top), z = depth (0 = the front rail's mounting plane, + to the back).
+ * Panel drawings are face-local (u right, v down, mm) with the origin at the top-left of the
+ * 482.6 mm frame, so one drawing fits every view: ortho for elevations, faceMatrix for iso.
  */
-import { cabinet, derived, devices, links, offSheet, sources } from '../../../data/hardware/rack';
-import type { Device, PanelZone } from '../../../data/hardware/types';
-import { RACK_19_MM, U_MM } from '../../../lib/drawing/projection';
+import { cabinet, derived, device, devices, devicesByRole, links, offSheet, uLabel, uMap } from '../../../data/lab/rack';
+import type { Device, DeviceId, PanelZone, URange } from '../../../data/lab/types';
+import { RACK_19_MM, U_MM, join, matrix, type Ortho } from '../../../lib/drawing/projection';
 
 const r1 = (n: number): string => String(Math.round(n * 10) / 10);
 /** Compact rect path in face-local mm. */
 export const rr = (x: number, y: number, w: number, h: number): string => `M${r1(x)} ${r1(y)}h${r1(w)}v${r1(h)}h${r1(-w)}Z`;
-const hl = (x: number, y: number, w: number): string => `M${r1(x)} ${r1(y)}h${r1(w)}`;
-const vl = (x: number, y: number, h: number): string => `M${r1(x)} ${r1(y)}v${r1(h)}`;
 const ci = (cx: number, cy: number, r: number): string =>
   `M${r1(cx - r)} ${r1(cy)}a${r1(r)} ${r1(r)} 0 1 0 ${r1(2 * r)} 0a${r1(r)} ${r1(r)} 0 1 0 ${r1(-2 * r)} 0`;
+/** Axis-aligned ellipse path (face-local or paper). */
+export const el = (cx: number, cy: number, rx: number, ry: number): string =>
+  `M${r1(cx - rx)} ${r1(cy)}a${r1(rx)} ${r1(ry)} 0 1 0 ${r1(2 * rx)} 0a${r1(rx)} ${r1(ry)} 0 1 0 ${r1(-2 * rx)} 0`;
 
 /* ------------------------------------------------------------------ cabinet */
 
-const outer = cabinet.outer.value;
-const railSpan = cabinet.railSpan?.value ?? 750;
-/** ASSUMED: rails centred front to back in the enclosure. */
+const N = cabinet.heightU;
+/** Model y of the bottom / top edge of rack unit `u` (U1 is the top). */
+export const yBot = (u: number): number => (N - u) * U_MM;
+export const yTop = (u: number): number => (N - u + 1) * U_MM;
+/** Model y span of a U range: [bottom, top]. */
+export const ySpan = (r: URange): [number, number] => [yBot(r.bottom), yTop(r.top)];
+
+const { outer, railSpan } = cabinet;
+/** Rails centred front to back in the enclosure (a drawing choice; the survey didn't measure it). */
 const setBack = (outer.d - railSpan) / 2;
 export const CAB = {
   w: outer.w,
@@ -34,149 +39,158 @@ export const CAB = {
   d: outer.d,
   x0: -(outer.w - RACK_19_MM) / 2,
   x1: RACK_19_MM + (outer.w - RACK_19_MM) / 2,
-  /** floor (bottom of the plinth) and roof, relative to the bottom of U1 */
-  y0: -(cabinet.u1FloorMm?.value ?? 70),
-  y1: outer.h - (cabinet.u1FloorMm?.value ?? 70),
+  /** floor and roof, relative to the bottom of the rails */
+  y0: -cabinet.railFloorMm,
+  y1: outer.h - cabinet.railFloorMm,
   /** outer front (door face) and rear */
   z0: -setBack,
   z1: railSpan + setBack,
   railSpan,
   setBack,
-  units: cabinet.heightU,
-  railTop: cabinet.heightU * U_MM,
-  /** ASSUMED sheet thickness for door and panels, for drawing only */
+  units: N,
+  railTop: N * U_MM,
+  /** sheet-metal thickness of the door and panels, for drawing only */
   skin: 20,
 };
 
+/** EIA-310 rail flange width, and the hole centres across a 19″ panel (465.1 mm apart, centred). */
+export const RAIL_W = 15.875;
+export const HOLES = [(RACK_19_MM - 465.1) / 2, (RACK_19_MM + 465.1) / 2];
+
+/** Devices that pull air front to back (both have fans behind front intakes); airflow is drawn for these only. */
+export const FRONT_TO_BACK: DeviceId[] = ['unas-pro-8', 'r720xd'];
+
 /* ------------------------------------------------------------------ devices */
 
+type Box3 = { x: number; y: number; z: number; w: number; h: number; d: number };
 export type Slot = {
   dev: Device;
   n: number;
-  /** bottom of the device in model y */
+  /** bottom of the slot in model y */
   y0: number;
-  /** nominal slot height (U × 44.45) or the body height for shelf items */
+  /** slot height (U × 44.45), or the body height for things standing on a shelf */
   hU: number;
-  /** body box */
-  body: { x: number; y: number; z: number; w: number; h: number; d: number };
-  /** front plate / ears box (full frame width for 19″ faces), if any */
+  body: Box3;
+  /** front plate (the R720xd's ears and carriers), if any */
   plate?: { x: number; w: number; z: number; t: number; h: number };
+  /** separate 3 mm rack brackets (UDM Pro, UNAS Pro 8, shelves), each `w` wide */
   ears?: { w: number; t: number };
-  /** z of the face that carries the front panel drawing, and model y of its top edge */
+  /** z of the face carrying the front panel drawing, and model y of its top edge */
   faceZ: number;
   faceTop: number;
-  /** x offset of the panel drawing's origin (for faces narrower than the frame) */
   faceX: number;
   faceW: number;
   faceH: number;
-  /** travel when selected, mm (out of the front); lift for the Pi */
+  /** travel out of the front when selected, mm; `lift` for things standing on a shelf */
   travel: number;
   lift?: number;
+  /** the shelf a thing stands on */
+  on?: DeviceId;
 };
 
-const byId = new Map(devices.map((d) => [d.id, d]));
-export const dev = (id: string): Device => {
-  const d = byId.get(id);
-  if (!d) throw new Error(`rack model: unknown device ${id}`);
-  return d;
-};
-
-/** Balloon numbers, top of the cabinet to the bottom, then the devices kept elsewhere. */
-export const ORDER = ['rpi-4b', 'shelf', 'patch-panel', 'udm-pro', 'unas-pro-8', 'r720xd', 'u7-pro', 'flex-mini'] as const;
-export const balloonOf = (id: string): number => ORDER.indexOf(id as (typeof ORDER)[number]) + 1;
-
-const yOf = (d: Device): number => ((d.u?.value ?? 1) - 1) * U_MM;
-const PI_X = 300;
-const PI_Z = 24;
+/** Balloon numbers: the /lab list order (Compute, Network, Storage, Edge), then the shelves and spares. */
+const listed = devicesByRole();
+export const ORDER: DeviceId[] = [
+  ...listed.flatMap((g) => g.devices.map((d) => d.id)),
+  ...devices.filter((d) => d.role === 'shelf').map((d) => d.id),
+];
+export const balloonOf = (id: DeviceId): number => ORDER.indexOf(id) + 1;
+/** Things on a shelf stand this far back from the front rail. */
+const ON_SHELF_Z = 24;
 
 function slotOf(d: Device): Slot {
   const n = balloonOf(d.id);
-  const b = d.body.value;
-  const y0 = yOf(d);
-  const hU = (d.heightU ?? 0) * U_MM;
-  const cx = (RACK_19_MM - b.w) / 2;
-  switch (d.id) {
-    case 'r720xd':
-      // Ears + drive carriers stand 18 mm proud of the rack flange (Dell Za); body behind it.
-      return {
-        dev: d, n, y0, hU,
-        body: { x: cx, y: y0 + 0.8, z: 0, w: b.w, h: b.h, d: b.d },
-        plate: { x: 0.1, w: 482.4, z: -18, t: 18, h: b.h },
-        faceZ: -18, faceTop: y0 + 0.8 + b.h, faceX: 0.1, faceW: 482.4, faceH: b.h, travel: 320,
-      };
-    case 'patch-panel':
-      return {
-        dev: d, n, y0, hU,
-        body: { x: 24, y: y0 + 4, z: 0, w: RACK_19_MM - 48, h: hU - 8.8, d: b.d },
-        plate: { x: 0, w: RACK_19_MM, z: -2.5, t: 2.5, h: hU - 0.8 },
-        faceZ: -2.5, faceTop: y0 + hU - 0.4, faceX: 0, faceW: RACK_19_MM, faceH: hU - 0.8, travel: 90,
-      };
-    case 'shelf':
-      return {
-        dev: d, n, y0, hU,
-        body: { x: 16, y: y0 + 0.4, z: 0, w: RACK_19_MM - 32, h: hU - 0.8, d: b.d },
-        plate: { x: 0, w: RACK_19_MM, z: -3, t: 3, h: hU - 0.8 },
-        faceZ: -3, faceTop: y0 + hU - 0.4, faceX: 0, faceW: RACK_19_MM, faceH: hU - 0.8, travel: 160,
-      };
-    case 'rpi-4b':
-      // Stands on the shelf (top of U24), port end to the front; board 56 wide × 85 deep.
-      return {
-        dev: d, n, y0, hU: b.h,
-        body: { x: PI_X, y: y0, z: PI_Z, w: 56, h: b.h, d: 85 },
-        faceZ: PI_Z, faceTop: y0 + b.h, faceX: PI_X, faceW: 56, faceH: b.h, travel: 0, lift: 46,
-      };
-    default:
-      // UDM Pro, UNAS Pro 8: body face flush with 3 mm rack brackets.
-      return {
-        dev: d, n, y0, hU,
-        body: { x: cx, y: y0 + (hU - b.h) / 2, z: -3, w: b.w, h: b.h, d: b.d },
-        ears: { w: cx, t: 3 },
-        faceZ: -3, faceTop: y0 + (hU + b.h) / 2, faceX: cx, faceW: b.w, faceH: b.h, travel: d.id === 'unas-pro-8' ? 300 : 170,
-      };
+  const b = d.body;
+  if (d.placement.kind === 'shelf') {
+    const sh = slotOf(device(d.placement.shelf));
+    const y = sh.body.y + sh.body.h;
+    return {
+      dev: d, n, y0: y, hU: b.h, on: sh.dev.id,
+      body: { x: d.placement.x, y, z: ON_SHELF_Z, w: b.w, h: b.h, d: b.d },
+      faceZ: ON_SHELF_Z, faceTop: y + b.h, faceX: d.placement.x, faceW: b.w, faceH: b.h, travel: 0, lift: 40,
+    };
   }
+  if (d.placement.kind !== 'rack') throw new Error(`rack model: ${d.id} is not in the cabinet`);
+  const [y0, y1] = ySpan(d.placement.u);
+  const hU = y1 - y0;
+  const cx = (RACK_19_MM - b.w) / 2;
+  if (d.id === 'r720xd') {
+    // Ears + drive carriers stand 18 mm proud of the rack flange (Dell Za); the body sits behind.
+    return {
+      dev: d, n, y0, hU,
+      body: { x: cx, y: y0 + 0.8, z: 0, w: b.w, h: b.h, d: b.d },
+      plate: { x: 0.1, w: d.earsWidth ?? 482.4, z: -18, t: 18, h: b.h },
+      faceZ: -18, faceTop: y0 + 0.8 + b.h, faceX: 0.1, faceW: d.earsWidth ?? 482.4, faceH: b.h, travel: 320,
+    };
+  }
+  if (d.role === 'shelf') {
+    // Cantilever shelf: a bracket at each end of the 2U face, and the vented tray between them.
+    const zones = d.panels?.front?.zones ?? [];
+    const ear = (zones.find((q) => q.id === 'ear-l')?.x1 ?? 0.04) * RACK_19_MM;
+    const tray = zones.find((q) => q.id === 'tray');
+    return {
+      dev: d, n, y0, hU,
+      body: { x: ear, y: y0 + 0.4, z: -3, w: RACK_19_MM - 2 * ear, h: (tray ? tray.y1 - tray.y0 : 0.16) * b.h, d: b.d + 3 },
+      ears: { w: ear, t: 3 },
+      faceZ: -3, faceTop: y0 + hU - 0.4, faceX: 0, faceW: RACK_19_MM, faceH: hU - 0.8, travel: 0,
+    };
+  }
+  // UDM Pro, UNAS Pro 8: the body face is flush with 3 mm rack brackets.
+  return {
+    dev: d, n, y0, hU,
+    body: { x: cx, y: y0 + (hU - b.h) / 2, z: -3, w: b.w, h: b.h, d: b.d },
+    ears: { w: cx, t: 3 },
+    faceZ: -3, faceTop: y0 + (hU + b.h) / 2, faceX: cx, faceW: b.w, faceH: b.h, travel: d.id === 'unas-pro-8' ? 300 : 170,
+  };
 }
 
-/** Every device in the cabinet, bottom to top (the iso painter's order). */
+/** Everything in the cabinet, bottom to top, each shelf before what stands on it (the iso painter's order). */
 export const slots: Slot[] = devices
-  .filter((d) => d.location === 'cabinet')
+  .filter((d) => d.placement.kind !== 'elsewhere')
   .map(slotOf)
-  .sort((a, b) => a.y0 - b.y0 || a.n - b.n);
-export const slotOf$ = (id: string): Slot => {
+  .sort((a, b) => a.y0 - b.y0 || a.body.x - b.body.x);
+export const slotOf$ = (id: DeviceId): Slot => {
   const s = slots.find((x) => x.dev.id === id);
   if (!s) throw new Error(`rack model: ${id} is not in the cabinet`);
   return s;
 };
-export const racked = slots.filter((s) => s.dev.mount === 'rack');
-export const elsewhere = ORDER.slice(6).map(dev);
+/** Off the sheet: the U7 Pro. */
+export const elsewhere = devices.filter((d) => d.placement.kind === 'elsewhere');
 
-/** U range text: "U18–19", "U24", "ON U24 SHELF" */
+/** U text for the schedule: "U13–14"; a thing on a shelf gets the shelf's; "Off sheet" otherwise. */
 export function uText(d: Device): string {
-  const u = d.u?.value;
-  if (u === undefined) return '—';
-  if (d.mount === 'shelf') return `U${u} (on shelf)`;
-  const h = d.heightU ?? 1;
-  return h > 1 ? `U${u}–${u + h - 1}` : `U${u}`;
+  const p = d.placement;
+  if (p.kind === 'rack') return uLabel(p.u);
+  if (p.kind === 'shelf') {
+    const s = device(p.shelf).placement;
+    return s.kind === 'rack' ? uLabel(s.u) : '';
+  }
+  return 'Off sheet';
 }
 
-/** Contiguous free runs of U (1-based, inclusive). */
-export function freeRuns(): { from: number; to: number }[] {
-  const used = new Set<number>();
-  for (const s of racked) for (let i = 0; i < (s.dev.heightU ?? 0); i++) used.add((s.dev.u?.value ?? 0) + i);
-  const runs: { from: number; to: number }[] = [];
-  for (let u = 1; u <= CAB.units; u++) {
-    if (used.has(u)) continue;
-    const last = runs.at(-1);
-    if (last && last.to === u - 1) last.to = u;
-    else runs.push({ from: u, to: u });
-  }
-  return runs;
-}
-export const stack = {
-  from: Math.min(...racked.map((s) => s.dev.u?.value ?? 99)),
-  to: Math.max(...racked.map((s) => (s.dev.u?.value ?? 0) + (s.dev.heightU ?? 1) - 1)),
+/** Empty runs of rack units, top to bottom, with their model y span. */
+export const free = uMap
+  .filter((s) => !s.device)
+  .map((s) => {
+    const [y0, y1] = ySpan(s.u);
+    return { ...s.u, n: s.u.bottom - s.u.top + 1, y0, y1 };
+  });
+
+/** The transform that puts a front panel symbol (#{dwg}-pf-{id}) on its face in an elevation. */
+export const placeFront = (v: Ortho, sl: Slot): string => {
+  const [x, y] = v.pt(0, sl.faceTop);
+  return matrix([v.scale, 0, 0, v.scale, x, y]);
+};
+/** A slot's front outline in an elevation (face, ears or shelf tray), for the fill behind its panel. */
+export const faceRect = (v: Ortho, sl: Slot): string => {
+  if (sl.plate) return v.rect(sl.plate.x, sl.faceTop - sl.plate.h, sl.plate.w, sl.plate.h);
+  if (sl.dev.id === 'patch-cables') return '';
+  const ears = sl.ears ? join(v.rect(0, sl.y0 + 0.4, sl.ears.w, sl.hU - 0.8), v.rect(RACK_19_MM - sl.ears.w, sl.y0 + 0.4, sl.ears.w, sl.hU - 0.8)) : '';
+  if (sl.dev.role === 'shelf' && !sl.on) return join(ears, v.rect(sl.body.x, sl.body.y, sl.body.w, sl.body.h));
+  return join(v.rect(sl.faceX, sl.faceTop - sl.faceH, sl.faceW, sl.faceH), ears);
 };
 
-export { cabinet, derived, devices, links, offSheet, sources };
+export { cabinet, derived, device, devices, devicesByRole, links, offSheet, uLabel };
 
 /** The sheet's id (defs, tabs, parts); shared by the page, the lazy views and ./rack.ts. */
 export { DWG } from './dwg';
@@ -185,9 +199,6 @@ export { DWG } from './dwg';
 
 /** Line work of one face, in face-local mm (origin top-left of the 482.6 frame). */
 export type Panel = { obj: string; med: string; thin: string; hid?: string };
-
-/** EIA-310 hole centres across a 19″ panel: 465.1 mm apart, centred. */
-export const HOLES = [(RACK_19_MM - 465.1) / 2, (RACK_19_MM + 465.1) / 2];
 
 const RJ = (x: number, y: number, w: number, h: number): string =>
   // RJ45 jack: opening plus the latch notch on the lower edge
@@ -199,21 +210,23 @@ function jacks(x: number, y: number, w: number, h: number, p: number, n: number)
   const next = `m${r1(p - w * 0.7)} ${r1(-h)}`;
   return `M${r1(x)} ${r1(y)}${one}` + `${next}${one}`.repeat(n - 1);
 }
+/** Coil of patch cable seen side-on: flat loops stacked on the shelf, plugs trailing off the front. */
+function coilSide(x: number, w: number, h: number): string {
+  const loops = [0, 1, 2, 3].map((i) => el(x + w / 2 + (i % 2 ? 3 : -2), h - 4 - i * ((h - 8) / 3), w / 2 - 3 - (i % 2) * 4, 3.4));
+  return loops.join('') + rr(x + w * 0.62, h - 9, 7, 5) + rr(x + w * 0.74, h - 5, 7, 5);
+}
 
-/** Draw zones laid out as fractions of a face `w` × `h` placed at (ox, 0) in the frame. */
-function zonesPanel(d: Device, face: 'front' | 'rear', ox: number, w: number, h: number): Panel {
-  const zones = d.panels?.[face]?.zones ?? [];
+/** Draw zones laid out as fractions of a face `w` × `h` placed at (ox, 0) in the frame. `lite` drops
+ *  the finest texture (carrier detail, perforations, vent lines; frontPanel: ear slots) for small, byte-tight drawings. */
+function zonesPanel(d: Device, face: 'front' | 'rear', ox: number, w: number, h: number, lite = false): Panel {
   const obj: string[] = [], med: string[] = [], thin: string[] = [];
-  const X = (f: number): number => ox + f * w;
-  const Y = (f: number): number => f * h;
-  for (const z of zones) {
-    const x = X(z.x0), y = Y(z.y0), zw = (z.x1 - z.x0) * w, zh = (z.y1 - z.y0) * h;
-    drawZone(d.id, z, x, y, zw, zh, obj, med, thin);
+  for (const z of d.panels?.[face]?.zones ?? []) {
+    drawZone(d.id, z, ox + z.x0 * w, z.y0 * h, (z.x1 - z.x0) * w, (z.y1 - z.y0) * h, obj, med, thin, lite);
   }
   return { obj: obj.join(''), med: med.join(''), thin: thin.join('') };
 }
 
-function drawZone(id: string, z: PanelZone, x: number, y: number, w: number, h: number, obj: string[], med: string[], thin: string[]): void {
+function drawZone(id: string, z: PanelZone, x: number, y: number, w: number, h: number, obj: string[], med: string[], thin: string[], lite: boolean): void {
   const key = `${id}:${z.id}`;
   if (key === 'r720xd:bays') {
     // 24 carriers, bay 0 at the left: release button up top, vented handle below.
@@ -225,7 +238,7 @@ function drawZone(id: string, z: PanelZone, x: number, y: number, w: number, h: 
       `m${r1(cw * 0.22 - (cw / 2 - r))} ${r1(h * 0.16)}h${r1(hw)}v${r1(hh)}h${r1(-hw)}Z` +
       `m${r1(cw * 0.08)} ${r1(h * 0.16)}h${r1(vw)}m${r1(-vw)} ${r1(h * 0.2)}h${r1(vw)}`;
     med.push(`M${r1(x + 0.4)} ${r1(y)}${carrier}` + `m${r1(cw)} 0${carrier}`.repeat(23));
-    for (let i = 0; i < 24; i++) thin.push(`M${r1(x + i * cw + cw / 2 - r)} ${r1(y + h * 0.1)}${detail}`);
+    if (!lite) for (let i = 0; i < 24; i++) thin.push(`M${r1(x + i * cw + cw / 2 - r)} ${r1(y + h * 0.1)}${detail}`);
     return;
   }
   if (key === 'udm-pro:lan-top' || key === 'udm-pro:lan-bottom') {
@@ -233,15 +246,32 @@ function drawZone(id: string, z: PanelZone, x: number, y: number, w: number, h: 
     med.push(jacks(x + 0.4, y, pw - 0.8, h, pw, 4));
     return;
   }
-  if (key === 'patch-panel:jacks') {
-    // 24 jacks in four groups of six (group size assumed, per the data note)
-    const gap = 6, pw = (w - 3 * gap) / 24;
-    for (let g = 0; g < 4; g++) med.push(jacks(x + g * (6 * pw + gap) + 0.5, y, pw - 1, h, pw, 6));
-    return;
-  }
   if (key === 'r720xd:diag') {
     const cw = w / 3, chh = h / 2;
     for (let i = 0; i < 6; i++) thin.push(rr(x + (i % 3) * cw + 0.3, y + Math.floor(i / 3) * chh + 0.3, cw - 0.6, chh - 0.6));
+    return;
+  }
+  if (key === 'fiber-modem:leds') {
+    // the row of status lights along the top
+    for (let i = 0; i < 5; i++) thin.push(ci(x + (w * (i + 0.5)) / 5, y + h / 2, 1.2));
+    return;
+  }
+  if (key === 'fiber-modem:vents') {
+    // staggered rows of short slots, as in the photo
+    const rows = lite ? 3 : 6, cols = lite ? 10 : 14, sw = w / cols;
+    for (let j = 0; j < rows; j++) {
+      const off = j % 2 ? sw / 2 : 0;
+      const n = j % 2 ? cols - 1 : cols;
+      thin.push(`M${r1(x + off + sw * 0.2)} ${r1(y + ((j + 0.5) * h) / rows)}` + Array.from({ length: n }, (_, i) => `${i ? `m${r1(sw * 0.4)} 0` : ''}h${r1(sw * 0.6)}`).join(''));
+    }
+    return;
+  }
+  if (z.kind === 'vent' && id.endsWith('shelf')) {
+    // the tray's front lip: a line of hex perforations
+    obj.push(rr(x, y, w, h));
+    if (lite) return;
+    const n = Math.floor(w / 14);
+    thin.push(Array.from({ length: n }, (_, i) => rr(x + 5 + i * 14, y + h * 0.3, 6, h * 0.4)).join(''));
     return;
   }
   switch (z.kind) {
@@ -249,11 +279,11 @@ function drawZone(id: string, z: PanelZone, x: number, y: number, w: number, h: 
       obj.push(rr(x, y, w, h));
       // tray handle / latch and a few vent lines
       thin.push(rr(x + w * 0.06, y + h * 0.66, w * 0.5, h * 0.2));
-      thin.push(`M${r1(x + w * 0.62)} ${r1(y + h * 0.2)}` + Array.from({ length: 5 }, (_, k) => `${k ? `m${r1(-w * 0.3)} ${r1(h * 0.14)}` : ''}h${r1(w * 0.3)}`).join(''));
+      if (!lite) thin.push(`M${r1(x + w * 0.62)} ${r1(y + h * 0.2)}` + Array.from({ length: 5 }, (_, k) => `${k ? `m${r1(-w * 0.3)} ${r1(h * 0.14)}` : ''}h${r1(w * 0.3)}`).join(''));
       return;
     case 'port':
       if (/sfp/i.test(z.id)) med.push(rr(x, y, w, h), rr(x + w * 0.18, y + h * 0.25, w * 0.64, h * 0.5));
-      else if (/usb|vga|serial|rps|ac|usbc|power/i.test(z.id)) med.push(rr(x, y, w, h), rr(x + w * 0.2, y + h * 0.28, w * 0.6, h * 0.44));
+      else if (/usb|vga|serial|rps|ac|power/i.test(z.id)) med.push(rr(x, y, w, h), rr(x + w * 0.2, y + h * 0.28, w * 0.6, h * 0.44));
       else med.push(RJ(x, y, w, h));
       return;
     case 'display':
@@ -261,8 +291,8 @@ function drawZone(id: string, z: PanelZone, x: number, y: number, w: number, h: 
       thin.push(rr(x + w * 0.14, y + h * 0.14, w * 0.72, h * 0.72));
       return;
     case 'vent':
-      if (z.id === 'handle') { med.push(rr(x, y, w, h)); return; }
-      thin.push(rr(x, y, w, h));
+      if (z.id === 'handle') med.push(rr(x, y, w, h));
+      else thin.push(rr(x, y, w, h));
       return;
     case 'fan': {
       const r = Math.min(w, h) / 2, cx = x + w / 2, cy = y + h / 2;
@@ -273,15 +303,14 @@ function drawZone(id: string, z: PanelZone, x: number, y: number, w: number, h: 
     }
     case 'psu': {
       med.push(rr(x, y, w, h));
-      if (/bay/.test(z.id)) { thin.push(rr(x + w * 0.1, y + h * 0.2, w * 0.8, h * 0.6)); return; }
+      if (/bay/i.test(z.label)) return void thin.push(rr(x + w * 0.1, y + h * 0.2, w * 0.8, h * 0.6));
       // AC inlet on the left, fan grille on the right
       thin.push(rr(x + w * 0.08, y + h * 0.25, w * 0.22, h * 0.5), ci(x + w * 0.66, y + h / 2, Math.min(w * 0.22, h * 0.38)));
-      thin.push(hl(x + w * 0.04, y + h * 0.92, w * 0.5));
       return;
     }
     case 'slot':
       med.push(rr(x, y, w, h));
-      for (let k = 1; k < 6; k++) thin.push(vl(x + (w * k) / 6, y + h * 0.25, h * 0.5));
+      for (let k = 1; k < 6; k++) thin.push(`M${r1(x + (w * k) / 6)} ${r1(y + h * 0.25)}v${r1(h * 0.5)}`);
       return;
     case 'button':
       thin.push(ci(x + w / 2, y + h / 2, Math.max(w, h) / 2));
@@ -296,42 +325,7 @@ function drawZone(id: string, z: PanelZone, x: number, y: number, w: number, h: 
   }
 }
 
-/** Front panel line work, face-local (v down from the top of the face). */
-export function frontPanel(s: Slot): Panel {
-  const d = s.dev;
-  switch (d.id) {
-    case 'r720xd': {
-      const p = zonesPanel(d, 'front', s.faceX, s.faceW, s.faceH);
-      return { ...p, obj: rr(s.faceX, 0, s.faceW, s.faceH) + p.obj };
-    }
-    case 'patch-panel': {
-      const p = zonesPanel(d, 'front', 0, RACK_19_MM, s.faceH);
-      return { obj: rr(0, 0, RACK_19_MM, s.faceH), med: p.med + slotsAt(HOLES, s.faceH), thin: p.thin };
-    }
-    case 'shelf': {
-      // plain lip with two slotted ears; perforations are on the tray, not the face
-      const perf: string[] = [];
-      for (let i = 0; i < 13; i++) perf.push(rr(40 + i * 31, s.faceH * 0.42, 18, s.faceH * 0.18));
-      return { obj: rr(0, 0, RACK_19_MM, s.faceH), med: slotsAt(HOLES, s.faceH), thin: perf.join('') };
-    }
-    case 'rpi-4b': {
-      const p = zonesPanel(d, 'front', s.faceX, s.faceW, s.faceH);
-      return { ...p, obj: rr(s.faceX, 0, s.faceW, s.faceH) };
-    }
-    default: {
-      // UDM Pro / UNAS Pro 8: body face + separate rack brackets
-      const p = zonesPanel(d, 'front', s.faceX, s.faceW, s.faceH);
-      const top = (s.hU - s.faceH) / 2;
-      const ears = rr(0, -top, s.faceX, s.hU - 0.8) + rr(RACK_19_MM - s.faceX, -top, s.faceX, s.hU - 0.8);
-      return {
-        obj: rr(s.faceX, 0, s.faceW, s.faceH) + p.obj,
-        med: ears + p.med + slotsAt(HOLES, s.hU - 0.8, -top, d.heightU ?? 1),
-        thin: p.thin,
-      };
-    }
-  }
-}
-
+/** Mounting slots (two per U) in rack ears at xs, for a face `h` tall whose top is at y0. */
 function slotsAt(xs: number[], h: number, y0 = 0, units = 1): string {
   const out: string[] = [];
   for (const x of xs) {
@@ -345,18 +339,67 @@ function slotsAt(xs: number[], h: number, y0 = 0, units = 1): string {
   return out.join('');
 }
 
-/** Rear panel line work, as seen from behind (u right as you stand behind the cabinet). */
+/** Front panel line work, face-local (v down from the top of the face); `lite` as zonesPanel. */
+export function frontPanel(s: Slot, lite = false): Panel {
+  const d = s.dev;
+  const units = Math.round(s.hU / U_MM);
+  switch (d.id) {
+    case 'r720xd': {
+      const p = zonesPanel(d, 'front', s.faceX, s.faceW, s.faceH, lite);
+      return { ...p, obj: rr(s.faceX, 0, s.faceW, s.faceH) + p.obj };
+    }
+    case 'top-shelf':
+    case 'bottom-shelf': {
+      // brackets and the tray lip; items on the shelf are drawn on their own
+      const p = zonesPanel(d, 'front', 0, RACK_19_MM, s.faceH, lite);
+      return { ...p, med: p.med + (lite ? '' : slotsAt(HOLES, s.faceH, 0, units)) };
+    }
+    case 'spare-drive': {
+      // the open box, and the caddy's front (handle and latch) standing just above its lip
+      const { faceX: x, faceW: w, faceH: h } = s;
+      return { obj: rr(x, 0, w, h), med: rr(x + 8, 1.5, w - 16, 5.5), thin: `M${r1(x)} 4.5h${r1(w)}` + rr(x + 12, 2.6, 16, 3.2) };
+    }
+    case 'patch-cables':
+      return { obj: '', med: coilSide(s.faceX, s.faceW, s.faceH), thin: '' };
+    case 'rpi-4b':
+    case 'fiber-modem':
+    case 'poe-injector': {
+      const p = zonesPanel(d, 'front', s.faceX, s.faceW, s.faceH, lite);
+      return { ...p, obj: rr(s.faceX, 0, s.faceW, s.faceH) + p.obj };
+    }
+    default: {
+      // UDM Pro / UNAS Pro 8: body face + separate rack brackets
+      const p = zonesPanel(d, 'front', s.faceX, s.faceW, s.faceH, lite);
+      const top = (s.hU - s.faceH) / 2;
+      const ears = rr(0, -top, s.faceX, s.hU - 0.8) + rr(RACK_19_MM - s.faceX, -top, s.faceX, s.hU - 0.8);
+      return {
+        obj: rr(s.faceX, 0, s.faceW, s.faceH) + p.obj,
+        med: ears + p.med + (lite ? '' : slotsAt(HOLES, s.hU - 0.8, -top, units)),
+        thin: p.thin,
+      };
+    }
+  }
+}
+
+/** Rear panel line work as seen from behind, face-local with v down from `faceTop`. */
 export function rearPanel(s: Slot): Panel {
   const d = s.dev;
   // From behind, a body at x..x+w (front coords) sits at 482.6 − x − w.
   const ox = RACK_19_MM - s.body.x - s.body.w;
+  const top = s.faceTop - (s.body.y + s.body.h);
   switch (d.id) {
-    case 'patch-panel':
-      return { obj: '', med: '', thin: '', hid: rr(ox, 0, s.body.w, s.body.h) };
-    case 'shelf':
-      return { obj: rr(ox, 0, s.body.w, s.body.h), med: '', thin: '' };
+    case 'top-shelf':
+    case 'bottom-shelf':
+      return { obj: rr(ox, top, s.body.w, s.body.h), med: rr(0, 0, s.ears!.w, s.faceH) + rr(RACK_19_MM - s.ears!.w, 0, s.ears!.w, s.faceH), thin: '' };
+    case 'patch-cables':
+      return { obj: '', med: coilSide(ox, s.body.w, s.body.h), thin: '' };
     case 'rpi-4b':
-      return { obj: rr(ox, 0, s.body.w, s.body.h), med: '', thin: rr(ox + 20, s.body.h - 3, 15, 2) };
+      // the USB-C power inlet on the far side
+      return { obj: rr(ox, 0, s.body.w, s.body.h), med: '', thin: rr(ox + s.body.w * 0.55, s.body.h - 7, 9, 3.4) };
+    case 'fiber-modem':
+    case 'poe-injector':
+    case 'spare-drive':
+      return { obj: rr(ox, 0, s.body.w, s.body.h), med: '', thin: '' };
     default: {
       const p = zonesPanel(d, 'rear', ox, s.body.w, s.body.h);
       return { ...p, obj: rr(ox, 0, s.body.w, s.body.h) + p.obj };

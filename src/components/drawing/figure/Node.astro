@@ -1,0 +1,36 @@
+---
+/*
+  Node: one box of a figure primitive (a Box from lib/drawing/figure.ts boxes()), drawn once and
+  placed in both layouts. Tone classes colour it; `planned` draws a dashed phantom outline. A node
+  with a `card` is a kit part: focusable button, numbered balloon on its corner, name tag on
+  hover/focus, and the card (the primitive renders the PartCard template).
+
+  <Node box={b} wp={[x, y]} np={[nx, ny]} />
+
+    box    the sized node (w, h, wrapped lines, tone, n)
+    wp np  top-left in the wide / narrow layout (np omitted: same spot)
+    p      plot order (default 2)
+*/
+import Balloon from '../Balloon.astro';
+import { at, f, rc, toneOf, type Box, type P } from '../../../lib/drawing/figure';
+
+interface Props {
+  box: Box;
+  wp: P;
+  np?: P;
+  p?: number;
+}
+const { box: b, wp, np, p = 2 } = Astro.props;
+const planned = b.tone === 'planned';
+const part = b.card
+  ? { class: 'part', 'data-part': b.id, role: 'button' as const, tabindex: '0', 'aria-pressed': 'false' as const, 'aria-label': b.label }
+  : {};
+---
+
+<g {...at(wp, np, `fg-node ${toneOf(b.tone)}`.trim(), `--p:${p}`)}>
+  <g {...part}>
+    <path class={planned ? 'face ln-phantom' : 'face ln-obj'} d={rc(0, 0, b.w, b.h)} pathLength={planned ? undefined : '1'} />
+    {b.lines.map((l) => <text class={`${l.cls} fg-c`} x={f(b.w / 2)} y={f(l.y)}>{l.t}</text>)}
+  </g>
+  {b.card && b.n && <Balloon at={[b.w, 0]} n={b.n} part={b.id} r={9} />}
+</g>

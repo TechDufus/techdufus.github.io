@@ -1,0 +1,40 @@
+---
+/*
+  ServerCards: the <PartCard> templates for every clickable R720xd part, straight from the
+  cards in src/data/lab/server.ts. Part ids: the drive ids (gigastone-1 … st300mp0004), the
+  pulled drive (st9300653ss), the pools (rpool, fast, bulk), hba330, perc, cable-1 … cable-4,
+  server, cpu1, cpu2, memory, fans, backplane, riser-1, psus, nics.
+
+  <Fragment slot="cards"><ServerCards /></Fragment>                     all of them
+  <Fragment slot="cards"><ServerCards only={['gigastone-1']} /></Fragment>   a subset
+*/
+import PartCard from '../PartCard.astro';
+import { server } from '../../../data/lab/server';
+import type { Card } from '../../../data/lab/types';
+
+interface Props {
+  only?: string[];
+}
+const { only } = Astro.props;
+const part = (id: string) => server.internal.parts.find((p) => p.id === id)?.card;
+const all: [string, Card | undefined][] = [
+  ...server.drives.map((d): [string, Card] => [d.id, d.card]),
+  [server.removed.id, server.removed.card],
+  ...server.pools.map((p): [string, Card] => [p.id, p.card]),
+  ['hba330', server.controller.now.card],
+  ['perc', server.controller.before.card],
+  ...server.cables.filter((c) => c.n < 5).map((c): [string, Card] => [`cable-${c.n}`, c.card]),
+  ['server', server.identity.card],
+  ['cpu1', server.cpus[0].card],
+  ['cpu2', server.cpus[1].card],
+  ['memory', server.memory.card],
+  ['fans', server.fans.card],
+  ['backplane', part('backplane')],
+  ['riser-1', part('riser-1')],
+  ['psus', server.psus.card],
+  ['nics', server.nics.card],
+];
+const cards = all.filter((e): e is [string, Card] => !!e[1] && (!only || only.includes(e[0])));
+---
+
+{cards.map(([id, c]) => <PartCard id={id} title={c.title} kind={c.kind} lines={c.lines} />)}

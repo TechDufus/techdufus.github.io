@@ -1,25 +1,21 @@
 ---
 /*
-  View: one view on a sheet: a paper region, its title and scale label, the cursor readout
-  mapping, and (with `name`) a tab panel switched by ViewTabs.
+  View: one view on a sheet: a paper region with its title and scale label, and (with `name`) a
+  tab panel switched by ViewTabs.
 
   <View dwg="lab01" name="front" x={a.x} y={a.y} w={a.w} h={a.h} title="FRONT ELEVATION"
-        scale={v.scale} mm={v.matrix} u0={0} active>
+        scale={v.scale} active>
     …paths drawn with the view's projection…
   </View>
 
     dwg        the Sheet id (needed with `name`, for the tab ↔ panel ids)
     name       tab panel name; omit for a view that is always shown
     active     the panel shown first (exactly one per sheet)
-    x y w h    paper region; a transparent hit rect fills it so the status bar can read the cursor
+    x y w h    paper region (places the default label)
     title      view title, mono caps, double-ruled ("FRONT ELEVATION", "SECTION A–A", "DETAIL B")
     scale      paper units per mm (printed as "SCALE 1:5") or a literal string ("NOT TO SCALE")
-    note       small line under the scale ("PLACEHOLDER DIMENSIONS")
+    note       small line under the scale
     labelAt    [x, y] of the title's centre (default: bottom centre of the region)
-    mm         matrix(…) mapping the view's model mm onto the paper (ortho().matrix, or
-               iso.faceMatrix(face, origin, true)); drives the X/Y readout
-    u0         model height (mm) of the bottom of U `uStart`, to read rack units too
-    uStart     number of that U (default 1)
 */
 import { fmtScale } from '../../lib/drawing/projection';
 import { monoWidth } from '../../lib/drawing/sheet';
@@ -36,11 +32,8 @@ interface Props {
   scale?: number | string;
   note?: string;
   labelAt?: [number, number];
-  mm?: string;
-  u0?: number;
-  uStart?: number;
 }
-const { dwg, name, active = false, x, y, w, h, title, scale, note, labelAt, mm, u0, uStart = 1 } = Astro.props;
+const { dwg, name, active = false, x, y, w, h, title, scale, note, labelAt } = Astro.props;
 const f = (v: number): string => String(Math.round(v * 10) / 10);
 const [lx, ly] = labelAt ?? [x + w / 2, y + h - 34];
 const scaleText = scale === undefined ? '' : typeof scale === 'number' ? `SCALE ${fmtScale(scale)}` : scale;
@@ -55,13 +48,7 @@ const panel = name && dwg ? { id: `${dwg}-view-${name}`, tab: `${dwg}-tab-${name
   aria-labelledby={panel?.tab}
   data-view-panel={name}
   data-active={!name || active ? '' : undefined}
-  data-view-title={title}
-  data-view-scale={scaleText || undefined}
-  data-mm={mm}
-  data-u0={u0}
-  data-u1={u0 === undefined ? undefined : uStart}
 >
-  <rect class="dwg-hit" x={f(x)} y={f(y)} width={f(w)} height={f(h)} />
   <slot />
   {title && (
     <g class="view__label" style="--p:6">
