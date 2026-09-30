@@ -32,7 +32,7 @@ const text =
     layers.map((l, i) => `Layer ${i + 1}, ${l.label}${l.tool ? ` (${l.tool})` : ''}${l.tone === 'planned' ? ', planned' : ''}: ${list(l.items.map(say)) || 'empty'}.`).join(' ');
 ---
 
-<Figure {...base} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0}>
+<Figure {...base} bp={base.bp ?? L.size[0]} desc={text} size={L.size} narrow={L.narrow} interactive={cards.length > 0} hint={hint ?? cards.length > 0}>
   {(['w', 'n'] as const).map((k) => (
     <g class={`fg-${k}`} style="--p:1">
       {L.bands.map((b) => (

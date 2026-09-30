@@ -3,7 +3,7 @@
   FIG 5 · Two cables, 26 bays: the inside of the R720xd from above, simplified, from
   server.internal (parts and cable routes as fractions of the chassis). The part drawing is one
   group in fraction units, mapped by a matrix: front to the left in the wide layout, front at the
-  top in the narrow one (a CSS matrix; strokes are non-scaling). Labels move as blocks. Cables 1–4
+  top in the narrow one (272 units; a CSS matrix; strokes are non-scaling). Labels move as blocks. Cables 1–4
   are clickable parts; their balloons carry the cable numbers.
 */
 import Figure from '../figure/Figure.astro';
@@ -31,7 +31,7 @@ const line = (pts: [number, number][]): string => pts.map(([x, z], i) => `${i ? 
 
 /* layouts: wide = front at the left, narrow = front at the top */
 const Wd = { x: 110, y: 34, d: 680, w: 380 };
-const Nw = { x: 20, y: 84, d: 560, w: 350 };
+const Nw = { x: 14, y: 84, d: 400, w: 244 };
 const mapW = (u: number, v: number): P => [Wd.x + Wd.d * v, Wd.y + Wd.w * (1 - u)];
 const mapN = (u: number, v: number): P => [Nw.x + Nw.w * u, Nw.y + Nw.d * v];
 const matW = `matrix(0 ${-Wd.w} ${Wd.d} 0 ${Wd.x} ${Wd.y + Wd.w})`;
@@ -70,8 +70,8 @@ const mid = (id: string): [number, number] => {
 };
 const connectors = ['sas-b', 'sas-a', 'sas-a1'].map((id, i) => {
   const [u, v] = mid(id);
-  // narrow: the three sit 47 apart, so the middle one steps up a line
-  const [wp, np] = both(u, v, [-10 - Wd.d * v, 4], [0, -12 - Nw.d * v - (i === 1 ? 15 : 0)]);
+  // narrow: the three sit about 33 apart, so each steps up a line from the one before
+  const [wp, np] = both(u, v, [-10 - Wd.d * v, 4], [0, -12 - Nw.d * v - i * 15]);
   return { t: part(id).label, wp, np, lw: `M${wp[0] + 4} ${wp[1] - 4}H${mapW(u, v)[0]}`, ln: `M${np[0]} ${np[1] + 4}V${mapN(u, v)[1]}` };
 });
 // balloons on the cables: a point on each route
@@ -99,7 +99,8 @@ const desc =
   desc={desc}
   caption="Two cables reach all 26 bays, because the backplane does the fanning out."
   size={[900, 456]}
-  narrow={[390, 710]}
+  narrow={[272, Nw.y + Nw.d + 76]}
+  bp={900}
   breakout
   interactive
   hint
@@ -135,14 +136,14 @@ const desc =
       <text class="txt-note" y="15">came out</text>
     </g>
     <g class="sem-removed"><text {...at(...both(...mid('j-sasx8'), [-14, 4], [7, 21]), 'txt-note fg-e fg-ko')}>{part('j-sasx8').label}</text></g>
-    <g {...at(...both((flex.x[0] + flex.x[1]) / 2, flex.z[0], [-27, -8], [-20, -41]), 'fg-e fg-nc fg-ko')}>
+    <g {...at(...both((flex.x[0] + flex.x[1]) / 2, flex.z[0], [-27, -8], [-8, -84]), 'fg-e fg-nc fg-ko')}>
       <text class="txt-note">flex backplane</text>
       <text class="txt-label" y="15">{bays.rear} rear bays</text>
     </g>
     <text {...at([Wd.x + Wd.d + 14, Wd.y + Wd.w / 2], [Nw.x, Nw.y + Nw.d + 20], 'view__t')}>REAR</text>
     <g {...at([Wd.x, Wd.y + Wd.w + 30], [Nw.x, Nw.y + Nw.d + 44])}>
       {legend.map((l, i) => (
-        <g class={TONE[l.s].c || undefined}><text class="txt-note" x={[0, 110, 240][i]}>{l.ns.join(', ')} · {TONE[l.s].word}</text></g>
+        <g {...at([[0, 110, 240][i], 0], [[0, 96, 0][i], [0, 0, 16][i]], TONE[l.s].c)}><text class="txt-note">{l.ns.join(', ')} · {TONE[l.s].word}</text></g>
       ))}
     </g>
   </g>

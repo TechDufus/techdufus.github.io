@@ -3,7 +3,8 @@
  * figure primitives in src/components/drawing/figure/ (Flow, Stack, Compare, Lanes, Bars).
  *
  * Every primitive lays itself out twice from the same data: a wide layout (the ~680px prose
- * column, or 920 with `breakout`) and a narrow one (a phone, 360 paper units wide). Blocks that
+ * column, or 920 with `breakout`) and a narrow one (a phone, 272 paper units wide, so 10.5-unit
+ * notes read at ≥ 12px and 12-unit labels at ≥ 14px on a 320px-wide figure). Blocks that
  * exist in both are drawn once and placed with `at(wide, narrow)`: the wide spot is the SVG
  * transform attribute, the narrow one a CSS variable that Figure.astro applies (.is-narrow .fg-m).
  * Lines that differ go in `.fg-w` (wide only) and `.fg-n` (narrow only) groups.
@@ -35,7 +36,7 @@ export type FigNode = {
 
 export const WIDE = 680;
 export const BREAKOUT = 920;
-export const NARROW = 360;
+export const NARROW = 272;
 
 /** Tone → class on the node/edge group (kit semantic classes, plus figure.css for the rest). */
 export const TONE: Record<Tone, string> = { default: '', new: 'sem-new', removed: 'sem-removed', keep: 'fg-keep', planned: 'fg-planned' };
@@ -61,7 +62,8 @@ export type FigureBase = {
   scale?: string;
   rev?: string;
   date?: string;
-  /** Figure width in px below which the narrow layout is used (default 0.8 × wide width). */
+  /** Figure width in px below which the narrow layout is used (default: the wide width, so the
+   *  wide layout never shows below 1:1). */
   bp?: number;
 };
 
@@ -119,8 +121,9 @@ export class Pen {
 /* ---------------------------------------------------------------- boxes */
 
 export type Line = { t: string; cls: 'txt-label' | 'txt-note'; y: number };
-/** A node sized for a figure: every box in one figure shares w and h (rhythm). */
-export type Box = FigNode & { w: number; h: number; lines: Line[]; tone: Tone; n?: string };
+/** A node sized for a figure: every box in one figure shares w and h (rhythm). `nb` is its
+ *  narrow-layout size and lettering, when that differs from the wide one. */
+export type Box = FigNode & { w: number; h: number; lines: Line[]; tone: Tone; n?: string; nb?: { w: number; h: number; lines: Line[] } };
 
 const PAD_X = 16;
 const LH_LABEL = 15;
@@ -376,9 +379,14 @@ export function compareLayout(rows: CompareRow[], W = WIDE, NW = NARROW): Compar
   const R = rows.length;
   const K = Math.max(...rows.map((r) => r.nodes.length));
   const colW = (NW - 2 * NMX - (R - 1) * NCG) / R;
-  const w = Math.floor(Math.min(wantW(rows.flatMap((r) => r.nodes.map((n) => n.label))), (W - 2 * MX - (K - 1) * 40) / K, colW - 6));
-  const all = boxes(rows.flatMap((r) => r.nodes), w);
-  const h = all[0].h;
+  // wide and narrow boxes are sized apart: the phone's columns are narrower than a wide row's slots
+  const want = wantW(rows.flatMap((r) => r.nodes.map((n) => n.label)));
+  const w = Math.floor(Math.min(want, (W - 2 * MX - (K - 1) * 40) / K));
+  const nw = Math.floor(Math.min(want, colW - 6));
+  const nodes = rows.flatMap((r) => r.nodes);
+  const nbx = nw === w ? null : boxes(nodes, nw);
+  const all = boxes(nodes, w).map((b, i) => (nbx ? { ...b, nb: { w: nw, h: nbx[i].h, lines: nbx[i].lines } } : b));
+  const h = all[0].h, nh = nbx ? nbx[0].h : h;
   const per = split(all, rows.map((r) => r.nodes.length));
   const pitch = K > 1 ? Math.min((W - 2 * MX - w) / (K - 1), w + 110) : 0;
   const rowH = TH + h + 40;
@@ -391,13 +399,13 @@ export function compareLayout(rows: CompareRow[], W = WIDE, NW = NARROW): Compar
     const cx = NMX + r * (colW + NCG);
     per[r].forEach((b, j) => {
       const wp: P = [MX + j * pitch, top + TH];
-      const np: P = [cx + (colW - w) / 2, NTOP + j * (h + NGAP)];
+      const np: P = [cx + (colW - nw) / 2, NTOP + j * (nh + NGAP)];
       out.push({ ...b, wp, np });
       if (j) {
         const px = MX + (j - 1) * pitch + w, cy = top + TH + h / 2;
         aw.push(`M${f(px)} ${f(cy)}H${f(wp[0])}`);
         hw.push(head(wp[0], cy, 'r'));
-        const ux = np[0] + w / 2;
+        const ux = np[0] + nw / 2;
         an.push(`M${f(ux)} ${f(np[1] - NGAP)}V${f(np[1])}`);
         hn.push(head(ux, np[1], 'd'));
       }
@@ -407,7 +415,7 @@ export function compareLayout(rows: CompareRow[], W = WIDE, NW = NARROW): Compar
       const s = typeof row.stamp === 'string' ? { text: row.stamp } : row.stamp;
       const sw = Math.max(monoWidth(s.text, 24, 0.16), s.sub ? monoWidth(s.sub, 9.5, 0.22) : 0) + 36;
       const tw = Math.max(monoWidth(row.label.toUpperCase(), 13, 0.14), row.note ? wNote(row.note) : 0);
-      const lastY = NTOP + (per[r].length - 1) * (h + NGAP) + h;
+      const lastY = NTOP + (per[r].length - 1) * (nh + NGAP) + nh;
       const k = Math.min(1, (colW - 4) / sw);
       stamp = { ...s, wp: [MX + tw + 56 + sw / 2, top + 6], np: [cx + colW / 2, lastY + 40, Math.round(k * 100) / 100] };
     }
@@ -415,11 +423,11 @@ export function compareLayout(rows: CompareRow[], W = WIDE, NW = NARROW): Compar
   });
   const rules = {
     w: rows.slice(1).map((_, r) => `M${MX} ${f(18 + (r + 1) * rowH - 20)}H${W - MX}`).join(''),
-    n: rows.slice(1).map((_, r) => `M${f(NMX + (r + 1) * (colW + NCG) - NCG / 2)} 14V${f(NTOP + K * (h + NGAP) - NGAP + (stamps ? 50 : 6))}`).join(''),
+    n: rows.slice(1).map((_, r) => `M${f(NMX + (r + 1) * (colW + NCG) - NCG / 2)} 14V${f(NTOP + K * (nh + NGAP) - NGAP + (stamps ? 50 : 6))}`).join(''),
   };
   return {
     size: [W, Math.ceil(18 + R * rowH - 22)],
-    narrow: [NW, Math.ceil(NTOP + K * (h + NGAP) - NGAP + (stamps ? 76 : 20))],
+    narrow: [NW, Math.ceil(NTOP + K * (nh + NGAP) - NGAP + (stamps ? 76 : 20))],
     boxes: out,
     rows: meta,
     arrows: { w: aw.join(''), n: an.join(''), heads: { w: hw.join(''), n: hn.join('') } },
@@ -534,7 +542,8 @@ export type BarsLayout = {
   narrow: P;
   bars: (Bar & { box: Box; at: { wp: P; np: P }; geo: { w: BarGeo; n: BarGeo }; text: string })[];
   axis: { w: string; n: string; ticks: { v: number; w: number; n: number }[]; wy: number; ny: number };
-  band?: { w: string; n: string; label?: { wp: P; np: P; t: string } };
+  /** `start`: the narrow label doesn't fit left of the band's end, so it starts at the band's start. */
+  band?: { w: string; n: string; label?: { wp: P; np: P; t: string; start: boolean } };
 };
 
 /** Horizontal bars from zero. Wide: names in a left column. Narrow: the name above each bar. */
@@ -577,13 +586,14 @@ export function barsLayout(bars: Bar[], opts: { max?: number; unit?: string; tic
   const X = (k: 'w' | 'n', v: number): number => L[k].x0 + (v * (L[k].x1 - L[k].x0)) / axisMax;
   const axis = (k: 'w' | 'n'): string => `M${f(L[k].x0)} ${f(ay(k))}H${f(L[k].x1)}` + ticks.map((v) => `M${f(X(k, v))} ${f(ay(k))}v5`).join('');
   const bandPath = (k: 'w' | 'n'): string => (band ? rc(X(k, band.from), L[k].top - 8, X(k, band.to) - X(k, band.from), ay(k) - L[k].top + 8) : '');
+  const start = !!band?.label && X('n', band.to) - wNote(band.label) < NMX;
   return {
     size: [W, Math.ceil(ay('w') + 30)],
     narrow: [NW, Math.ceil(ay('n') + 30)],
     bars: out,
     axis: { w: axis('w'), n: axis('n'), ticks: ticks.map((v) => ({ v, w: X('w', v), n: X('n', v) })), wy: ay('w'), ny: ay('n') },
     band: band
-      ? { w: bandPath('w'), n: bandPath('n'), label: band.label ? { t: band.label, wp: [X('w', band.to), L.w.top - 16], np: [X('n', band.to), L.n.top - 16] } : undefined }
+      ? { w: bandPath('w'), n: bandPath('n'), label: band.label ? { t: band.label, wp: [X('w', band.to), L.w.top - 16], np: [X('n', start ? band.from : band.to), L.n.top - 16], start } : undefined }
       : undefined,
   };
 }
