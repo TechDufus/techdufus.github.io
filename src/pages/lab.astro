@@ -57,7 +57,7 @@ const [photoLead, photoRest] = (photo.caption ?? '').split(' · ');
 
 <BaseLayout
   title="The lab"
-  description={`The homelab as engineering drawings: the cabinet, the R720xd and the stack on top of it (Proxmox, Talos Kubernetes, Flux), plus a terminal-first desk. Last revised ${labSpec.lastRevised}.`}
+  description={`The homelab as engineering drawings: the cabinet, the R730 and the stack on top of it (Proxmox, Talos Kubernetes, Flux), plus a terminal-first desk. Last revised ${labSpec.lastRevised}.`}
   ogImage={siteMetadata.media.labSocialImage}
   ogImageAlt={siteMetadata.media.labSocialImageAlt}
 >
@@ -73,7 +73,7 @@ const [photoLead, photoRest] = (photo.caption ?? '').split(' · ');
       </p>
 
       <dl class="stats lhero__stats" data-reveal style="--d:3">
-        <Stat value={server.threads} term="Threads" label="threads, two Xeons, one R720xd" />
+        <Stat value={server.threads} term="Threads" label="threads, two Xeons, one R730" />
         <Stat value={server.memory.gb} accent="GB" term="Memory" label="of RAM in the same box" />
         <Stat value={server.pools.length} term="ZFS pools" label={`ZFS pools: ${server.pools.map((p) => p.id).join(', ')}`} />
         {talos?.count && <Stat value={talos.count} term="Cluster" label={`Talos ${talos.version} nodes on Proxmox`} />}

@@ -1,0 +1,237 @@
+---
+/*
+  OrthoViews: Sheet 02's ORTHOGRAPHIC tab, as built: the TOP VIEW (cover off) above the FRONT,
+  the REAR beside it, DETAIL B (the populated front bays 0–9, big enough to click and to letter)
+  and the ZFS POOLS tree (each pool, its hot spare, and the spares that sit in no pool). Detail B
+  comes first in the DOM: a balloon click opens its card beside the first part with that id, and
+  the balloons live there. Drives, pools, the PERC mini, the backplane, fans, CPUs, DIMM sockets,
+  PSUs, risers and the NDC are parts. Needs <R730Defs id={dwg} /> in the same SVG and
+  <R730Cards /> on the page. A3 paper units.
+
+  <OrthoViews dwg="lab02" active />
+*/
+import View from '../View.astro';
+import Dim from '../Dim.astro';
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import Particles from '../Particles.astro';
+import Stamp from '../Stamp.astro';
+import BayStrip from './BayStrip.astro';
+import PlanView from './PlanView.astro';
+import { atScale, join } from '../../../lib/drawing/projection';
+import {
+  BEZEL, D, EAR, EAR_D, FANS, H, HANDLES, NUM, OVERALL, RISERS, STAMP, W, WE,
+  P, R, bayP, bayX, driveClass, driveShort, frontDrives, n, part, partLabel, place, planAt, pools, psuOpen, rj, rz, spareKind,
+} from './geom';
+
+interface Props {
+  dwg: string;
+  active?: boolean;
+}
+const { dwg, active = false } = Astro.props;
+
+const s = atScale(1, 4); // 0.75
+const X0 = 74, YF = 612, YT = 668, XR = X0 + s * WE + 30 + s * EAR; // rear body left
+const top = planAt(X0, YF, s);
+const pl = top.pt;
+/** front face (u, v) → paper */
+const fr = (u: number, v: number): [number, number] => [X0 + s * u, YT + s * v];
+/** rear face (u from the body's left seen from behind, v) → paper */
+const rr = (u: number, v: number): [number, number] => [XR + s * u, YT + s * v];
+const title = partLabel;
+
+// top view: balloons down the left edge for what touches the left wall, along an aisle behind
+// the DIMMs for the CPUs and sockets
+const bp = part('backplane'), fans = part('fans'), perc = part('perc');
+const cpus = [part('cpu1'), part('cpu2')];
+const bank = part('dimms');
+const psu2 = psuOpen(2);
+const LX = 58;
+const edge = (b: { x: number; z: number; w: number; d: number }, dx = 6): [number, number] => pl(b.x + dx, b.z + b.d / 2);
+const aisleY = pl(0, 455)[1];
+const fw = fans.w / FANS;
+const cold = P([pl(fans.x + 2.5 * fw, -30), pl(fans.x + 2.5 * fw, 140)]);
+const hotX = EAR + W * 0.79; // the gap between riser 2 and riser 1
+const hot = P([pl(hotX, 412), pl(hotX, 735)]);
+
+// Detail B: the left ear and bays 0–9 at 1:1.5
+const SB = atScale(1, 1.5);
+const lastBay = frontDrives[frontDrives.length - 1].bay;
+const B = { x: 500, y: 190, to: lastBay, u1: bayX(lastBay) + bayP(lastBay) + 1.5 };
+
+// rear view: NDC ports
+const nics = ['nic-1', 'nic-2', 'nic-3', 'nic-4'];
+const n1 = rz('nic-1'), n4 = rz('nic-4');
+const nicOut = rr(n1.x + n1.w / 2, n1.y + n1.h);
+const nicBox = R(...rr(n1.x - 5, n1.y - 3), s * (n4.x + n4.w - n1.x + 10), s * (n1.h + 6));
+const psu1 = rz('psu-1'), psu2r = rz('psu-2');
+const riserPaths = RISERS.map((r) => {
+  const slots = r.slots.map(rz);
+  return { ...r, hit: R(...rr(r.x0 - 2, r.y0 - 2), s * (r.x1 - r.x0 + 4), s * (r.y1 - r.y0 + 4)), outline: slots.map((q) => R(q.x, q.y, q.w, q.h)).join('') };
+});
+const psuHit = R(...rr(psu1.x, psu1.y), s * (psu2r.x + psu2r.w - psu1.x), s * psu1.h);
+const psuLines = R(psu1.x, psu1.y, psu1.w, psu1.h) + R(psu2r.x, psu2r.y, psu2r.w, psu2r.h);
+
+// ZFS pools: a tree per pool, then the spares that sit in no pool. Columns are as wide as their
+// longest row (10.5-unit lettering advances 6.9 units a glyph).
+const T = { x: 490, y: 484, row: 18 };
+const drive = (bay: number) => frontDrives.find((d) => d.bay === bay)!;
+const layout = (p: (typeof pools)[number]) => (p.layout === 'mirror' ? `${p.copies}-WAY MIRROR` : 'ONE DISK');
+const loose = frontDrives.filter((d) => !d.pool);
+type Row = { d: (typeof frontDrives)[number]; text: string };
+type Col = { id: string; pool?: (typeof pools)[number]; rows: Row[]; note: string; x: number; w: number };
+const rowText = (d: Row['d'], hot: boolean) => `BAY ${d.bay} · ${hot ? 'HOT SPARE' : driveShort(d)}`;
+const draft = [
+  ...pools.map((p) => ({
+    id: p.id,
+    pool: p,
+    rows: [...p.bays.map((b) => ({ d: drive(b), text: rowText(drive(b), false) })), ...p.spares.map((b) => ({ d: drive(b), text: rowText(drive(b), true) }))],
+    note: p.holds.toUpperCase(),
+  })),
+  ...(loose.length ? [{ id: 'none', pool: undefined, rows: loose.map((d) => ({ d, text: rowText(d, false) })), note: 'WIPED AND WAITING' }] : []),
+];
+let colX = T.x;
+const cols: Col[] = draft.map((c) => {
+  const chars = Math.max(...c.rows.map((r) => r.text.length), 14);
+  const w = 34 + chars * 6.9 + 8;
+  const col = { ...c, x: colX, w };
+  colX += w;
+  return col;
+});
+/** A note wrapped to its column (6.9 units a glyph), words kept whole. */
+const wrap = (text: string, w: number): string[] => {
+  const max = Math.floor((w - 28) / 6.9);
+  const lines: string[] = [];
+  for (const word of text.split(' ')) {
+    const last = lines[lines.length - 1];
+    if (last !== undefined && last.length + 1 + word.length <= max) lines[lines.length - 1] = `${last} ${word}`;
+    else lines.push(word);
+  }
+  return lines;
+};
+---
+
+<View dwg={dwg} name="ortho" active={active} x={39} y={39} w={1182} h={813}>
+  <!-- ================= DETAIL B: bays 0–9 ================= -->
+  <View x={500} y={150} w={700} h={290} title="DETAIL B" scale={SB} labelAt={[B.x + (SB * B.u1) / 2, 438]}>
+    <BayStrip dwg={dwg} x={B.x} y={B.y} s={SB} to={B.to} nums="in" letter balloons={166} brackets />
+  </View>
+
+  <!-- ================= ZFS POOLS ================= -->
+  <View x={480} y={462} w={740} h={200} title="ZFS POOLS" labelAt={[T.x + (colX - T.x) / 2 - 20, 650]}>
+    {cols.map((c) => {
+      const x = c.x, y = T.y;
+      const rows0 = y + 50;
+      const last = rows0 + (c.rows.length - 1) * T.row;
+      const body = (
+        <>
+          <text class="txt-label" x={x + 22} y={y + 4}>{c.pool ? c.id.toUpperCase() : 'NO POOL'}</text>
+          <text class="txt-note" x={x + 22} y={y + 17}>{c.pool ? layout(c.pool) : 'SPARES'}</text>
+          <text class="txt-note" x={x + 22} y={y + 30}>{c.pool ? <>≈ {c.pool.usableGiB}{' '}<tspan class="sv-nc">GiB</tspan></> : 'IN THE SERVER'}</text>
+        </>
+      );
+      return (
+        <g class={c.pool ? `pool-${c.id}` : 'pool-none'}>
+          {c.pool ? (
+            <>
+              <Part id={c.id} label={c.id}>
+                <path class="dwg-hit" d={R(x - 12, y - 12, c.w - 14, 48)} />
+                {body}
+              </Part>
+              <Balloon at={[x, y]} n={NUM[c.id]} part={c.id} />
+            </>
+          ) : (
+            <g>
+              <path class="ln-med sv-dash" d={`M${x} ${y - 11}v22`} />
+              {body}
+            </g>
+          )}
+          <path class="ln-med" d={`M${x} ${y + 40}V${last}` + c.rows.map((_, j) => `M${x} ${rows0 + j * T.row}h14`).join('')} />
+          {c.rows.map((r, j) => {
+            const ry = rows0 + j * T.row;
+            const kind = spareKind(r.d);
+            return (
+              <Part id={r.d.id} label={r.d.card.title} class={driveClass(r.d)}>
+                <path class="dwg-hit" d={R(x + 16, ry - 9, c.w - 20, 18)} />
+                <path class:list={['sv-drv', kind && `sv-${kind}`]} d={R(x + 18, ry - 4.5, 12, 9)} />
+                {kind === 'hot' && <path class="sv-hatch" d={R(x + 18, ry - 4.5, 12, 9)} />}
+                <text class="txt-note sv-row" x={x + 34} y={ry + 3.8}>{r.text}</text>
+              </Part>
+            );
+          })}
+          {wrap(c.note, c.w).map((line, k) => <text class="txt-note" x={x + 22} y={last + 24 + k * 13}>{line}</text>)}
+        </g>
+      );
+    })}
+  </View>
+
+  <!-- ================= TOP VIEW (cover off) ================= -->
+  <View x={39} y={48} w={440} h={600} title="TOP VIEW · COVER OFF" scale={s} labelAt={[340, 58]}>
+    <PlanView dwg={dwg} x={X0} y={YF} s={s} />
+    <path class="ln-phantom" d={R(...pl(0, -EAR_D), s * WE, s * (BEZEL - EAR_D))} style="--p:4" />
+    <Particles d={cold} kind="cold" n={3} dur={3} />
+    <Particles d={hot} kind="hot" n={3} dur={3} />
+    <Balloon at={[LX, pl(0, bp.z)[1]]} n={NUM.backplane} to={edge(bp, 8)} part="backplane" />
+    <Balloon at={[LX, pl(0, fans.z + fans.d / 2)[1]]} n={NUM.fans} to={edge(fans)} part="fans" />
+    <Balloon at={[LX, pl(0, perc.z + perc.d / 2)[1]]} n={NUM.perc} to={edge(perc, 3)} part="perc" />
+    <Balloon at={[LX, pl(0, psu2.z + psu2.d / 2)[1]]} n={NUM.psus} to={edge(psu2)} part="psus" />
+    {cpus.map((c, i) => (
+      <Balloon at={[pl(c.x + c.w / 2, 0)[0], aisleY]} n={NUM[`cpu${i + 1}`]} to={pl(c.x + c.w / 2, c.z + c.d - 6)} part={`cpu${i + 1}`} />
+    ))}
+    <Balloon at={[pl(bank.x + bank.w / 2, 0)[0], aisleY]} n={NUM.dimms} to={pl(bank.x + bank.w / 2, bank.z + bank.d - 12)} part="dimms" />
+    <Dim a={pl(EAR + W, 0)} b={pl(EAR + W, D)} offset={24} mm={D} />
+    <Dim a={pl(EAR + W, HANDLES)} b={pl(EAR + W, -BEZEL)} offset={52} mm={OVERALL} />
+  </View>
+
+  <!-- ================= FRONT ================= -->
+  <View x={39} y={654} w={420} h={198} title="FRONT" scale={s} labelAt={[X0 + (s * WE) / 2, 806]}>
+    <path class="ln-cons" d={join(P([pl(0, -BEZEL), fr(0, -14)]), P([pl(WE, -BEZEL), fr(WE, -14)]))} />
+    <BayStrip dwg={dwg} x={X0} y={YT} s={s} nums />
+    <path class="ln-thin" d={R(...fr(-3, -14), s * (B.u1 + 3), s * (H + 17))} style="--p:4" />
+    <text class="txt-label" x={X0 - 12} y={YT - 1}>B</text>
+    <Dim a={fr(0, H)} b={fr(WE, H)} offset={22} mm={WE} />
+    <Dim a={fr(WE, 0)} b={fr(WE, H)} offset={20} mm={H} sub="2U" />
+  </View>
+
+  <!-- ================= REAR ================= -->
+  <View x={470} y={640} w={367} h={212} title="REAR" scale={s} labelAt={[XR + (s * W) / 2, 806]}>
+    <path class="face-front" d={R(XR, YT, s * W, s * H)} />
+    <path class="ln-thin" d={join(R(XR - s * EAR, YT, s * EAR, s * H), R(XR + s * W, YT, s * EAR, s * H))} />
+    <use href={`#${dwg}-rear`} transform={place(s, XR, YT)} />
+    {riserPaths.map((r) => (
+      <Part id={r.id} label={title(r.id)}>
+        <path class="dwg-hit" d={r.hit} />
+        <path class="ln-med" d={r.outline} transform={place(s, XR, YT)} />
+      </Part>
+    ))}
+    <Part id="psus" label={title('psus')}>
+      <path class="dwg-hit" d={psuHit} />
+      <path class="ln-obj" d={psuLines} transform={place(s, XR, YT)} />
+    </Part>
+    <Part id="ndc" label={title('ndc')}>
+      <path class="dwg-hit" d={nicBox} />
+      <path class="ln-med" d={nics.map(rj).join('')} transform={place(s, XR, YT)} />
+    </Part>
+    <g class="net-1g">
+      <path class="ln-net" d={P([nicOut, [nicOut[0], 776]])} pathLength="1" />
+      <text class="txt-note" x={nicOut[0] - 6} y={772} text-anchor="end">NIC 1 → GATEWAY · 1 GbE</text>
+    </g>
+    {riserPaths.map((r) => {
+      const x = rr((r.x0 + r.x1) / 2, 0)[0];
+      return (
+        <>
+          <Balloon at={[x, 640]} n={NUM[r.id]} to={rr((r.x0 + r.x1) / 2, r.y0 + 3)} part={r.id} />
+          <text class="sv-s" x={x + 14} y={YT - 5} text-anchor="start">{r.id.replace('-', ' ').toUpperCase()}</text>
+        </>
+      );
+    })}
+    <Balloon at={[rr(n4.x + n4.w, 0)[0] + 22, 752]} n={NUM.ndc} to={rr(n4.x + n4.w / 2, n4.y + n4.h)} part="ndc" />
+    <g class="sv-s">
+      <text x={n(rr(psu1.x + psu1.w / 2, 0)[0])} y={YT + s * H + 12}>PSU 1</text>
+      <text x={n(rr(psu2r.x + psu2r.w / 2, 0)[0])} y={YT + s * H + 12}>PSU 2</text>
+    </g>
+    <Balloon at={[rr((psu1.x + psu1.w + psu2r.x) / 2, 0)[0], 764]} n={NUM.psus} to={rr((psu1.x + psu1.w + psu2r.x) / 2, psu1.y + psu1.h - 4)} part="psus" />
+  </View>
+
+  <Stamp x={1046} y={650} {...STAMP} />
+</View>

@@ -1,7 +1,7 @@
 ---
 /*
   Sheet 03 · SECTION A–A: the stack drawn as a building section. Layer 1 is the foundation (the
-  R720xd below grade on its ZFS footings, Proxmox at ground level, the host config as a plant
+  R730 below grade on its ZFS footings, Proxmox at ground level, the host config as a plant
   room), with the gateway, NAS and control node as site services. Layer 2 is the floor of VMs:
   one room per Talos node, standalone VMs as pavilions. Layer 3 is the cluster: a tower on the
   Talos rooms, Cilium as its floor, the platform as fixtures, the apps storey on top. What builds
@@ -27,7 +27,7 @@ const { active = false } = Astro.props;
 
 /* ---- the site: x across, y down; grade is y = G ---- */
 const X0 = 268; // building, left
-const XR = 932; // building, right (the R720xd's footprint)
+const XR = 932; // building, right (the R730's footprint)
 const RW = 136; // one Talos room
 const G = 550; // grade
 const SLAB = 6;
@@ -35,7 +35,7 @@ const n = talos.count;
 const TX1 = X0 + n * RW; // tower, right
 
 // layer 1 · bootstrap
-const r720 = thing('r720xd');
+const r730 = thing('r730');
 const zfs = thing('zfs');
 const pve = thing('proxmox');
 const hostItems = groupThings('host').filter((t) => t.id !== 'proxmox');
@@ -85,10 +85,15 @@ const feet = pools.map((p) => {
   return r;
 });
 
-// standalone VMs: pavilions on the VM floor beside the tower
-const PW = 120;
-const pav = solos.map((t, i) => ({ t, x: TX1 + 16 + i * (PW + 16), lines: wrap(t.item?.what ?? '', 15) }));
-if (pav.length && pav[pav.length - 1].x + PW > XR) throw new Error('stack section: too many standalone VMs for the VM floor');
+// standalone VMs: pavilions on the VM floor beside the tower (two fit beside three Talos rooms)
+const PW = 112, PG = 8;
+const pav = solos.map((t, i) => ({
+  t,
+  x: TX1 + 12 + i * (PW + PG),
+  title: wrap((t.item?.name ?? t.name).toUpperCase(), 9),
+  lines: wrap(t.item?.what ?? '', 12),
+}));
+if (pav.length && pav[pav.length - 1].x + PW > XR - SLAB - 4) throw new Error('stack section: too many standalone VMs for the VM floor');
 const PLANT = 112; // host config plant room(s), right end of the Proxmox storey
 const plants = hostItems.map((t, i) => ({ t, x: XR - (hostItems.length - i) * PLANT }));
 const pveR = plants.length ? plants[0].x : XR;
@@ -150,14 +155,14 @@ const up = (s: string) => s.toUpperCase();
   </g>
 
   <!-- ===== layer 1 · bootstrap ===== -->
-  <Part id={r720.id} label={tagOf(r720)} p={1}>
+  <Part id={r730.id} label={tagOf(r730)} p={1}>
     <path class="hatch ln-med" d={rc(X0, G, SLAB, B_B - G + SLAB) + rc(XR - SLAB, G, SLAB, B_B - G + SLAB) + rc(X0, B_B, XR - X0, SLAB)} />
     <rect class="face-side ln-obj" x={X0 + SLAB} y={G} width={XR - X0 - 2 * SLAB} height={B_B - G} pathLength="1" />
-    <text class="txt-label" x={X0 + 20} y={G + 26}>{up(r720.card.title)}</text>
+    <text class="txt-label" x={X0 + 20} y={G + 26}>{up(r730.card.title)}</text>
     <text class="txt-note" x={X0 + 20} y={G + 44}>{cpuCount} × {up(cpuModel)} · {threads} THREADS · {memoryGB} GB</text>
     <text class="txt-note" x={X0 + 20} y={G + 60}>{up(controllerName)} · {driveCount} DRIVES · BELOW GRADE</text>
   </Part>
-  <Balloon at={[XR - 22, G + 20]} n={r720.n} part={r720.id} r={9} />
+  <Balloon at={[XR - 22, G + 20]} n={r730.n} part={r730.id} r={9} />
 
   <Part id={zfs.id} label={tagOf(zfs)} p={2}>
     {feet.map((ft) => (
@@ -239,13 +244,13 @@ const up = (s: string) => s.toUpperCase();
     })}
   </Part>
   {Array.from({ length: n }, (_, i) => <Balloon at={[X0 + (i + 1) * RW - 16, VM_T + 18]} n={nodes.n} part={nodes.id} r={9} />)}
-  {pav.map(({ t, x, lines }) => (
+  {pav.map(({ t, x, title, lines }) => (
     <Fragment>
       <Part id={t.id} label={tagOf(t)} p={3} class={planned(t) ? 'stk-pl' : undefined}>
         <rect class={room(t)} x={x} y={VM_T + 12} width={PW} height={PX_T - SLAB - VM_T - 12} pathLength={planned(t) ? undefined : '1'} />
         <rect class="dwg-hit" x={x} y={VM_T + 12} width={PW} height={PX_T - SLAB - VM_T - 12} />
-        <text class="txt-label" x={x + 12} y={VM_T + 36}>{up(t.item?.name ?? t.name)}</text>
-        {lines.map((l, i) => <text class="txt-note" x={x + 12} y={VM_T + 56 + i * 14}>{up(l)}</text>)}
+        {title.map((l, i) => <text class="txt-label" x={x + 12} y={VM_T + 36 + i * 14}>{l}</text>)}
+        {lines.map((l, i) => <text class="txt-note" x={x + 12} y={VM_T + 56 + (title.length - 1) * 14 + i * 14}>{up(l)}</text>)}
       </Part>
       <Balloon at={[x + PW - 16, VM_T + 28]} n={t.n} part={t.id} r={9} />
     </Fragment>

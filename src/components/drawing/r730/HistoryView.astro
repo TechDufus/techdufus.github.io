@@ -1,0 +1,159 @@
+---
+/*
+  HistoryView: Sheet 02's R720xd → R730 tab. The R720xd's front, simplified (24 carriers; the six
+  drives that moved, in the bays they left), joined by an elbow line each to the bay they sit in on
+  the R730 (clickable, numbered, as on the other tabs), and the four Intel SSDs that are new to
+  the lab, in bays 0–3. The move table below is the owner's record of 2026-10-01 (it is not the
+  frozen 2026-09-28 snapshot: that one still shows a Gigastone in bay 0); the R720xd's outline is
+  the only thing read from the snapshot. Needs <R730Defs id={dwg} /> in the same SVG and
+  <R730Cards /> on the page.
+
+  <HistoryView dwg="lab02" />
+*/
+import View from '../View.astro';
+import Balloon from '../Balloon.astro';
+import Stamp from '../Stamp.astro';
+import BayStrip from './BayStrip.astro';
+import { server as old } from '../../../data/lab/snapshots/server-2026-09-28';
+import type { DriveId, PoolId } from '../../../data/lab/types';
+import {
+  BAY_H, BAY_Y0, H, NUM, R, STAMP, WE, bayP, bayX, frontDrives, n, driveShort, fitLetter, spareKind,
+} from './geom';
+
+interface Props {
+  dwg: string;
+  active?: boolean;
+}
+const { dwg, active = false } = Astro.props;
+
+/** The drives that moved over: where each one sat in the R720xd on 2026-10-01, and its pool there. */
+type Move = { to: DriveId; from: { bay: number; rear?: boolean }; was: PoolId };
+const MOVES: Move[] = [
+  { to: 'p210', from: { bay: 0 }, was: 'rpool' },
+  { to: 'gigastone', from: { bay: 1 }, was: 'rpool' },
+  { to: 'st300mp0004', from: { bay: 24, rear: true }, was: 'rpool' },
+  { to: 'mx500-1tb', from: { bay: 4 }, was: 'bulk' },
+  { to: 'mx500-500-1', from: { bay: 2 }, was: 'fast' },
+  { to: 'mx500-500-2', from: { bay: 3 }, was: 'fast' },
+];
+const drive = (id: DriveId) => frontDrives.find((d) => d.id === id)!;
+const fresh = frontDrives.filter((d) => !MOVES.some((m) => m.to === d.id));
+const upper = (s: string) => s.toUpperCase();
+
+// the R720xd strip (simplified), then the R730 strip under it, both at 1:2.3
+const S = 1.3, X = 60, OLD_Y = 215, NEW_Y = 420;
+const zone = old.panels.front.zones.find((z) => z.id === 'bays')!;
+const ears = old.panels.front.zones.filter((z) => z.kind === 'ear');
+const OLD_N = old.bays.front;
+const oldPitch = ((zone.x1 - zone.x0) * WE) / OLD_N;
+const oldX = (i: number): number => X + S * (zone.x0 * WE + i * oldPitch);
+const oldTop = OLD_Y + S * zone.y0 * H, oldH = S * (zone.y1 - zone.y0) * H;
+const oldRect = (i: number) => R(oldX(i) + S * 0.5, oldTop, S * (oldPitch - 1), oldH);
+const oldMid = (i: number): number => oldX(i) + (S * oldPitch) / 2;
+// the rear flex bays, as a small box beside it
+const REAR = { x: 700, y: OLD_Y + 10, w: 122, h: 66 };
+const rearBay = { x: REAR.x + 8, y: REAR.y + 12, w: 50, h: 42 };
+
+const newMid = (bay: number): number => X + S * (bayX(bay) + bayP(bay) / 2);
+const newTop = NEW_Y + S * BAY_Y0;
+const newBottom = NEW_Y + S * (BAY_Y0 + BAY_H);
+
+// elbow levels: shallow → deep, so the lines cross as little as the order allows
+const LEVEL: Record<string, number> = { 'st300mp0004': 342, 'mx500-1tb': 355, 'mx500-500-2': 368, 'mx500-500-1': 381, 'gigastone': 394, 'p210': 407 };
+const links = MOVES.map((m) => {
+  const d = drive(m.to);
+  const x1 = m.from.rear ? rearBay.x + rearBay.w / 2 : oldMid(m.from.bay);
+  const y1 = m.from.rear ? rearBay.y + rearBay.h + 2 : oldTop + oldH + 3;
+  const x2 = newMid(d.bay), y2 = newTop - 3;
+  const ym = LEVEL[m.to];
+  return { m, d, path: `M${n(x1)} ${n(y1)}V${n(ym)}H${n(x2)}V${n(y2 - 6)}`, tip: `M${n(x2)} ${n(y2)}l-3.4 -8h6.8z` };
+});
+
+// the move table, down the right-hand column
+const rows = MOVES.map((m) => {
+  const d = drive(m.to);
+  const was = m.from.rear ? `REAR ${m.from.bay}` : `BAY ${m.from.bay}`;
+  return {
+    id: m.to,
+    head: `${was} → BAY ${d.bay}`,
+    what: driveShort(d),
+    pool: upper(m.was),
+    changed: d.pool !== m.was ? `WAS ${upper(m.was)} · NOW ${d.pool ? upper(d.pool) : 'A SPARE'}` : '',
+    cls: `pool-${m.was}`,
+  };
+});
+const COL = 858;
+---
+
+<View dwg={dwg} name="history" active={active} x={39} y={39} w={1182} h={813}>
+  <!-- ================= R720xd (simplified) ================= -->
+  <View x={50} y={130} w={780} h={220} title="R720XD" scale="AS LAST BUILT · 2026-10-01" labelAt={[165, 140]}>
+    <path class="face-front" d={R(X, OLD_Y, S * WE, S * H)} />
+    <path class="ln-obj" d={R(X, OLD_Y, S * WE, S * H)} />
+    <path class="ln-thin" d={ears.map((z) => `M${n(X + S * (z.x0 === 0 ? z.x1 : z.x0) * WE)} ${n(OLD_Y)}v${n(S * H)}`).join('')} />
+    <path class="ln-thin" d={Array.from({ length: OLD_N }, (_, i) => oldRect(i)).join('')} />
+    {links.filter((l) => !l.m.from.rear).map((l) => (
+      <g class={`pool-${l.m.was}`}>
+        <path class="sv-drv" d={oldRect(l.m.from.bay)} />
+        <text class="sv-lt sv-ko" transform={`translate(${n(oldMid(l.m.from.bay) + 3.2)} ${n(oldTop + oldH - 8)}) rotate(-90)`}>{fitLetter(l.d, oldH - 14)}</text>
+      </g>
+    ))}
+    {Array.from({ length: OLD_N }, (_, i) => <text class="sv-s" x={n(oldMid(i))} y={OLD_Y - 6}>{i}</text>)}
+
+    <path class="ln-obj" d={R(REAR.x, REAR.y, REAR.w, REAR.h)} />
+    <path class="ln-thin" d={R(REAR.x + 8, REAR.y + 12, 50, 42) + R(REAR.x + 64, REAR.y + 12, 50, 42)} />
+    {links.filter((l) => l.m.from.rear).map((l) => (
+      <g class={`pool-${l.m.was}`}>
+        <path class="sv-drv" d={R(rearBay.x, rearBay.y, rearBay.w, rearBay.h)} />
+      </g>
+    ))}
+    <path class="sv-empty" d={R(REAR.x + 64, REAR.y + 12, 50, 42)} />
+    <text class="sv-s" x={n(rearBay.x + rearBay.w / 2)} y={n(rearBay.y + rearBay.h / 2 + 3)}>24</text>
+    <text class="sv-s" x={n(REAR.x + 64 + 25)} y={n(rearBay.y + rearBay.h / 2 + 3)}>25</text>
+    <text class="sv-s" x={n(REAR.x + REAR.w / 2)} y={n(REAR.y + REAR.h + 14)}>REAR BAYS 24 · 25</text>
+  </View>
+
+  <!-- ================= the moves ================= -->
+  {links.map((l) => (
+    <g class={`pool-${l.m.was}`}>
+      <path class="sv-link" d={l.path} pathLength="1" />
+      <path class="dim-arr" d={l.tip} />
+    </g>
+  ))}
+
+  <!-- ================= R730 ================= -->
+  <View x={50} y={400} w={780} h={300} title="R730" scale="AS BUILT · 2026-10-02" labelAt={[165, 630]}>
+    <BayStrip dwg={dwg} x={X} y={NEW_Y} s={S} nums="in" letter />
+    {frontDrives.map((d) => <Balloon at={[newMid(d.bay), 586]} n={NUM[d.id]} to={[newMid(d.bay), newBottom - 4]} part={d.id} />)}
+    <g class="sem-new">
+      <path class="ln-obj" d={`M${n(X + S * (bayX(fresh[0].bay) + 1.5))} ${n(NEW_Y + S * H + 10)}v6H${n(X + S * (bayX(fresh[fresh.length - 1].bay) + bayP(fresh[fresh.length - 1].bay) - 1.5))}v-6`} />
+      <text class="txt-label" x={n(X + (S * (bayX(fresh[0].bay) + bayX(fresh[fresh.length - 1].bay) + bayP(fresh[fresh.length - 1].bay))) / 2)} y={n(NEW_Y + S * H + 32)} text-anchor="middle">NEW TO THE LAB</text>
+    </g>
+  </View>
+
+  <!-- ================= the table ================= -->
+  <g>
+    <text class="txt-label" x={COL} y="176">MOVED OVER</text>
+    {rows.map((r, i) => {
+      const y = 204 + i * 40;
+      return (
+        <g class={r.cls}>
+          <text class="txt-label sv-row" x={COL} y={y}>{r.head}</text>
+          <text class="txt-note" x={COL} y={y + 14}>{r.what} · {r.changed || r.pool}</text>
+        </g>
+      );
+    })}
+    <g class="sem-new">
+      <text class="txt-label" x={COL} y={204 + rows.length * 40 + 14}>NEW TO THE LAB</text>
+      {fresh.map((d, i) => (
+        <text class="txt-note" x={COL} y={204 + rows.length * 40 + 34 + i * 14}>BAY {d.bay} · {driveShort(d)} · {upper(d.pool ?? 'no pool')}{spareKind(d) === 'hot' ? ', HOT SPARE' : ''}</text>
+      ))}
+    </g>
+  </g>
+
+  <a class="sv-a" href="/lab/r720xd/">
+    <text class="txt-label" x="60" y="708">THE ARCHIVED R720XD SHEET →</text>
+    <path class="dwg-hit" d={R(52, 692, 270, 24)} />
+  </a>
+  <Stamp x={1046} y={650} {...STAMP} />
+</View>

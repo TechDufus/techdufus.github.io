@@ -1,0 +1,49 @@
+---
+/*
+  Key: Sheet 02's legend. LineKey (the kit's) draws every swatch with the real line class; the two
+  spares need their own look (hatched and dashed in the pool's ink, dashed and neutral), so this
+  is the same markup with two extra swatches.
+
+  <Key items={[{ line: 'obj', label: 'Object' }, { line: 'spare-hot', label: 'Hot spare' }]} />
+
+    items  { line, label }: any LineKey line, or 'spare-hot' | 'spare-idle'
+*/
+import { lineSwatch } from '../../../lib/drawing/sheet';
+
+interface Props {
+  items: { line: string; label: string }[];
+  title?: string;
+}
+const { items, title = 'Line key' } = Astro.props;
+---
+
+<div class="dwg-key">
+  <p class="dwg-key__h">{title}</p>
+  <ul class="dwg-key__list">
+    {items.map((it) => {
+      if (it.line === 'spare-hot' || it.line === 'spare-idle') {
+        const hot = it.line === 'spare-hot';
+        return (
+          <li>
+            <svg class="dwg-key__sw" viewBox="0 0 28 10" aria-hidden="true">
+              <g class={hot ? 'pool-fast' : 'pool-none'}>
+                <rect class:list={['sv-drv', hot ? 'sv-hot' : 'sv-idle']} x="1" y="1" width="26" height="8" />
+                {hot && <rect class="sv-hatch" x="1" y="1" width="26" height="8" />}
+              </g>
+            </svg>
+            <span>{it.label}</span>
+          </li>
+        );
+      }
+      const sw = lineSwatch(it.line);
+      return (
+        <li>
+          <svg class="dwg-key__sw" viewBox="0 0 28 10" aria-hidden="true">
+            <g class={sw.group || undefined}>{sw.hatch ? <rect class={sw.cls} x="1" y="1" width="26" height="8" /> : <path class={sw.cls} d="M1 5h26" />}</g>
+          </svg>
+          <span>{it.label}</span>
+        </li>
+      );
+    })}
+  </ul>
+</div>

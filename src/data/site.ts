@@ -25,7 +25,7 @@ export const siteMetadata = {
     /** The /lab pages' card (same size as the default): the site drawn as sheet TD-SITE-00. */
     labSocialImage: '/img/social-lab.png',
     labSocialImageAlt:
-      'Gold-ink drawing sheet on navy: the TechDufus wordmark with dimension lines, a front elevation of the Dell R720xd with its five drives, and a schedule of writing, the lab and projects.'
+      'Gold-ink drawing sheet on navy: the TechDufus wordmark with dimension lines, a front elevation of the Dell R730 with its ten drives, and a schedule of writing, the lab and projects.'
   }
 };
 
@@ -619,8 +619,8 @@ type LabDrawing = { no: string; title: string; href: string; note: string; thumb
  * data); this is the words around them, the changelog and the desk.
  */
 export const labSpec: {
-  lastRevised: 'Sep 2026';
-  lastRevisedIso: '2026-09';
+  lastRevised: 'Oct 2026';
+  lastRevisedIso: '2026-10';
   status: 'Rebuild in progress';
   headline: string;
   lede: string;
@@ -642,8 +642,8 @@ export const labSpec: {
     photo: LabPhoto;
   };
 } = {
-  lastRevised: 'Sep 2026',
-  lastRevisedIso: '2026-09',
+  lastRevised: 'Oct 2026',
+  lastRevisedIso: '2026-10',
   status: 'Rebuild in progress',
   headline: 'The <em>lab</em>.',
   lede: 'What runs at home, drawn to spec. It’s mid-rebuild, so anything dashed is next.',
@@ -662,8 +662,8 @@ export const labSpec: {
       {
         no: 'TD-LAB-02',
         title: 'The server',
-        href: '/lab/r720xd/',
-        note: 'The R720xd inside and out, with an HBA330 where the RAID card used to be.',
+        href: '/lab/r730/',
+        note: 'The R730 inside and out: sixteen bays, ten drives, three pools.',
         thumb: 'server',
         state: 'As built'
       },
@@ -671,7 +671,7 @@ export const labSpec: {
         no: 'TD-LAB-03',
         title: 'The stack',
         href: '/lab/stack/',
-        note: 'What runs on the metal, in three layers. Lots of dashed lines for now.',
+        note: 'What runs on the metal, in three layers. A few dashed lines left.',
         thumb: 'stack',
         state: 'In progress'
       }
@@ -692,6 +692,34 @@ export const labSpec: {
     ]
   },
   changelog: [
+    {
+      date: '2026-10-03',
+      title: 'CloudNativePG, RustFS',
+      href: '/lab/stack/',
+      note: 'Postgres for the apps that want one, and an S3 store inside the cluster for its backups.',
+      cta: 'See the stack'
+    },
+    {
+      date: '2026-10-02',
+      title: 'R720xd → R730',
+      href: '/lab/r730/',
+      note: 'Swapped the server for an R730: 64 threads, 512 GB of RAM, and a RAID card that does HBA mode on its own. Then rebuilt the whole cluster on it from git.',
+      cta: 'See the server'
+    },
+    {
+      date: '2026-10-02',
+      title: 'A registry, a GitHub runner',
+      href: '/lab/stack/',
+      note: 'Zot keeps my container images in the lab, and a runner VM builds them.',
+      cta: 'See the stack'
+    },
+    {
+      date: '2026-09-30',
+      title: 'Homepage, Gatus',
+      href: '/lab/stack/',
+      note: 'A start page for the lab, a status page that checks it, and alerts that finally reach my phone.',
+      cta: 'See the stack'
+    },
     {
       date: '2026-09-29',
       title: 'kubectl top → Grafana',

@@ -93,4 +93,4 @@ On Linux this runs through AwesomeWM automation; on macOS through Hammerspoon. S
 
 <h2 id="setup-homelab">Homelab</h2>
 
-The homelab lives on [the lab page](/lab/) now, drawn to spec: [the cabinet](/lab/rack/), [the server](/lab/r720xd/) and [the stack](/lab/stack/). It's mid-rebuild, so I keep the drawings current and this page short.
+The homelab lives on [the lab page](/lab/) now, drawn to spec: [the cabinet](/lab/rack/), [the server](/lab/r730/) and [the stack](/lab/stack/). It's mid-rebuild, so I keep the drawings current and this page short.

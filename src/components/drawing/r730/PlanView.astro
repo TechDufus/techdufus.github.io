@@ -1,0 +1,98 @@
+---
+/*
+  PlanView: the R730 from above with the cover off, front at the bottom: the sixteen carriers in
+  their cage, the backplane, the six-fan row, the shroud (phantom), two CPUs with a bank of DIMM
+  sockets either side (24 sockets, 16 fitted), the PERC mini, and the rear row: riser cage over
+  the NDC and PSU 1, PSU 2 with its handle loop. The board is schematic (the standard two-socket
+  layout; Dell publishes no coordinates), the rear row follows the rear panel mirrored.
+
+  Clickable by default: backplane, fans, cpu1, cpu2, dimms, perc, psus. Needs
+  <R730Defs id={dwg} /> (plan) in the same SVG, and R730Cards on the page.
+
+  <PlanView dwg="lab02" x={64} y={612} s={0.75} />
+
+    x, y      paper point of model (x 0, z 0): the left ear's outer edge at the rack flange
+    s         paper units per mm
+    click     ids made clickable (default all of the above)
+  Balloons are the caller's: planAt(x, y, s) from ./geom maps model points onto the paper.
+*/
+import Bit from './Bit.astro';
+import { D, EAR, W, dimmBanks, part, partLabel, planAt, psuOpen } from './geom';
+
+interface Props {
+  dwg: string;
+  x: number;
+  y: number;
+  s: number;
+  click?: string[];
+}
+const { dwg, x, y, s, click } = Astro.props;
+const on = (id: string) => !click || click.includes(id);
+const pa = planAt(x, y, s);
+const { box, pt } = pa;
+const title = partLabel;
+
+const fans = part('fans'), perc = part('perc');
+const cpus = [part('cpu1'), part('cpu2')];
+const banks = dimmBanks();
+const psus = [psuOpen(1), psuOpen(2)];
+
+/** A label: text centred at model (x, z). */
+type L = { t: string; x: number; z: number; sm?: boolean };
+const mid = (b: { x: number; z: number; w: number; d: number }) => ({ x: b.x + b.w / 2, z: b.z + b.d / 2 });
+const bp = part('backplane');
+const dimmBox = part('dimms');
+const list: L[] = [
+  { t: 'CPU 1', ...mid(cpus[0]) },
+  { t: 'CPU 2', ...mid(cpus[1]) },
+  { t: 'PERC MINI', x: perc.x + (perc.w - 8) / 2, z: perc.z + perc.d / 2, sm: true },
+  { t: 'BACKPLANE', x: bp.x + bp.w * 0.74, z: bp.z - 14, sm: true },
+  { t: '24 DIMM SOCKETS · 16 FITTED', x: dimmBox.x + dimmBox.w / 2, z: dimmBox.z - 10, sm: true },
+  { t: 'SHROUD', x: 330, z: 200, sm: true },
+  ...['riser-1', 'riser-2', 'riser-3'].map((id): L => ({ t: id.replace('-', ' ').toUpperCase(), ...mid(part(id)), sm: true })),
+  { t: 'PSU 2', ...mid(psus[1]) },
+  { t: 'PSU 1', ...mid(psus[0]) },
+];
+const ndc = part('ndc');
+list.push({ t: 'NDC', x: ndc.x + 8, z: ndc.z + 14, sm: true });
+const texts = list.map((l) => {
+  const [px, py] = pt(l.x, l.z);
+  return { ...l, px: Math.round(px * 10) / 10, py: Math.round((py + 3.5) * 10) / 10 };
+});
+---
+
+<g class="plan">
+  <path class="face-top" d={box({ x: EAR, z: 0, w: W, d: D })} />
+  <use href={`#${dwg}-plan`} transform={pa.m} />
+
+  <Bit on={on('backplane')} id="backplane" label={title('backplane')}>
+    <path class="tint" d={box(bp)} />
+    <path class="ln-obj" d={box(bp)} pathLength="1" />
+  </Bit>
+  <Bit on={on('fans')} id="fans" label={title('fans')}>
+    <path class="tint" d={box(fans)} />
+    <path class="ln-obj" d={box(fans)} pathLength="1" />
+  </Bit>
+  {cpus.map((c, i) => (
+    <Bit on={on(`cpu${i + 1}`)} id={`cpu${i + 1}`} label={title(`cpu${i + 1}`)}>
+      <path class="tint" d={box(c)} />
+      <path class="ln-obj" d={box(c)} pathLength="1" />
+    </Bit>
+  ))}
+  <Bit on={on('dimms')} id="dimms" label={title('dimms')}>
+    <path class="tint" d={banks.map(box).join('')} />
+    <path class="ln-obj" d={banks.map(box).join('')} pathLength="1" />
+  </Bit>
+  <Bit on={on('perc')} id="perc" label={title('perc')}>
+    <path class="tint" d={box(perc)} />
+    <path class="ln-obj" d={box(perc)} pathLength="1" />
+  </Bit>
+  <Bit on={on('psus')} id="psus" label={title('psus')}>
+    <path class="tint" d={psus.map(box).join('')} />
+    <path class="ln-obj" d={psus.map(box).join('')} pathLength="1" />
+  </Bit>
+
+  {texts.map((l) => (
+    <text class:list={[l.sm ? 'sv-s' : 'sv-t', 'sv-ko']} x={l.px} y={l.py}>{l.t}</text>
+  ))}
+</g>

@@ -265,79 +265,85 @@ export const devices: Device[] = [
     }
   },
   {
-    id: 'r720xd',
-    name: 'Dell PowerEdge R720xd',
-    short: 'R720xd',
+    id: 'r730',
+    name: 'Dell PowerEdge R730',
+    short: 'R730',
     maker: 'Dell',
-    model: 'PowerEdge R720xd (24 × 2.5″ + 2 rear)',
+    model: 'PowerEdge R730 (16 × 2.5″)',
     role: 'compute',
     placement: at(13, 14),
     body: { w: 444.0, h: 87.3, d: 684.0 },
     earsWidth: 482.4,
     ports: [
       { group: 'VGA (front)', count: 1, kind: 'DB-15 VGA', face: 'front' },
-      { group: 'USB (front)', count: 1, kind: 'USB-A', speed: 'USB 2.0', face: 'front' },
-      { group: 'NIC ports 1–4', count: 4, kind: 'RJ45', speed: '1 GbE', face: 'rear' },
+      { group: 'USB (front)', count: 2, kind: 'USB-A', speed: 'USB 2.0', face: 'front' },
+      { group: 'NIC ports 1–4', count: 4, kind: 'RJ45', speed: '10 GbE', face: 'rear' },
       { group: 'iDRAC port', count: 1, kind: 'RJ45', face: 'rear' },
       { group: 'Serial', count: 1, kind: 'DB-9', face: 'rear' },
       { group: 'VGA (rear)', count: 1, kind: 'DB-15 VGA', face: 'rear' },
-      { group: 'USB (rear)', count: 2, kind: 'USB-A', speed: 'USB 2.0', face: 'rear' },
+      { group: 'USB (rear)', count: 2, kind: 'USB-A', speed: 'USB 3.0', face: 'rear' },
       { group: 'PSU inlets', count: 2, kind: 'AC inlet', face: 'rear' }
     ],
     panels: {
       front: {
-        frame: 'Overall face 482.4 mm including rack ears: body (444.0 mm) spans 0.04 → 0.96. Height 87.3 mm.',
+        frame: 'Overall face 482.4 mm including rack ears, height 87.3 mm. Left cluster, bays 0–7, a seam, bays 8–15, right ear.',
         zones: [
-          { id: 'ear-l', label: 'Left control panel', kind: 'ear', x0: 0, x1: 0.04, y0: 0, y1: 1 },
-          { id: 'power', label: 'Power button', kind: 'button', x0: 0.006, x1: 0.026, y0: 0.12, y1: 0.23 },
-          { id: 'nmi', label: 'NMI button', kind: 'button', x0: 0.026, x1: 0.034, y0: 0.2, y1: 0.25 },
-          { id: 'sysid', label: 'System ID button', kind: 'button', x0: 0.012, x1: 0.024, y0: 0.29, y1: 0.33 },
-          { id: 'diag', label: 'Diagnostic indicators', kind: 'led', x0: 0.006, x1: 0.034, y0: 0.36, y1: 0.49 },
-          { id: 'tag', label: 'Information tag', kind: 'label', x0: 0.13, x1: 0.2, y0: 0.01, y1: 0.05 },
-          { id: 'bays', label: 'Bays 0–23', kind: 'bay', x0: 0.04, x1: 0.96, y0: 0.06, y1: 0.97 },
-          { id: 'ear-r', label: 'Right I/O panel', kind: 'ear', x0: 0.96, x1: 1, y0: 0, y1: 1 },
-          { id: 'vga', label: 'VGA', kind: 'port', x0: 0.968, x1: 0.99, y0: 0.1, y1: 0.32 },
-          { id: 'usb', label: 'USB 2.0', kind: 'port', x0: 0.966, x1: 0.992, y0: 0.44, y1: 0.51 }
+          { id: 'ear-l', label: 'Left rack ear', kind: 'ear', x0: 0, x1: 0.065, y0: 0, y1: 1 },
+          { id: 'power', label: 'Power button', kind: 'button', x0: 0.075, x1: 0.092, y0: 0.14, y1: 0.23 },
+          { id: 'sysid', label: 'System ID button', kind: 'button', x0: 0.1, x1: 0.117, y0: 0.14, y1: 0.23 },
+          { id: 'vga', label: 'VGA', kind: 'port', x0: 0.13, x1: 0.17, y0: 0.12, y1: 0.32 },
+          { id: 'lcd-prev', label: 'LCD menu button', kind: 'button', x0: 0.19, x1: 0.198, y0: 0.17, y1: 0.22 },
+          { id: 'lcd-ok', label: 'LCD menu button', kind: 'button', x0: 0.201, x1: 0.209, y0: 0.17, y1: 0.22 },
+          { id: 'lcd-next', label: 'LCD menu button', kind: 'button', x0: 0.212, x1: 0.22, y0: 0.17, y1: 0.22 },
+          { id: 'lcd', label: 'LCD panel', kind: 'display', x0: 0.24, x1: 0.3, y0: 0.12, y1: 0.32 },
+          { id: 'vflash', label: 'vFlash media card slot', kind: 'led', x0: 0.09, x1: 0.12, y0: 0.58, y1: 0.64 },
+          { id: 'usb-1', label: 'USB 2.0', kind: 'port', x0: 0.09, x1: 0.12, y0: 0.7, y1: 0.78 },
+          { id: 'usb-2', label: 'USB 2.0 (iDRAC Direct)', kind: 'port', x0: 0.09, x1: 0.12, y0: 0.82, y1: 0.9 },
+          { id: 'optical', label: 'Optical drive blank', kind: 'vent', x0: 0.13, x1: 0.335, y0: 0.55, y1: 0.94 },
+          { id: 'bays-0-7', label: 'Bays 0–7', kind: 'bay', x0: 0.335, x1: 0.634, y0: 0.04, y1: 0.96, cells: 8 },
+          { id: 'seam', label: 'Seam', kind: 'vent', x0: 0.634, x1: 0.639, y0: 0.04, y1: 0.96 },
+          { id: 'bays-8-15', label: 'Bays 8–15', kind: 'bay', x0: 0.639, x1: 0.941, y0: 0.04, y1: 0.96, cells: 8 },
+          { id: 'ear-r', label: 'Right rack ear', kind: 'ear', x0: 0.941, x1: 1, y0: 0, y1: 1 }
         ]
       },
       rear: {
         frame: 'Rear face as seen from behind, body width 444.0 mm, height 87.3 mm.',
         zones: [
-          { id: 'slot-1', label: 'Slot 1', kind: 'slot', x0: 0.083, x1: 0.22, y0: 0.09, y1: 0.25 },
-          { id: 'slot-2', label: 'Slot 2', kind: 'slot', x0: 0.083, x1: 0.22, y0: 0.31, y1: 0.48 },
-          { id: 'slot-3', label: 'Slot 3', kind: 'slot', x0: 0.083, x1: 0.22, y0: 0.55, y1: 0.71 },
-          { id: 'slot-4', label: 'Slot 4', kind: 'slot', x0: 0.273, x1: 0.478, y0: 0.09, y1: 0.25 },
-          { id: 'slot-5', label: 'Slot 5', kind: 'slot', x0: 0.273, x1: 0.478, y0: 0.31, y1: 0.47 },
-          { id: 'handle', label: 'Handle', kind: 'vent', x0: 0.271, x1: 0.537, y0: 0.58, y1: 0.67 },
-          { id: 'slot-6', label: 'Slot 6', kind: 'slot', x0: 0.549, x1: 0.751, y0: 0.09, y1: 0.235 },
-          { id: 'vflash', label: 'vFlash slot', kind: 'slot', x0: 0.808, x1: 0.873, y0: 0.12, y1: 0.19 },
-          { id: 'rear-bay-24', label: 'Rear bay 24', kind: 'bay', x0: 0.556, x1: 0.72, y0: 0.28, y1: 0.47 },
-          { id: 'rear-bay-25', label: 'Rear bay 25', kind: 'bay', x0: 0.73, x1: 0.888, y0: 0.28, y1: 0.47 },
-          { id: 'psu-1', label: 'PSU 1', kind: 'psu', x0: 0.556, x1: 0.746, y0: 0.51, y1: 0.95 },
-          { id: 'psu-2', label: 'PSU 2', kind: 'psu', x0: 0.751, x1: 0.941, y0: 0.51, y1: 0.95 },
-          { id: 'sysid', label: 'System ID button', kind: 'button', x0: 0.063, x1: 0.083, y0: 0.76, y1: 0.87 },
-          { id: 'sysid-conn', label: 'System ID connector', kind: 'port', x0: 0.085, x1: 0.102, y0: 0.76, y1: 0.87 },
-          { id: 'idrac', label: 'iDRAC port', kind: 'port', x0: 0.109, x1: 0.144, y0: 0.74, y1: 0.9 },
-          { id: 'serial', label: 'Serial', kind: 'port', x0: 0.166, x1: 0.205, y0: 0.76, y1: 0.88 },
-          { id: 'vga', label: 'VGA', kind: 'port', x0: 0.234, x1: 0.278, y0: 0.76, y1: 0.88 },
-          { id: 'usb', label: 'USB 2.0 ×2', kind: 'port', x0: 0.298, x1: 0.327, y0: 0.74, y1: 0.97 },
-          { id: 'nic-1', label: 'NIC 1', kind: 'port', x0: 0.34, x1: 0.376, y0: 0.74, y1: 0.89 },
-          { id: 'nic-2', label: 'NIC 2', kind: 'port', x0: 0.388, x1: 0.425, y0: 0.74, y1: 0.89 },
-          { id: 'nic-3', label: 'NIC 3', kind: 'port', x0: 0.437, x1: 0.474, y0: 0.74, y1: 0.89 },
-          { id: 'nic-4', label: 'NIC 4', kind: 'port', x0: 0.483, x1: 0.519, y0: 0.74, y1: 0.89 }
+          { id: 'slot-1', label: 'Slot 1', kind: 'slot', x0: 0.03, x1: 0.18, y0: 0.09, y1: 0.25 },
+          { id: 'slot-2', label: 'Slot 2', kind: 'slot', x0: 0.03, x1: 0.18, y0: 0.31, y1: 0.47 },
+          { id: 'slot-3', label: 'Slot 3', kind: 'slot', x0: 0.03, x1: 0.18, y0: 0.53, y1: 0.69 },
+          { id: 'slot-4', label: 'Slot 4', kind: 'slot', x0: 0.24, x1: 0.46, y0: 0.09, y1: 0.25 },
+          { id: 'slot-5', label: 'Slot 5', kind: 'slot', x0: 0.24, x1: 0.46, y0: 0.31, y1: 0.47 },
+          { id: 'blank-2', label: 'Riser 2 blank', kind: 'vent', x0: 0.24, x1: 0.46, y0: 0.49, y1: 0.57 },
+          { id: 'handle', label: 'Handle', kind: 'vent', x0: 0.24, x1: 0.46, y0: 0.6, y1: 0.68 },
+          { id: 'slot-6', label: 'Slot 6', kind: 'slot', x0: 0.555, x1: 0.77, y0: 0.09, y1: 0.25 },
+          { id: 'slot-7', label: 'Slot 7', kind: 'slot', x0: 0.555, x1: 0.77, y0: 0.31, y1: 0.47 },
+          { id: 'blank-3', label: 'Vent blank', kind: 'vent', x0: 0.83, x1: 1, y0: 0.09, y1: 0.47 },
+          { id: 'psu-1', label: 'PSU 1', kind: 'psu', x0: 0.58, x1: 0.775, y0: 0.51, y1: 0.95 },
+          { id: 'psu-2', label: 'PSU 2', kind: 'psu', x0: 0.79, x1: 1, y0: 0.51, y1: 0.95 },
+          { id: 'sysid', label: 'System ID button', kind: 'button', x0: 0.02, x1: 0.04, y0: 0.76, y1: 0.87 },
+          { id: 'sysid-conn', label: 'System ID connector', kind: 'port', x0: 0.042, x1: 0.06, y0: 0.76, y1: 0.87 },
+          { id: 'idrac', label: 'iDRAC port', kind: 'port', x0: 0.065, x1: 0.1, y0: 0.74, y1: 0.9 },
+          { id: 'serial', label: 'Serial', kind: 'port', x0: 0.115, x1: 0.185, y0: 0.76, y1: 0.88 },
+          { id: 'vga', label: 'VGA', kind: 'port', x0: 0.195, x1: 0.265, y0: 0.76, y1: 0.88 },
+          { id: 'usb', label: 'USB 3.0 ×2', kind: 'port', x0: 0.28, x1: 0.31, y0: 0.74, y1: 0.97 },
+          { id: 'nic-1', label: 'NIC 1', kind: 'port', x0: 0.322, x1: 0.362, y0: 0.74, y1: 0.89 },
+          { id: 'nic-2', label: 'NIC 2', kind: 'port', x0: 0.3745, x1: 0.4145, y0: 0.74, y1: 0.89 },
+          { id: 'nic-3', label: 'NIC 3', kind: 'port', x0: 0.427, x1: 0.467, y0: 0.74, y1: 0.89 },
+          { id: 'nic-4', label: 'NIC 4', kind: 'port', x0: 0.4795, x1: 0.5195, y0: 0.74, y1: 0.89 }
         ]
       }
     },
     card: {
-      title: 'Dell PowerEdge R720xd',
+      title: 'Dell PowerEdge R730',
       kind: 'Server · U13–14',
       lines: [
-        '2 × Xeon E5-2690 v2: 40 threads, 128 GB RAM.',
-        'Proxmox VE 9.2 on ZFS, six drives behind an HBA330.',
-        'The firmware says R720. The 26 bays say otherwise.'
+        '2 × Xeon E5-2683 v4: 64 threads, 512 GB RAM.',
+        'Proxmox VE 9.2 on ZFS, ten drives in 16 bays.',
+        'The RAID card does HBA mode itself: no surgery needed.'
       ]
     },
-    sheetHref: '/lab/r720xd/'
+    sheetHref: '/lab/r730/'
   },
   {
     id: 'bottom-shelf',
@@ -456,7 +462,7 @@ export const links: Link[] = [
   {
     id: 'gw-server',
     from: { device: 'udm-pro', port: 'Port 3' },
-    to: { device: 'r720xd', port: 'NIC 1' },
+    to: { device: 'r730', port: 'NIC 1' },
     speed: '1 GbE',
     medium: 'copper'
   },
@@ -511,7 +517,7 @@ export const roleLabels: Record<Role, string> = {
 
 /** The /lab list: which devices each role shows, in order. Shelves and spares stay off it. */
 const listed: Record<ListedRole, DeviceId[]> = {
-  compute: ['r720xd'],
+  compute: ['r730'],
   network: ['udm-pro', 'u7-pro', 'ont', 'poe-injector'],
   storage: ['unas-pro-8'],
   edge: ['rpi-4b']

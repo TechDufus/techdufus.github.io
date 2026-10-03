@@ -1,0 +1,142 @@
+---
+/*
+  BayStrip: the R730's front panel with the drives in it, as built: bays 0–9 tinted by pool, each
+  drive a clickable kit <Part> (its id is the drive id from src/data/lab/server.ts, its name tag
+  the drive's name), bays 10–15 empty. The pool's hot spare draws hatched and dashed in the
+  pool's ink; the spares in no pool draw dashed in the neutral ink. Optional bay numbers, carrier
+  lettering, a balloon per drive and pool brackets underneath. Needs <R730Defs id={dwg} /> (front
+  at least) in the same SVG, and the drives' <PartCard>s (R730Cards) on the page.
+
+  <BayStrip dwg="lab02" x={64} y={668} s={0.75} />                              front view, 1:4
+  <BayStrip dwg="lab02" x={520} y={150} s={2} to={9} nums="in" letter balloons={132} brackets />
+
+    dwg        the R730Defs id
+    x, y       paper point of the panel's top-left corner (the left ear's outer edge)
+    s          paper units per mm
+    to         last bay drawn (crops the panel just after it; default: the whole panel)
+    nums       bay numbers: true = over the bays, 'in' = inside each carrier, under its latch
+    letter     drive names lettered up the carriers (big scales only)
+    balloons   paper y of a row of numbered balloons, one per drive (needs a bay pitch ≥ 24)
+    stagger    alternate the balloons between two rows (a pitch under 24)
+    brackets   pool brackets and names under the bays (the hot spare and the spares in no pool included)
+    plain      no parts, no balloons: the drives as merged tinted shapes (a small, static excerpt)
+    num        balloon numbers by part id (default: the sheet's NUM)
+*/
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import { monoWidth } from '../../../lib/drawing/sheet';
+import { BAY_H, BAY_N, BAY_Y0, H, NUM, R, WE, bayP, bayX, driveClass, fitLetter, frontDrives, n, place, pools, spareKind } from './geom';
+
+interface Props {
+  dwg: string;
+  x: number;
+  y: number;
+  s: number;
+  to?: number;
+  nums?: boolean | 'in';
+  letter?: boolean;
+  balloons?: number;
+  stagger?: boolean;
+  brackets?: boolean;
+  plain?: boolean;
+  num?: Record<string, number>;
+}
+const { dwg, x, y, s, to = BAY_N - 1, nums = false, letter = false, balloons, stagger = false, brackets = false, plain = false, num = NUM } = Astro.props;
+const crop = to < BAY_N - 1;
+const u1 = crop ? bayX(to) + bayP(to) : WE;
+const clip = `${dwg}-bays-${n(x)}-${n(y)}`.replace(/\./g, '_');
+const bx = (u: number) => x + s * u;
+const top = y + s * BAY_Y0;
+const drives = frontDrives.filter((d) => d.bay <= to);
+const cx = (bay: number) => bx(bayX(bay) + bayP(bay) / 2);
+
+// bay numbers: one <text>, one x per glyph (two-digit numbers split around the bay centre)
+const adv = s >= 1.5 ? 7.6 : 5.6;
+const glyphs = Array.from({ length: to + 1 }, (_, i) => String(i));
+const numX = glyphs.flatMap((g, i) => (g.length === 1 ? [n(cx(i))] : [n(cx(i) - adv / 2), n(cx(i) + adv / 2)])).join(' ');
+
+// brackets: each pool's data drives, its hot spare, and the spares that sit in no pool
+type Bracket = { bays: number[]; label: string; cls: string; dashed: boolean };
+const groups: Bracket[] = [];
+if (brackets) {
+  for (const p of pools) {
+    groups.push({ bays: p.bays, label: p.id.toUpperCase(), cls: `pool-${p.id}`, dashed: false });
+    if (p.spares.length) groups.push({ bays: p.spares, label: 'SPARE', cls: `pool-${p.id}`, dashed: true });
+  }
+  const loose = frontDrives.filter((d) => !d.pool).map((d) => d.bay);
+  if (loose.length) groups.push({ bays: loose, label: 'NO POOL', cls: 'pool-none', dashed: true });
+}
+const bracketY = y + s * H + 10;
+const placed = groups
+  .map((g) => ({ ...g, bays: g.bays.filter((b) => b <= to) }))
+  .filter((g) => g.bays.length)
+  .map((g) => {
+    const first = Math.min(...g.bays), last = Math.max(...g.bays);
+    const a = bx(bayX(first) + 1.5), b = bx(bayX(last) + bayP(last) - 1.5);
+    const fs = g.dashed ? 10.5 : 12;
+    const w = monoWidth(g.label, fs, g.dashed ? 0.06 : 0.08);
+    return { ...g, a, b, lo: (a + b) / 2 - w / 2 - 4, hi: (a + b) / 2 + w / 2 + 4 };
+  });
+// a name goes on the first line it fits without touching another name; lines are 14 units apart
+const lines: { lo: number; hi: number }[][] = [];
+const rows = placed.map((g) => {
+  let row = 0;
+  while ((lines[row] ??= []).some((o) => g.lo < o.hi && g.hi > o.lo)) row++;
+  lines[row].push(g);
+  return { ...g, row };
+});
+// the drives of a plain strip, merged by pen
+const merged = new Map<string, { cls: string; kind?: string; d: string }>();
+if (plain) {
+  for (const d of drives) {
+    const kind = spareKind(d);
+    const key = `${driveClass(d)}|${kind ?? ''}`;
+    const m = merged.get(key) ?? { cls: driveClass(d), kind, d: '' };
+    m.d += R(bx(bayX(d.bay) + 0.5), top, s * (bayP(d.bay) - 1), s * BAY_H);
+    merged.set(key, m);
+  }
+}
+---
+
+<g class="bays">
+  <path class="face-front" d={R(x, y, s * u1, s * H)} />
+  {crop && <clipPath id={clip}><path d={R(x - 2, y - 2, s * u1 + 2, s * H + 4)} /></clipPath>}
+  <g clip-path={crop ? `url(#${clip})` : undefined}><use href={`#${dwg}-front`} transform={place(s, x, y)} /></g>
+  {crop && <path class="ln-thin" d={`M${n(bx(u1))} ${n(y - 4)}l-3 ${n(s * H * 0.3)}l6 ${n(s * H * 0.3)}l-6 ${n(s * H * 0.4 + 8)}`} />}
+
+  {plain && [...merged.values()].map((m) => (
+    <g class={m.cls}>
+      <path class:list={['sv-drv', m.kind && `sv-${m.kind}`]} d={m.d} />
+      {m.kind === 'hot' && <path class="sv-hatch" d={m.d} />}
+    </g>
+  ))}
+
+  {!plain && drives.map((d) => {
+    const x0 = bx(bayX(d.bay) + 0.5), w = s * (bayP(d.bay) - 1);
+    const kind = spareKind(d);
+    const rect = R(x0, top, w, s * BAY_H);
+    return (
+      <Part id={d.id} label={d.card.title} class={driveClass(d)}>
+        <path class:list={['sv-drv', kind && `sv-${kind}`]} d={rect} />
+        {kind === 'hot' && <path class="sv-hatch" d={rect} />}
+        {letter && (
+          <text class="sv-lt sv-ko" transform={`translate(${n(x0 + w / 2 + 3.2)} ${n(top + s * BAY_H - 10)}) rotate(-90)`}>{fitLetter(d, s * BAY_H - 10 - (nums === 'in' ? s * 12 + 4 : 4))}</text>
+        )}
+      </Part>
+    );
+  })}
+
+  {nums && <text class="sv-s" x={numX} y={n(nums === 'in' ? top + s * 12 : y - 5)}>{glyphs.join('')}</text>}
+
+  {!plain && balloons !== undefined && drives.map((d, i) => {
+    const row = stagger && i % 2 ? balloons - 30 : balloons;
+    return <Balloon at={[cx(d.bay), row]} n={num[d.id]} to={[cx(d.bay), top + 6]} part={d.id} />;
+  })}
+
+  {rows.map((g) => (
+    <g class={g.cls}>
+      <path class={g.dashed ? 'ln-med sv-dash' : 'ln-obj'} d={`M${n(g.a)} ${n(bracketY)}v6H${n(g.b)}v-6`} />
+      <text class={g.dashed ? 'sv-lbl' : 'txt-label'} x={n((g.a + g.b) / 2)} y={n(bracketY + 22 + g.row * 14)} text-anchor="middle">{g.label}</text>
+    </g>
+  ))}
+</g>

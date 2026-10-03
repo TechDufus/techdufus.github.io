@@ -1,9 +1,9 @@
-// Synced from homelab @ bf7e1f3 (2026-09-29)
+// Synced from homelab @ 92ff23f (2026-10-03)
 /**
  * Sheet 03 · The stack: what runs where, in three layers. Bootstrap turns the metal into a
  * hypervisor, OpenTofu puts VMs on it, and the cluster runs the rest.
  *
- * `status` is as of 2026-09-29: running means it's in the repo and up; planned means it's in the
+ * `status` is as of 2026-10-03: running means it's in the repo and up; planned means it's in the
  * plan but not built yet. Versions are major.minor.
  */
 import type { StackGroup, StackItem, StackLayer, Status } from './types';
@@ -21,14 +21,14 @@ export const stack: StackLayer[] = [
         title: 'Metal',
         items: [
           {
-            id: 'r720xd',
-            name: 'Dell R720xd',
-            what: 'The one server: 40 threads, 128 GB',
+            id: 'r730',
+            name: 'Dell R730',
+            what: 'The one server: 64 threads, 512 GB',
             status: 'running',
             card: {
-              title: 'Dell PowerEdge R720xd',
+              title: 'Dell PowerEdge R730',
               kind: 'Metal',
-              lines: ['40 threads, 128 GB RAM, six drives.', 'An HBA330 hands every disk straight to ZFS.']
+              lines: ['64 threads, 512 GB RAM, ten drives.', 'Its RAID card runs in HBA mode, so every disk goes straight to ZFS.']
             }
           },
           {
@@ -39,7 +39,7 @@ export const stack: StackLayer[] = [
             card: {
               title: 'ZFS pools',
               kind: 'Storage',
-              lines: ['rpool: boot, a 3-way mirror.', 'fast: VM disks, a mirror.', 'bulk: scratch, one disk.']
+              lines: ['rpool: boot, a 3-way mirror.', 'fast: VM disks, a 3-way mirror with a hot spare.', 'bulk: scratch, one disk.']
             }
           }
         ]
@@ -72,7 +72,7 @@ export const stack: StackLayer[] = [
                 'Hourly and daily ZFS snapshots of the VM pool.',
                 'SMART self-tests and ZFS event alerts.',
                 'Push alerts to my phone, through ntfy.',
-                'A node metrics exporter.'
+                'Metrics exporters for the host and its hardware.'
               ]
             }
           }
@@ -161,6 +161,18 @@ export const stack: StackLayer[] = [
         id: 'standalone',
         title: 'Standalone VMs',
         items: [
+          {
+            id: 'ci-runner',
+            name: 'GitHub runner',
+            what: 'Self-hosted CI runners',
+            status: 'running',
+            vm: { vcpu: 8, ramGiB: 16, diskGB: 200, pool: 'bulk' },
+            card: {
+              title: 'GitHub runner',
+              kind: 'Standalone VM',
+              lines: ['Self-hosted GitHub Actions runners, in their own VM.', '8 vCPU, 16 GiB RAM, 200 GB on bulk.']
+            }
+          },
           {
             id: 'robomp',
             name: 'robomp',
@@ -272,7 +284,7 @@ export const stack: StackLayer[] = [
               lines: [
                 'VictoriaMetrics for metrics, VictoriaLogs for logs.',
                 'Grafana for looking at both.',
-                'The alert rules run, but nothing pages me yet. On purpose.'
+                'The alert rules run, and they page my phone through ntfy.'
               ]
             }
           },
@@ -294,18 +306,35 @@ export const stack: StackLayer[] = [
             id: 'cloudnative-pg',
             name: 'CloudNativePG',
             what: 'Postgres',
-            status: 'planned',
-            card: { title: 'CloudNativePG', kind: 'Databases', lines: ['Postgres, for the apps that want one.'] }
+            status: 'running',
+            version: '1.30',
+            card: {
+              title: 'CloudNativePG 1.30',
+              kind: 'Databases',
+              lines: ['Postgres, for the apps that want one.', 'Its backups land in RustFS.']
+            }
+          },
+          {
+            id: 'rustfs',
+            name: 'RustFS',
+            what: 'S3 storage in the cluster',
+            status: 'running',
+            version: '1.0',
+            card: {
+              title: 'RustFS 1.0',
+              kind: 'Object storage',
+              lines: ['S3-compatible storage inside the cluster.', 'Database backups land here.']
+            }
           },
           {
             id: 'policies',
             name: 'Admission policies',
             what: 'Guardrails',
-            status: 'planned',
+            status: 'running',
             card: {
               title: 'Admission policies',
               kind: 'Guardrails',
-              lines: ['Built-in Kubernetes rules that say no to risky changes.']
+              lines: ['Built-in Kubernetes rules that turn risky changes away.']
             }
           }
         ]
@@ -324,6 +353,34 @@ export const stack: StackLayer[] = [
               kind: 'Cluster UI',
               lines: ['A web UI for the cluster.', 'The first app in, mostly so I can click instead of type.']
             }
+          },
+          {
+            id: 'homepage',
+            name: 'Homepage',
+            what: 'A start page for the lab',
+            status: 'running',
+            version: '2.4',
+            card: { title: 'Homepage 2.4', kind: 'Dashboard', lines: ['A start page for the lab.', 'Everything I run, one click away.'] }
+          },
+          {
+            id: 'gatus',
+            name: 'Gatus',
+            what: 'Status page and uptime checks',
+            status: 'running',
+            version: '5.37',
+            card: {
+              title: 'Gatus 5.37',
+              kind: 'Status page',
+              lines: ['Checks that everything answers.', 'Pages my phone when something doesn’t.']
+            }
+          },
+          {
+            id: 'zot',
+            name: 'Zot',
+            what: 'A private container registry',
+            status: 'running',
+            version: '2.1',
+            card: { title: 'Zot 2.1', kind: 'Registry', lines: ['A private container registry.', 'Container images stay in the lab.'] }
           }
         ]
       }

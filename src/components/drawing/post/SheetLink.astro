@@ -6,8 +6,7 @@
     sheet="stack"   Sheet 03 (TD-LAB-03): the three layers as storeys, a box per thing, planned
                     ones dashed (from src/data/lab/stack.ts); title, note and link from labSpec
 */
-import { device } from '../../../data/lab/rack';
-import { server } from '../../../data/lab/server';
+import { server, sheetHref } from '../../../data/lab/snapshots/server-2026-09-28';
 import { stack } from '../../../data/lab/stack';
 import { labSpec } from '../../../data/site';
 import { f } from '../../../lib/drawing/figure';
@@ -48,7 +47,7 @@ if (sheet === 'stack') {
     });
   });
 } else {
-  href = device('r720xd').sheetHref ?? '/lab/r720xd/';
+  href = sheetHref;
   const { before, now } = server.controller;
   const { body, earsWidth } = server.dims;
   meta = 'TD-LAB-02 · Sheet 2 of 3 · Rev B · Checked TD';

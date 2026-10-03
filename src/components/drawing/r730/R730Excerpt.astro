@@ -1,0 +1,65 @@
+---
+/*
+  R730Excerpt: Sheet 02 in miniature for /lab or a post: the R730's front panel as built, the
+  drives tinted by pool (the hot spare hatched, the spares in no pool dashed), pool brackets
+  underneath, bays 10–15 empty. A kit <Figure>: it lays out 680 wide, and on phones crops to the
+  populated end of the panel. It is a still picture on purpose (no parts, balloons or cards), so it
+  fits /lab's HTML budget; the numbered, clickable version is the full sheet at /lab/r730/.
+
+  <R730Excerpt />
+  <R730Excerpt id="lab-bays" caption="Where the drives live." fig="TD-LAB-02 · DETAIL" />
+
+    id        unique on the page (default "r730-bays")
+    caption   one line under it (default in voice, from the data; pass "" for none)
+    fig       FIG title strip, as Figure (default none)
+    breakout  as Figure
+*/
+import Figure from '../figure/Figure.astro';
+import R730Defs from './R730Defs.astro';
+import BayStrip from './BayStrip.astro';
+import { derived, server } from '../../../data/lab/server';
+import { BAY_N, H, frontDrives } from './geom';
+
+interface Props {
+  id?: string;
+  caption?: string;
+  fig?: number | string;
+  breakout?: boolean;
+}
+const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen'];
+const {
+  id = 'r730-bays',
+  caption = `${words[derived.drives][0].toUpperCase()}${words[derived.drives].slice(1)} drives up front, ${words[server.pools.length]} pools, ${words[derived.baysFree]} empty bays.`,
+  fig,
+  breakout = false,
+} = Astro.props;
+
+const last = frontDrives[frontDrives.length - 1].bay;
+const desc =
+  `The Dell PowerEdge R730's front panel, ${BAY_N} bays. ` +
+  server.pools.map((p) => `${p.id}: bays ${[...p.spares, ...p.bays].join(', ')}`).join('; ') +
+  `. Spares in no pool: bays ${frontDrives.filter((d) => !d.pool).map((d) => d.bay).join(', ')}. Bays ${last + 1} to ${BAY_N - 1} are empty.`;
+
+// wide: the whole panel; narrow: crop at the last drive, balloons on two rows
+const S = 1.35, X = 20, Y = 30;
+const SN = 0.95, XN = 10, YN = 30;
+const baseW = Y + S * H + 40;
+const baseN = YN + SN * H + 56;
+---
+
+<Figure
+  id={id}
+  title="The R730's front bays, as built"
+  desc={desc}
+  caption={caption || undefined}
+  size={[680, Math.ceil(baseW) + 14]}
+  narrow={[360, Math.ceil(baseN) + 14]}
+  fig={fig}
+  breakout={breakout}
+  defs={['hatch']}
+  grid={false}
+>
+  <R730Defs id={id} only={['front']} lean />
+  <g class="fg-w"><BayStrip dwg={id} x={X} y={Y} s={S} nums="in" brackets plain /></g>
+  <g class="fg-n"><BayStrip dwg={id} x={XN} y={YN} s={SN} to={last} nums="in" brackets plain /></g>
+</Figure>

@@ -1,0 +1,102 @@
+---
+/*
+  R730Defs: the R730 drawn once, in model millimetres, as <defs> groups that any view places
+  with <use href="#{id}-front" transform={…}/>. Lines only (no lettering), so a <use> can be
+  scaled freely: strokes are non-scaling and the pens come from drawing.css.
+
+    #{id}-front   front panel, face-local (u → from the left ear, v ↓ from the top), 482.4 × 87.3
+    #{id}-rear    rear panel seen from behind (u → from the left of the body), 444.0 × 87.3
+    #{id}-plan    top view with the cover off (u = model x from the left ear, v = −z: the rear wall
+                  at v −684, the front plate at v 0 … 18). Schematic inside (see geom.ts); no
+                  drives (PlanView adds nothing to the carriers either: they stay in the cage).
+
+  Place a face with transform={place(s, x, y)} from ./geom (y = its top edge; for the plan, the
+  rack-flange line). Put fills (face-front, tints) BEFORE the <use>.
+
+  Also carries the few styles every R730 drawing shares (lettering, drives, spares), as global
+  CSS: drawing.css belongs to the whole kit and the archive sheets.
+
+  <R730Defs id="lab02" />                     all three
+  <R730Defs id="fig1" only={['front']} />     just the front
+  <R730Defs id="x" only={['front']} lean />    …the cluster in outline, no carrier handles, latches or perforations (a small excerpt)
+*/
+import { join } from '../../../lib/drawing/projection';
+import { frontPanel, rearPanel, planPaths } from './geom';
+
+type Face = 'front' | 'rear' | 'plan';
+interface Props {
+  id: string;
+  only?: Face[];
+  lean?: boolean;
+}
+const { id, only = ['front', 'rear', 'plan'], lean = false } = Astro.props;
+const has = new Set(only);
+const f = has.has('front') ? frontPanel() : null;
+const r = has.has('rear') ? rearPanel() : null;
+const p = has.has('plan') ? planPaths() : null;
+---
+
+<defs>
+  {f && (
+    <g id={`${id}-front`}>
+      <path class="ln-obj" d={join(f.outline, f.ears)} />
+      <path class="ln-med" d={join(f.bays, lean ? f.lean : f.ctrl, f.seam)} />
+      {!lean && <path class="ln-thin" d={join(f.detail, f.latches, f.lcdIn, f.tongues)} />}
+      {!lean && <path class="ln-thin sv-perf" d={f.perf} />}
+    </g>
+  )}
+  {r && (
+    <g id={`${id}-rear`}>
+      <path class="ln-obj" d={join(r.outline, r.psus)} />
+      <path class="ln-med" d={r.slots} />
+      <path class="ln-thin" d={r.io} />
+      <path class="ln-thin sv-perf" d={r.perf} />
+    </g>
+  )}
+  {p && (
+    <g id={`${id}-plan`}>
+      <path class="ln-obj" d={join(p.shell, p.cpus)} />
+      <path class="ln-med" d={join(p.board, p.fans, p.psus)} />
+      <path class="ln-thin" d={join(p.cage, p.fins, p.sockets)} />
+      <path class="sv-stick" d={p.sticks} />
+      <path class="face-top" d={p.riserFill} />
+      <path class="ln-hid" d={p.hidden} />
+      <path class="ln-med" d={p.risers} />
+      <path class="ln-phantom" d={p.shroud} />
+      <path class="ln-ctr" d={p.ctr} />
+    </g>
+  )}
+</defs>
+
+<style is:global>
+  /* R730 drawings: small lettering, drives (pool colour via .pool-*), spares */
+  .sv-t, .sv-s { text-anchor: middle; letter-spacing: .06em; fill: var(--muted); pointer-events: none; }
+  .sv-t { font-size: 10.5px; }
+  .sv-s { font-size: 8.5px; letter-spacing: .08em; }
+  .sv-ko { paint-order: stroke; stroke: var(--dwg-paper); stroke-width: 3px; stroke-linejoin: round; }
+  .sv-drv { fill: color-mix(in srgb, var(--flow) 26%, transparent); stroke: var(--flow); stroke-width: 1px; vector-effect: non-scaling-stroke; }
+  .sv-lt { font-size: 9px; letter-spacing: .06em; fill: var(--flow); }
+  .sv-row { fill: var(--dwg-text); }
+  .sv-nc { text-transform: none; }
+  .pool-rpool .txt-label, .pool-none .txt-label { fill: var(--flow); }
+  .sv-empty { fill: none; stroke: var(--dwg-obj); stroke-width: .8px; stroke-dasharray: 3 3; opacity: .6; vector-effect: non-scaling-stroke; }
+  /* a text link inside a drawing (the archived sheet) */
+  .sv-a { cursor: pointer; }
+  .sv-a text { fill: var(--gold-light); text-decoration: underline; text-underline-offset: 3px; }
+  .sv-a:is(:hover, :focus-visible) text { fill: var(--gold-pale); }
+  .sv-a:focus-visible { outline: none; filter: drop-shadow(0 0 3px var(--gold)); }
+  .sv-dash { stroke-dasharray: 5 3; }
+  .sv-lbl { font-size: 10.5px; letter-spacing: .06em; fill: var(--flow); }
+  /* a spare in no pool: neutral ink, dashed, barely tinted */
+  .pool-none { --dwg-obj: var(--muted); --flow: var(--muted); }
+  .sv-drv.sv-idle { fill: color-mix(in srgb, var(--flow) 8%, transparent); stroke-dasharray: 3 3; }
+  /* the pool's hot spare: the pool's ink, hatched and dashed */
+  .sv-drv.sv-hot { fill: color-mix(in srgb, var(--flow) 8%, transparent); stroke-dasharray: 7 3; }
+  .sv-hatch { fill: var(--dwg-hatch); opacity: .8; pointer-events: none; }
+  /* perforated blanks and vents: rows of dots */
+  .sv-perf { stroke-dasharray: 1 2.6; }
+  /* fitted DIMM sticks */
+  .sv-stick { fill: color-mix(in srgb, var(--dwg-obj) 42%, transparent); stroke: var(--dwg-obj); stroke-width: .6px; vector-effect: non-scaling-stroke; opacity: var(--stick-o, 1); }
+  .xp-bare { --stick-o: 0; }
+  .sv-link { fill: none; stroke: var(--flow); stroke-width: 1.4px; vector-effect: non-scaling-stroke; }
+</style>

@@ -1,7 +1,7 @@
 ---
 /*
   ServerCards: the <PartCard> templates for every clickable R720xd part, straight from the
-  cards in src/data/lab/server.ts. Part ids: the drive ids (gigastone-1 … st300mp0004), the
+  cards in src/data/lab/snapshots/server-2026-09-28.ts. Part ids: the drive ids (gigastone-1 … st300mp0004), the
   pulled drive (st9300653ss), the pools (rpool, fast, bulk), hba330, perc, cable-1 … cable-4,
   server, cpu1, cpu2, memory, fans, backplane, riser-1, psus, nics.
 
@@ -9,8 +9,8 @@
   <Fragment slot="cards"><ServerCards only={['gigastone-1']} /></Fragment>   a subset
 */
 import PartCard from '../PartCard.astro';
-import { server } from '../../../data/lab/server';
-import type { Card } from '../../../data/lab/types';
+import { server } from '../../../data/lab/snapshots/server-2026-09-28';
+import type { Card } from '../../../data/lab/snapshots/types-2026-09-28';
 
 interface Props {
   only?: string[];

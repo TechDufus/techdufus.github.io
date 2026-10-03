@@ -35,8 +35,8 @@ const [gx0, gy] = S.pt(CAB.z0 - 60, CAB.y0);
 const [gx1] = S.pt(CAB.z1 + 60, CAB.y0);
 const ground = Array.from({ length: Math.floor((gx1 - gx0) / 9) }, (_, i) => `M${gx0 + i * 9 + 7} ${gy}l-7 7`).join('');
 
-const r7 = slotOf$('r720xd');
-/** A box's side profile, plus the R720xd's ears-and-carriers plate in front of it. */
+const r7 = slotOf$('r730');
+/** A box's side profile, plus the R730's ears-and-carriers plate in front of it. */
 const profile = (sl: Slot): string =>
   sl.dev.id === 'patch-cables'
     ? join(...[0, 1, 2].map((i) => {
@@ -44,7 +44,7 @@ const profile = (sl: Slot): string =>
         return el(cx, cy, (sl.body.d / 2) * S.scale, 1.6);
       }))
     : join(S.rect(sl.body.z, sl.body.y, sl.body.d, sl.body.h), sl.plate ? S.rect(sl.plate.z, sl.faceTop - sl.plate.h, sl.plate.t, sl.plate.h) : '', sl.ears ? S.rect(sl.faceZ, sl.y0 + 0.4, 3, sl.hU - 0.8) : '');
-// R720xd extras: the bezel in front of the carriers, the PSU handles behind the body
+// R730 extras: the bezel in front of the carriers, the PSU handles behind the body
 const bezel = S.rect(-32, r7.body.y + 4, 14, r7.body.h - 8);
 const HANDLES_Z = 723;
 const handles = S.rect(r7.body.z + r7.body.d, r7.body.y + 6, HANDLES_Z - r7.body.d, 26);
@@ -53,12 +53,12 @@ const handles = S.rect(r7.body.z + r7.body.d, r7.body.y + 6, HANDLES_Z - r7.body
 const flow = FRONT_TO_BACK.map((id) => {
   const sl = slotOf$(id);
   const my = sl.body.y + sl.body.h / 2;
-  const back = sl.dev.id === 'r720xd' ? HANDLES_Z + 8 : sl.body.z + sl.body.d + 6;
+  const back = sl.dev.id === 'r730' ? HANDLES_Z + 8 : sl.body.z + sl.body.d + 6;
   return { cold: S.poly([[zDoorIn + 8, my], [sl.faceZ - 4, my]]), hot: S.poly([[back, my], [zRearIn - 8, my]]) };
 });
 
 /* depth labels on the boxes wide enough to hold one; balloons in a column behind the cabinet */
-const tagged = ['r720xd', 'unas-pro-8'] as const;
+const tagged = ['r730', 'unas-pro-8'] as const;
 const BX = 512;
 let lastY = -Infinity;
 const balloons = slots
@@ -129,7 +129,7 @@ const swing = (() => {
     <Dim a={S.pt(CAB.z0, CAB.y1)} b={S.pt(CAB.z1, CAB.y1)} offset={-44} mm={CAB.d} />
     <Dim a={S.pt(0, CAB.y1)} b={S.pt(CAB.railSpan, CAB.y1)} offset={-14} mm={CAB.railSpan} sub="RAIL SPAN" ext="none" />
     <Dim a={S.pt(CAB.z0, CAB.y0)} b={S.pt(CAB.z0, CAB.y1)} offset={-30} mm={CAB.h} />
-    <Dim a={S.pt(-32, r7.body.y)} b={S.pt(HANDLES_Z, r7.body.y)} offset={30} mm={HANDLES_Z + 32} sub="R720xd, BEZEL TO HANDLES" />
+    <Dim a={S.pt(-32, r7.body.y)} b={S.pt(HANDLES_Z, r7.body.y)} offset={30} mm={HANDLES_Z + 32} sub="R730, BEZEL TO HANDLES" />
 
     {balloons.map(({ sl, to, y }) => <Balloon at={[BX, y]} n={sl.n} to={to} end="dot" part={sl.dev.id} />)}
   </View>

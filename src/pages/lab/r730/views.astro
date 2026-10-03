@@ -1,0 +1,18 @@
+---
+/*
+  /lab/r730/views/: a page partial (no layout, no head) with the tab panels of Sheet 02 that
+  load after the page: EXPLODED and R720xd → R730. src/components/drawing/r730/page.ts fetches
+  it once and moves them into the sheet; the defs they <use> and the cards are already on
+  /lab/r730/. Everything here is generated at build time, like the rest.
+*/
+import ExplodedView from '../../../components/drawing/r730/ExplodedView.astro';
+import HistoryView from '../../../components/drawing/r730/HistoryView.astro';
+
+export const partial = true;
+const DWG = 'lab02';
+---
+
+<svg xmlns="http://www.w3.org/2000/svg">
+  <ExplodedView dwg={DWG} />
+  <HistoryView dwg={DWG} />
+</svg>

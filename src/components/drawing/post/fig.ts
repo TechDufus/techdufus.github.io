@@ -3,8 +3,8 @@
  * TwoCables). Everything generic (at, rc, pl, Pen, wrap, wLabel, wNote, f) comes from the kit's
  * src/lib/drawing/figure.ts; this file only knows about the R720xd's drives and pools.
  */
-import { server } from '../../../data/lab/server';
-import type { Drive, PoolId } from '../../../data/lab/types';
+import { server } from '../../../data/lab/snapshots/server-2026-09-28';
+import type { Drive, PoolId } from '../../../data/lab/snapshots/types-2026-09-28';
 import { f } from '../../../lib/drawing/figure';
 
 export const POOL_CLASS: Record<PoolId, string> = { rpool: 'pool-rpool', fast: 'pool-fast', bulk: 'pool-bulk' };

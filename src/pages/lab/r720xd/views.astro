@@ -1,12 +1,12 @@
 ---
 /*
   /lab/r720xd/views/: a page partial (no layout, no head) with the tab panels of Sheet 02 that
-  load after the page: EXPLODED and BEFORE / AFTER. src/components/drawing/server/server.ts
+  load after the page: EXPLODED and BEFORE / AFTER. src/components/drawing/r720xd/page.ts
   fetches it once and moves them into the sheet; the defs they <use> and the cards are already
   on /lab/r720xd/. Everything here is generated at build time, like the rest.
 */
-import ExplodedView from '../../../components/drawing/server/ExplodedView.astro';
-import BeforeAfter from '../../../components/drawing/server/BeforeAfter.astro';
+import ExplodedView from '../../../components/drawing/r720xd/ExplodedView.astro';
+import BeforeAfter from '../../../components/drawing/r720xd/BeforeAfter.astro';
 
 export const partial = true;
 const DWG = 'lab02';

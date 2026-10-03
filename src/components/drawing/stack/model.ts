@@ -82,7 +82,7 @@ export const threads = server.threads;
 export const memoryGB = server.memory.gb;
 export const cpuCount = server.cpus.length;
 export const cpuModel = server.cpus[0].model.replace(/^Intel\s+/, '');
-export const controllerName = server.controller.now.card.title.replace(/^Dell\s+/, '');
+export const controllerName = server.controller.card.title.replace(/^Dell\s+/, '');
 export const driveCount = server.drives.length;
 
 /** The cluster's one API endpoint: drawn on the plan, not an item in the data. */

@@ -1,0 +1,28 @@
+---
+/*
+  R730Cards: the <PartCard> templates for every clickable R730 part, straight from the cards in
+  src/data/lab/server.ts. Part ids: the drive ids (s3520-0 … mx500-500-2), the pools (rpool, fast,
+  bulk), `server` (the chassis) and every server.internal id (backplane, fans, cpu1, cpu2, dimms,
+  perc, riser-1 … riser-3, ndc, psus).
+
+  <Fragment slot="cards"><R730Cards /></Fragment>                     all of them
+  <Fragment slot="cards"><R730Cards only={['s3520-0']} /></Fragment>  a subset
+*/
+import PartCard from '../PartCard.astro';
+import { server } from '../../../data/lab/server';
+import type { Card } from '../../../data/lab/types';
+
+interface Props {
+  only?: string[];
+}
+const { only } = Astro.props;
+const all: [string, Card | undefined][] = [
+  ...server.drives.map((d): [string, Card] => [d.id, d.card]),
+  ...server.pools.map((p): [string, Card] => [p.id, p.card]),
+  ['server', server.identity.card],
+  ...server.internal.map((p): [string, Card | undefined] => [p.id, p.card]),
+];
+const cards = all.filter((e): e is [string, Card] => !!e[1] && (!only || only.includes(e[0])));
+---
+
+{cards.map(([id, c]) => <PartCard id={id} title={c.title} kind={c.kind} lines={c.lines} />)}

@@ -56,7 +56,7 @@ const cls = (t: { status: 'running' | 'planned' }) => (planned(t) ? 'stk-pl' : u
   <Part id="c-proxmox" label={tagOf(pve)} p={1}>
     <path class="hatch ln-obj" fill-rule="evenodd" d={rc(H.x, H.y, H.w, H.h) + rc(H.x + WALL, H.y + WALL, H.w - 2 * WALL, H.h - 2 * WALL)} pathLength="1" />
     <text class="txt-label" x={H.x + 28} y={H.y + 40}>{pve.card.title.toUpperCase()}</text>
-    <text class="txt-note" x={H.x + 28} y={H.y + 56}>THE HOST · ONE R720XD</text>
+    <text class="txt-note" x={H.x + 28} y={H.y + 56}>THE HOST · ONE R730</text>
   </Part>
   <Balloon at={[H.x + H.w - 32, H.y + 32]} n={pve.n} part="c-proxmox" r={9} />
 

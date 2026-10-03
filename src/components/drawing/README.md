@@ -317,7 +317,8 @@ drawing), `Stamp`, `LineKey`, `ScaleBar`, `URuler`, `DrawingDefs`, `Monogram`, `
 | Sheet | Page | Data | Excerpt (for `/lab` or a post) |
 | --- | --- | --- | --- |
 | TD-LAB-01 · The cabinet | `/lab/rack/` | `src/data/lab/rack.ts` | `rack/CabinetExcerpt.astro`: `id?` (`'lab-cab'`), `caption?`, `href?` |
-| TD-LAB-02 · The server | `/lab/r720xd/` | `src/data/lab/server.ts` | `server/ServerExcerpt.astro`: `id?` (`'r720-bays'`), `caption?`, `fig?`, `breakout?` |
+| TD-LAB-02 · The server (the R730) | `/lab/r730/` | `src/data/lab/server.ts` | `r730/R730Excerpt.astro`: `id?` (`'r730-bays'`), `caption?`, `fig?`, `breakout?` (not placed on any page now) |
+| TD-LAB-02 · The server (archived R720xd, frozen) | `/lab/r720xd/` | `src/data/lab/snapshots/server-2026-09-28.ts` | `r720xd/ServerExcerpt.astro`: `id?` (`'r720-bays'`), `caption?`, `fig?`, `breakout?` (not placed on any page now) |
 | TD-LAB-03 · The stack | `/lab/stack/` | `src/data/lab/stack.ts` | `stack/StackExcerpt.astro`: `id?` (`'sx'`), `caption?`, `href?` |
 
 - Types are in `src/data/lab/types.ts`. Every clickable thing carries its own
@@ -327,9 +328,14 @@ drawing), `Stamp`, `LineKey`, `ScaleBar`, `URuler`, `DrawingDefs`, `Monogram`, `
 - `rack/SheetThumb.astro` (`kind: 'cabinet' | 'server' | 'stack' | 'path' | 'lanes'`) is the
   small decorative line drawing on the `/lab` "Drawn to spec" cards (`path` and `lanes` are the
   two posts' cards).
+- The R720xd sheet is a frozen archive (stamped SUPERSEDED, off the `/lab` sheet index): the
+  snapshots, `r720xd/`, `post/` and `src/pages/lab/r720xd*` never change. The live Sheet 02 is
+  `src/pages/lab/r730.astro` with its components in `r730/`.
 - `post/SheetLink.astro` (`sheet?: 'server' | 'stack'`, default `'server'`) is the card at the
   end of a post that links a sheet. The stack card reads its title, note and thumbnail from
-  `labSpec` and `stack.ts`, and states no Rev: Sheet 03 is still going up.
+  `labSpec` and `stack.ts`, and states no Rev: Sheet 03 is still going up. The server card reads
+  only the frozen `data/lab/snapshots/` R720xd, like the R720xd post's figures (`post/{fig.ts,BayMap,Pools,TwoCables}`)
+  and the archived sheet's drawings in `r720xd/`.
 
 ## Budgets
 

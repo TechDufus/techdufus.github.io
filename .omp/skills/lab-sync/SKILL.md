@@ -15,8 +15,9 @@ homelab; never write to it.
 - Paths below are relative to the site repo root; the homelab is `../homelab`. Work from its
   committed `HEAD` only. Untracked or modified files there (`git -C ../homelab status --short`)
   are drafts: don't sync them, and don't `pull` or `fetch` unless the owner asks.
-- Only the lab section changes. Don't touch post prose, `src/content/**`, the desk
-  (`labSpec.workstation`) or anything outside the files named here.
+- Only the lab section changes. Don't touch post prose, `src/content/**`, the frozen R720xd archive
+  (`src/data/lab/snapshots/`, `src/components/drawing/{r720xd,post}/`, `src/pages/lab/r720xd*`),
+  the desk (`labSpec.workstation`) or anything outside the files named here.
 - Never publish anything from "Privacy" below. When in doubt, leave it off. This skill, the site
   repo and its commits are public too: never paste a private value into them, not even as an
   example or a regex (the privacy scan reads the private names from the homelab at run time).
@@ -24,6 +25,10 @@ homelab; never write to it.
   VM's estimated size stays off until it's built).
 - No provenance or citation clutter, no layer toggles, no CAD readouts, no link to the homelab
   repo (it's private; the site says "one git repo, private for now").
+- Owner decisions on what stays off the site, whatever the homelab says: external-dns, tenants and
+  the apps they bring, whose code the runner builds, and anything about who or what else runs on the cluster.
+  The owner doesn't want internals shared: keep cards short and generic, and a commit that is only
+  about those is *none*.
 - Commit locally when verified; ask the owner before pushing or deploying.
 
 ## The lab section: data and who follows it
@@ -32,7 +37,8 @@ homelab; never write to it.
 |---|---|---|
 | `src/data/lab/stack.ts` | Sheet 03: three layers → groups → items, each `running` or `planned`, with a `card`. Line 1 is the sync marker. | Sheet 03 (`src/components/drawing/stack/*` via `model.ts`) on `/lab/stack/`; the stack excerpt on `/lab/`; the `/lab/` hero (Talos count and version); the `/lab/stack/` "Layer by layer" list and counts; the home lab stack line and hardware notes (`src/pages/index.astro`); the guide's `homelab` answer (`src/pages/guide.json.ts`); the stack thumb on `/lab/` (`rack/SheetThumb.astro`) |
 | `src/data/lab/rack.ts` | Sheet 01: the cabinet, devices (top-down U), shelves, links, the `/lab/` role list | Sheet 01 on `/lab/rack/` and its lazy views `/lab/rack/views/`; the cabinet excerpt and `derived.uUsed` on `/lab/`; the home "Hardware readout" (`devicesByRole`, branded devices only); the cabinet thumb |
-| `src/data/lab/server.ts` | Sheet 02: the R720xd as built (drives, bays, pools, controller, cables) | Sheet 02 on `/lab/r720xd/` and `/lab/r720xd/views/`; pools, threads, memory, controller and drive count on Sheet 03; the `/lab/` hero; the home readout; the guide; **the post `src/content/blog/from-hardware-raid-to-zfs.mdx`** (its figures in `src/components/drawing/post/{fig.ts,BayMap,Pools,TwoCables,SheetLink}.astro`, the MDX's own `import { server }`) and the post's `path` thumb |
+| `src/data/lab/server.ts` | Sheet 02: the R730 as built (16 front bays, drives, pools, the PERC H730P Mini in HBA mode, risers, NICs, internal parts) | Sheet 02 on `/lab/r730/` and its lazy views `/lab/r730/views/`; the kit excerpt `r730/R730Excerpt.astro` (not placed on any page; `/lab/` is at its HTML budget); pools, threads, memory, controller and drive count on Sheet 03; the `/lab/` hero; the home readout; the guide; the server thumb |
+| `src/data/lab/snapshots/` | The R720xd as built on 2026-09-28, **frozen** (its own `server-…` and `types-…`) | Nothing live: only the post `src/content/blog/from-hardware-raid-to-zfs.mdx` (its figures in `src/components/drawing/post/{fig.ts,BayMap,Pools,TwoCables,SheetLink}.astro`, the MDX's own `import { server }`, the post's `path` thumb) and the archive `/lab/r720xd/` (+ `/lab/r720xd/views/`, `src/components/drawing/r720xd/`). Never edit it |
 | `src/data/lab/types.ts` | Unions and shapes (`DeviceId`, `DriveId`, `PoolId`, `CardLines`, `Status`) | type-checks all of the above |
 | `labSpec` in `src/data/site.ts` | `lastRevised`/`lastRevisedIso`, `status`, `lede`, `drawings` (sheet cards, notes, `state`), `changelog` | `/lab/` (hero badge, Drawn to spec, changelog); home lab section (`labSpec.changelog[0]`, status); guide (`lastRevised`, status); `/docs/` and `/docs/setup/` ("Revised …") |
 
@@ -46,11 +52,13 @@ no longer true:
 - `src/pages/lab.astro`: the stack section lede ("The top floor is still going up."), the page
   `description`.
 - `src/pages/lab/stack.astro`: hero lede and page `description`.
+- `src/pages/lab/r730.astro`: the page `description`.
 - `labSpec.lede`, `labSpec.drawings.lede`, `labSpec.drawings.sheets[].note` and `.state`.
 - The sheet `desc` props (the SVG's text description): Sheet 01 in
   `src/components/drawing/rack/CabinetSheet.astro` (lists every device and U), Sheet 02 in
-  `src/pages/lab/r720xd.astro` ("the five drives", "three ZFS pools"), Sheet 03 in
-  `src/components/drawing/stack/StackSheet.astro` ("three Talos nodes", "an empty apps storey").
+  `src/pages/lab/r730.astro` (its drive and pool counts), Sheet 03 in
+  `src/components/drawing/stack/StackSheet.astro` (the Talos node and standalone VM counts, "an
+  apps storey of running apps").
 - `server.ts` cards that mention the stack: `memory.card` ("three Talos nodes at 24 GiB each"),
   the `fast` drives' cards ("the Talos nodes included").
 - The `stack.ts` header comment ("`status` is as of YYYY-MM-DD").
@@ -61,7 +69,7 @@ no longer true:
 |---|---|
 | `infra/tofu/talos.tf` `locals` (`talos_version`, `kubernetes_version`, `nodes`) and `proxmox_virtual_environment_vm.talos` (`cpu.cores`, `memory.dedicated` MiB ÷ 1024, `disk.size` GB, `datastore_id` → pool) | `talos-nodes`: `version`, `count`, `vm`, the card's size and "Talos X.Y, running Kubernetes X.Y" line |
 | `talos/schematic.yaml` | the Talos card's Image Factory line (extension names only) |
-| other `infra/tofu/*.tf` VM resources (general-purpose VMs are open work in `docs/architecture.md` "Not built") | `standalone` group items (robomp and any later VM): status, size |
+| other `infra/tofu/*.tf` VM resources (general-purpose VMs are open work in `docs/architecture.md` "Not built") | `standalone` group items (`ci-runner`, `robomp` and any later VM): status, size |
 | `kubernetes/flux/platform.yaml` (one Flux `Kustomization` per component) + `kubernetes/platform/<x>/` (HelmRelease/OCIRepository/manifests) | `platform` items: running, `version` |
 | `kubernetes/flux/*.yaml` Kustomizations with `path: ./kubernetes/apps/<app>` + `kubernetes/apps/<app>/` | the `apps` group |
 | `hosts/proxmox/playbook.yml` task names | the `host-config` card (snapshots, SMART, ZFS events, ntfy, node exporter) and any new plant-room item in the `host` group |
@@ -138,8 +146,8 @@ add the answer here.
      the marker (step 9) and commit it as `chore(lab): homelab <short hash>, nothing to sync`.
 4. **Check each candidate** against the source map and the status rules, reading the file at
    `HEAD` (not the diff alone). Write down the site change and the commit that justifies it.
-5. **Edit the data** with the recipes below. Hardware change to drives, pools or bays: freeze the
-   post first ("Before changing server.ts").
+5. **Edit the data** with the recipes below. Hardware change to drives, pools or bays: edit the
+   live `server.ts`; never the frozen snapshots ("The frozen R720xd archive").
 6. **Re-read the hand-written copy** listed above and fix what's no longer true.
 7. **Revisions and changelog**: bump a sheet's REV if its drawing changed materially; add a
    changelog entry per milestone; bump `lastRevised` if the month changed.
@@ -186,30 +194,27 @@ telemetry, dates of measurement, firmware or serials. For planned things the dra
 - Gone: delete the item. Don't delete `cilium` or `proxmox-csi`: the drawings draw them by id
   (see gotchas).
 
-### Add the first app (group `apps`)
+### Add an app (group `apps`)
 
 ```ts
+// an item of the `apps` group; `version` is the app's own major.minor
 {
-  id: 'apps',
-  title: 'Apps',
-  items: [
-    {
-      id: 'headlamp',
-      name: 'Headlamp',
-      what: 'A web UI for the cluster',
-      status: 'running',
-      card: { title: 'Headlamp', kind: 'Cluster UI', lines: ['A web UI for the cluster.'] }
-    }
-  ]
-}
+  id: 'gatus',
+  name: 'Gatus',
+  what: 'Status page and uptime checks',
+  status: 'running',
+  version: '5.37',
+  card: { title: 'Gatus 5.37', kind: 'Status page', lines: ['Checks that everything answers.'] }
+},
 ```
 
-- Drop the group's `card` ("Nothing decided yet…"): it only exists for the empty slot. The
-  check at the bottom of `stack.ts` throws if an empty group has no card, so put it back if the
-  last app ever goes.
-- The section's top storey switches from the crossed-out "NOTHING YET" bay to a row of fixtures,
-  solid once any app runs; the `/lab/` excerpt and `/lab/stack/` list show the app instead of
-  "Apps · nothing yet". Update Sheet 03's `desc` ("an empty apps storey").
+- The group already holds four apps (Headlamp, Homepage, Gatus, Zot). They draw as one row of
+  fixtures on Sheet 03's top storey; a fifth starts a second row, which is too many (see the
+  limits below).
+- The group's `card` ("Nothing decided yet…") only exists while the group is empty. The check at
+  the bottom of `stack.ts` throws if an empty group has no card, so put it back if the last app
+  ever goes.
+- Keep Sheet 03's `desc` ("an apps storey of running apps") and the `/lab/` excerpt in step.
 
 ### Add or flip a standalone VM (group `standalone`, e.g. `robomp`)
 
@@ -225,8 +230,9 @@ telemetry, dates of measurement, firmware or serials. For planned things the dra
 ```
 
 Running needs its tofu resource and `docs/architecture.md` describing it; sizes come from the
-resource, never an estimate. `what` wraps at 15 characters in the pavilion: three lines at most. It
-draws as a pavilion beside the cluster on the VM floor; see the capacity limit below.
+resource, never an estimate. The pavilion letters the name over lines of 9 characters and `what`
+over lines of 12: keep both short (`ci-runner` is the running example, `robomp` the planned
+one). It draws as a pavilion beside the cluster on the VM floor; see the capacity limit below.
 
 ### Change the Talos node count or size (`talos-nodes`)
 
@@ -238,19 +244,29 @@ section, plan, dimensions, hero, guide and excerpt follow. Check the limits belo
 
 ### Hardware (`server.ts`, `rack.ts`, `types.ts`)
 
-Before changing drives, pools or bays in `server.ts`, freeze the post (next section).
+`server.ts` is the R730 as built. Never edit `src/data/lab/snapshots/` (the frozen R720xd, see
+"The frozen R720xd archive"). The chassis geometry (`dims`, `panels`, `internal`) comes from Dell's
+manuals and is never guessed; `internal` lists only parts the manuals state, in order, with no
+coordinates.
 
-- **Drives**: add the id to `DriveId` in `types.ts`; add a `drives` entry (`bay` 0–23 front,
-  24–25 rear; `pool`; card `kind` like `Bay 5 · SATA SSD`). Bays are derived. Every pool's `bays`
-  must equal its drives' bays, in the same order, or `server.ts` throws at load. Update the
-  pool's `usableGiB` and card ("Bays 2 and 3, about 450 GiB.") from the inventory and the pools
-  table in `docs/architecture.md`.
-- **Pools**: a new pool needs the id in `PoolId`, `POOL_CLASS` in
-  `src/components/drawing/post/fig.ts`, a `.pool-<id>` colour in `src/styles/drawing.css`, the
-  `LineKey` union in `src/components/drawing/LineKey.astro`, and the legend in
-  `src/pages/lab/r720xd.astro`. The stack's footings size themselves from `usableGiB`.
-- **Controller, CPUs, memory, NICs**: edit the matching block; `controller.before`, `removed`,
-  `swapDate` and the cables are the 2026-09-28 swap's history: leave them.
+- **Drives**: add the id to `DriveId` in `types.ts`; add a `drives` entry (`bay` 0–15: the R730
+  has front bays only and no rear ones; card `kind` like `Bay 5 · SATA SSD`). `pool` is the pool
+  it belongs to and is omitted for a spare in no pool; `role: 'spare'` marks a spare: with a
+  `pool` it is that pool's hot spare (the `fast` spare in bay 0), without one it just sits in the
+  server (the two wiped spares in bays 8 and 9; card `kind` ends in ` · spare`). Bays are derived
+  (`bays.front` is 16; the empty ones draw as empty carriers). `server.ts` throws at load when a
+  drive is outside 0–15 or two share a bay, when a drive has neither a `pool` nor `role: 'spare'`,
+  when a pool's `bays` aren't its data drives' bays in order or its `spares` aren't its hot
+  spares' bays, and when the front panel's bay zones in `rack.ts` don't add up to 16 carriers.
+  Update the pool's `usableGiB` and card from the inventory and the pools table in
+  `docs/architecture.md`.
+- **Pools**: a new pool needs the id in `PoolId`, a `.pool-<id>` colour in
+  `src/styles/drawing.css`, the `LineKey` union in `src/components/drawing/LineKey.astro`, and the
+  legend in `src/pages/lab/r730.astro`. The stack's footings size themselves from `usableGiB`.
+  (`POOL_CLASS` in `post/fig.ts` belongs to the frozen post: leave it.)
+- **Controller, CPUs, memory, NICs**: edit the matching block. The controller is the PERC H730P
+  Mini in HBA mode (`controller.mode`); there is no `before`, `removed`, `swapDate` or cable
+  data any more: the R720xd's swap lives only in the frozen snapshot and in Sheet 02's history tab.
 - **Cabinet devices** (`rack.ts`): add the id to `DeviceId`; add the device to `devices` in
   top-to-bottom order. Rails count from the top: `at(8, 9)` is U8–9, `at(10)` is U10, and
   `top ≤ bottom`. Load-time checks in `rack.ts` throw on: a duplicate id; a racked device whose
@@ -260,34 +276,31 @@ Before changing drives, pools or bays in `server.ts`, freeze the post (next sect
   `maker` only to branded gear: the home readout lists devices with a `maker`. `links` are
   documented links only.
 
-## Before changing server.ts: freeze the post
+## The frozen R720xd archive
 
-`from-hardware-raid-to-zfs.mdx` shows the server "as built 2026-09-28", but its figures and its
-`path` thumb read the live `server.ts`. Changing drives, pools or bays would rewrite that
-history. Freeze it once, before the first such change:
+`from-hardware-raid-to-zfs.mdx` shows the R720xd "as built 2026-09-28", and the archived
+`/lab/r720xd/` sheet draws it. The R720xd left the lab on 2026-10-02, so both are frozen: they
+read only `src/data/lab/snapshots/{server,types}-2026-09-28.ts`, a literal copy of the old
+`server.ts` and its types (with its own copy of the panels, reading nothing live). **They must
+never change.** That covers the snapshots, `src/components/drawing/r720xd/*`,
+`src/components/drawing/post/*`, `src/pages/lab/r720xd*` and the post (prose, figures and FIG
+strips). The archive sheet is stamped `SUPERSEDED` ("2026-10-02 · BY THE R730"), stays REV B, is
+off the `/lab/` sheet index, and is reachable from the post, the changelog's 2026-09-28 entry and
+a link on Sheet 02.
 
-1. `npm run build`, then keep the reference:
-   `cp dist/blog/from-hardware-raid-to-zfs/index.html /tmp/post-before.html`.
-2. Copy `src/data/lab/server.ts` to `src/data/lab/snapshots/server-2026-09-28.ts`, keeping every
-   export (`server`, `derived`, `driveAt`, `gbLabel`, `inBefore`, `inNow`). Fix its relative
-   imports (`../types`), and replace the `device('r720xd').panels` import with a literal copy of
-   those panels from `rack.ts`, so the snapshot reads nothing live. Header: "The R720xd as built
-   on 2026-09-28, frozen for the post."
-3. Point the post's readers at the snapshot: `src/components/drawing/post/{fig.ts,BayMap.astro,Pools.astro,TwoCables.astro,SheetLink.astro}`
-   (their `server`/`derived`/`driveAt` imports), the MDX's `import { server }`, and the `path`
-   branch of `src/components/drawing/rack/SheetThumb.astro` (it reads `server` too, so give that
-   branch the snapshot).
-4. `npm run build` again and
+Live data (`server.ts`, `types.ts`, `rack.ts`) can't reach it, but shared code can (`rack/`,
+`drawing.css`, the kit components). After touching any of that, prove the post is unchanged:
+
+1. Before: `npm run build`, then `cp dist/blog/from-hardware-raid-to-zfs/index.html /tmp/post-before.html`.
+2. After: `npm run build` again and
    `cmp /tmp/post-before.html dist/blog/from-hardware-raid-to-zfs/index.html`: no output means
-   identical. Only then change `server.ts`.
-
-Don't touch the post's prose or its figures' FIG strips.
+   identical.
 
 ## Drawing limits and gotchas
 
 **Sheet 03** (`src/components/drawing/stack/`):
 
-- Layer 1 is drawn by hand from fixed ids: `r720xd`, `zfs`, `proxmox`, `rpi`, `udm-pro`, `unas`
+- Layer 1 is drawn by hand from fixed ids: `r730`, `zfs`, `proxmox`, `rpi`, `udm-pro`, `unas`
   (`SectionView.astro`). Renaming one breaks the build (`thing()` throws); a new item in the
   `metal`, `control` or `network` groups gets a number and a card but no drawing. Only the
   `host` group grows: each item other than `proxmox` is a 112-wide plant room at the right of the
@@ -296,8 +309,9 @@ Don't touch the post's prose or its figures' FIG strips.
   `proxmox-csi` by id, and the group ids `cluster`, `standalone`, `platform`, `apps` are fixed.
   The cluster group's first item is the Talos item and must have `count` and `vm`.
 - **The VM floor** runs from x 268 to 932: the tower takes `count × 136`, then each standalone VM
-  needs 136 more. With 3 nodes it holds **one** standalone VM (robomp); a second throws "too
-  many standalone VMs for the VM floor". 2 nodes → 2 VMs, 4 nodes → none.
+  is a 112-wide pavilion with an 8 gap (`PW`, `PG` in `SectionView.astro`). With 3 nodes it holds
+  **two** standalone VMs (the GitHub runner and robomp today); a third throws "too many
+  standalone VMs for the VM floor". 2 nodes → 3 VMs, 4 nodes → none.
 - **The cluster plan** fits **3 nodes** (200-wide rooms, 50 apart, inside an 800-wide host). A
   fourth overflows the host outline: redraw `ClusterView.astro` first. VM disks are drawn to
   scale on `fast`; above about 110 GB per disk they crowd out the CSI volumes drawn between
@@ -305,27 +319,48 @@ Don't touch the post's prose or its figures' FIG strips.
 - **The platform and apps grids** are 4 columns (`COLS = 4`), 50 units per row, growing upward.
   The roof sits at y = 276 − 50 × platform rows while the apps slot is empty, or 300 − 50 ×
   (platform rows + app rows) once there's an app. Keep the roof's y at 75 or more (the view
-  starts at y 40 and the width dimension sits 22 above the roof): today 10 platform fixtures fill
-  3 rows (2 free slots), so the first app row puts the roof at 100 and **one more row of either
-  kind (a 13th platform item or a 5th app) is too many**. Nothing throws when it overflows: look at
-  the sheet, and redraw `SectionView.astro` (more columns, or a lower VM floor) before adding it.
+  starts at y 40 and the width dimension sits 22 above the roof): today 11 platform fixtures fill
+  3 rows (one free slot, so a 12th still fits) and the 4 apps fill one row, which puts the roof at
+  100: **one more row of either kind (a 13th platform item or a 5th app) is too many**. Nothing
+  throws when it overflows: look at the sheet, and redraw `SectionView.astro` (more columns, or a
+  lower VM floor) before adding it.
 - Particles: ≤ 8 per instance, ≤ 12 per drawing (README). The section uses 8 and the plan 5.
 
 **Sheet 01** (`src/components/drawing/rack/`):
 
 - `model.ts` draws faces by id: `frontPanel`/`rearPanel` switch on the device id; the default
-  branch assumes a UDM/UNAS-style body with separate rack brackets. `slotOf` special-cases the
-  R720xd. Airflow is drawn only for `FRONT_TO_BACK`. Balloons follow the `/lab/` list order, then
-  shelves.
-- `SheetThumb.astro` draws the cabinet thumb from a fixed id list; `FrontView`, `RearView`,
-  `SideView`, `IsoView`, `IsoStack` and `CabinetExcerpt` use ids like `poe-injector`,
-  `patch-cables`, `spare-drive`, `r720xd`. A new device usually needs a look at each.
+  branch assumes a UDM/UNAS-style body with separate rack brackets. The R730 is special-cased:
+  `slotOf` stands its ears and drive carriers (the `plate`) 18 mm proud of the rack flange with
+  the body behind and a 320 mm slide for the exploded views; `frontPanel` draws it from its
+  front `zones` (the `kind: 'bay'` zones draw as carrier cells, and `server.ts` throws unless
+  they add up to 16); `FRONT_TO_BACK` lists `unas-pro-8` and `r730`, the only devices with
+  airflow drawn. The R730 sits at U13–14, where the R720xd was; the R720xd is a powered-off
+  spare off the cabinet, so it isn't drawn. Balloons follow the `/lab/` list order, then shelves.
+- `SheetThumb.astro` draws the cabinet thumb from a fixed id list (it draws `r730` from its
+  front zones, and the server thumb too); `FrontView`, `RearView`, `SideView`, `IsoView`,
+  `IsoStack` and `CabinetExcerpt` use ids like `poe-injector`, `patch-cables`, `spare-drive`,
+  `r730`. A new device usually needs a look at each.
 - The OFF SHEET box holds one device (the U7 Pro) and its note is hard-coded ("CEILING OR WALL ·
   POE"); a second `elsewhere` device draws on top of it.
 - Front, side and rear views are lazy: built into `/lab/rack/views/` and fetched after load, so
   their cards must stay in `CabinetSheet.astro`'s `cards` slot (they do: one per device).
 
-**Sheet 02** (`src/components/drawing/server/`):
+**Sheet 02 · the R730** (`src/components/drawing/r730/`, data `server.ts`; page
+`src/pages/lab/r730.astro`, lazy views `src/pages/lab/r730/views.astro`):
+
+- `geom.ts` holds the geometry (built from `server.dims` and `server.panels`), the balloon order
+  (`NUM`) and the `STAMP`; `page.ts` loads the lazy views; `R730Defs.astro`, `R730Cards.astro`
+  (the cards: they must stay on the page so the lazy views' parts are clickable) and `Key.astro`
+  (the legend) are page furniture.
+- Tabs: Orthographic, Exploded and "R720xd → R730" (`HistoryView.astro`, the swap). The views are
+  `BayStrip`, `OrthoViews`, `PlanView`, `ExplodedView` and `HistoryView`; `Bit.astro` is the
+  shared bit lettering. Read the page before adding a drive or a pool: nothing checks that the
+  drawn bays and pools tree still fit.
+- `R730Excerpt.astro` is a kit excerpt (`id?` `'r730-bays'`, `caption?`, `fig?`, `breakout?`),
+  not placed on any page: `/lab/` has no room left in its HTML budget.
+- The page links to the archived R720xd sheet; keep that link.
+
+**Sheet 02 (archived R720xd, frozen)** (`src/components/drawing/r720xd/`, reads only `src/data/lab/snapshots/`):
 
 - `geom.ts` assumes exactly one rear drive, in bay 24 (`rearDrive`); bay 25 is the removed
   drive's bay in the before view. A drive in bay 25, or none in 24, needs `geom.ts`,
@@ -336,16 +371,17 @@ Don't touch the post's prose or its figures' FIG strips.
   `ServerCards.astro` on the page.
 
 **Budgets** (`npm run check:perf`, after a build): drawing pages (`/lab/`, `/lab/rack/`,
-`/lab/r720xd/`, `/lab/stack/`, the R720xd post) HTML ≤ 80 KB raw / 20 KB gzip; lazy partials
-(`/lab/rack/views/`, `/lab/r720xd/views/`) ≤ 96 / 18; every page CSS ≤ 90 / 24, JS ≤ 64 / 24.
-More fixtures and apps grow `/lab/stack/` and `/lab/`.
+`/lab/r730/`, `/lab/r720xd/`, `/lab/stack/`, the R720xd post) HTML ≤ 80 KB raw / 20 KB gzip; lazy
+partials (`/lab/rack/views/`, `/lab/r730/views/`, `/lab/r720xd/views/`) ≤ 96 / 18; every page CSS
+≤ 90 / 24, JS ≤ 64 / 24. More fixtures and apps grow `/lab/stack/` and `/lab/`.
 
 ## Revisions and stamps
 
 | Sheet | Revision table, REV, date | Stamp |
 |---|---|---|
 | 01 · The cabinet | `src/components/drawing/rack/CabinetSheet.astro` (`rev`, `date`, `revisions`) | same file: `AS BUILT`, tone `ok` |
-| 02 · The server | `src/pages/lab/r720xd.astro` (`rev`, `date`, `revisions`) | `STAMP` in `src/components/drawing/server/geom.ts` (`AS BUILT`, sub "SWAP DONE · date") |
+| 02 · The server | `src/pages/lab/r730.astro` (`rev`, `date`, `revisions`: A and B are the R720xd's history, C is "Redrawn for the R730") | `STAMP` in `src/components/drawing/r730/geom.ts`: `AS BUILT`, sub "R730 · 2026-10-02", tone `ok` |
+| 02 · The server (R720xd archive, frozen) | `src/pages/lab/r720xd.astro` (stays REV B) | `STAMP` in `src/components/drawing/r720xd/geom.ts`: `SUPERSEDED`, sub "2026-10-02 · BY THE R730", tone `warn` |
 | 03 · The stack | `src/components/drawing/stack/StackSheet.astro` (`rev`, `date`, `revisions`) | same file: `IN PROGRESS`, tone `wip` |
 
 - Material drawing change (something drawn appears, disappears, moves, changes size or count, or
@@ -370,7 +406,7 @@ More fixtures and apps grow `/lab/stack/` and `/lab/`.
   so set it for sheets ("See the stack"). Titles: "A → B" for a swap, or "X, Y" (the part after
   the last ", " is highlighted on `/lab/`).
 - Not every sync is a milestone. Version bumps and fixes get no entry.
-- `lastRevised` / `lastRevisedIso` are month-grained (`'Sep 2026'`, `'2026-09'`) and are literal
+- `lastRevised` / `lastRevisedIso` are month-grained (`'Oct 2026'`, `'2026-10'`) and are literal
   types in `labSpec`'s type annotation: change the annotation and the value together.
 - Notes and card lines are the owner's voice: short, plain, first person, a little funny, never
   salesy. Quote every new line in the report.
@@ -383,6 +419,10 @@ Never publish: IP addresses, subnets, VLAN IDs, VIPs, VMIDs, MACs, hostnames and
 firmware versions, security design (how secrets flow and who holds them, agent autonomy levels,
 state encryption), the homelab repo's URL, and anything about location. Fine: product models,
 counts, sizes, pool names, tool names and major.minor versions.
+
+Off the site by owner decision, even though they aren't private values: external-dns, tenants and
+their apps, and whose code the runner builds. Known problems (a disk with errors, a boot alarm) aren't
+published either.
 
 Scan the diff before committing (from the site root; exits 1 on hits, review each one):
 
@@ -450,20 +490,21 @@ npm run check:images
 ```
 
 Then serve the build (`npx astro preview --host 127.0.0.1 --port <free port>`) and open `/`,
-`/lab/`, `/lab/stack/`, `/lab/rack/` and `/lab/r720xd/` at 1440 and 390 wide:
+`/lab/`, `/lab/stack/`, `/lab/rack/` and `/lab/r730/` at 1440 and 390 wide:
 
 - Every changed part is there, solid or dashed as intended, with the right balloon.
 - Click (and Enter on) a numbered part on each sheet and on the `/lab/` excerpts: the card
   opens with the new lines; Esc closes it.
-- On `/lab/rack/` and `/lab/r720xd/`, open the lazy tabs (Front, Side, Rear; Exploded,
-  Before / After).
+- On `/lab/rack/` and `/lab/r730/`, open the lazy tabs (Front, Side, Rear; Exploded,
+  R720xd → R730).
 - Zero console errors; at 390 the page doesn't scroll sideways
   (`document.documentElement.scrollWidth <= innerWidth`; the sheets pan inside their frame, that's
   fine). The home stack line wraps without overflow as it grows (a hyphenated name such as
   cert-manager may break at its hyphen at 390; that's the browser, not a bug).
 - Take screenshots with `prefers-reduced-motion: reduce` emulated: otherwise the sheets and
   excerpts plot in as they scroll into view, and an early shot shows an empty frame.
-- The post, if `server.ts` changed: identical to before (the freeze check).
+- The post and the archive (`/lab/r720xd/`, its views): unchanged (the freeze check), whenever
+  shared drawing code, `rack.ts` or the styles changed.
 
 Stop the preview server when done.
 
@@ -481,7 +522,9 @@ Stop the preview server when done.
 
 - No provenance, sources, citations, "last measured" dates or "still open" lists on the drawings.
 - No layer toggles, cursor readouts or status bars.
-- Don't edit post prose, and don't let a hardware change silently rewrite the post.
+- Don't edit post prose or anything the frozen R720xd archive reads, and don't let a shared change
+  silently rewrite the post.
+- Don't put external-dns, tenants or tenant apps on the lab pages, in lab data, drawings or the guide.
 - Don't link or quote the homelab repo on any rendered page: no URL, path or hash. The only
   traces are the source-comment marker in `stack.ts` and the commit subject, both a short hash.
 - Don't write to `../homelab`.

@@ -1,9 +1,9 @@
 /**
- * Sheet 02 page behaviour (bundled by src/pages/lab/r720xd.astro).
+ * Sheet 02 (the R730) page behaviour (bundled by src/pages/lab/r730.astro).
  *
- * Lazy views: the EXPLODED and BEFORE / AFTER tab panels ship empty and fill from
- * /lab/r720xd/views/ (fetched once: on idle, or at the first touch of a view tab), which keeps the
- * page HTML inside budget. The drawings they <use> (ServerDefs) and every card are already on the
+ * Lazy views: the EXPLODED and R720xd → R730 tab panels ship empty and fill from
+ * /lab/r730/views/ (fetched once: on idle, or at the first touch of a view tab), which keeps the
+ * page HTML inside budget. The drawings they <use> (R730Defs) and every card are already on the
  * page. Without JS the tabs are hidden and only the orthographic views show.
  *
  * Tab stops: one per part per view. A drive drawn in three places on a tab is still one stop;

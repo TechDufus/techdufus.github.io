@@ -1,39 +1,45 @@
 ---
 /*
-  /lab/r720xd/: Sheet 02 · The server (TD-LAB-02) as it was, a frozen archive since the R730 took
-  the slot on 2026-10-02. Built on 2026-09-28, after the PERC H710P Mini → HBA330 swap. Every number
-  comes from src/data/lab/snapshots/server-2026-09-28.ts (nothing live); the drawings live in
-  src/components/drawing/r720xd/; the EXPLODED and BEFORE / AFTER panels load from /lab/r720xd/views/
-  (r720xd/page.ts). Below the sheet: the machine at a glance and the three pools
-  (the text equivalent of the drives and pools on the drawing).
+  /lab/r730/: Sheet 02 · The server (TD-LAB-02), the Dell PowerEdge R730 that replaced the R720xd
+  on 2026-10-02. Every number comes from src/data/lab/server.ts; the drawings live in
+  src/components/drawing/r730/; the EXPLODED and R720xd → R730 panels load from /lab/r730/views/
+  (r730/page.ts). Below the sheet: the machine at a glance and the pools, spares included (the
+  text equivalent of the drives and pools on the drawing). The R720xd sheet it replaced is the
+  frozen archive at /lab/r720xd/.
 */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { siteMetadata } from '../../data/site';
 import Sheet from '../../components/drawing/Sheet.astro';
 import ViewTabs from '../../components/drawing/ViewTabs.astro';
-import LineKey from '../../components/drawing/LineKey.astro';
-import ServerDefs from '../../components/drawing/r720xd/ServerDefs.astro';
-import ServerCards from '../../components/drawing/r720xd/ServerCards.astro';
-import OrthoViews from '../../components/drawing/r720xd/OrthoViews.astro';
+import Key from '../../components/drawing/r730/Key.astro';
+import R730Defs from '../../components/drawing/r730/R730Defs.astro';
+import R730Cards from '../../components/drawing/r730/R730Cards.astro';
+import OrthoViews from '../../components/drawing/r730/OrthoViews.astro';
 import View from '../../components/drawing/View.astro';
-import { derived, server } from '../../data/lab/snapshots/server-2026-09-28';
+import { derived, driveAt, server } from '../../data/lab/server';
 
 const DWG = 'lab02';
 const cpu = server.cpus[0];
+const hotSpares = server.drives.filter((d) => d.role === 'spare' && d.pool).length;
+const looseSpares = server.drives.filter((d) => d.role === 'spare' && !d.pool).length;
 const glance = [
-  { k: 'CPUs', v: `2 × ${cpu.model.replace('Intel Xeon ', '').replace('-', '\u2011')}` },
+  { k: 'CPUs', v: `2 × ${cpu.model.replace('Intel Xeon ', '').replace('-', '\u2011').replace(' ', '\u00a0')}` },
   { k: 'Threads', v: String(server.threads) },
   { k: 'Memory', v: `${server.memory.gb} GB` },
   { k: 'Storage', v: `${derived.drives} drives in ${server.pools.length} ZFS pools` },
-  { k: 'Controller', v: server.controller.now.name.replace('Dell ', '').replace(' Adapter', '') },
+  { k: 'Spares', v: `${hotSpares} hot, ${looseSpares} in no pool` },
+  { k: 'Controller', v: `${server.controller.name.replace('Dell ', '')}, ${server.controller.mode}` },
 ];
+const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen'];
+const cap = (w: string) => w[0].toUpperCase() + w.slice(1);
+const quip = `${cap(words[derived.drives])} drives, ${words[server.pools.length]} pools, ${words[derived.baysFree]} empty bays. The bad ideas have to fit in fewer slots now.`;
 const layout = (p: (typeof server.pools)[number]) => (p.layout === 'mirror' ? `${p.copies}-way mirror` : 'Single disk');
-const driveAt = (bay: number) => server.drives.find((d) => d.bay === bay)!;
+const spares = server.drives.filter((d) => !d.pool);
 ---
 
 <BaseLayout
   title="The server · Sheet 02"
-  description="Archived Sheet 02 of my homelab drawings: the Dell PowerEdge R720xd as it was on 2026-09-28, after swapping its PERC H710P Mini for an HBA330. Six drives, three ZFS pools. The R730 replaced it on 2026-10-02."
+  description="Sheet 02 of my homelab drawings: the Dell PowerEdge R730 as built on 2026-10-02. Sixteen front bays, ten drives in three ZFS pools with a hot spare and two spares, and a PERC H730P Mini in HBA mode. Top, front and rear views, an exploded view, and how the drives moved over from the R720xd."
   ogImage={siteMetadata.media.labSocialImage}
   ogImageAlt={siteMetadata.media.labSocialImageAlt}
 >
@@ -41,27 +47,29 @@ const driveAt = (bay: number) => server.drives.find((d) => d.bay === bay)!;
     <section class="wrap srv-hero" aria-labelledby="srv-title">
       <p class="eyebrow srv-hero__eyebrow">Lab · Sheet 02</p>
       <h1 class="h1" id="srv-title">The <em>server</em>.</h1>
-      <p class="lede srv-hero__lede">A Dell PowerEdge R720xd that thinks it’s an R720. The RAID card is gone, and ZFS sees every disk. Archived: the R730 took this slot on 2026-10-02. This is the R720xd as it was. <a class="link" href="/lab/r730/">See the R730 <span class="arrow" aria-hidden="true">→</span></a></p>
+      <p class="lede srv-hero__lede">A Dell R730, in the R720xd’s old slot. Its RAID card does HBA mode on its own, so ZFS sees every disk and there was no surgery this time.</p>
       <p class="srv-hero__links">
+        <a class="link" href="/lab/r720xd/">The R720xd it replaced <span class="arrow" aria-hidden="true">→</span></a>
         <a class="link link--quiet" href="/lab/"><span aria-hidden="true">←</span> The lab</a>
         <a class="link link--quiet" href="/lab/rack/">Sheet 01 · The cabinet</a>
         <a class="link link--quiet" href="/lab/stack/">Sheet 03 · The stack <span class="arrow" aria-hidden="true">→</span></a>
       </p>
     </section>
 
-    <div class="srv-wide" data-srv-views="/lab/r720xd/views/">
+    <div class="srv-wide" data-srv-views="/lab/r730/views/">
       <Sheet
         id={DWG}
         dwgNo="TD-LAB-02"
         title="The server"
-        desc="Dell PowerEdge R720xd as built. Orthographic tab: top view with the cover off, front, rear, detail B of front bays 0 to 7 with the five drives, detail C of the rear flex bays, and the three ZFS pools. Exploded tab: the server taken apart, with the drives pulled out. Before / After tab: the storage controller, cables and rear drives before and after the 2026-09-28 swap, with the data path under each."
+        desc="Dell PowerEdge R730 as built. Orthographic tab: top view with the cover off, front elevation, rear elevation, detail B of front bays 0 to 9 with the ten drives (a hot spare in bay 0, two spares in bays 8 and 9), and the three ZFS pools with the spares. Exploded tab: the server taken apart, with the drives pulled out. R720xd to R730 tab: where each drive came from in the R720xd and where it sits now, with the four new SSDs."
         sheet={[2, 3]}
-        rev="B"
-        date="2026-09-29"
+        rev="C"
+        date="2026-10-03"
         checked="TD"
         revisions={[
           { rev: 'A', date: '2026-09-28', desc: 'First issue' },
           { rev: 'B', date: '2026-09-29', desc: 'As built' },
+          { rev: 'C', date: '2026-10-03', desc: 'Redrawn for the R730' },
         ]}
         interactive
         hint
@@ -70,25 +78,26 @@ const driveAt = (bay: number) => server.drives.find((d) => d.bay === bay)!;
           <ViewTabs dwg={DWG} active="ortho" views={[
             { id: 'ortho', label: 'Orthographic', icon: 'front' },
             { id: 'exploded', label: 'Exploded', icon: 'iso' },
-            { id: 'history', label: 'Before / After', icon: 'top' },
+            { id: 'history', label: 'R720xd → R730', icon: 'top' },
           ]} />
         </Fragment>
 
-        <ServerDefs id={DWG} />
+        <R730Defs id={DWG} />
         <OrthoViews dwg={DWG} active />
-        {/* filled from /lab/r720xd/views/ (ExplodedView, BeforeAfter) by server.ts */}
+        {/* filled from /lab/r730/views/ (ExplodedView, HistoryView) by r730/page.ts */}
         <View dwg={DWG} name="exploded" x={39} y={39} w={1182} h={813} />
         <View dwg={DWG} name="history" x={39} y={39} w={1182} h={813} />
 
-        <Fragment slot="cards"><ServerCards /></Fragment>
+        <Fragment slot="cards"><R730Cards /></Fragment>
         <Fragment slot="legend">
-          <LineKey items={[
+          <Key items={[
             { line: 'obj', label: 'Object' },
             { line: 'pool-rpool', label: 'rpool' },
             { line: 'pool-fast', label: 'fast' },
             { line: 'pool-bulk', label: 'bulk' },
-            { line: 'sem-new', label: 'Went in' },
-            { line: 'sem-removed', label: 'Came out' },
+            { line: 'spare-hot', label: 'Hot spare' },
+            { line: 'spare-idle', label: 'Spare, no pool' },
+            { line: 'sem-new', label: 'New to the lab' },
             { line: 'air-cold', label: 'Cold air' },
             { line: 'air-hot', label: 'Hot air' },
           ]} />
@@ -101,7 +110,7 @@ const driveAt = (bay: number) => server.drives.find((d) => d.bay === bay)!;
       <dl class="srv-glance">
         {glance.map((g) => <div><dt>{g.k}</dt><dd>{g.v}</dd></div>)}
       </dl>
-      <p class="srv-quip">Six drives, three pools, twenty empty bays. Plenty of room for bad ideas.</p>
+      <p class="srv-quip">{quip}</p>
 
       <h2 class="srv-h srv-h--pools" id="srv-pools">The pools</h2>
       <ul class="srv-pools" aria-labelledby="srv-pools">
@@ -111,15 +120,26 @@ const driveAt = (bay: number) => server.drives.find((d) => d.bay === bay)!;
             <p class="srv-pool__m">{layout(p)} · about {p.usableGiB} GiB</p>
             <p class="srv-pool__h">{p.holds}</p>
             <ul class="srv-pool__d">
-              {p.bays.map((b) => <li><span>Bay {b}</span> {driveAt(b).card.title}</li>)}
+              {p.bays.map((b) => <li><span>Bay {b}</span> {driveAt(b)?.card.title}</li>)}
+              {p.spares.map((b) => <li><span>Bay {b}</span> {driveAt(b)?.card.title} · hot spare</li>)}
             </ul>
           </li>
         ))}
+        {spares.length > 0 && (
+          <li data-pool="none">
+            <p class="srv-pool__n">No pool</p>
+            <p class="srv-pool__m">Spares in the server</p>
+            <p class="srv-pool__h">Wiped and waiting</p>
+            <ul class="srv-pool__d">
+              {spares.map((d) => <li><span>Bay {d.bay}</span> {d.card.title}</li>)}
+            </ul>
+          </li>
+        )}
       </ul>
 
       <nav class="srv-next" aria-label="More drawings">
         <a class="link link--quiet" href="/lab/rack/"><span aria-hidden="true">←</span> Sheet 01 · The cabinet</a>
-        <a class="link link--quiet" href="/blog/from-hardware-raid-to-zfs/">The post: From hardware RAID to ZFS</a>
+        <a class="link link--quiet" href="/lab/r720xd/">The R720xd sheet, archived</a>
         <a class="link link--quiet" href="/lab/stack/">Sheet 03 · The stack <span class="arrow" aria-hidden="true">→</span></a>
       </nav>
     </section>
@@ -164,7 +184,8 @@ const driveAt = (bay: number) => server.drives.find((d) => d.bay === bay)!;
   .pg-server [data-pool="rpool"] { --pc: var(--gold); }
   .pg-server [data-pool="fast"] { --pc: var(--ink); }
   .pg-server [data-pool="bulk"] { --pc: #8fa3c7; }
-  .pg-server .srv-pools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none; background: var(--line); border: 1px solid var(--line); }
+  .pg-server [data-pool="none"] { --pc: var(--faint); }
+  .pg-server .srv-pools { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none; background: var(--line); border: 1px solid var(--line); }
   .pg-server .srv-pools > li { padding: 20px 22px 18px; background: var(--bg); box-shadow: inset 0 2px 0 var(--pc); }
   .pg-server .srv-pools p { margin: 0; }
   .pg-server .srv-pool__n { font: 500 1rem/1 var(--font-mono); color: var(--pc); letter-spacing: .02em; }
@@ -180,5 +201,5 @@ const driveAt = (bay: number) => server.drives.find((d) => d.bay === bay)!;
 </style>
 
 <script>
-  import '../../components/drawing/r720xd/page';
+  import '../../components/drawing/r730/page';
 </script>

@@ -58,7 +58,7 @@ export const RAIL_W = 15.875;
 export const HOLES = [(RACK_19_MM - 465.1) / 2, (RACK_19_MM + 465.1) / 2];
 
 /** Devices that pull air front to back (both have fans behind front intakes); airflow is drawn for these only. */
-export const FRONT_TO_BACK: DeviceId[] = ['unas-pro-8', 'r720xd'];
+export const FRONT_TO_BACK: DeviceId[] = ['unas-pro-8', 'r730'];
 
 /* ------------------------------------------------------------------ devices */
 
@@ -71,7 +71,7 @@ export type Slot = {
   /** slot height (U × 44.45), or the body height for things standing on a shelf */
   hU: number;
   body: Box3;
-  /** front plate (the R720xd's ears and carriers), if any */
+  /** front plate (the R730's ears and carriers), if any */
   plate?: { x: number; w: number; z: number; t: number; h: number };
   /** separate 3 mm rack brackets (UDM Pro, UNAS Pro 8, shelves), each `w` wide */
   ears?: { w: number; t: number };
@@ -114,7 +114,7 @@ function slotOf(d: Device): Slot {
   const [y0, y1] = ySpan(d.placement.u);
   const hU = y1 - y0;
   const cx = (RACK_19_MM - b.w) / 2;
-  if (d.id === 'r720xd') {
+  if (d.id === 'r730') {
     // Ears + drive carriers stand 18 mm proud of the rack flange (Dell Za); the body sits behind.
     return {
       dev: d, n, y0, hU,
@@ -228,27 +228,23 @@ function zonesPanel(d: Device, face: 'front' | 'rear', ox: number, w: number, h:
 
 function drawZone(id: string, z: PanelZone, x: number, y: number, w: number, h: number, obj: string[], med: string[], thin: string[], lite: boolean): void {
   const key = `${id}:${z.id}`;
-  if (key === 'r720xd:bays') {
-    // 24 carriers, bay 0 at the left: release button up top, vented handle below.
+  if (z.kind === 'bay' && z.cells) {
+    // A run of carriers, the first at the left: release button up top, vented handle below.
     // One carrier drawn in relative steps, repeated with a relative move: a sixth of the bytes.
-    const cw = w / 24, r = cw * 0.18, hw = cw * 0.56, hh = h * 0.62, vw = cw * 0.4;
+    const n = z.cells;
+    const cw = w / n, r = cw * 0.18, hw = cw * 0.56, hh = h * 0.62, vw = cw * 0.4;
     const carrier = `h${r1(cw - 0.8)}v${r1(h)}h${r1(0.8 - cw)}Z`;
     const detail =
       `a${r1(r)} ${r1(r)} 0 1 0 ${r1(2 * r)} 0a${r1(r)} ${r1(r)} 0 1 0 ${r1(-2 * r)} 0` +
       `m${r1(cw * 0.22 - (cw / 2 - r))} ${r1(h * 0.16)}h${r1(hw)}v${r1(hh)}h${r1(-hw)}Z` +
       `m${r1(cw * 0.08)} ${r1(h * 0.16)}h${r1(vw)}m${r1(-vw)} ${r1(h * 0.2)}h${r1(vw)}`;
-    med.push(`M${r1(x + 0.4)} ${r1(y)}${carrier}` + `m${r1(cw)} 0${carrier}`.repeat(23));
-    if (!lite) for (let i = 0; i < 24; i++) thin.push(`M${r1(x + i * cw + cw / 2 - r)} ${r1(y + h * 0.1)}${detail}`);
+    med.push(`M${r1(x + 0.4)} ${r1(y)}${carrier}` + `m${r1(cw)} 0${carrier}`.repeat(n - 1));
+    if (!lite) for (let i = 0; i < n; i++) thin.push(`M${r1(x + i * cw + cw / 2 - r)} ${r1(y + h * 0.1)}${detail}`);
     return;
   }
   if (key === 'udm-pro:lan-top' || key === 'udm-pro:lan-bottom') {
     const pw = w / 4;
     med.push(jacks(x + 0.4, y, pw - 0.8, h, pw, 4));
-    return;
-  }
-  if (key === 'r720xd:diag') {
-    const cw = w / 3, chh = h / 2;
-    for (let i = 0; i < 6; i++) thin.push(rr(x + (i % 3) * cw + 0.3, y + Math.floor(i / 3) * chh + 0.3, cw - 0.6, chh - 0.6));
     return;
   }
   if (key === 'ont:leds') {
@@ -344,7 +340,7 @@ export function frontPanel(s: Slot, lite = false): Panel {
   const d = s.dev;
   const units = Math.round(s.hU / U_MM);
   switch (d.id) {
-    case 'r720xd': {
+    case 'r730': {
       const p = zonesPanel(d, 'front', s.faceX, s.faceW, s.faceH, lite);
       return { ...p, obj: rr(s.faceX, 0, s.faceW, s.faceH) + p.obj };
     }

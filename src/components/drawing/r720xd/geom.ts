@@ -5,8 +5,9 @@
  * seen from the front (0 … 482.4), y = height from the chassis bottom, z = depth from the rack
  * flange towards the rear (the front ears sit at z −18 … 0).
  *
- * Sizes come from server.dims, panel features from the zones in src/data/lab/rack.ts, and the
- * internals from server.internal (schematic fractions, not to scale).
+ * Sizes come from server.dims, panel features from server.panels (the zones the cabinet sheet traced
+ * for the R720xd) and the internals from server.internal (schematic fractions, not to scale). All of
+ * it is the frozen 2026-09-28 snapshot in src/data/lab/snapshots/.
  *
  * The path builders return compact `d` strings (relative moves, 0.1 mm) in model mm, so one
  * drawing can be placed in any view with a transform (see ServerDefs.astro):
@@ -14,8 +15,8 @@
  *   rearPanel()   as seen from behind: u → from the left of the body, v ↓
  *   planPaths()   top view, cover off: u = model x, v = −z (rear up, front ears at v 0 … 18)
  */
-import { server } from '../../../data/lab/server';
-import type { CableN, Drive, PanelZone, PoolId } from '../../../data/lab/types';
+import { server } from '../../../data/lab/snapshots/server-2026-09-28';
+import type { CableN, Drive, PanelZone, PoolId } from '../../../data/lab/snapshots/types-2026-09-28';
 import { join, type Pt } from '../../../lib/drawing/projection';
 
 /* ------------------------------------------------------------------ sizes (mm) */
@@ -287,8 +288,8 @@ export const rearDrive = server.drives.find((d) => d.bay === 24)!;
 export const driveShort = (d: { maker: string; model: string; sizeGB: number; interface: string }): string =>
   d.interface === 'SAS' ? d.model : `${d.maker === 'Crucial' ? 'MX500' : d.maker} ${d.sizeGB >= 1000 ? `${d.sizeGB / 1000} TB` : `${d.sizeGB} GB`}`.toUpperCase();
 
-/** Sheet 02's stamp. Each view sets it down where it has room (Stamp.astro). */
-export const STAMP = { text: 'AS BUILT', sub: `SWAP DONE · ${server.swapDate}`, tone: 'ok' as const };
+/** Sheet 02's stamp: the sheet is a superseded archive since the R730 took the slot. Each view sets it down where it has room (Stamp.astro). */
+export const STAMP = { text: 'SUPERSEDED', sub: '2026-10-02 · BY THE R730', tone: 'warn' as const };
 
 /* ------------------------------------------------------------------ balloon numbers */
 /**

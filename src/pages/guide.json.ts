@@ -42,7 +42,7 @@ export async function GET() {
   const answers: Record<string, Answer> = {
     homelab: {
       text:
-        `One Dell PowerEdge R720xd (${server.threads} threads, ${server.memory.gb} GB) running Proxmox VE ${pve?.version ?? ''} on ZFS. OpenTofu puts ${talos?.count ?? 3} Talos VMs on it, and those are the Kubernetes cluster. Cilium runs its network, and Flux runs everything else from git.\n\n` +
+        `One Dell PowerEdge R730 (${server.threads} threads, ${server.memory.gb} GB) running Proxmox VE ${pve?.version ?? ''} on ZFS. OpenTofu puts ${talos?.count ?? 3} Talos VMs on it, and those are the Kubernetes cluster. Cilium runs its network, and Flux runs everything else from git.\n\n` +
         `Ansible configures the host, and a Raspberry Pi 4 on the top shelf is the control node. A UDM Pro runs the network and a UNAS Pro 8 holds the storage. All of it is declared in one git repo, private for now, and it's built for an AI agent to run, not me: [here's why](/blog/${SLUG.operator}/).\n\n` +
         `As of ${labSpec.lastRevised} it's ${labSpec.status.toLowerCase()}: ${running} things running, the rest still on paper. The [lab page](/lab/) has the drawings, and ${sheet('stack')} shows what runs where.`,
       cards: cards(SLUG.operator, SLUG.zfs, SLUG.talos)
@@ -74,8 +74,8 @@ export async function GET() {
     },
     rack: {
       text:
-        `A 42U cabinet, and its rails count from the top. Up there is a shelf with the Raspberry Pi 4, the fiber ONT and the PoE injector that powers the U7 Pro. Under it: the UNAS Pro 8, the UDM Pro, then the R720xd. A shelf of spares sits at the very bottom, and the rest is air.\n\n` +
-        `It's all drawn to spec. ${sheet('cabinet')} has every box where it sits, ${sheet('server')} opens up the R720xd, and ${sheet('stack')} shows what runs on it. The first two are stamped as built.`,
+        `A 42U cabinet, and its rails count from the top. Up there is a shelf with the Raspberry Pi 4, the fiber ONT and the PoE injector that powers the U7 Pro. Under it: the UNAS Pro 8, the UDM Pro, then the R730. A shelf of spares sits at the very bottom, and the rest is air.\n\n` +
+        `It's all drawn to spec. ${sheet('cabinet')} has every box where it sits, ${sheet('server')} opens up the R730, and ${sheet('stack')} shows what runs on it. The first two are stamped as built.`,
       cards: cards(SLUG.zfs)
     },
     hire: {
