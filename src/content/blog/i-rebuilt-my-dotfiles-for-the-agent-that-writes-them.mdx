@@ -1,0 +1,270 @@
+---
+title: 'I Rebuilt My Dotfiles for the Agent That Writes Them'
+description: >-
+  I don't hand-write my dotfiles anymore. An agent does. So I rebuilt them for
+  the agent, and almost four years of Ansible went out in one commit.
+pubDate: '2026-10-11'
+created: '2026-10-10'
+tags:
+  - dotfiles
+  - ai
+  - ai-agents
+  - mise
+  - ansible
+  - omarchy
+category: tech
+socialImage: /img/posts/i-rebuilt-my-dotfiles-for-the-agent-that-writes-them.png
+socialImageAlt: >-
+  The post title over a gold-ink drawing on navy: a decision table headed "Who
+  writes it?", where one question fans out to four conditions, from the app
+  only reading the file to a link that can't survive the app, each pointing to
+  a numbered deploy mode: symlink, merge, line edits and copy.
+socialImageWidth: 1200
+socialImageHeight: 630
+---
+import YearOfChanges from '../../components/drawing/post/dotfiles/YearOfChanges.astro';
+import TheSaturday from '../../components/drawing/post/dotfiles/TheSaturday.astro';
+import TheRoles from '../../components/drawing/post/dotfiles/TheRoles.astro';
+import WhoWrites from '../../components/drawing/post/dotfiles/WhoWrites.astro';
+
+# I Rebuilt My Dotfiles for the Agent That Writes Them
+
+```text
+1098 files changed, 2490 insertions(+), 52108 deletions(-)
+```
+
+That's one commit in my dotfiles repo. It landed at 4:09 on a Saturday afternoon, and it deleted almost four years of Ansible.
+
+At 1:52 that same afternoon, I'd asked my agent a question:
+
+> I'm wondering if i've outgrown the original intent of this dotfiles, as an ansible project to manage all my devices / config / etc...
+
+Two hours and seventeen minutes later, the answer was a commit.
+
+In September I [scorched my homelab and rebuilt it for an AI operator](/blog/i-rebuilt-my-homelab-for-an-ai-operator/). This is the same move, one layer closer to my keyboard. My dotfiles were built for the person who writes them. That used to be me.
+
+It isn't anymore.
+
+(Same harness as the homelab, [oh-my-pi](https://github.com/can1357/oh-my-pi). Same disclaimer: the ideas matter more than the harness.)
+
+## I don't write my dotfiles anymore
+
+My [dotfiles repo](https://github.com/TechDufus/dotfiles) started in December 2022. Its README called it a "Fully automated development environment" for my Twitch stream, and I made a YouTube video showing it off: [Automating your Dotfiles with Ansible: A Showcase](https://youtu.be/hPPIScBt4Gw). It picked up over 400 stars along the way. In my [very first blog post](/blog/welcome-post/), back in 2020, Ansible was on my list of things I wanted to learn.
+
+In February I wrote that [my dotfiles exist](/blog/ai-already-took-my-job/) because I obsess over understanding how my tools work. Still true. What changed is who does the typing. This was the line in my question that mattered:
+
+> i no longer hand-write the ansible tasks, my configs, etc...
+
+Agents write my shell functions, my window rules and the Ansible that deployed all of it. The busiest thing in the repo wasn't even my shell anymore. It was my agent's own config: the omp role alone had 146 commits in the year before the rebuild.
+
+So who was the repo built for? A human who writes YAML by hand, and strangers who fork it. I'm not the first one anymore. I was never the second.
+
+## What the agent found
+
+I asked for an immense amount of effort and research. It sent out seven research agents at once: chezmoi, Nix, package tools, how Omarchy works, my 90 roles, how they're wired, and my git history.
+
+The one assigned to my git history couldn't run git. It said so instead of guessing:
+
+> No churn counts, ratios, fix-cause counts or hashes were produced; none are fabricated.
+
+So the main agent ran the numbers itself. What I had: 90 roles, about 14,000 lines of task YAML, about 23,700 lines of Markdown, 52 test files (32 of them read the Ansible YAML), and CI that only linted.
+
+Then came the line that reframed the whole thing for me:
+
+> Your history shows the pain isn't the YAML itself (orchestration is about 11% of last year's churn); it's the per-OS boilerplate, slow runs, and bespoke logic for files that apps rewrite.
+
+<YearOfChanges />
+
+The engine was the smallest part of what changed. The year went into config content, Markdown my agents wrote, and tests, many of which just read my own YAML. (Also, 101 of the 298 commits in the six months before I asked were fixes. Not great.)
+
+The shape was the real problem. Every tool was a role, most roles had a task file per OS, and the repo still carried paths for Ubuntu, Fedora and WSL setups that none of my three machines ran. The Ghostty role was a README, three task files and an uninstall script, 265 lines in all, to install Ghostty and put its config in place.
+
+## Picking the engine for the writer
+
+My question had a guess in it: "is just simple bash best? could this be a `just` project or something?"
+
+Neither, it turned out. "`just` isn't an engine, only a command runner, and mise tasks already cover that." Bash plus GNU Stow meant "about 600-900 lines of bash" of my own framework, and that's how I got here in the first place: the agent pointed out the same link-and-guard logic was already copied across four of my AI tool roles.
+
+Nix was out fast:
+
+> Nix is ruled out: it fights Omarchy's pacman-owned setup and the apps that rewrite their own settings (Claude, Tern, omp), and it only fits the Mac.
+
+chezmoi is the most mature dotfile manager around, and it was a real contender. But it handles app-owned JSON by rewriting the whole file ("they re-serialize the file, so key order and comments are lost"), and system files would still be bash. "That's 3-4 tools plus glue."
+
+The winner was already on my laptop. Omarchy ships [mise](https://mise.jdx.dev/), and two mise features, `mise bootstrap` and `mise dotfiles`, cover the whole job in one tool: packages (pacman, AUR, Homebrew), files (links, copies, templates), key-level merges into JSON, TOML and YAML that apps also write, marked blocks inside files I don't own, system files, services, tools and tasks.
+
+Here's my whole Ghostty setup after the rebuild:
+
+```toml
+# modules/ghostty/mise.toml: every machine
+[dotfiles]
+"~/.config/ghostty/config" = { source = "config" }
+"~/.config/ghostty/shaders" = { source = "shaders", mode = "symlink-each" }
+"~/.config/ghostty/themes" = { source = "themes", mode = "symlink-each" }
+
+# modules/ghostty/mise.linux.toml: the laptop and the desktop
+[bootstrap.packages]
+"pacman:ghostty" = "latest"
+
+# modules/ghostty/mise.macos.toml: the MacBook
+[bootstrap.packages]
+"brew-cask:ghostty@tip" = "latest"
+```
+
+Eight lines, where the role was 265. Every app gets a folder, and each machine only loads the files meant for it.
+
+And mise can say what it's about to do before it does it: a dry run, a diff, a status for every managed file. My homelab rule was "Queryable, not clickable." Same idea here. If a tool can't tell my agent what it's about to change, my agent can't check its own work.
+
+### I broke my own rule
+
+In the homelab post, my favorite rule was "Few, boring, well-documented tools that language models already know well." mise bootstrap wasn't that. It had only [gone stable three months earlier](https://github.com/jdx/mise/releases/tag/v2026.7.4).
+
+The agent knew. It wrote the risk into the option itself:
+
+> Risk: this part of mise has only been stable since 2026-07 and has little AI training data behind it, so agents depend on its docs and on dry-run/plan/status.
+
+I took the trade. Here's how the agent handled a tool it couldn't have learned from the internet: before porting a single role, it had a subagent build a syntax sheet, with every claim marked as verified (run in a throwaway home directory) or docs-only. The sandbox found the sharp edge right away:
+
+> Typos are not caught. `[dotfiles]` entry keys are not validated. `permisions` or `merg = true` is ignored silently
+
+When the agent edited entries later, it checked each one's kind before trusting it. And AGENTS.md got a warning for every future agent:
+
+> mise bootstrap is new: read [bootstrap.html](https://mise.jdx.dev/bootstrap.html) and [dotfiles.html](https://mise.jdx.dev/dotfiles.html) instead of guessing syntax.
+
+Boring is still the default. New is fine if the operator proves it before it trusts it, and writes down what it learned.
+
+## Four calls
+
+Then it asked me four questions. These were the real decisions, and they were mine:
+
+- **Engine.** mise, over chezmoi, Stow and "Keep Ansible, restructure."
+- **Audience.** "Who is the repo for after the rebuild?" I picked "Personal fleet, still public." Everything written for forkers got deleted: the quick start guide, the 350-line example config, the example role, the uninstall scripts. The new README says it plainly: "Public for reference, not as a framework. Read before you borrow."
+- **Machines.** Three: the Omarchy laptop, the CachyOS desktop (Plasma and Steam) and the MacBook. Not the Ubuntu server I'd mentioned in my own question, and not WSL. Every Ubuntu, Fedora, Debian and WSL path got deleted.
+- **Migration.** The agent recommended a per-machine cutover, each machine proving its port against what Ansible had built. I picked big-bang: "Port everything, switch every machine at once, and delete Ansible in one PR. Faster, but a mistake hits every machine."
+
+In the homelab post I pushed back on Talos and lost. This time the agent recommended the careful path and I overruled it. Years of Ansible, one shot. The agent proposes, I decide, and I own the blast radius.
+
+## Two hours and seventeen minutes
+
+The plan came back at 631 lines. Before I saw it, a separate agent tore into it, marked it "NEEDS_REVISION" and listed six blocking issues. The best one: the cutover deleted the old role files my live config links pointed at, so one failed package install mid-run would have left the laptop with dangling configs. The fix was to relink first and install second. The plan I approved already had it.
+
+One rule in that plan matters later, so hold onto it:
+
+> Deploy mode follows the role's current behavior, so the cutover diff shows no content changes
+
+Then four agents ported in parallel: shell and CLI, AI tools, the Linux desktop, and system plus macOS. A reviewer went through every module, found seven behaviors the port had dropped, and those got fixed. At 4:09 PM, the commit.
+
+The repo went from 985 files to 462, in 42 modules. The new `bin/dotfiles` came in at 127 lines (the old one was 698): it installs git and mise, works out which machine it's on, and runs `mise bootstrap`. CI used to only lint. The new CI dry-runs both Linux machines in an Arch container, plus macOS, and runs the module tests.
+
+## I was the hands for one command
+
+For the homelab, I was the hands for a whole night of hardware. This time it was one command.
+
+The plan had me run the cutover, not the agent. From its session, the Hyprland reload would have waited until my next login, so it wrote a script and asked me to run it from a plain terminal:
+
+```bash
+bash /tmp/dotfiles-cutover.sh
+```
+
+I ran it and typed "done" at 9:51 PM. A minute later: "it looks like it errored when trying to install gopls?"
+
+Two tools had failed. gopls had timed out once, and a retry fixed it. The other one was mise doing its job: it refused one release of `svelte`, which the Svelte language server needs, because it lacked the provenance attestation an earlier Svelte release had. The agent checked it was genuine (the same publisher as every Svelte release, with a matching upstream tag) and allowed exactly that version, so the next unattested release still gets blocked. A supply-chain exception I can read in git. I'll take it.
+
+Then it finished the cutover from its side. Second run: no changes.
+
+Two more moments from that day:
+
+- **It owned a slip without being asked.** One of its test runs wrote into my real mise config instead of its sandbox. Its report said "One mistake on my part," and it had cleaned up "within a minute."
+- **Someone was checking its work.** A second model rode along as an advisor, reviewing the agent as it went. When the agent's report shrugged off a stray Node install, the advisor didn't: "Your final report says the 24.21.0 node is harmless. That's wrong." It was right. One module was shadowing Omarchy's Node version. Fixed and pushed.
+
+<TheSaturday />
+
+## “Are you claiming…?”
+
+At 10:00 PM the laptop was running on mise, every check passed and the branch was pushed. It looked done. So I asked:
+
+> are you claiming that this is whole and a complete reimplementation of my ENTIRE set of configs for all roles?
+
+The answer started with one word:
+
+> No. It is not a complete reimplementation of every role, and I shouldn't have left that impression.
+
+Then it told me why I should stay suspicious: the module review had found "7 kept-role behaviours the port had dropped without anyone deciding to. I fixed those, but that hit rate means there could be more." And it sent six auditors through every task, default, file and template in all 90 roles, "so you get an exact list instead of my summary."
+
+<TheRoles />
+
+The list was mostly good news. Git showed 299 of the 333 moved files byte-for-byte identical, and the other 34 had only the planned edits. None of the 24 dropped roles ran on a plain `dotfiles` on any of my machines. It found two real gaps. One got fixed, and I let the other go.
+
+It wasn't lying before. It was summarizing. Asking it to prove "done" turned a summary into a list.
+
+## Rewriting the vehicle
+
+Then the question that mattered most. At 10:26 PM:
+
+> did you think through what's getting symlinked and what's getting copied? just because something is the way that it is now, doesn't mean it should stay that way? just making sure you didn't just rewrite the vehicle (ansible to mise) and not thought through what remains
+
+Remember the rule about deploy modes? So did the agent:
+
+> No, not per file. The plan's rule 3 deliberately kept every deploy mode exactly as Ansible had it, so the cutover could be verified as a zero-content-change move. That was a sequencing choice: change the engine first, then improve. I never did the improvement pass, so I'm doing it now.
+
+That's the trap with AI and migrations. An agent will happily carry years of decisions to a new engine, including the ones nobody ever made on purpose. Porting is the easy part. Rethinking is the work, and I had to ask for it.
+
+The second pass asked the same three things of every file: "who writes it, whether a symlink survives the app's writes, and whether it can end up holding secrets."
+
+<WhoWrites />
+
+The answer was a little embarrassing for the old setup:
+
+> Most of those copies dated from each role's first version and had no recorded reason.
+
+- **55 copies became symlinks** on the laptop: zsh, Ghostty, kitty, lsd, the Taskfile and more. Each one matched the repo byte for byte before it switched, so my live edits land in git.
+- **herdr became a merge.** Its settings screen writes keys into its config, and every `dotfiles` run had been quietly reverting them.
+- **`~/.npmrc` became three line edits.** `npm login` writes a token into it, and the old copy deleted it on every run. The agent's note on why not a symlink: "A symlink would put that token in your public repo." Good catch.
+- **A few stayed copies, with the reason written down.** btop rewrites its config on exit, fcitx5 saves by temp file and rename, and Karabiner and Codex don't work with links.
+
+The rule went into AGENTS.md, so every future agent gets it: "Decide by who writes the file."
+
+Along the way it found what looked like a bug in mise, in a throwaway home directory: switching a whole-folder link to per-file links with `--force-dotfiles` "replaced the repo's own source files with links to themselves, destroying their content." Nothing it switched on the laptop could trigger it. It added a warning to AGENTS.md anyway, and a check to the cutover checker for my other machines.
+
+## The lessons go to the next agent
+
+My other two machines were still on Ansible, and their agents weren't there for any of this. So at 10:56 PM I asked:
+
+> could you create a github issue that describes all of these 'lessons learned' when doing this cutover? that way i can get this branch on those devices, and have a local agent work through the cutover specific to that device and benefit from what we learned here?
+
+[Issue #159](https://github.com/TechDufus/dotfiles/issues/159) went up nine minutes later: a runbook for each machine, the decisions already made so nobody reopens them, 15 lessons from the laptop, and a template for reporting back. The repo is public, so it carries no email addresses, keys or host details. In the agent's words: "It's written for an agent that starts with nothing from this session."
+
+The handoff for each of those machines fit in three sentences:
+
+> Read GitHub issue #159 and AGENTS.md on the mise-migration branch. Do the cutover for this machine and comment results on the issue. Ask me before pushing.
+
+In the homelab, every fix ends as a skill. Here, every lesson ends where the next agent will look for it.
+
+## How it runs
+
+| Command | Does |
+| --- | --- |
+| `dotfiles` | Pull the repo, then converge this machine |
+| `dotfiles --dry-run` | Preview every change |
+| `mise dot status` | Show the state of every managed file |
+| `mise run check` | Dry run plus module tests |
+| `update` | Full system upgrade |
+
+I don't write the modules. An agent does: it edits, previews with a dry run, applies, runs the checks and commits. The preview and status commands are how it checks its work, and how I check it.
+
+## Steal this
+
+- **Ask who the repo is for.** If nobody types it by hand and you're not running a framework for strangers, delete the docs and tests written for them.
+- **Pick the engine for the writer.** One folder per app, declarative, and able to say what it's about to change. If it can't preview, your agent can't check its work.
+- **New tools are fine if the operator proves them first.** A sandbox and a syntax sheet marked verified or docs-only beat training data it doesn't have.
+- **Change the engine first, then rethink. But do the second pass.** Ask whether it did more than "just rewrite the vehicle." Every migration needs that question, AI or not.
+- **Make it prove "done."** Ask "are you claiming this is complete?" and make it audit itself against the old system.
+- **Write the lessons for the next agent.** Not a note for future you. A runbook another agent can pick up cold.
+
+## Adapt
+
+In 2020, Ansible was on my list of things to learn. In December 2022 I started automating my machines with it. On a Saturday in October I deleted it in one commit, because the person it was built for, the one writing YAML by hand, isn't the one doing the work anymore.
+
+Being able to adapt is the cornerstone of a great engineer, and I intend to keep doing just that.
+
+I still obsess over my tools. I just don't type them anymore.

@@ -22,7 +22,7 @@
 - Dev server: `npm run dev`
 - Type/content checks: `npm run check`
 - Production build: `npm run build`
-- Bundle budget check: `npm run check:perf` (after a build; per-page HTML/CSS/JS budgets for home, about, blog, docs, contact, lab, projects, the drawing pages `/lab/rack/`, `/lab/r730/`, `/lab/r720xd/`, `/lab/stack/` and the R720xd post, and the lazily fetched sheet views `/lab/rack/views/`, `/lab/r730/views/`, `/lab/r720xd/views/`)
+- Bundle budget check: `npm run check:perf` (after a build; per-page HTML/CSS/JS budgets for home, about, blog, docs, contact, lab, projects, the drawing pages `/lab/rack/`, `/lab/r730/`, `/lab/r720xd/`, `/lab/stack/`, the three posts with drawings (R720xd, AI operator, dotfiles), and the lazily fetched sheet views `/lab/rack/views/`, `/lab/r730/views/`, `/lab/r720xd/views/`)
 - Image privacy check: `npm run check:images` (fails if any tracked image has EXIF/XMP location data; strip with `exiftool -all= -overwrite_original <file>`)
 
 ## Content locations

@@ -13,7 +13,8 @@ const SLUG = {
   omc: 'oh-my-claude-batteries-included-enhancements-for-claude-code',
   aijob: 'ai-already-took-my-job',
   zfs: 'from-hardware-raid-to-zfs',
-  operator: 'i-rebuilt-my-homelab-for-an-ai-operator'
+  operator: 'i-rebuilt-my-homelab-for-an-ai-operator',
+  dotfiles: 'i-rebuilt-my-dotfiles-for-the-agent-that-writes-them'
 };
 
 export async function GET() {
@@ -63,8 +64,8 @@ export async function GET() {
     agents: {
       text:
         `With my name on the result. When work gets big, I split it into phases: gather context, implement, then verify.\n\n` +
-        `AI helps with speed, but I still own the final decision and the release. I prefer git-first, reproducible workflows because they are easier to review and easier to recover. Same pattern in my public tooling ([oh-my-claude](${omcUrl}), [openkanban](${kanbanUrl})) and in my homelab, where [an agent does the operating](/blog/${SLUG.operator}/) and I make the calls.`,
-      cards: cards(SLUG.operator, SLUG.aijob, SLUG.omc)
+        `AI helps with speed, but I still own the final decision and the release. I prefer git-first, reproducible workflows because they are easier to review and easier to recover. Same pattern in my public tooling ([oh-my-claude](${omcUrl}), [openkanban](${kanbanUrl})), in my homelab, where [an agent does the operating](/blog/${SLUG.operator}/) and I make the calls, and in my dotfiles, which [an agent writes now](/blog/${SLUG.dotfiles}/).`,
+      cards: cards(SLUG.operator, SLUG.dotfiles, SLUG.aijob)
     },
     building: {
       text:

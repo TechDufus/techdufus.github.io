@@ -1,0 +1,30 @@
+---
+/*
+  FIG 1 · A year of changes, by kind: four bars to scale, in thousands of lines (the printed
+  numbers are the exact counts). The Ansible is the red one.
+*/
+import BarsFigure from '../../figure/BarsFigure.astro';
+import { list } from '../../../../lib/drawing/figure';
+import { yearOfChanges as D } from './data';
+import './dotfiles.css';
+
+/* the axis counts thousands; the printed values stay exact */
+const bars = D.bars.map((b) => ({ ...b, value: b.value / 1000 }));
+const desc =
+  `Bars to scale from 0 to 80 thousand ${D.unit} changed in a year, by kind: ` +
+  list(D.bars.map((b) => `${b.label} ${b.display}`)) + '.';
+---
+
+<BarsFigure
+  id="fig-year"
+  fig={1}
+  date="2026-10-10"
+  title={D.title}
+  caption={D.caption}
+  desc={desc}
+  scale="k = 1,000 LINES"
+  unit="k"
+  max={80}
+  tick={40}
+  bars={bars}
+/>

@@ -1,0 +1,118 @@
+---
+/*
+  FIG 4 · Who writes the file?: one question, asked of every file, fans out to four deploy modes,
+  a decision table. Each row reads "when" (the condition) → the mode (a numbered, clickable box
+  with its label and sub). Wide (680 units): the question on the left, a spine fanning to four
+  rows. Narrow (280 units): the question on top, the spine down the left edge, each row a
+  condition over its mode. The boxes are 232 units wide in both layouts and every row is drawn
+  once and moved (at()); only the lines between them are drawn per layout. All lettering is
+  12 units.
+*/
+import Figure from '../../figure/Figure.astro';
+import Node from '../../figure/Node.astro';
+import PartCard from '../../PartCard.astro';
+import { at, head, wrap, Pen, type Box, type Line } from '../../../../lib/drawing/figure';
+import { whoWrites as D } from './data';
+import '../operator/operator.css';
+import './dotfiles.css';
+
+/* 12px mono: a label (caps, +.06em) is 7.92 units a character, a sub (+.02em) 7.44, the condition (+.01em) 7.4 */
+const BW = 232, QW = 168, LH = 15, SH = 14;
+const lab = (w: number): number => Math.floor((w - 16) / 7.92);
+const sub = (w: number): number => Math.floor((w - 20) / 7.44);
+
+/** wrap(), then the narrowest cap that keeps the same line count, so two lines come out even. */
+const even = (text: string, max: number): string[] => {
+  const n = wrap(text, max).length;
+  let cap = max;
+  while (cap > 8 && wrap(text, cap - 1).length === n) cap--;
+  return wrap(text, cap);
+};
+
+type Face = { id: string; label: string; sub: string; w: number; l: string[]; s: string[]; tone?: Box['tone']; card?: Box['card'] };
+const faces: Face[] = [
+  { id: D.question.id, label: D.question.label, sub: D.question.sub, w: QW, l: [], s: [] },
+  ...D.modes.map((m) => ({ id: m.id, label: m.label, sub: m.sub, w: BW, l: [], s: [], tone: m.tone, card: m.card })),
+];
+faces.forEach((x) => {
+  x.l = wrap(x.label, lab(x.w));
+  x.s = wrap(x.sub, sub(x.w));
+});
+const content = (x: Face): number => x.l.length * LH + (x.s.length ? x.s.length * SH + 2 : 0);
+const BH = Math.max(36, Math.ceil(Math.max(...faces.map(content)) + 20));
+let k = 0;
+const [qb, ...mb]: Box[] = faces.map((x): Box => {
+  const top = (BH - content(x)) / 2;
+  const lines: Line[] = [
+    ...x.l.map((t, i): Line => ({ t, cls: 'txt-label', y: top + 11.5 + i * LH })),
+    ...x.s.map((t, i): Line => ({ t, cls: 'op-s' as Line['cls'], y: top + x.l.length * LH + 2 + 11 + i * SH })),
+  ];
+  return { id: x.id, label: x.label, sub: x.sub, w: x.w, h: BH, lines, tone: x.tone ?? 'default', card: x.card, n: x.card ? String(++k) : undefined };
+});
+
+const WRAP = 24; // characters a line of a condition (≈ 178 units)
+const whens = D.modes.map((m) => even(m.when, WRAP));
+
+/* wide: 680 · question 16 · spine 206 · condition 230 · arrow 414 → modes 432 */
+const W = 680, QX = 16, SPX = 206, WX = 230, BX = W - 16 - BW, PITCH = BH + 16, TOP = 14;
+const H = TOP + 4 * PITCH - 16 + TOP;
+const mid = (i: number): number => TOP + i * PITCH + BH / 2;
+const cy = (mid(0) + mid(3)) / 2;
+/* narrow: 280 · question 12 · spine 22 · condition and modes 36 */
+const NW = 280, NQX = 12, NSP = 22, NBX = 36;
+let cursor = TOP + BH + 26;
+const nrows = whens.map((w) => {
+  const first = cursor, last = first + (w.length - 1) * 16, top = last + 18;
+  cursor = top + BH + 30;
+  return { first, last, top };
+});
+const NH = nrows[3].top + BH + 14;
+
+const wide = new Pen(), narrow = new Pen();
+wide.add('ln-med', `M${QX + QW} ${cy}H${SPX}M${SPX} ${mid(0)}V${mid(3)}`);
+narrow.add('ln-med', `M${NSP} ${TOP + BH}V${nrows[3].first - 4}`);
+mb.forEach((_, i) => {
+  wide.add('ln-med', `M${SPX} ${mid(i)}H${WX - 10}M${WX + 4 + 24 * 7.4 + 6} ${mid(i)}H${BX - 4}`);
+  wide.add('fg-arr', head(WX - 4, mid(i), 'r') + head(BX, mid(i), 'r'));
+  const n = nrows[i];
+  narrow.add('ln-med', `M${NSP} ${n.first - 4}H${NBX - 8}M${NBX + 12} ${n.last + 6}V${n.top - 2}`);
+  narrow.add('fg-arr', head(NBX - 3, n.first - 4, 'r') + head(NBX + 12, n.top, 'd'));
+});
+
+const desc =
+  `One question, “${D.question.label}”, ${D.question.sub}, fans out to four ways to deploy it, picked by who else writes the file. ` +
+  D.modes.map((m) => `${m.when}: ${m.label}, ${m.sub}`).join('; ') + '.';
+---
+
+<Figure
+  id="fig-writes"
+  fig={4}
+  date="2026-10-10"
+  title={D.title}
+  desc={desc}
+  caption={D.caption}
+  size={[W, H]}
+  narrow={[NW, NH]}
+  bp={W}
+  interactive
+  hint
+>
+  <g class="fg-edge" style="--p:1">
+    {wide.list.map(({ c, d }) => <path class={`${c} fg-w`} d={d} pathLength={c === 'ln-med' ? '1' : undefined} />)}
+    {narrow.list.map(({ c, d }) => <path class={`${c} fg-n`} d={d} pathLength={c === 'ln-med' ? '1' : undefined} />)}
+  </g>
+
+  <Node box={qb} wp={[QX, cy - BH / 2]} np={[NQX, TOP]} p={2} />
+  <g style="--p:5">
+    {whens.map((w, i) => (
+      <text {...at([WX, mid(i) - ((w.length - 1) * 16) / 2 + 4], [NBX, nrows[i].first], 'op-t')}>
+        {w.map((t, j) => <tspan x="0" y={j ? j * 16 : undefined}>{t}</tspan>)}
+      </text>
+    ))}
+  </g>
+  {mb.map((b, i) => <Node box={b} wp={[BX, mid(i) - BH / 2]} np={[NBX, nrows[i].top]} p={4} />)}
+
+  <Fragment slot="cards">
+    {D.modes.map((m) => <PartCard id={m.id} title={m.card.title} kind={m.card.kind} lines={m.card.lines} />)}
+  </Fragment>
+</Figure>
