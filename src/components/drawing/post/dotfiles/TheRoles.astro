@@ -1,0 +1,26 @@
+---
+/*
+  FIG 3 · Where the 90 roles went: three bars to scale (38 + 28 + 24), numbered and clickable,
+  each with what was in it.
+*/
+import BarsFigure from '../../figure/BarsFigure.astro';
+import { list } from '../../../../lib/drawing/figure';
+import { theRoles as D } from './data';
+import './dotfiles.css';
+
+const desc =
+  `Bars to scale from 0 to 40 ${D.unit}: ` + list(D.bars.map((b) => `${b.label} ${b.display}`)) + '.';
+---
+
+<BarsFigure
+  id="fig-roles"
+  fig={3}
+  date="2026-10-10"
+  title={D.title}
+  caption={D.caption}
+  desc={desc}
+  scale="TO SCALE"
+  unit={D.unit}
+  max={40}
+  bars={D.bars}
+/>

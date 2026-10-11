@@ -1,0 +1,6 @@
+/* Figures for "I Rebuilt My Dotfiles for the Agent That Writes Them" (YearOfChanges, TheSaturday,
+   TheRoles, WhoWrites). The lettering vocabulary (.op-*) comes from ../operator/operator.css;
+   this file only carries what that file keys to its own figure ids: the FIG strip's kickers at
+   12px, and the narrow layout's 380px cap. */
+:is([data-dwg=fig-year],[data-dwg=fig-saturday],[data-dwg=fig-roles],[data-dwg=fig-writes]) .dwg-tb dt{font-size:12px;letter-spacing:.1em}
+.fg.is-narrow:has(>:is([data-dwg=fig-year],[data-dwg=fig-saturday],[data-dwg=fig-roles],[data-dwg=fig-writes]))>*{max-width:380px}
