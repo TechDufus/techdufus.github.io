@@ -18,7 +18,6 @@ import {
   aboutCopy,
   business,
   businessCopy,
-  featuredProject,
   fillCopy,
   heroCopy,
   homeCopy,
@@ -28,7 +27,8 @@ import {
   labSpec,
   profileSpotlight,
   siteMetadata,
-  topics
+  topics,
+  yahwai
 } from '../data/site';
 import { devicesByRole } from '../data/lab/rack';
 import { server } from '../data/lab/server';
@@ -340,15 +340,15 @@ const businessCss = [
         title="Things I <em>build</em>."
       />
       <article class="yw-card" data-reveal>
-        <img class="yw-card__shot" src={featuredProject.image.src} alt="" width={featuredProject.image.width} height={featuredProject.image.height} loading="lazy" decoding="async" />
+        <img class="yw-card__shot" src={yahwai.image.src} alt="" width={yahwai.image.width} height={yahwai.image.height} loading="lazy" decoding="async" />
         <div class="yw-card__body">
           <div class="yw-card__head">
-            <h3 class="yw-card__name"><a href={featuredProject.href} target="_blank" rel="noopener">{featuredProject.name}</a></h3>
-            <span class="chip chip--accent">{featuredProject.status}</span>
+            <h3 class="yw-card__name"><a href={yahwai.href} target="_blank" rel="noopener">{yahwai.name}</a></h3>
+            <span class="chip chip--accent">{yahwai.status}</span>
           </div>
-          <p class="yw-card__tagline">{featuredProject.tagline}</p>
+          <p class="yw-card__tagline">{yahwai.tagline}</p>
         </div>
-        <span class="yw-card__go" aria-hidden="true">{hostOf(featuredProject.href)} <span class="arrow--ne">↗</span></span>
+        <span class="yw-card__go" aria-hidden="true">{hostOf(yahwai.href)} <span class="arrow--ne">↗</span></span>
       </article>
       <div class="grid grid--2">
         {repos.map((repo) => <RepoCard repo={repo} why={false} />)}

@@ -451,16 +451,18 @@ export type FeaturedProject = {
   description: string;
   image: { src: string; alt: string; width: number; height: number };
   facts: { k: string; v: string }[];
+  /** A second link beside the "Visit" button. */
+  more: { label: string; href: string };
 };
 
 /**
  * YahwAI, on /projects/ and the home Projects section. Tagline, description, image and facts
- * all come from yahwai.com itself (meta description, og:image, the "will and won't" list).
+ * all come from yahwai.com itself (meta description, og:image, the "will and won't" list, /plans).
  */
-export const featuredProject: FeaturedProject = {
+export const yahwai: FeaturedProject = {
   name: 'YahwAI',
   href: 'https://yahwai.com/',
-  status: 'Opening soon',
+  status: 'Live',
   tagline: 'Search the Scriptures. Keep your eyes fixed on Jesus.',
   description:
     'An AI Bible-study tool for personal study and for preparing questions to bring to church or a small group. It answers in plain words and shows you the passages, so you can read them for yourself.',
@@ -472,9 +474,36 @@ export const featuredProject: FeaturedProject = {
   },
   facts: [
     { k: 'Shows', v: 'The passages behind a reply, from the Berean Standard Bible' },
+    { k: 'Plans', v: 'Study tools and a prayer list are free. Paid plans add AI replies.' },
     { k: "Won't", v: "Speak for God. Replies aren't Scripture." }
-  ]
+  ],
+  more: { label: 'See the plans', href: 'https://yahwai.com/plans' }
 };
+
+/** omp-cloud, on /projects/. Copy and image come from omp-cloud.techdufus.com (hero, og:image). */
+export const ompCloud: FeaturedProject = {
+  name: 'omp-cloud',
+  href: 'https://omp-cloud.techdufus.com/',
+  status: 'Open source',
+  tagline: 'Cloud agents for omp. On your hardware.',
+  description:
+    'Hand a task from omp to an agent in its own KVM microVM, on your own Linux box. It brings your repo and the conversation, asks you questions, sleeps when idle with its processes intact, and returns a branch.',
+  image: {
+    src: '/img/projects/omp-cloud.webp',
+    alt: 'The omp-cloud share card: the words "Cloud agents for omp. On your hardware." beside the dashboard\'s Threads page.',
+    width: 1280,
+    height: 640
+  },
+  facts: [
+    { k: 'Runs', v: 'Each task in its own KVM microVM. No Kubernetes.' },
+    { k: 'Returns', v: 'A branch you pull back into your repo' },
+    { k: 'License', v: 'MIT' }
+  ],
+  more: { label: 'View on GitHub', href: 'https://github.com/TechDufus/omp-cloud' }
+};
+
+/** The Featured section of /projects/, in order. */
+export const featuredProjects: FeaturedProject[] = [yahwai, ompCloud];
 
 export type EarlierWork = {
   name: string;

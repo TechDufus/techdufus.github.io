@@ -5,7 +5,7 @@ import Portrait from '../components/ui/Portrait.astro';
 import ProofPoints from '../components/ui/ProofPoints.astro';
 import Timeline, { type TimelineItem } from '../components/ui/Timeline.astro';
 import Principles from '../components/ui/Principles.astro';
-import { aboutCopy, aboutNow, featuredProject, homeOperatingStyle, profileSpotlight, siteMetadata } from '../data/site';
+import { aboutCopy, aboutNow, homeOperatingStyle, profileSpotlight, siteMetadata, yahwai } from '../data/site';
 
 // The body copy carries the old Tailwind link classes; render its links with the Studio `.link` style.
 const bodyParagraphs = aboutCopy.body.map((paragraph) => paragraph.replace(/class="[^"]*"/g, 'class="link"'));
@@ -17,7 +17,7 @@ const path: TimelineItem[] = [
   { when: 'Wanted the whole pipeline', what: 'DevOps', body: 'Scripts only covered my corner. I wanted to see how software actually ships, so I moved into DevOps: Terraform on Azure, CI/CD, PKI automation that went from hours to seconds. CISSP along the way.' },
   { when: 'Wanted the app side too', what: 'Full-stack', body: 'I wanted to understand the apps I was deploying, so I joined a team that owned everything from app code to firewalls. Go services, Helm on GKE. Learned to care about the people using what I build.' },
   { when: 'Wanted the platform underneath', what: 'Platform engineering', body: 'Big Kubernetes clusters, RBAC at scale, GitOps with ArgoCD, air-gapped environments, Ansible across whole fleets. Fast only counts if you can roll it back.' },
-  { when: 'Now', what: 'AI everything engineer', whatNote: 'Team lead, solutions architect', now: true, bodyHtml: `AI means one person can finally work across the whole stack, so I do: infra, code, and the agents that write it. I lead a team now, and most of that job is mentoring and training people to use AI well. I'm also building <a href="${featuredProject.href}" target="_blank" rel="noopener noreferrer" class="link">${featuredProject.name}</a>, an AI Bible-study tool, on the side.` }
+  { when: 'Now', what: 'AI everything engineer', whatNote: 'Team lead, solutions architect', now: true, bodyHtml: `AI means one person can finally work across the whole stack, so I do: infra, code, and the agents that write it. I lead a team now, and most of that job is mentoring and training people to use AI well. On the side I built and run <a href="${yahwai.href}" target="_blank" rel="noopener noreferrer" class="link">${yahwai.name}</a>, an AI Bible-study tool.` }
 ];
 ---
 
