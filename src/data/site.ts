@@ -502,8 +502,30 @@ export const ompCloud: FeaturedProject = {
   more: { label: 'View on GitHub', href: 'https://github.com/TechDufus/omp-cloud' }
 };
 
+/** dash, on /projects/. Copy and image come from dash.techdufus.com (hero, og:image) and the repo README. */
+export const dash: FeaturedProject = {
+  name: 'dash',
+  href: 'https://dash.techdufus.com/',
+  status: 'Open source',
+  tagline: 'Homelab mission control.',
+  description:
+    'One Go binary, a live web UI over Proxmox, Kubernetes, Flux, hardware, storage, alerts and service status. It reads the whole lab and shows the state on one screen, worst problems first.',
+  image: {
+    src: '/img/projects/dash.webp',
+    alt: 'The dash share card: the words "Your whole homelab, live on one screen." beside the Overview page, with its KPIs and the topology from the Proxmox host to the cluster.',
+    width: 1280,
+    height: 640
+  },
+  facts: [
+    { k: 'Runs', v: 'One container, or in Kubernetes with the Helm chart' },
+    { k: 'Writes', v: 'In three places only, each off until you turn it on' },
+    { k: 'License', v: 'MIT' }
+  ],
+  more: { label: 'View on GitHub', href: 'https://github.com/TechDufus/dash' }
+};
+
 /** The Featured section of /projects/, in order. */
-export const featuredProjects: FeaturedProject[] = [yahwai, ompCloud];
+export const featuredProjects: FeaturedProject[] = [yahwai, ompCloud, dash];
 
 export type EarlierWork = {
   name: string;

@@ -1,6 +1,6 @@
 ---
 /*
-  /projects/: featuredProjects (YahwAI, omp-cloud), the featured repos with live GitHub metadata, and earlierWork.
+  /projects/: featuredProjects (YahwAI, omp-cloud, dash), the featured repos with live GitHub metadata, and earlierWork.
   Every line of copy comes from src/data/site.ts, the projects' own sites, or the repos themselves.
 */
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -9,16 +9,17 @@ import RepoCard from '../components/ui/RepoCard.astro';
 import SectionHead from '../components/ui/SectionHead.astro';
 import Stat from '../components/ui/Stat.astro';
 import { hostOf, linkProps } from '../components/ui/format';
-import { earlierWork, featuredProjects, ompCloud, siteMetadata, yahwai } from '../data/site';
+import { dash, earlierWork, featuredProjects, ompCloud, siteMetadata, yahwai } from '../data/site';
 import { featuredReposNote, getFeaturedRepos } from '../lib/github';
 
 const repos = await getFeaturedRepos();
 const firstYear = Math.min(...earlierWork.map((item) => item.year));
+const featuredNames = new Intl.ListFormat('en', { type: 'conjunction' }).format(featuredProjects.map((p) => p.name));
 ---
 
 <BaseLayout
   title="Projects"
-  description={`${yahwai.name}, an AI Bible-study tool, and ${ompCloud.name}, self-hosted cloud agents for omp, plus the open-source tools I maintain (${repos.map((repo) => repo.name).join(', ')}) and the PowerShell modules where it started.`}
+  description={`${yahwai.name}, an AI Bible-study tool, ${ompCloud.name}, self-hosted cloud agents for omp, and ${dash.name}, homelab mission control, plus the open-source tools I maintain (${repos.map((repo) => repo.name).join(', ')}) and the PowerShell modules where it started.`}
 >
   <div class="pg-projects">
   <!-- ============ HERO ============ -->
@@ -29,7 +30,7 @@ const firstYear = Math.min(...earlierWork.map((item) => item.year));
       <p class="lede phero__lede" data-reveal style="--d:2">What I'm shipping now, the open-source tools I lean on, and some old PowerShell.</p>
 
       <dl class="stats phero__stats" data-reveal style="--d:3">
-        <Stat value={featuredProjects.length} term="Featured" label={`shipping now: ${featuredProjects.map((p) => p.name).join(' and ')}`} href="#featured" />
+        <Stat value={featuredProjects.length} term="Featured" label={`shipping now: ${featuredNames}`} href="#featured" />
         <Stat value={repos.length} term="Open source" label="open-source repos I maintain" href="#open-source" />
         <Stat value={String(firstYear)} num term="Earlier work" label="my first PowerShell module" href="#earlier" />
       </dl>
