@@ -1,7 +1,7 @@
 ---
 /*
   Sheet 01 · the isometric stack (./iso.ts): rails with top-down U rulers, broken between U15 and
-  U40, every box as a Part with its front panel symbol (PanelDefs, same dwg) mapped onto its face,
+  the last three units, every box as a Part with its front panel symbol (PanelDefs, same dwg) mapped onto its face,
   a numbered balloon per part, and airflow where it runs front to back. Selecting a racked box
   slides it out of the front on its rails; things on a shelf lift off it. Used by IsoView (the
   sheet) and CabinetExcerpt (/lab).
@@ -9,14 +9,14 @@
     dwg      the Sheet id (panel symbols are #{dwg}-pf-{id})
     x, y, k  see isoStack()
     bx, by   the balloon column: its x, and the [top, bottom] y it spreads over (paper)
-    ty       y of the balloon row above the top shelf, for the top shelf and what's on it
+    ty       y of the balloon row above the top shelf, for what's on it
 */
 import Part from '../Part.astro';
 import Balloon from '../Balloon.astro';
 import URuler from '../URuler.astro';
 import Particles from '../Particles.astro';
 import { U_MM, join, type Iso, type Pt } from '../../../lib/drawing/projection';
-import { CAB, FRONT_TO_BACK, HOLES, RAIL_W, el, slotOf$, slots } from './model';
+import { CAB, FRONT_TO_BACK, HOLES, RAIL_W, covered, el, slotOf$, slots } from './model';
 import { BREAK, isoStack } from './iso';
 
 interface Props {
@@ -81,18 +81,21 @@ const air = FRONT_TO_BACK.map((id) => {
   const D = of(s);
   const my = s.body.y + s.body.h / 2;
   return {
+    // a 1U box moves less air: one particle each way
+    n: s.hU > 50 ? 2 : 1,
     cold: D.poly([[300, my, CAB.z0 + 40], [300, my, s.faceZ - 6]]),
     hot: D.poly([[300, my, s.body.z + s.body.d + 6], [300, my, s.body.z + s.body.d + 170]]),
   };
 });
 
-/* balloons: the top shelf and its things in a row above it, pointing at their tops; the rest in a
-   column on the left, pointing at their front faces, spread in the paper order of their anchors */
+/* balloons: the things on the top shelf in a row above it, pointing at their tops (a thing with
+   something standing on it has no top to point at, so it joins the column); the rest in a column
+   on the left, pointing at their front faces, spread in the paper order of their anchors */
 const topShelf = slots.filter((q) => q.dev.role === 'shelf' && !q.on).reduce((a, q) => (q.y0 > a.y0 ? q : a));
-const inRow = (s: (typeof items)[number]['s']): boolean => s === topShelf || s.on === topShelf.dev.id;
+const inRow = (s: (typeof items)[number]['s']): boolean => s.on === topShelf.dev.id && !covered.has(s.dev.id);
 const row = items
   .filter((it) => inRow(it.s))
-  .map(({ s, D }) => ({ s, a: s.on ? D.pt(s.body.x + s.body.w * 0.4, s.faceTop, s.body.z + s.body.d * 0.5) : D.pt(s.body.x + 24, s.body.y + s.body.h, s.body.d * 0.55) }))
+  .map(({ s, D }) => ({ s, a: D.pt(s.body.x + s.body.w * 0.4, s.faceTop, s.body.z + s.body.d * (s.back ? 0.75 : 0.5)) }))
   .sort((p, q) => p.a[0] - q.a[0]);
 let last = -Infinity;
 const rowAt = row.map(({ s, a }) => {
@@ -161,8 +164,8 @@ const step = (by[1] - by[0]) / Math.max(1, col.length - 1);
 
 {air.map((a) => (
   <>
-    <Particles d={a.cold} kind="cold" n={2} dur={3.2} guide={false} />
-    <Particles d={a.hot} kind="hot" n={2} dur={3.2} />
+    <Particles d={a.cold} kind="cold" n={a.n} dur={3.2} guide={false} />
+    <Particles d={a.hot} kind="hot" n={a.n} dur={3.2} />
   </>
 ))}
 

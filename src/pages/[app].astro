@@ -129,10 +129,10 @@ const email = siteMetadata.email;
     </div>
   </section>
 
-  <!-- ============ 01 · WHY ============ -->
+  <!-- ============ WHY ============ -->
   <section id="why" class="section" aria-labelledby="why-title">
     <div class="wrap">
-      <SectionHead index={1} label="Why it exists" title="The problem, and the <em>promise</em>." titleId="why-title">
+      <SectionHead title="The problem, and the <em>promise</em>." titleId="why-title">
         <Draft slot="aside" />
       </SectionHead>
 
@@ -160,12 +160,10 @@ const email = siteMetadata.email;
     </div>
   </section>
 
-  <!-- ============ 02 · HOW ============ -->
+  <!-- ============ HOW ============ -->
   <section id="how" class="section" aria-labelledby="how-title">
     <div class="wrap">
       <SectionHead
-        index={2}
-        label="How it works"
         title="Three steps. <em>That's</em> the whole thing."
         titleId="how-title"
         lede={`From sign-up to <span class="ph">[the first useful result]</span>. The steps below are placeholders until the setup flow is final.`}
@@ -180,12 +178,10 @@ const email = siteMetadata.email;
     </div>
   </section>
 
-  <!-- ============ 03 · FEATURES ============ -->
+  <!-- ============ FEATURES ============ -->
   <section id="features" class="section" aria-labelledby="features-title">
     <div class="wrap">
       <SectionHead
-        index={3}
-        label="Features"
         title="What's <em>inside</em>."
         titleId="features-title"
         lede="The feature list isn't final, so nothing here is a promise yet. Each tile is a slot waiting for the real thing."
@@ -227,12 +223,10 @@ const email = siteMetadata.email;
     </div>
   </section>
 
-  <!-- ============ 04 · DEMO ============ -->
+  <!-- ============ DEMO ============ -->
   <section id="demo" class="section" aria-labelledby="demo-title">
     <div class="wrap">
       <SectionHead
-        index={4}
-        label="Live demo"
         title="Don't take my word for it. <em>Ask it.</em>"
         titleId="demo-title"
         lede="This is the same engine as the assistant in the corner, running on real content from this site. It won't make things up; if it doesn't know, it says so."
@@ -272,10 +266,10 @@ const email = siteMetadata.email;
     </div>
   </section>
 
-  <!-- ============ 05 · PRICING ============ -->
+  <!-- ============ PRICING ============ -->
   <section id="pricing" class="section" aria-labelledby="pricing-title">
     <div class="wrap">
-      <SectionHead index={5} label="Pricing" title={businessCopy.pricing.title} titleId="pricing-title" lede={businessCopy.pricing.lede}>
+      <SectionHead title={businessCopy.pricing.title} titleId="pricing-title" lede={businessCopy.pricing.lede}>
         <Draft slot="aside" />
       </SectionHead>
 
@@ -310,13 +304,12 @@ const email = siteMetadata.email;
     </div>
   </section>
 
-  <!-- ============ 06 · FAQ ============ -->
+  <!-- ============ FAQ ============ -->
   <section id="faq" class="section" aria-labelledby="faq-title">
     <div class="wrap">
       <div class="split">
         <div class="faq__intro">
-          <SectionHead bare index={6} label="FAQ" />
-          <h2 class="h2" id="faq-title" data-reveal style="--d:1;margin-top:28px" set:html={businessCopy.faq.title} />
+          <h2 class="h2" id="faq-title" data-reveal set:html={businessCopy.faq.title} />
           <p class="lede" data-reveal style="--d:2">{businessCopy.faq.lede}</p>
           <div class="faq__mail" data-reveal style="--d:3">
             <span class="meta">{businessCopy.faq.mailLabel}</span>
@@ -353,8 +346,7 @@ const email = siteMetadata.email;
           <circle class="r-draw" cx="50" cy="50" r="49.5" pathLength="1" vector-effect="non-scaling-stroke"></circle>
         </svg>
         <div class="cta__copy">
-          <p class="eyebrow">Waitlist</p>
-          <h2 class="display" id="waitlist-title" style="margin-top:20px" set:html={`Be first to try <em>${appName}</em>.`} />
+          <h2 class="display" id="waitlist-title" set:html={`Be first to try <em>${appName}</em>.`} />
           <p class="lede">One email when it launches. That's the whole list.</p>
           <div class="cta__sig">
             <Portrait px={44} ring={false} alt="" />

@@ -1,9 +1,9 @@
-// Synced from homelab @ 92ff23f (2026-10-03)
+// Synced from homelab @ a2557c0 (2026-11-10)
 /**
  * Sheet 03 · The stack: what runs where, in three layers. Bootstrap turns the metal into a
  * hypervisor, OpenTofu puts VMs on it, and the cluster runs the rest.
  *
- * `status` is as of 2026-10-03: running means it's in the repo and up; planned means it's in the
+ * `status` is as of 2026-11-10: running means it's in the repo and up; planned means it's in the
  * plan but not built yet. Versions are major.minor.
  */
 import type { StackGroup, StackItem, StackLayer, Status } from './types';
@@ -23,12 +23,12 @@ export const stack: StackLayer[] = [
           {
             id: 'r730',
             name: 'Dell R730',
-            what: 'The one server: 64 threads, 512 GB',
+            what: 'The main server: 64 threads, 512 GB',
             status: 'running',
             card: {
               title: 'Dell PowerEdge R730',
               kind: 'Metal',
-              lines: ['64 threads, 512 GB RAM, ten drives.', 'Its RAID card runs in HBA mode, so every disk goes straight to ZFS.']
+              lines: ['64 threads, 512 GB RAM, eight drives.', 'Its RAID card runs in HBA mode, so every disk goes straight to ZFS.']
             }
           },
           {
@@ -39,7 +39,23 @@ export const stack: StackLayer[] = [
             card: {
               title: 'ZFS pools',
               kind: 'Storage',
-              lines: ['rpool: boot, a 3-way mirror.', 'fast: VM disks, a 3-way mirror with a hot spare.', 'bulk: scratch, one disk.']
+              lines: [
+                'rpool: boot, a 3-way mirror.',
+                'fast: VM disks, a 3-way mirror with a hot spare.',
+                'bulk: scratch, one disk.',
+                'On the R730. The R430 has one pool of its own, a 2-way mirror.'
+              ]
+            }
+          },
+          {
+            id: 'r430',
+            name: 'Dell R430',
+            what: 'The second server: 24 threads, 48 GB',
+            status: 'running',
+            card: {
+              title: 'Dell PowerEdge R430',
+              kind: 'Metal',
+              lines: ['24 threads, 48 GB RAM, two drives in one ZFS mirror.', 'The second Proxmox host, clustered with the R730.']
             }
           }
         ]
@@ -51,13 +67,18 @@ export const stack: StackLayer[] = [
           {
             id: 'proxmox',
             name: 'Proxmox VE',
-            what: 'The hypervisor, on ZFS',
+            what: 'The hypervisor: two hosts, one cluster',
             status: 'running',
             version: '9.2',
             card: {
               title: 'Proxmox VE 9.2',
               kind: 'Hypervisor',
-              lines: ['Installed by hand, on ZFS.', 'Ansible configures it after that.']
+              lines: [
+                'Installed by hand, on ZFS.',
+                'Ansible configures it after that.',
+                'Two hosts now, the R730 and an R430, in one cluster.',
+                'The Pi is the tie-breaker between them.'
+              ]
             }
           },
           {
@@ -90,7 +111,7 @@ export const stack: StackLayer[] = [
             card: {
               title: 'Raspberry Pi 4',
               kind: 'Control node',
-              lines: ['The control node, on the top shelf.', 'Configured by Ansible, like the host.']
+              lines: ['The control node, on the top shelf.', 'Configured by Ansible, like the hosts.', 'Also the tie-breaker for the two Proxmox hosts.']
             }
           }
         ]
@@ -166,22 +187,39 @@ export const stack: StackLayer[] = [
             name: 'GitHub runner',
             what: 'Self-hosted CI runners',
             status: 'running',
-            vm: { vcpu: 8, ramGiB: 16, diskGB: 200, pool: 'bulk' },
+            vm: { vcpu: 32, ramGiB: 64, diskGB: 200, pool: 'bulk' },
             card: {
               title: 'GitHub runner',
               kind: 'Standalone VM',
-              lines: ['Self-hosted GitHub Actions runners, in their own VM.', '8 vCPU, 16 GiB RAM, 200 GB on bulk.']
+              lines: ['Self-hosted GitHub Actions runners, in their own VM.', '32 vCPU, 64 GiB RAM, 200 GB on bulk.']
+            }
+          },
+          {
+            id: 'omp-cloud',
+            name: 'omp-cloud',
+            what: 'Cloud agents for oh-my-pi',
+            status: 'running',
+            vm: { vcpu: 16, ramGiB: 48, diskGB: 300, pool: 'bulk' },
+            card: {
+              title: 'omp-cloud',
+              kind: 'Standalone VM',
+              lines: ['Runs omp-cloud: cloud agents for oh-my-pi.', 'Each agent is a microVM inside it.', '16 vCPU, 48 GiB RAM, 300 GB on bulk.']
             }
           },
           {
             id: 'robomp',
             name: 'robomp',
             what: 'The oh-my-pi GitHub bot',
-            status: 'planned',
+            status: 'running',
+            on: 'r430',
             card: {
               title: 'robomp',
               kind: 'Standalone VM',
-              lines: ['The oh-my-pi GitHub bot, in its own VM.', 'It will triage my personal projects and fix them through PRs.']
+              lines: [
+                'The oh-my-pi GitHub bot, in its own VM.',
+                'It triages issues on my personal projects and opens fix PRs.',
+                '8 vCPU, 16 GiB RAM, 100 GB, on the R430.'
+              ]
             }
           }
         ]
@@ -292,15 +330,13 @@ export const stack: StackLayer[] = [
             id: 'nfs-csi',
             name: 'NFS CSI',
             what: 'Shared storage on the UNAS',
-            status: 'planned',
-            card: { title: 'NFS CSI', kind: 'Shared storage', lines: ['Volumes on the UNAS, over NFS.'] }
-          },
-          {
-            id: 'volsync',
-            name: 'VolSync',
-            what: 'Backups',
-            status: 'planned',
-            card: { title: 'VolSync', kind: 'Backups', lines: ['Backs up the cluster’s volumes to the UNAS.'] }
+            status: 'running',
+            version: '4.13',
+            card: {
+              title: 'NFS CSI 4.13',
+              kind: 'Shared storage',
+              lines: ['Volumes carved out of the UNAS, over NFS.', 'For big or shared files. Everything else stays on fast.']
+            }
           },
           {
             id: 'cloudnative-pg',
@@ -381,6 +417,49 @@ export const stack: StackLayer[] = [
             status: 'running',
             version: '2.1',
             card: { title: 'Zot 2.1', kind: 'Registry', lines: ['A private container registry.', 'Container images stay in the lab.'] }
+          },
+          {
+            id: 'dash',
+            name: 'Dash',
+            what: 'Mission control for the lab',
+            status: 'running',
+            version: '0.15',
+            card: {
+              title: 'Dash 0.15',
+              kind: 'Mission control',
+              lines: ['Mission control for the lab, on one screen.', 'My own open-source project, running here.']
+            }
+          },
+          {
+            id: 'plex',
+            name: 'Plex',
+            what: 'Media server',
+            status: 'running',
+            version: '1.43',
+            card: {
+              title: 'Plex 1.43',
+              kind: 'Media server',
+              lines: ['Movies and TV, streamed from the UNAS.', 'No GPU here, so every transcode is software.']
+            }
+          },
+          {
+            id: 'seerr',
+            name: 'Seerr',
+            what: 'Requests for Plex',
+            status: 'running',
+            version: '3.5',
+            card: { title: 'Seerr 3.5', kind: 'Requests', lines: ['Where requests for Plex get made.'] }
+          },
+          {
+            id: 'arr',
+            name: 'Radarr, Sonarr',
+            what: 'Movies, TV and indexers',
+            status: 'running',
+            card: {
+              title: 'Radarr, Sonarr',
+              kind: 'Media automation',
+              lines: ['Radarr and Sonarr fill the library.', 'Prowlarr keeps their indexers in sync.']
+            }
           }
         ]
       }

@@ -1,5 +1,5 @@
 /**
- * Sheet 01 · The cabinet, as surveyed: a 42U enclosure whose rails count from the top (U1 is the
+ * Sheet 01 · The cabinet, as surveyed: a 24U enclosure whose rails count from the top (U1 is the
  * top), what sits in it, and the documented links between the boxes.
  *
  * Panel zones are traced from each maker's product images. The ONT and the PoE injector are the
@@ -33,19 +33,21 @@ export const uHeight = ({ top, bottom }: URange): number => bottom - top + 1;
 const at = (top: number, bottom = top): { kind: 'rack'; u: URange } => ({ kind: 'rack', u: { top, bottom } });
 
 export const cabinet: Cabinet = {
-  heightU: 42,
+  heightU: 24,
   uMm: U,
   rackWidthIn: 19,
   numbering: 'top-down',
-  outer: { w: 600, h: 1991, d: 1070 },
+  // The outer height isn't measured: it is the rails (24 × 44.45) plus the plinth and roof as drawn.
+  outer: { w: 600, h: 1191, d: 1070 },
+  outerHeightMeasured: false,
   railSpan: 750,
   railFloorMm: 70,
   front: { kind: 'glass-door', hinge: 'left' },
   rear: { kind: 'perforated-panel', pattern: 'hex' },
   card: {
     title: 'The cabinet',
-    kind: '42U enclosure',
-    lines: ['42U, and the rails count from the top: U1 is up there.', 'Glass door at the front, a hex-perforated panel at the back.']
+    kind: '24U enclosure',
+    lines: ['24U, and the rails count from the top: U1 is up there.', 'Glass door at the front, a hex-perforated panel at the back.']
   }
 };
 
@@ -58,6 +60,9 @@ const shelfPanel = (frame: string): PanelLayout => ({
     { id: 'ear-r', label: 'Bracket', kind: 'ear', x0: 0.96, x1: 1, y0: 0, y1: 1 }
   ]
 });
+
+/** The NAS's data disks: five 4 TB drives in one RAID 6 pool, in a chassis with eight bays. */
+export const nas = { bays: 8, drives: 5, driveGB: 4000, layout: 'RAID 6' } as const;
 
 /** In the order they sit, top to bottom; the U7 Pro (outside the cabinet) last. */
 export const devices: Device[] = [
@@ -74,7 +79,47 @@ export const devices: Device[] = [
     card: {
       title: 'Top shelf',
       kind: 'Shelf · U1–2',
-      lines: ['The small stuff: the Pi, the ONT and the PoE injector.']
+      lines: ['The small stuff: a Mac mini, a spare thin client, and the Pi and the ONT sitting on it.', 'The PoE injector is tucked in at the right end.']
+    }
+  },
+  {
+    id: 'mini',
+    name: 'Mac mini',
+    short: 'Mac mini',
+    maker: 'Apple',
+    model: 'Mac mini (M1, 2020)',
+    role: 'compute',
+    placement: { kind: 'shelf', shelf: 'top-shelf', x: 20 },
+    // Apple's technical specifications: 19.7 × 19.7 × 3.6 cm.
+    body: { w: 197, h: 36, d: 197 },
+    ports: [{ group: 'Ethernet', count: 1, kind: 'RJ45', speed: '1 GbE', face: 'rear' }],
+    panels: {
+      front: {
+        frame: 'Front face, 197 × 36 mm: plain, with the status light at the right.',
+        zones: [{ id: 'led', label: 'Status light', kind: 'led', x0: 0.9, x1: 0.915, y0: 0.56, y1: 0.64 }]
+      }
+    },
+    card: {
+      title: 'Mac mini',
+      kind: 'macOS host · top shelf',
+      lines: ['Apple M1, 16 GB, 1 TB.', 'A headless Mac for macOS CI: each job gets a throwaway macOS VM.', 'Plugged into the gateway’s port 6.']
+    },
+    sheetHref: '/lab/servers/'
+  },
+  {
+    id: 't540',
+    name: 'HP t540 Thin Client',
+    short: 't540',
+    maker: 'HP',
+    model: 'HP t540 Thin Client',
+    role: 'shelf',
+    placement: { kind: 'shelf', shelf: 'top-shelf', x: 221 },
+    // HP's QuickSpecs: 35 × 200 × 200 mm standing up; it lies flat here.
+    body: { w: 200, h: 35, d: 200 },
+    card: {
+      title: 'HP t540 Thin Client',
+      kind: 'Spare · top shelf',
+      lines: ['A thin client with no job right now.', 'The Pi and the ONT sit on it.']
     }
   },
   {
@@ -84,7 +129,7 @@ export const devices: Device[] = [
     maker: 'Raspberry Pi',
     model: 'Raspberry Pi 4 Model B, 8 GB',
     role: 'edge',
-    placement: { kind: 'shelf', shelf: 'top-shelf', x: 150 },
+    placement: { kind: 'shelf', shelf: 'top-shelf', x: 225, atop: 't540' },
     body: { w: 62, h: 26, d: 92 },
     ports: [
       { group: 'Ethernet', count: 1, kind: 'RJ45', speed: '1 GbE', face: 'front' },
@@ -105,7 +150,8 @@ export const devices: Device[] = [
       title: 'Raspberry Pi 4 Model B',
       kind: 'Control node · top shelf',
       lines: ['8 GB, in a black case.', 'The control node. Ansible configures it too.', 'Plugged into the gateway’s port 2.']
-    }
+    },
+    sheetHref: '/lab/servers/'
   },
   {
     id: 'ont',
@@ -113,7 +159,7 @@ export const devices: Device[] = [
     short: 'ONT',
     model: 'ISP optical network terminal',
     role: 'network',
-    placement: { kind: 'shelf', shelf: 'top-shelf', x: 216 },
+    placement: { kind: 'shelf', shelf: 'top-shelf', x: 291, atop: 't540' },
     body: { w: 160, h: 45, d: 120 },
     panels: {
       front: {
@@ -136,7 +182,7 @@ export const devices: Device[] = [
     short: 'PoE injector',
     model: 'PoE injector',
     role: 'network',
-    placement: { kind: 'shelf', shelf: 'top-shelf', x: 380 },
+    placement: { kind: 'shelf', shelf: 'top-shelf', x: 403, back: 100 },
     body: { w: 60, h: 32, d: 110 },
     ports: [
       { group: 'LAN in', count: 1, kind: 'RJ45', face: 'front' },
@@ -205,7 +251,7 @@ export const devices: Device[] = [
     card: {
       title: 'UniFi UNAS Pro 8',
       kind: 'NAS · U8–9',
-      lines: ['Eight drive bays of shared storage.', 'Serves NFS to the lab.', '10 GbE to the gateway over SFP+.']
+      lines: [`${nas.drives} × ${nas.driveGB / 1000} TB drives in ${nas.bays} bays, one ${nas.layout} pool.`, 'Serves NFS to the lab.', '10 GbE to the gateway over SFP+.']
     }
   },
   {
@@ -259,10 +305,90 @@ export const devices: Device[] = [
       lines: [
         'Router and firewall. Everything else hangs off it.',
         'WAN on port 9, to the ONT.',
-        'Port 2: the Pi. Port 3: the server.',
+        'Ports 2, 3, 6 and 7: the Pi, the R730, the Mac mini, the R430.',
         'SFP+ port 11: the NAS, at 10 GbE.'
       ]
     }
+  },
+  {
+    id: 'r430',
+    name: 'Dell PowerEdge R430',
+    short: 'R430',
+    maker: 'Dell',
+    model: 'PowerEdge R430 (8 × 2.5″)',
+    role: 'compute',
+    placement: at(12),
+    // Dell's chassis dimensions: Xa × Y × Zb, and X across the ears.
+    body: { w: 434.0, h: 42.8, d: 642.3 },
+    earsWidth: 482.4,
+    ports: [
+      { group: 'VGA (front)', count: 1, kind: 'DB-15 VGA', face: 'front' },
+      { group: 'USB (front)', count: 2, kind: 'USB-A', speed: 'USB 2.0', face: 'front' },
+      { group: 'NIC ports 1–4', count: 4, kind: 'RJ45', speed: '1 GbE', face: 'rear' },
+      { group: 'Serial', count: 1, kind: 'DB-9', face: 'rear' },
+      { group: 'VGA (rear)', count: 1, kind: 'DB-15 VGA', face: 'rear' },
+      { group: 'USB (rear)', count: 2, kind: 'USB-A', face: 'rear' },
+      { group: 'PSU inlets', count: 2, kind: 'AC inlet', face: 'rear' }
+    ],
+    panels: {
+      front: {
+        frame: 'Overall face 482.4 mm including rack ears, height 42.8 mm. Controls and two bays on the left, six bays in three columns on the right.',
+        zones: [
+          { id: 'ear-l', label: 'Left rack ear', kind: 'ear', x0: 0, x1: 0.05, y0: 0, y1: 1 },
+          { id: 'power', label: 'Power button', kind: 'button', x0: 0.079, x1: 0.093, y0: 0.05, y1: 0.2 },
+          { id: 'nmi', label: 'NMI button', kind: 'button', x0: 0.1, x1: 0.108, y0: 0.09, y1: 0.17 },
+          { id: 'sysid', label: 'System ID button', kind: 'button', x0: 0.116, x1: 0.13, y0: 0.05, y1: 0.2 },
+          { id: 'usb-mgmt', label: 'USB 2.0 (iDRAC Direct)', kind: 'port', x0: 0.136, x1: 0.167, y0: 0.07, y1: 0.2 },
+          { id: 'usb-1', label: 'USB 2.0', kind: 'port', x0: 0.175, x1: 0.207, y0: 0.07, y1: 0.2 },
+          { id: 'lcd-prev', label: 'LCD menu button', kind: 'button', x0: 0.278, x1: 0.29, y0: 0.07, y1: 0.17 },
+          { id: 'lcd-ok', label: 'LCD menu button', kind: 'button', x0: 0.292, x1: 0.304, y0: 0.07, y1: 0.17 },
+          { id: 'lcd-next', label: 'LCD menu button', kind: 'button', x0: 0.306, x1: 0.318, y0: 0.07, y1: 0.17 },
+          { id: 'lcd', label: 'LCD panel', kind: 'display', x0: 0.327, x1: 0.392, y0: 0.04, y1: 0.3 },
+          { id: 'optical', label: 'Optical drive bay', kind: 'vent', x0: 0.05, x1: 0.303, y0: 0.3, y1: 0.5 },
+          { id: 'tag', label: 'Information tag', kind: 'label', x0: 0.307, x1: 0.39, y0: 0.38, y1: 0.48 },
+          { id: 'vga', label: 'VGA', kind: 'port', x0: 0.4, x1: 0.414, y0: 0.5, y1: 0.82 },
+          { id: 'bay-a', label: '2.5″ drive bay', kind: 'bay', x0: 0.05, x1: 0.216, y0: 0.55, y1: 0.96 },
+          { id: 'bay-b', label: '2.5″ drive bay', kind: 'bay', x0: 0.226, x1: 0.392, y0: 0.55, y1: 0.96 },
+          { id: 'bay-c', label: '2.5″ drive bay', kind: 'bay', x0: 0.422, x1: 0.588, y0: 0.06, y1: 0.47 },
+          { id: 'bay-d', label: '2.5″ drive bay', kind: 'bay', x0: 0.599, x1: 0.762, y0: 0.06, y1: 0.47 },
+          { id: 'bay-e', label: '2.5″ drive bay', kind: 'bay', x0: 0.774, x1: 0.94, y0: 0.06, y1: 0.47 },
+          { id: 'bay-f', label: '2.5″ drive bay', kind: 'bay', x0: 0.422, x1: 0.588, y0: 0.55, y1: 0.96 },
+          { id: 'bay-g', label: '2.5″ drive bay', kind: 'bay', x0: 0.599, x1: 0.762, y0: 0.55, y1: 0.96 },
+          { id: 'bay-h', label: '2.5″ drive bay', kind: 'bay', x0: 0.774, x1: 0.94, y0: 0.55, y1: 0.96 },
+          { id: 'ear-r', label: 'Right rack ear', kind: 'ear', x0: 0.95, x1: 1, y0: 0, y1: 1 }
+        ]
+      },
+      rear: {
+        frame: 'Rear face as seen from behind, body width 434.0 mm, height 42.8 mm.',
+        zones: [
+          { id: 'serial', label: 'Serial', kind: 'port', x0: 0.076, x1: 0.12, y0: 0.17, y1: 0.43 },
+          { id: 'vga', label: 'VGA', kind: 'port', x0: 0.076, x1: 0.12, y0: 0.58, y1: 0.86 },
+          { id: 'nic-1', label: 'NIC 1', kind: 'port', x0: 0.14, x1: 0.179, y0: 0.17, y1: 0.43 },
+          { id: 'nic-2', label: 'NIC 2', kind: 'port', x0: 0.14, x1: 0.179, y0: 0.58, y1: 0.86 },
+          { id: 'usb-1', label: 'USB', kind: 'port', x0: 0.198, x1: 0.218, y0: 0.61, y1: 0.81 },
+          { id: 'usb-2', label: 'USB', kind: 'port', x0: 0.231, x1: 0.257, y0: 0.61, y1: 0.81 },
+          { id: 'sysid', label: 'System ID button', kind: 'button', x0: 0.273, x1: 0.281, y0: 0.68, y1: 0.77 },
+          { id: 'sysid-conn', label: 'System ID connector', kind: 'port', x0: 0.293, x1: 0.307, y0: 0.65, y1: 0.8 },
+          { id: 'slot-1', label: 'PCIe slot', kind: 'slot', x0: 0.378, x1: 0.514, y0: 0.17, y1: 0.46 },
+          { id: 'slot-2', label: 'PCIe slot', kind: 'slot', x0: 0.557, x1: 0.694, y0: 0.17, y1: 0.46 },
+          { id: 'nic-3', label: 'NIC 3', kind: 'port', x0: 0.374, x1: 0.413, y0: 0.58, y1: 0.86 },
+          { id: 'nic-4', label: 'NIC 4', kind: 'port', x0: 0.417, x1: 0.456, y0: 0.58, y1: 0.86 },
+          { id: 'psu-1', label: 'PSU 1', kind: 'psu', x0: 0.733, x1: 0.83, y0: 0.07, y1: 0.9 },
+          { id: 'psu-2', label: 'PSU 2', kind: 'psu', x0: 0.84, x1: 0.939, y0: 0.07, y1: 0.9 }
+        ]
+      }
+    },
+    card: {
+      title: 'Dell PowerEdge R430',
+      kind: 'Server · U12',
+      lines: [
+        '2 × Xeon E5-2620 v3: 24 threads, 48 GB RAM.',
+        'Proxmox VE 9.2 on a ZFS mirror of two SSDs.',
+        'The second Proxmox node, clustered with the R730.',
+        'The Pi breaks ties.'
+      ]
+    },
+    sheetHref: '/lab/servers/'
   },
   {
     id: 'r730',
@@ -339,11 +465,11 @@ export const devices: Device[] = [
       kind: 'Server · U13–14',
       lines: [
         '2 × Xeon E5-2683 v4: 64 threads, 512 GB RAM.',
-        'Proxmox VE 9.2 on ZFS, ten drives in 16 bays.',
+        'Proxmox VE 9.2 on ZFS, eight drives in 16 bays.',
         'The RAID card does HBA mode itself: no surgery needed.'
       ]
     },
-    sheetHref: '/lab/r730/'
+    sheetHref: '/lab/servers/'
   },
   {
     id: 'bottom-shelf',
@@ -351,13 +477,13 @@ export const devices: Device[] = [
     short: 'Bottom shelf',
     model: '2U vented cantilever shelf',
     role: 'shelf',
-    placement: at(41, 42),
+    placement: at(23, 24),
     body: { w: 482.6, h: 2 * U, d: 250 },
     earsWidth: 482.6,
     panels: { front: shelfPanel('Full 19″ face, 482.6 × 88.9 mm.') },
     card: {
       title: 'Bottom shelf',
-      kind: 'Shelf · U41–42',
+      kind: 'Shelf · U23–24',
       lines: ['Storage for the storage: a spare drive and a bundle of patch cables.']
     }
   },
@@ -435,7 +561,7 @@ export const rackDevices: RackDevice[] = devices.filter(isRack).sort((a, b) => a
 export const shelfItems = (shelf: ShelfId): ShelfDevice[] =>
   devices.filter(isShelf).filter((d) => d.placement.shelf === shelf).sort((a, b) => a.placement.x - b.placement.x);
 
-/** Every U from 1 to 42, as runs: each racked device, and the empty space between them. */
+/** Every U from 1 to the last, as runs: each racked device, and the empty space between them. */
 export const uMap: USpan[] = (() => {
   const spans: USpan[] = [];
   let next = 1;
@@ -463,6 +589,20 @@ export const links: Link[] = [
     id: 'gw-server',
     from: { device: 'udm-pro', port: 'Port 3' },
     to: { device: 'r730', port: 'NIC 1' },
+    speed: '1 GbE',
+    medium: 'copper'
+  },
+  {
+    id: 'gw-r430',
+    from: { device: 'udm-pro', port: 'Port 7' },
+    to: { device: 'r430', port: 'NIC 1' },
+    speed: '1 GbE',
+    medium: 'copper'
+  },
+  {
+    id: 'gw-mini',
+    from: { device: 'udm-pro', port: 'Port 6' },
+    to: { device: 'mini', port: 'Ethernet' },
     speed: '1 GbE',
     medium: 'copper'
   },
@@ -517,7 +657,7 @@ export const roleLabels: Record<Role, string> = {
 
 /** The /lab list: which devices each role shows, in order. Shelves and spares stay off it. */
 const listed: Record<ListedRole, DeviceId[]> = {
-  compute: ['r730'],
+  compute: ['r730', 'r430', 'mini'],
   network: ['udm-pro', 'u7-pro', 'ont', 'poe-injector'],
   storage: ['unas-pro-8'],
   edge: ['rpi-4b']
@@ -541,6 +681,6 @@ const uUsed = rackDevices.reduce((sum, d) => sum + uHeight(d.placement.u), 0);
 export const derived = {
   uUsed,
   uFree: cabinet.heightU - uUsed,
-  /** 42 × 44.45 mm. */
+  /** heightU × 44.45 mm. */
   railLengthMm: Math.round(cabinet.heightU * U * 10) / 10
 };

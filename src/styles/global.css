@@ -10,8 +10,8 @@
    Type .......... .display (hero) .h1 .h2 .h3 .h4 .lede .eyebrow .meta .serif
                    .muted .faint .accent  (use <em> inside .display/.h1/.h2/.h3 for the one
                    italic gold word)  .num (tabular numerals)  .link  .link--quiet
-   Section head .. .sec-head > .sec-head__bar (.sec-head__index + .eyebrow + .sec-head__aside)
-                   + .sec-head__title (.h2) + .lede   (.sec-head--split)
+   Section head .. .sec-head > .sec-head__title (.h2) + .sec-head__side (.lede + .sec-head__aside)
+                   (.sec-head--split: title left, side right)
    Buttons ....... .btn .btn--primary .btn--ghost .btn--quiet .btn--sm .btn--lg .btn--block
                    .arrow (animated → inside any link/button) .icon-btn
    Forms ......... .label .input .form-note
@@ -273,19 +273,12 @@ p { text-wrap: pretty; }
 .link--quiet:hover { color: var(--ink); text-decoration-color: var(--accent); }
 
 /* ---------- 5. Section header ---------- */
-.sec-head { margin-bottom: clamp(40px, 5vw, 72px); }
-.sec-head__bar {
-  display: flex; align-items: center; gap: var(--s-4);
-  padding-bottom: var(--s-4); margin-bottom: clamp(24px, 3vw, 40px);
-  border-bottom: 1px solid var(--line);
-}
-.sec-head__index { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--accent); letter-spacing: 0.08em; }
-.sec-head__aside { margin-left: auto; display: flex; align-items: center; gap: var(--s-3); }
+/* The title is the label: no number, no kicker. Without a lede the aside rides the title's baseline. */
+.sec-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s-4) clamp(24px, 5vw, 80px); margin-bottom: clamp(40px, 5vw, 72px); }
 .sec-head__title { max-width: 18ch; }
-.sec-head__title + .lede { margin-top: var(--s-5); }
-.sec-head--split { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(24px, 5vw, 80px); align-items: end; }
-.sec-head--split .sec-head__bar { grid-column: 1 / -1; margin-bottom: 0; }
-.sec-head--split .lede { margin-top: 0; }
+.sec-head__side { display: grid; gap: var(--s-4); justify-items: start; }
+.sec-head__aside { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); }
+.sec-head--split { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: end; }
 @media (max-width: 960px) { .sec-head--split { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- 6. Buttons ---------- */

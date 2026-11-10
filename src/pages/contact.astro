@@ -32,16 +32,15 @@ const channels = channelUses.flatMap(({ label, use }) => {
   <div class="pg-contact">
   <!-- ============ Header ============ -->
   <header class="head wrap" aria-labelledby="page-title">
-    <p class="eyebrow head__eyebrow" data-reveal>Contact</p>
     <h1 class="display" id="page-title" data-reveal style="--d:1">Say <em>hey</em>.</h1>
     <p class="lede" data-reveal style="--d:2">Email's the fastest way to reach me. For code stuff, open an issue on GitHub.</p>
     <EmailCopy d={3} />
   </header>
 
-  <!-- ============ 01 · Elsewhere ============ -->
-  <section id="channels" class="section" aria-label="Elsewhere">
+  <!-- ============ Elsewhere ============ -->
+  <section id="channels" class="section" aria-labelledby="channels-title">
     <div class="wrap">
-      <SectionHead index={1} label="Elsewhere" aside={`${channels.length} links`} bare />
+      <SectionHead titleId="channels-title" title="Elsewhere." />
       <ul class="routes" data-reveal>
         {channels.map((channel) => (
           <li>
@@ -67,8 +66,6 @@ const channels = channelUses.flatMap(({ label, use }) => {
 <style is:global>
   /* Global under the .pg-contact root (no data-astro-cid attributes). Page head (mockup blog.html .head) */
   .pg-contact .head { padding-block: clamp(40px, 7vw, 104px) clamp(48px, 6vw, 88px); }
-  .pg-contact .head__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-  .pg-contact .head__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
   .pg-contact .head .display { max-width: 12ch; }
   .pg-contact .head .lede { margin-top: 28px; }
 

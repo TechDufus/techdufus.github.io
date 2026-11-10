@@ -1,6 +1,7 @@
 // Build-time data for the scripted site guide (src/scripts/guide.ts fetches it on first open).
 // Every answer is written from real site content. Mini-markup: [label](href) links, blank line = paragraph.
 import { business, dash, featuredReposAsOf, labSpec, ompCloud, ompcraft, siteMetadata, yahwai } from '../data/site';
+import { cabinet } from '../data/lab/rack';
 import { server } from '../data/lab/server';
 import { stackItems } from '../data/lab/stack';
 import { getPostMetas, postStats } from '../lib/content';
@@ -43,9 +44,9 @@ export async function GET() {
   const answers: Record<string, Answer> = {
     homelab: {
       text:
-        `One Dell PowerEdge R730 (${server.threads} threads, ${server.memory.gb} GB) running Proxmox VE ${pve?.version ?? ''} on ZFS. OpenTofu puts ${talos?.count ?? 3} Talos VMs on it, and those are the Kubernetes cluster. Cilium runs its network, and Flux runs everything else from git.\n\n` +
-        `Ansible configures the host, and a Raspberry Pi 4 on the top shelf is the control node. A UDM Pro runs the network and a UNAS Pro 8 holds the storage. All of it is declared in one git repo, private for now, and it's built for an AI agent to run, not me: [here's why](/blog/${SLUG.operator}/).\n\n` +
-        `As of ${labSpec.lastRevised} it's ${labSpec.status.toLowerCase()}: ${running} things running, the rest still on paper. The [lab page](/lab/) has the drawings, and ${sheet('stack')} shows what runs where.`,
+        `A Dell PowerEdge R730 (${server.threads} threads, ${server.memory.gb} GB) and a smaller R430, two hosts in one Proxmox VE ${pve?.version ?? ''} cluster. OpenTofu puts ${talos?.count ?? 3} Talos VMs on the R730, and those are the Kubernetes cluster. Cilium runs its network, and Flux runs everything else from git.\n\n` +
+        `Ansible configures the hosts, and a Raspberry Pi 4 on the top shelf is the control node and the cluster’s tie-breaker. A UDM Pro runs the network and a UNAS Pro 8 holds the storage. All of it is declared in one git repo, private for now, and it's built for an AI agent to run, not me: [here's why](/blog/${SLUG.operator}/).\n\n` +
+        `As of ${labSpec.lastRevised} it's ${labSpec.status.toLowerCase()}, with ${running} things running. The [lab page](/lab/) has the drawings, and ${sheet('stack')} shows what runs where.`,
       cards: cards(SLUG.operator, SLUG.zfs, SLUG.talos)
     },
     omc: {
@@ -78,8 +79,8 @@ export async function GET() {
     },
     rack: {
       text:
-        `A 42U cabinet, and its rails count from the top. Up there is a shelf with the Raspberry Pi 4, the fiber ONT and the PoE injector that powers the U7 Pro. Under it: the UNAS Pro 8, the UDM Pro, then the R730. A shelf of spares sits at the very bottom, and the rest is air.\n\n` +
-        `It's all drawn to spec. ${sheet('cabinet')} has every box where it sits, ${sheet('server')} opens up the R730, and ${sheet('stack')} shows what runs on it. The first two are stamped as built.`,
+        `A ${cabinet.heightU}U cabinet, and its rails count from the top. Up there is a shelf with a Mac mini, the Raspberry Pi 4, the fiber ONT and the PoE injector that powers the U7 Pro. Under it: the UNAS Pro 8, the UDM Pro, then the R430 and the R730. A shelf of spares sits at the very bottom, and the rest is air.\n\n` +
+        `It's all drawn to spec. ${sheet('cabinet')} has every box where it sits, ${sheet('servers')} puts the four machines that do the work side by side, and ${sheet('stack')} shows what runs on them. All three are stamped as built.`,
       cards: cards(SLUG.zfs)
     },
     hire: {

@@ -2,6 +2,7 @@
 import { getEntry } from 'astro:content';
 import readingTime from 'reading-time';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionHead from '../../components/ui/SectionHead.astro';
 import { labSpec } from '../../data/site';
 
 const setup = await getEntry('docs', 'setup');
@@ -37,14 +38,7 @@ const docs = [
 >
   <section class="section pg-docs" aria-labelledby="docs-title">
     <div class="wrap">
-      <div class="sec-head sec-head--split">
-        <div class="sec-head__bar" data-reveal>
-          <span class="sec-head__index">Docs</span>
-          <span class="eyebrow">Documentation</span>
-          <span class="sec-head__aside"><span class="meta">{docs.length} pages</span></span>
-        </div>
-        <h1 class="h1 sec-head__title" id="docs-title" data-reveal><em>Docs</em>.</h1>
-      </div>
+      <SectionHead headingLevel="h1" titleId="docs-title" title="<em>Docs</em>." aside={`${docs.length} pages`} />
 
       <div class="post-list">
         {docs.map((doc, i) => (

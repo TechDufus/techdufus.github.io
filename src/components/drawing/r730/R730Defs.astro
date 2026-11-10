@@ -13,13 +13,15 @@
   Place a face with transform={place(s, x, y)} from ./geom (y = its top edge; for the plan, the
   rack-flange line). Put fills (face-front, tints) BEFORE the <use>.
 
-  Also carries the few styles every R730 drawing shares (lettering, drives, spares), as global
-  CSS: drawing.css belongs to the whole kit and the archive sheets.
+  The styles every server drawing shares (lettering, drives, spares) are in
+  src/styles/server-sheet.css, imported here: drawing.css belongs to the whole kit and the archive
+  sheets.
 
   <R730Defs id="lab02" />                     all three
   <R730Defs id="fig1" only={['front']} />     just the front
   <R730Defs id="x" only={['front']} lean />    …the cluster in outline, no carrier handles, latches or perforations (a small excerpt)
 */
+import '../../../styles/server-sheet.css';
 import { join } from '../../../lib/drawing/projection';
 import { frontPanel, rearPanel, planPaths } from './geom';
 
@@ -67,36 +69,3 @@ const p = has.has('plan') ? planPaths() : null;
     </g>
   )}
 </defs>
-
-<style is:global>
-  /* R730 drawings: small lettering, drives (pool colour via .pool-*), spares */
-  .sv-t, .sv-s { text-anchor: middle; letter-spacing: .06em; fill: var(--muted); pointer-events: none; }
-  .sv-t { font-size: 10.5px; }
-  .sv-s { font-size: 8.5px; letter-spacing: .08em; }
-  .sv-ko { paint-order: stroke; stroke: var(--dwg-paper); stroke-width: 3px; stroke-linejoin: round; }
-  .sv-drv { fill: color-mix(in srgb, var(--flow) 26%, transparent); stroke: var(--flow); stroke-width: 1px; vector-effect: non-scaling-stroke; }
-  .sv-lt { font-size: 9px; letter-spacing: .06em; fill: var(--flow); }
-  .sv-row { fill: var(--dwg-text); }
-  .sv-nc { text-transform: none; }
-  .pool-rpool .txt-label, .pool-none .txt-label { fill: var(--flow); }
-  .sv-empty { fill: none; stroke: var(--dwg-obj); stroke-width: .8px; stroke-dasharray: 3 3; opacity: .6; vector-effect: non-scaling-stroke; }
-  /* a text link inside a drawing (the archived sheet) */
-  .sv-a { cursor: pointer; }
-  .sv-a text { fill: var(--gold-light); text-decoration: underline; text-underline-offset: 3px; }
-  .sv-a:is(:hover, :focus-visible) text { fill: var(--gold-pale); }
-  .sv-a:focus-visible { outline: none; filter: drop-shadow(0 0 3px var(--gold)); }
-  .sv-dash { stroke-dasharray: 5 3; }
-  .sv-lbl { font-size: 10.5px; letter-spacing: .06em; fill: var(--flow); }
-  /* a spare in no pool: neutral ink, dashed, barely tinted */
-  .pool-none { --dwg-obj: var(--muted); --flow: var(--muted); }
-  .sv-drv.sv-idle { fill: color-mix(in srgb, var(--flow) 8%, transparent); stroke-dasharray: 3 3; }
-  /* the pool's hot spare: the pool's ink, hatched and dashed */
-  .sv-drv.sv-hot { fill: color-mix(in srgb, var(--flow) 8%, transparent); stroke-dasharray: 7 3; }
-  .sv-hatch { fill: var(--dwg-hatch); opacity: .8; pointer-events: none; }
-  /* perforated blanks and vents: rows of dots */
-  .sv-perf { stroke-dasharray: 1 2.6; }
-  /* fitted DIMM sticks */
-  .sv-stick { fill: color-mix(in srgb, var(--dwg-obj) 42%, transparent); stroke: var(--dwg-obj); stroke-width: .6px; vector-effect: non-scaling-stroke; opacity: var(--stick-o, 1); }
-  .xp-bare { --stick-o: 0; }
-  .sv-link { fill: none; stroke: var(--flow); stroke-width: 1.4px; vector-effect: non-scaling-stroke; }
-</style>

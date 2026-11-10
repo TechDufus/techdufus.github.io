@@ -1,13 +1,13 @@
 ---
 /*
-  R730Excerpt: Sheet 02 in miniature for /lab or a post: the R730's front panel as built, the
+  R730Excerpt: Sheet 02A in miniature for /lab or a post: the R730's front panel as built, the
   drives tinted by pool (the hot spare hatched, the spares in no pool dashed), pool brackets
   underneath, bays 10–15 empty. A kit <Figure>: it lays out 680 wide, and on phones crops to the
   populated end of the panel. It is a still picture on purpose (no parts, balloons or cards), so it
   fits /lab's HTML budget; the numbered, clickable version is the full sheet at /lab/r730/.
 
   <R730Excerpt />
-  <R730Excerpt id="lab-bays" caption="Where the drives live." fig="TD-LAB-02 · DETAIL" />
+  <R730Excerpt id="lab-bays" caption="Where the drives live." fig="TD-LAB-02A · DETAIL" />
 
     id        unique on the page (default "r730-bays")
     caption   one line under it (default in voice, from the data; pass "" for none)
@@ -35,10 +35,11 @@ const {
 } = Astro.props;
 
 const last = frontDrives[frontDrives.length - 1].bay;
+const loose = frontDrives.filter((d) => !d.pool).map((d) => d.bay);
 const desc =
   `The Dell PowerEdge R730's front panel, ${BAY_N} bays. ` +
   server.pools.map((p) => `${p.id}: bays ${[...p.spares, ...p.bays].join(', ')}`).join('; ') +
-  `. Spares in no pool: bays ${frontDrives.filter((d) => !d.pool).map((d) => d.bay).join(', ')}. Bays ${last + 1} to ${BAY_N - 1} are empty.`;
+  `.${loose.length ? ` Spares in no pool: bays ${loose.join(', ')}.` : ''} Bays ${last + 1} to ${BAY_N - 1} are empty.`;
 
 // wide: the whole panel; narrow: crop at the last drive, balloons on two rows
 const S = 1.35, X = 20, Y = 30;

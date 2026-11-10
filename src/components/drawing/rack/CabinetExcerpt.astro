@@ -2,7 +2,7 @@
 /*
   CabinetExcerpt: Sheet 01 in small, for /lab (or a post). The front elevation of the part of the
   cabinet that's used: U1 to U14 with the rails counting down from the top, a break, then the
-  bottom shelf at U41–42. The gear is numbered with the full sheet's balloon numbers and opens
+  bottom shelf in the last two units. The gear is numbered with the full sheet's balloon numbers and opens
   the same cards; the U7 Pro is an off-sheet callout fed by the injector. The device list
   (Compute / Network / Storage / Edge) sits beside the drawing when there's room, under it when
   there isn't; its rows select their parts. A link to the full sheet closes it.
@@ -27,7 +27,7 @@ import Particles from '../Particles.astro';
 import PanelDefs from './PanelDefs.astro';
 import DeviceList from './DeviceList.astro';
 import { join, ortho, type Ortho, type Pt } from '../../../lib/drawing/projection';
-import { CAB, HOLES, RAIL_W, balloonOf, devicesByRole, elsewhere, faceRect, free, placeFront, slotOf$, slots, yBot, yTop, zoneCentre, type Slot } from './model';
+import { CAB, HOLES, RAIL_W, balloonOf, devicesByRole, elsewhere, faceRect, free, placeFront, showsAt, slotOf$, slots, yBot, yTop, zoneCentre, type Slot } from './model';
 
 interface Props {
   id?: string;
@@ -67,7 +67,7 @@ const balloons = shown
   .map((sl) => {
     const v = viewOf(sl);
     if (sl.on) {
-      const x = sl.faceX + sl.faceW / 2;
+      const x = showsAt(sl);
       return { sl, at: [v.pt(x, 0)[0], ROW_Y] as Pt, to: v.pt(x, sl.faceTop - 5) };
     }
     const to = v.pt(sl.faceX + sl.faceW * 0.88, sl.faceTop - sl.faceH / 2);
@@ -83,8 +83,8 @@ const POE_X = 350;
 const poeRun = `M${f(poe[0])} ${f(poe[1])}H${POE_X}V${OFF.y + OFF.h + 8}`;
 
 const desc =
-  'The front of the 42U cabinet, rails numbered from the top. A shelf at U1 to 2 holds a Raspberry Pi 4, the fiber ONT and a PoE injector; U3 to 7 are empty; a UniFi UNAS Pro 8 sits at U8 to 9, a UniFi Dream Machine Pro at U10, U11 to 12 are empty, and a Dell PowerEdge R730 is at U13 to 14. ' +
-  `U15 to 40 are empty and broken out; a shelf at U41 to 42 holds a spare drive and patch cables. The U7 Pro access point is off the sheet, powered by the injector. Each numbered part opens a card.`;
+  `The front of the ${CAB.units}U cabinet, rails numbered from the top. A shelf at U1 to 2 holds a Mac mini, a spare HP thin client with a Raspberry Pi 4 and the fiber ONT on it, and a PoE injector; U3 to 7 are empty; a UniFi UNAS Pro 8 sits at U8 to 9, a UniFi Dream Machine Pro at U10, U11 is empty, a Dell PowerEdge R430 is at U12 and a Dell PowerEdge R730 at U13 to 14. ` +
+  `U15 to ${CAB.units - 2} are empty and broken out; a shelf at U${CAB.units - 1} to ${CAB.units} holds a spare drive and patch cables. The U7 Pro access point is off the sheet, powered by the injector. Each numbered part opens a card.`;
 ---
 
 <div class="rkx">
@@ -167,7 +167,7 @@ const desc =
     <Fragment slot="cards">
       {devicesByRole().flatMap((g) => g.devices).map((d) => (
         <PartCard id={pid(d.id)} title={d.card.title} kind={d.card.kind} lines={d.card.lines}>
-          {d.sheetHref && <a class="link" href={d.sheetHref}>Sheet 02 · the server <span aria-hidden="true">→</span></a>}
+          {d.sheetHref && <a class="link" href={d.sheetHref}>Sheet 02 · the servers <span aria-hidden="true">→</span></a>}
         </PartCard>
       ))}
     </Fragment>

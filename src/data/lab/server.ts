@@ -1,6 +1,6 @@
 /**
- * Sheet 02 · The server, as built: the Dell PowerEdge R730 that replaced the R720xd (2026-10-02).
- * Sixteen front bays, ten drives, a PERC H730P Mini in HBA mode.
+ * Sheet 02A · The R730, as built: the Dell PowerEdge R730 that replaced the R720xd (2026-10-02).
+ * Sixteen front bays, eight drives, a PERC H730P Mini in HBA mode.
  *
  * The R720xd as it was on 2026-09-28 is frozen in ./snapshots/ for the post and the archive sheet;
  * nothing here reads it.
@@ -187,36 +187,6 @@ const drives: Server['drives'] = [
       title: 'Crucial MX500 1 TB',
       kind: 'Bay 7 · SATA SSD',
       lines: ['1 TB, all of bulk.', 'Scratch and sandboxes. One disk, on purpose.']
-    }
-  },
-  {
-    id: 'mx500-500-1',
-    maker: 'Crucial',
-    model: 'CT500MX500SSD1',
-    kind: 'ssd',
-    interface: 'SATA',
-    sizeGB: 500,
-    bay: 8,
-    role: 'spare',
-    card: {
-      title: 'Crucial MX500 500 GB',
-      kind: 'Bay 8 · SATA SSD · spare',
-      lines: ['500 GB, wiped and waiting.', 'In no pool: a spare that lives in the server.']
-    }
-  },
-  {
-    id: 'mx500-500-2',
-    maker: 'Crucial',
-    model: 'CT500MX500SSD1',
-    kind: 'ssd',
-    interface: 'SATA',
-    sizeGB: 500,
-    bay: 9,
-    role: 'spare',
-    card: {
-      title: 'Crucial MX500 500 GB',
-      kind: 'Bay 9 · SATA SSD · spare',
-      lines: ['500 GB, wiped and waiting.', 'In no pool either: the other spare.']
     }
   }
 ];

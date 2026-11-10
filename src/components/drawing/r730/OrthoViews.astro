@@ -1,8 +1,8 @@
 ---
 /*
-  OrthoViews: Sheet 02's ORTHOGRAPHIC tab, as built: the TOP VIEW (cover off) above the FRONT,
-  the REAR beside it, DETAIL B (the populated front bays 0–9, big enough to click and to letter)
-  and the ZFS POOLS tree (each pool, its hot spare, and the spares that sit in no pool). Detail B
+  OrthoViews: Sheet 02A's ORTHOGRAPHIC tab, as built: the TOP VIEW (cover off) above the FRONT,
+  the REAR beside it, DETAIL B (the populated front bays, big enough to click and to letter)
+  and the ZFS POOLS tree (each pool, its hot spare, and any spares that sit in no pool). Detail B
   comes first in the DOM: a balloon click opens its card beside the first part with that id, and
   the balloons live there. Drives, pools, the PERC mini, the backplane, fans, CPUs, DIMM sockets,
   PSUs, risers and the NDC are parts. Needs <R730Defs id={dwg} /> in the same SVG and
@@ -54,10 +54,10 @@ const cold = P([pl(fans.x + 2.5 * fw, -30), pl(fans.x + 2.5 * fw, 140)]);
 const hotX = EAR + W * 0.79; // the gap between riser 2 and riser 1
 const hot = P([pl(hotX, 412), pl(hotX, 735)]);
 
-// Detail B: the left ear and bays 0–9 at 1:1.5
+// Detail B: the left ear and the populated bays at 1:1.5, under the sheet's revision block
 const SB = atScale(1, 1.5);
 const lastBay = frontDrives[frontDrives.length - 1].bay;
-const B = { x: 500, y: 190, to: lastBay, u1: bayX(lastBay) + bayP(lastBay) + 1.5 };
+const B = { x: 500, y: 206, to: lastBay, u1: bayX(lastBay) + bayP(lastBay) + 1.5 };
 
 // rear view: NDC ports
 const nics = ['nic-1', 'nic-2', 'nic-3', 'nic-4'];
@@ -112,13 +112,14 @@ const wrap = (text: string, w: number): string[] => {
 ---
 
 <View dwg={dwg} name="ortho" active={active} x={39} y={39} w={1182} h={813}>
-  <!-- ================= DETAIL B: bays 0–9 ================= -->
-  <View x={500} y={150} w={700} h={290} title="DETAIL B" scale={SB} labelAt={[B.x + (SB * B.u1) / 2, 438]}>
-    <BayStrip dwg={dwg} x={B.x} y={B.y} s={SB} to={B.to} nums="in" letter balloons={166} brackets />
+  <!-- ================= DETAIL B: the populated bays ================= -->
+  <View x={500} y={150} w={700} h={290} title="DETAIL B" scale={SB} labelAt={[B.x + (SB * B.u1) / 2, 446]}>
+    <BayStrip dwg={dwg} x={B.x} y={B.y} s={SB} to={B.to} nums="in" letter balloons={B.y - 24} brackets />
   </View>
 
   <!-- ================= ZFS POOLS ================= -->
-  <View x={480} y={462} w={740} h={200} title="ZFS POOLS" labelAt={[T.x + (colX - T.x) / 2 - 20, 650]}>
+  {/* the label stays right of x 850: the rear view's riser balloons sit left of that, at its height */}
+  <View x={480} y={462} w={740} h={200} title="ZFS POOLS" labelAt={[Math.max(850, T.x + (colX - T.x) / 2 - 20), 650]}>
     {cols.map((c) => {
       const x = c.x, y = T.y;
       const rows0 = y + 50;

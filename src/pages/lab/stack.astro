@@ -14,7 +14,7 @@ const counts = stackCounts();
 const glance = [
   { k: 'Layers', v: String(stack.length) },
   { k: 'Running', v: String(counts.running) },
-  { k: 'Planned', v: String(counts.planned) },
+  ...(counts.planned ? [{ k: 'Planned', v: String(counts.planned) }] : []),
   { k: 'Talos nodes', v: String(talos.count) },
 ];
 // one row per numbered thing, in balloon order (the same numbers as the drawing)
@@ -31,19 +31,18 @@ const rows = (l: (typeof stack)[number]) =>
 
 <BaseLayout
   title="The stack · Sheet 03"
-  description="Sheet 03 of my homelab drawings: what runs on the metal, from Proxmox up to the Kubernetes cluster, drawn as a building section. Solid is running, dashed is next."
+  description="Sheet 03 of my homelab drawings: what runs on the metal, from Proxmox up to the Kubernetes cluster, drawn as a building section. Solid is running."
   ogImage={siteMetadata.media.labSocialImage}
   ogImageAlt={siteMetadata.media.labSocialImageAlt}
 >
   <div class="pg-stack">
     <section class="wrap stk-hero" aria-labelledby="stk-title">
-      <p class="eyebrow stk-hero__eyebrow">Lab · Sheet 03</p>
       <h1 class="h1" id="stk-title">The <em>stack</em>.</h1>
-      <p class="lede stk-hero__lede">What runs on the metal, layer by layer. Dashed is next.</p>
+      <p class="lede stk-hero__lede">What runs on the metal, layer by layer. Nothing dashed.</p>
       <p class="stk-hero__links">
         <a class="link link--quiet" href="/lab/"><span aria-hidden="true">←</span> The lab</a>
         <a class="link link--quiet" href="/lab/rack/">Sheet 01 · The cabinet <span class="arrow" aria-hidden="true">→</span></a>
-        <a class="link link--quiet" href="/lab/r730/">Sheet 02 · The server <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="link link--quiet" href="/lab/servers/">Sheet 02 · The servers <span class="arrow" aria-hidden="true">→</span></a>
       </p>
     </section>
 
@@ -76,7 +75,7 @@ const rows = (l: (typeof stack)[number]) =>
       </div>
       <p class="stk-next">
         <a class="link" href="/lab/rack/">Sheet 01 · The cabinet <span class="arrow" aria-hidden="true">→</span></a>
-        <a class="link" href="/lab/r730/">Sheet 02 · The server <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="link" href="/lab/servers/">Sheet 02 · The servers <span class="arrow" aria-hidden="true">→</span></a>
       </p>
     </section>
   </div>
@@ -84,8 +83,6 @@ const rows = (l: (typeof stack)[number]) =>
 
 <style is:global>
   .pg-stack .stk-hero { padding-block: clamp(40px, 6vw, 80px) clamp(28px, 4vw, 44px); }
-  .pg-stack .stk-hero__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-  .pg-stack .stk-hero__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
   .pg-stack .stk-hero__lede { margin-top: 20px; max-width: 46ch; }
   .pg-stack .stk-hero__links { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 24px; font-size: var(--fs-sm); }
   .pg-stack .stk-wide { max-width: 1400px; margin-inline: auto; padding-inline: var(--gutter); }

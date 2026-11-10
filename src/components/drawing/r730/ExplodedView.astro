@@ -1,7 +1,7 @@
 ---
 /*
   ExplodedView: the R730 as built, taken apart: isometric (front-right), parts lifted straight up
-  out of the chassis (fan row, backplane, CPUs, the 16 DIMM sticks, PERC mini, risers), the ten drives
+  out of the chassis (fan row, backplane, CPUs, the 16 DIMM sticks, PERC mini, risers), the drives
   pulled out of their bays and the PSUs out the back. Every balloon is a kit <Part> with a card
   (R730Cards); the top cover is named but quiet. Board positions are schematic
   (geom.ts).
@@ -68,7 +68,7 @@ const perc = up(fromPart('perc', 12, 6), L.perc);
 const psus = ['psu-2', 'psu-1'].map((id) => ({ ...fromPart(id, 2, 40), z: part(id).z + PSU_OUT, d: HANDLES - part(id).z }));
 
 const lid = up({ x: EAR, y: H, z: 0, w: W, h: 2, d: D }, L.lid);
-// the drives, carriers and all, out of bays 0–9
+// the drives, carriers and all, out of their bays
 const drives = frontDrives.map((d) => ({
   d, b: { x: bayX(d.bay) + 0.5, y: H - BAY_Y0 - BAY_H, z: -EAR_D - DRV_OUT, w: bayP(d.bay) - 1, h: BAY_H, d: 140 } as IsoBoxInput,
 }));

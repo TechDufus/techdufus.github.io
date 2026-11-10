@@ -1,0 +1,88 @@
+---
+/*
+  /lab/servers/: Sheet 02 · The servers (TD-LAB-02): the four machines that run things (the R730,
+  the R430, the Mac mini and the Raspberry Pi), each one's front at the same scale. The drawing is
+  src/components/drawing/servers/ServersSheet.astro; under it the same four as a table (the text
+  equivalent), all from src/data/lab/servers.ts. The two Dells have sheets of their own:
+  /lab/r730/ (TD-LAB-02A) and /lab/r430/ (TD-LAB-02B).
+*/
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteMetadata } from '../../data/site';
+import ServersSheet from '../../components/drawing/servers/ServersSheet.astro';
+import { cpuCount, machines } from '../../data/lab/servers';
+---
+
+<BaseLayout
+  title="Sheet 02 · The servers"
+  description="The four machines that run my homelab, drawn from the front at one scale: a Dell R730 and a Dell R430 on Proxmox, a Mac mini for macOS CI, and a Raspberry Pi as the control node. What is in each, and what runs on it."
+  ogImage={siteMetadata.media.labSocialImage}
+  ogImageAlt={siteMetadata.media.labSocialImageAlt}
+>
+  <div class="pg-servers">
+    <section class="wrap sv-hero" aria-labelledby="sv-title">
+      <h1 class="h1" id="sv-title">The <em>servers</em>.</h1>
+      <p class="lede sv-hero__lede">Four machines do the work. Two Dells run Proxmox, a Mac mini runs macOS CI, and a Raspberry Pi is the control node.</p>
+      <p class="sv-hero__links">
+        <a class="link link--quiet" href="/lab/"><span aria-hidden="true">←</span> The lab</a>
+        <a class="link link--quiet" href="/lab/rack/">Sheet 01 · The cabinet</a>
+        {machines.filter((m) => m.sheet).map((m) => <a class="link link--quiet" href={m.sheet!.href}>Sheet {m.sheet!.no} · The {m.short} <span class="arrow" aria-hidden="true">→</span></a>)}
+        <a class="link link--quiet" href="/lab/stack/">Sheet 03 · The stack <span class="arrow" aria-hidden="true">→</span></a>
+      </p>
+    </section>
+
+    <div class="sv-sheet">
+      <ServersSheet />
+      <p class="sv-colophon">All four at the same scale. The Pi really is that small.</p>
+    </div>
+
+    <section class="wrap sv-more" aria-label="The servers in words">
+      <h2 class="sv-h" id="sv-table">What’s in each, and what it runs</h2>
+      <div class="sv-scroll" role="region" aria-labelledby="sv-table" tabindex="0">
+        <table class="sv-table">
+          <thead>
+            <tr><th scope="col">Machine</th><th scope="col">CPU</th><th scope="col">Memory</th><th scope="col">Storage</th><th scope="col">Software</th></tr>
+          </thead>
+          <tbody>
+            {machines.map((m) => (
+              <tr>
+                <th scope="row">
+                  {m.sheet ? <a class="link" href={m.sheet.href}>{m.name}</a> : m.name}
+                  <span>{m.where} · {m.job}</span>
+                </th>
+                <td>{m.cpu}<span>{cpuCount(m)}</span></td>
+                <td>{m.memoryGB} GB</td>
+                <td>{m.storage ?? '—'}</td>
+                <td>{m.os}<span>{m.runs.join(', ')}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="sv-next">
+        {machines.filter((m) => m.sheet).map((m) => <a class="link" href={m.sheet!.href}>Sheet {m.sheet!.no} · The {m.short} <span class="arrow" aria-hidden="true">→</span></a>)}
+        <a class="link" href="/lab/stack/">Sheet 03 · The stack <span class="arrow" aria-hidden="true">→</span></a>
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style is:global>
+  .pg-servers .sv-hero { padding-block: clamp(40px, 6vw, 80px) clamp(28px, 4vw, 44px); }
+  .pg-servers .sv-hero__lede { margin-top: 20px; max-width: 52ch; }
+  .pg-servers .sv-hero__links { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 24px; font-size: var(--fs-sm); }
+  .pg-servers .sv-sheet { max-width: 1400px; margin-inline: auto; padding-inline: var(--gutter); }
+  .pg-servers .sv-colophon { margin: 14px 0 0; font: italic 1rem/1.5 var(--font-display); color: var(--muted); }
+
+  .pg-servers .sv-more { padding-block: clamp(40px, 6vw, 72px); }
+  .pg-servers .sv-h { margin: 0 0 12px; font: 500 0.6875rem/1.3 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+  .pg-servers .sv-scroll { overflow-x: auto; scrollbar-width: thin; }
+  .pg-servers .sv-scroll:focus-visible { outline-offset: 4px; }
+  .pg-servers .sv-table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: var(--fs-sm); }
+  .pg-servers .sv-table :is(th, td) { padding: 14px 24px 14px 0; border-top: 1px solid var(--line); text-align: left; vertical-align: top; color: var(--ink-2); font-weight: 400; }
+  .pg-servers .sv-table thead th { padding-block: 0 10px; border-top: 0; border-bottom: 1px solid var(--line-2); font: 500 0.6875rem/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
+  .pg-servers .sv-table tbody th { color: var(--ink); }
+  .pg-servers .sv-table tbody span { display: block; margin-top: 4px; font-size: 0.8125rem; color: var(--muted); }
+  .pg-servers .sv-table td:nth-child(3) { white-space: nowrap; }
+  .pg-servers .sv-next { display: flex; flex-wrap: wrap; gap: 10px 32px; margin: 32px 0 0; }
+</style>

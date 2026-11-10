@@ -45,12 +45,6 @@ const listPosts = olderPosts.slice(0, 5);
 const repos = await getFeaturedRepos();
 const totalStars = repos.reduce((sum, repo) => sum + repo.stars, 0);
 
-// Section numbering follows what actually renders, so the flag never leaves gaps.
-const sectionOrder = ['app', 'writing', 'lab', 'work', 'services', 'about', 'contact'].filter(
-  (id) => business.enabled || (id !== 'app' && id !== 'services')
-);
-const sectionIndex = (id: string) => sectionOrder.indexOf(id) + 1;
-
 // Hero headline, split into words so each can rise in on load; the (first) accent word gets the gold <em>.
 let accented = false;
 const headlineWords = heroCopy.headline.split(' ').map((word) => {
@@ -96,8 +90,9 @@ const stackLine = [
   talos && { text: `Talos ×${talos.count ?? 1}` },
   platform.length > 0 && { text: platform.map((i) => i.name).join(' · ') }
 ].filter((s): s is { text: string; sub?: string } => !!s);
+const computeCount = devicesByRole().find((g) => g.role === 'compute')?.devices.length ?? 1;
 const roleNote: Record<ListedRole, string | undefined> = {
-  compute: `${server.threads} threads · ${server.memory.gb} GB`,
+  compute: computeCount > 1 ? 'Two Proxmox hosts, and a Mac for macOS CI' : `${server.threads} threads · ${server.memory.gb} GB`,
   network: item('udm-pro')?.what,
   storage: item('unas')?.what,
   edge: item('rpi')?.what
@@ -199,14 +194,12 @@ const businessCss = [
     business.enabled && (
       <section id="app" class="section" aria-labelledby="app-title">
         <div class="wrap">
-          <SectionHead bare index={sectionIndex('app')} label="Launching soon">
-            <Draft slot="aside" />
-          </SectionHead>
           <div class="app__grid">
             <div class="app__copy">
               <p class="app__name" data-reveal>
                 <span class:list={[{ ph: isPlaceholder(business.appName) }]}>{business.appName}</span> · by{' '}
-                <span class:list={[{ ph: isPlaceholder(business.companyName) }]}>{business.companyName}</span>
+                <span class:list={[{ ph: isPlaceholder(business.companyName) }]}>{business.companyName}</span> · Launching soon{' '}
+                <Draft />
               </p>
               <h2 class="h2" id="app-title" data-reveal style="--d:1">
                 <span class="ph">[Headline: the promise, in <em>one line</em>]</span>
@@ -254,12 +247,7 @@ const businessCss = [
   <!-- ============ WRITING ============ -->
   <section id="writing" class="section" aria-labelledby="writing-title">
     <div class="wrap">
-      <SectionHead
-        index={sectionIndex('writing')}
-        label="Writing"
-        titleId="writing-title"
-        title="Latest <em>writing</em>."
-      >
+      <SectionHead titleId="writing-title" title="Latest <em>writing</em>.">
         <a slot="aside" class="link link--quiet" href="/blog/">All {stats.count} posts</a>
       </SectionHead>
       {latestPost && <PostFeature post={latestPost} label="Latest post" />}
@@ -277,11 +265,9 @@ const businessCss = [
   <section id="lab" class="section" aria-labelledby="lab-title">
     <div class="wrap">
       <SectionHead
-        index={sectionIndex('lab')}
-        label="The lab"
         titleId="lab-title"
         title="The <em>lab</em>."
-        lede="One server, three Talos nodes, all of it in git. Mid-rebuild."
+        lede="Two servers, three Talos nodes, all of it in git."
       >
         <span slot="aside" class="badge badge--live"><i class="dot" aria-hidden="true"></i>{labSpec.status}</span>
       </SectionHead>
@@ -289,12 +275,11 @@ const businessCss = [
       <p
         class="lab__stackline"
         data-reveal
-        aria-label={`Stack: ${stackLine.map((s) => s.text + (s.sub ?? '')).join(', then ')}. The rest is next.`}
+        aria-label={`Stack: ${stackLine.map((s) => s.text + (s.sub ?? '')).join(', then ')}.`}
       >
         {stackLine.map((s, i) => (
           <>{i > 0 && <span class="to" aria-hidden="true">→</span>}<span>{s.text}{s.sub && <span class="muted">{s.sub}</span>}</span></>
         ))}
-        <span class="muted"><span aria-hidden="true">· </span>the rest is next</span>
       </p>
 
       <div class="lab__grid">
@@ -332,13 +317,7 @@ const businessCss = [
   <!-- ============ PROJECTS ============ -->
   <section id="work" class="section" aria-labelledby="work-title">
     <div class="wrap">
-      <SectionHead
-        index={sectionIndex('work')}
-        label="Projects"
-        aside={featuredReposNote(repos)}
-        titleId="work-title"
-        title="Things I <em>build</em>."
-      />
+      <SectionHead aside={featuredReposNote(repos)} titleId="work-title" title="Things I <em>build</em>." />
       <article class="yw-card" data-reveal>
         <img class="yw-card__shot" src={yahwai.image.src} alt="" width={yahwai.image.width} height={yahwai.image.height} loading="lazy" decoding="async" />
         <div class="yw-card__body">
@@ -365,13 +344,7 @@ const businessCss = [
     business.enabled && (
       <section id="services" class="section" aria-labelledby="services-title">
         <div class="wrap">
-          <SectionHead
-            index={sectionIndex('services')}
-            label={businessCopy.services.eyebrow}
-            titleId="services-title"
-            title={businessCopy.services.title}
-            lede={businessCopy.services.lede}
-          >
+          <SectionHead titleId="services-title" title={businessCopy.services.title} lede={businessCopy.services.lede}>
             <Fragment slot="aside">
               <span class="meta hide-sm">
                 under <span class:list={[{ ph: isPlaceholder(business.companyName) }]}>{business.companyName}</span>
@@ -427,7 +400,6 @@ const businessCss = [
   <!-- ============ ABOUT ============ -->
   <section id="about" class="section" aria-labelledby="about-title">
     <div class="wrap">
-      <SectionHead bare index={sectionIndex('about')} label="About" />
       <div class="split">
         <div class="about__bio">
           <h2 class="h2 sec-head__title" id="about-title" data-reveal style="margin-bottom:32px">Hello, I'm <em>TechDufus</em>.</h2>
@@ -451,7 +423,6 @@ const businessCss = [
   <!-- ============ CONTACT ============ -->
   <section id="contact" class="section" aria-labelledby="contact-title">
     <div class="wrap">
-      <SectionHead bare index={sectionIndex('contact')} label="Contact" />
       <h2 class="h2 sec-head__title" id="contact-title" data-reveal>Say <em>hey</em>.</h2>
       <p class="lede" style="margin-top:20px;--d:1" data-reveal>Questions, ideas, work, or a good DNS horror story. Email's fastest.</p>
       <EmailCopy d={2} />

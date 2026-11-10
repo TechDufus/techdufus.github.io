@@ -34,7 +34,6 @@ const path: TimelineItem[] = [
             <p class="meta">{siteMetadata.role}</p>
           </div>
         </div>
-        <p class="eyebrow hero__eyebrow" data-reveal>About</p>
         <h1 class="display" id="page-title" data-reveal style="--d:1">Hello, I'm <em>TechDufus</em>.</h1>
         <p class="lede hero__lede" data-reveal style="--d:2">{aboutCopy.intro}</p>
         <div class="hero__ctas" data-reveal style="--d:3">
@@ -47,10 +46,9 @@ const path: TimelineItem[] = [
     </div>
   </section>
 
-  <!-- ============ 01 · Backstory ============ -->
+  <!-- ============ Backstory ============ -->
   <section id="story" class="section" aria-labelledby="story-title">
     <div class="wrap">
-      <SectionHead index={1} label="Backstory" bare />
       <div class="about__bio">
         <h2 class="h2 sec-head__title" id="story-title" data-reveal>How I got <em>here</em>.</h2>
         {bodyParagraphs.map((paragraph, i) => <p class:list={{ first: i === 0 }} data-reveal set:html={paragraph} />)}
@@ -62,25 +60,25 @@ const path: TimelineItem[] = [
     </div>
   </section>
 
-  <!-- ============ 02 · Now ============ -->
+  <!-- ============ Now ============ -->
   <section id="now" class="section" aria-labelledby="now-title">
     <div class="wrap">
-      <SectionHead index={2} label="Now" aside={aboutNow.timeframe} titleId="now-title" title="Right <em>now</em>." lede={aboutNow.primaryFocus} />
+      <SectionHead aside={aboutNow.timeframe} titleId="now-title" title="Right <em>now</em>." lede={aboutNow.primaryFocus} />
     </div>
   </section>
 
-  <!-- ============ 03 · Proof ============ -->
+  <!-- ============ Proof ============ -->
   <section id="proof" class="section" aria-labelledby="proof-title">
     <div class="wrap">
-      <SectionHead index={3} label="Proof" titleId="proof-title" title="Proof." />
+      <SectionHead titleId="proof-title" title="Proof." />
       <ProofPoints />
     </div>
   </section>
 
-  <!-- ============ 04 · Principles ============ -->
+  <!-- ============ Principles ============ -->
   <section id="operate" class="section" aria-labelledby="operate-title">
     <div class="wrap">
-      <SectionHead index={4} label="Principles" titleId="operate-title" title="How I <em>work</em>." />
+      <SectionHead titleId="operate-title" title="How I <em>work</em>." />
       <div class="principles">
         <Principles heading="" />
       </div>
@@ -106,8 +104,6 @@ const path: TimelineItem[] = [
   .pg-about .hero { padding-block: clamp(40px, 7vw, 104px) clamp(56px, 7vw, 96px); }
   .pg-about .hero__grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(40px, 6vw, 96px); align-items: start; }
   .pg-about .hero__id { display: none; }
-  .pg-about .hero__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-  .pg-about .hero__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
   .pg-about .hero .display { max-width: 13ch; }
   .pg-about .hero__lede { margin-top: 28px; color: var(--ink-2); }
   .pg-about .hero__ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
@@ -120,7 +116,6 @@ const path: TimelineItem[] = [
     .pg-about .hero__id p { line-height: 1.35; }
     .pg-about .hero__id .serif { font-size: 1.375rem; font-style: italic; }
     .pg-about .hero__id .meta { color: var(--muted); }
-    .pg-about .hero__eyebrow { margin-bottom: 18px; }
   }
   @media (max-width: 640px) {
     .pg-about .hero__ctas .btn { width: 100%; }

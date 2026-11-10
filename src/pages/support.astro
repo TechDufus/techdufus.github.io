@@ -9,7 +9,6 @@ import SupportCards from '../components/ui/SupportCards.astro';
 >
   <!-- ============ Header ============ -->
   <header class="head wrap" aria-labelledby="page-title">
-    <p class="eyebrow head__eyebrow" data-reveal>Support</p>
     <h1 class="display" id="page-title" data-reveal style="--d:1">Support the <em>notes</em>.</h1>
     <p class="lede" data-reveal style="--d:2">
       Everything here is free and stays free. If something saved you an afternoon, these help cover lab costs and
@@ -26,8 +25,6 @@ import SupportCards from '../components/ui/SupportCards.astro';
 <style>
   /* Page head (mockup blog.html .head) */
   .head { padding-block: clamp(40px, 7vw, 104px) clamp(48px, 6vw, 88px); }
-  .head__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-  .head__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
   .head .display { max-width: 14ch; }
   .head .lede { margin-top: 28px; }
 

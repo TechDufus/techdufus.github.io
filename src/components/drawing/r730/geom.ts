@@ -1,5 +1,5 @@
 /**
- * R730 geometry for Sheet 02 (TD-LAB-02) and anything else that draws the server.
+ * R730 geometry for Sheet 02A (TD-LAB-02A) and anything else that draws the server.
  *
  * Model space, millimetres, the kit's axes: x = width from the LEFT EDGE OF THE RACK EARS as
  * seen from the front (0 … 482.4), y = height from the chassis bottom, z = depth from the rack
@@ -423,7 +423,7 @@ export const driveLetter = (d: Drive): string => driveShort(d) + (d.role === 'sp
 export const fitLetter = (d: Drive, avail: number): string =>
   [driveLetter(d), driveShort(d)].find((t) => monoWidth(t, 9, 0.06) <= avail) ?? driveTag(d);
 
-/** Sheet 02's stamp: as built since the R730 took the slot. Each view sets it down where it has room (Stamp.astro). */
+/** Sheet 02A's stamp: as built since the R730 took the slot. Each view sets it down where it has room (Stamp.astro). */
 export const STAMP = { text: 'AS BUILT', sub: 'R730 · 2026-10-02', tone: 'ok' as const };
 
 /* ------------------------------------------------------------------ balloon numbers */

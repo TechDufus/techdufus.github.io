@@ -1,5 +1,5 @@
 /**
- * Sheet 02 (the R730) page behaviour (bundled by src/pages/lab/r730.astro).
+ * Sheet 02A (the R730) page behaviour (bundled by src/pages/lab/r730.astro).
  *
  * Lazy views: the EXPLODED and R720xd → R730 tab panels ship empty and fill from
  * /lab/r730/views/ (fetched once: on idle, or at the first touch of a view tab), which keeps the

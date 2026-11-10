@@ -317,7 +317,9 @@ drawing), `Stamp`, `LineKey`, `ScaleBar`, `URuler`, `DrawingDefs`, `Monogram`, `
 | Sheet | Page | Data | Excerpt (for `/lab` or a post) |
 | --- | --- | --- | --- |
 | TD-LAB-01 · The cabinet | `/lab/rack/` | `src/data/lab/rack.ts` | `rack/CabinetExcerpt.astro`: `id?` (`'lab-cab'`), `caption?`, `href?` |
-| TD-LAB-02 · The server (the R730) | `/lab/r730/` | `src/data/lab/server.ts` | `r730/R730Excerpt.astro`: `id?` (`'r730-bays'`), `caption?`, `fig?`, `breakout?` (not placed on any page now) |
+| TD-LAB-02 · The servers | `/lab/servers/` | `src/data/lab/servers.ts` (the four machines, gathered from `rack.ts`, `server.ts`, `r430.ts` and `stack.ts`) | none: `servers/ServersSheet.astro` is the whole sheet |
+| TD-LAB-02A · The R730 | `/lab/r730/` | `src/data/lab/server.ts` | `r730/R730Excerpt.astro`: `id?` (`'r730-bays'`), `caption?`, `fig?`, `breakout?` (not placed on any page now) |
+| TD-LAB-02B · The R430 | `/lab/r430/` | `src/data/lab/r430.ts` | none: `r430/R430Sheet.astro` is the whole sheet |
 | TD-LAB-02 · The server (archived R720xd, frozen) | `/lab/r720xd/` | `src/data/lab/snapshots/server-2026-09-28.ts` | `r720xd/ServerExcerpt.astro`: `id?` (`'r720-bays'`), `caption?`, `fig?`, `breakout?` (not placed on any page now) |
 | TD-LAB-03 · The stack | `/lab/stack/` | `src/data/lab/stack.ts` | `stack/StackExcerpt.astro`: `id?` (`'sx'`), `caption?`, `href?` |
 
@@ -325,15 +327,24 @@ drawing), `Stamp`, `LineKey`, `ScaleBar`, `URuler`, `DrawingDefs`, `Monogram`, `
   `card: { title, kind?, lines }`, so a sheet and its excerpt say the same thing.
 - An excerpt's `id` prefixes its part and card ids, so an excerpt and the full sheet (or two
   excerpts) can share a page.
-- `rack/SheetThumb.astro` (`kind: 'cabinet' | 'server' | 'stack' | 'path' | 'lanes'`) is the
+- `rack/SheetThumb.astro` (`kind: 'cabinet' | 'servers' | 'stack' | 'path' | 'lanes'`) is the
   small decorative line drawing on the `/lab` "Drawn to spec" cards (`path` and `lanes` are the
   two posts' cards).
+- A sheet's schedule (the numbered table in its right column) is styled by
+  `src/styles/schedule.css` (`.rk-list`), imported by `rack/DeviceList.astro` and
+  `servers/ServersSheet.astro`.
+- Sheet 02 draws each machine's front with the cabinet's panel line work (`frontPanel()` in
+  `rack/model.ts`), so a panel traced in `rack.ts` shows on both sheets.
+- The two server sheets share `src/styles/server-sheet.css` (lettering, drives in their pool's
+  colour, DIMM sticks) and their pages share `src/styles/server-page.css` (hero, at a glance,
+  pools). Sheet 02B reuses the path helpers and `Key.astro` from `r730/`; its faces come from
+  `rack/model.ts` and its plan from `r430/geom.ts`.
 - The R720xd sheet is a frozen archive (stamped SUPERSEDED, off the `/lab` sheet index): the
-  snapshots, `r720xd/`, `post/` and `src/pages/lab/r720xd*` never change. The live Sheet 02 is
-  `src/pages/lab/r730.astro` with its components in `r730/`.
+  snapshots, `r720xd/`, `post/` and `src/pages/lab/r720xd*` never change. The live R730 sheet
+  (Sheet 02A) is `src/pages/lab/r730.astro` with its components in `r730/`.
 - `post/SheetLink.astro` (`sheet?: 'server' | 'stack'`, default `'server'`) is the card at the
   end of a post that links a sheet. The stack card reads its title, note and thumbnail from
-  `labSpec` and `stack.ts`, and states no Rev: Sheet 03 is still going up. The server card reads
+  `labSpec` and `stack.ts`, and states no Rev (Sheet 03's lives in `StackSheet.astro`). The server card reads
   only the frozen `data/lab/snapshots/` R720xd, like the R720xd post's figures (`post/{fig.ts,BayMap,Pools,TwoCables}`)
   and the archived sheet's drawings in `r720xd/`.
 

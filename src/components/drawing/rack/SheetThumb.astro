@@ -4,7 +4,8 @@
   the sheets but with a fraction of the line work (no kit CSS needed, so the styles live here).
     kind="cabinet"  Sheet 01: the cabinet's front faces from U1 to U14 between two rails, the
                     empty U3–7 broken out
-    kind="server"   Sheet 02: the R730's front face, 16 carriers in two groups of 8, the left control cluster and both ears
+    kind="servers"  Sheet 02: the four machines' fronts at one scale: the R730 (16 carriers, the left
+                    control cluster, both ears), the R430 under it, then the Mac mini and the Pi
     kind="stack"    Sheet 03: the three layers as storeys, one box per thing, planned ones dashed
     kind="path"     the post: disks → PERC → virtual disks → Proxmox (red, dashed: gone) over
                     disks → HBA330 → ZFS pools → Proxmox (green: what went in)
@@ -19,7 +20,7 @@ import { whoDidWhat } from '../post/operator/data';
 import { wrap } from '../../../lib/drawing/figure';
 
 interface Props {
-  kind: 'cabinet' | 'server' | 'stack' | 'path' | 'lanes';
+  kind: 'cabinet' | 'servers' | 'stack' | 'path' | 'lanes';
 }
 const { kind } = Astro.props;
 const r1 = (n: number): string => String(Math.round(n * 10) / 10);
@@ -31,12 +32,12 @@ const cells = (x: number, y: number, w: number, h: number, n: number): string =>
   return `M${r1(x + 0.5)} ${r1(y)}${one}` + `m${r1(cw)} 0${one}`.repeat(n - 1);
 };
 
-/** A device's front-face zones (fractions) placed on a face at (x, y), `w` × `h`: the bay runs as carrier cells, and the rest as rectangles. */
-const frontZones = (id: 'r730', x: number, y: number, w: number, h: number, only?: string[]): { cells: string; boxes: string } => {
+/** A device's front-face zones (fractions) placed on a face at (x, y), `w` × `h`: the bays as carrier cells (a run) or one outline each, and the rest as rectangles. */
+const frontZones = (id: 'r730' | 'r430', x: number, y: number, w: number, h: number, only?: string[]): { cells: string; boxes: string } => {
   let c = '', b = '';
   for (const z of device(id).panels?.front?.zones ?? []) {
     const [zx, zy, zw, zh] = [x + z.x0 * w, y + z.y0 * h, (z.x1 - z.x0) * w, (z.y1 - z.y0) * h];
-    if (z.kind === 'bay' && z.cells) c += cells(zx, zy, zw, zh, z.cells);
+    if (z.kind === 'bay') c += z.cells ? cells(zx, zy, zw, zh, z.cells) : rr(zx, zy, zw, zh);
     else if (only?.includes(z.id)) b += rr(zx, zy, zw, zh);
   }
   return { cells: c, boxes: b };
@@ -57,7 +58,8 @@ if (kind === 'cabinet') {
     thin += rr(x - 8, 0, 16, Y(cut)) + rr(x - 8, Y(resume), 16, H - Y(resume));
     thin += `M${r1(x - 14)} ${r1(brk)}h8l3 -6l4 12l3 -6h8`;
   }
-  for (const id of ['top-shelf', 'rpi-4b', 'ont', 'poe-injector', 'unas-pro-8', 'udm-pro', 'r730'] as const) {
+  // (the PoE injector is tucked behind the thin client: at this size it's left out)
+  for (const id of ['top-shelf', 'mini', 't540', 'rpi-4b', 'ont', 'unas-pro-8', 'udm-pro', 'r430', 'r730'] as const) {
     const s = slotOf$(id);
     if (id === 'top-shelf') {
       // the tray, and the two brackets
@@ -69,12 +71,10 @@ if (kind === 'cabinet') {
     const x = s.plate ? s.plate.x : s.faceX;
     const w = s.plate ? s.plate.w : s.faceW;
     obj += rr(x, t, w, s.faceH);
-    if (id === 'r730') med += frontZones(id, x, t, w, s.faceH).cells;
+    if (id === 'r730' || id === 'r430') med += frontZones(id, x, t, w, s.faceH).cells;
     if (id === 'unas-pro-8') med += cells(x + 5, t + 10, w - 10, s.faceH * 0.34, 4) + cells(x + 5, t + s.faceH * 0.54, w - 10, s.faceH * 0.34, 4);
     if (id === 'udm-pro') med += rr(x + 6, t + 10, 20, 24) + rr(x + 186, t + 8, 107, 29) + cells(x + 308, t + 9, 64, 26, 4) + rr(x + 386, t + 20, 20, 15);
-    if (id === 'rpi-4b') med += rr(x + 4, t + 6, 14, s.faceH - 8) + rr(x + 42, t + 6, 16, s.faceH - 8);
-    if (id === 'ont') med += `M${r1(x + w * 0.42)} ${r1(t + 5)}h${r1(w * 0.26)}` + cells(x + 8, t + 14, w - 16, s.faceH - 20, 10);
-    if (id === 'poe-injector') med += rr(x + 8, t + 11, 20, 16) + rr(x + 32, t + 11, 20, 16);
+    if (id === 'ont') med += `M${r1(x + w * 0.42)} ${r1(t + 5)}h${r1(w * 0.26)}`;
   }
   // the ears of the two bracketed boxes
   for (const id of ['unas-pro-8', 'udm-pro'] as const) {
@@ -82,16 +82,28 @@ if (kind === 'cabinet') {
     const t = Y(s.y0 + s.hU - 0.4);
     thin += rr(0, t, s.faceX, s.hU - 0.8) + rr(482.6 - s.faceX, t, s.faceX, s.hU - 0.8);
   }
-} else if (kind === 'server') {
-  const s = slotOf$('r730');
-  const w = s.plate?.w ?? 482.4, h = s.faceH;
-  const zs = device('r730').panels!.front!.zones;
-  const earL = zs.find((z) => z.id === 'ear-l')!.x1 * w, earR = zs.find((z) => z.id === 'ear-r')!.x0 * w;
-  const fz = frontZones('r730', 0, 0, w, h, ['power', 'sysid', 'vga', 'lcd', 'usb-1', 'usb-2', 'optical']);
-  vb = `-6 -6 ${r1(w + 12)} ${r1(h + 12)}`;
-  obj = rr(0, 0, w, h) + `M${r1(earL)} 0v${r1(h)}M${r1(earR)} 0v${r1(h)}`;
-  med = fz.cells;
-  thin = fz.boxes;
+} else if (kind === 'servers') {
+  const GAP = 16;
+  let y = 0, w = 0;
+  for (const id of ['r730', 'r430'] as const) {
+    const s = slotOf$(id);
+    const h = s.faceH;
+    w = s.faceW;
+    const zs = device(id).panels!.front!.zones;
+    const earL = zs.find((z) => z.id === 'ear-l')!.x1 * w, earR = zs.find((z) => z.id === 'ear-r')!.x0 * w;
+    // the R730 keeps its control cluster; the R430's is too fine for this size
+    const fz = frontZones(id, 0, y, w, h, id === 'r730' ? ['power', 'sysid', 'vga', 'lcd', 'usb-1', 'usb-2', 'optical'] : []);
+    obj += rr(0, y, w, h) + `M${r1(earL)} ${r1(y)}v${r1(h)}M${r1(earR)} ${r1(y)}v${r1(h)}`;
+    med += fz.cells;
+    thin += fz.boxes;
+    y += h + GAP;
+  }
+  // the two on the shelf, standing on one line
+  const mini = slotOf$('mini'), pi = slotOf$('rpi-4b');
+  const foot = y + mini.faceH, px = mini.faceW + 60;
+  obj += rr(0, y, mini.faceW, mini.faceH) + rr(px, foot - pi.faceH, pi.faceW, pi.faceH);
+  med += rr(px + 4, foot - pi.faceH + 6, 14, pi.faceH - 8) + rr(px + 42, foot - pi.faceH + 6, 16, pi.faceH - 8);
+  vb = `-6 -6 ${r1(w + 12)} ${r1(foot + 12)}`;
 } else if (kind === 'stack') {
   // Storeys bottom up (layer 1 at the bottom), a box per item (an empty planned slot is one
   // dashed box), in up to two rows; a bracket on the left of each storey and the ground under it.

@@ -25,7 +25,6 @@ const featuredNames = new Intl.ListFormat('en', { type: 'conjunction' }).format(
   <!-- ============ HERO ============ -->
   <section id="top" class="phero" aria-labelledby="page-title">
     <div class="wrap">
-      <p class="eyebrow phero__eyebrow" data-reveal>Projects</p>
       <h1 class="display" id="page-title" data-reveal style="--d:1">Things I've <em>built</em>.</h1>
       <p class="lede phero__lede" data-reveal style="--d:2">What I'm shipping now, the open-source tools I lean on, and some old PowerShell.</p>
 
@@ -37,10 +36,9 @@ const featuredNames = new Intl.ListFormat('en', { type: 'conjunction' }).format(
     </div>
   </section>
 
-  <!-- ============ 01 · FEATURED ============ -->
+  <!-- ============ FEATURED ============ -->
   <section id="featured" class="section" aria-label="Featured">
     <div class="wrap">
-      <SectionHead index={1} label="Featured" bare />
       {featuredProjects.map((project, i) => (
         <article class="feat" aria-labelledby={`feat-${i}`}>
           <div class="feat__body">
@@ -68,10 +66,10 @@ const featuredNames = new Intl.ListFormat('en', { type: 'conjunction' }).format(
     </div>
   </section>
 
-  <!-- ============ 02 · OPEN SOURCE ============ -->
+  <!-- ============ OPEN SOURCE ============ -->
   <section id="open-source" class="section" aria-labelledby="oss-title">
     <div class="wrap">
-      <SectionHead index={2} label="Open source" aside={featuredReposNote(repos)} titleId="oss-title" title="Open <em>source</em>." lede="Built for my own work, left out in the open." />
+      <SectionHead aside={featuredReposNote(repos)} titleId="oss-title" title="Open <em>source</em>." lede="Built for my own work, left out in the open." />
       <div class="grid grid--2">
         {repos.map((repo) => <RepoCard repo={repo} />)}
       </div>
@@ -81,10 +79,10 @@ const featuredNames = new Intl.ListFormat('en', { type: 'conjunction' }).format(
     </div>
   </section>
 
-  <!-- ============ 03 · EARLIER WORK ============ -->
+  <!-- ============ EARLIER WORK ============ -->
   <section id="earlier" class="section" aria-labelledby="earlier-title">
     <div class="wrap">
-      <SectionHead index={3} label="Earlier work" titleId="earlier-title" title="Where it <em>started</em>." lede="PowerShell, mostly." />
+      <SectionHead titleId="earlier-title" title="Where it <em>started</em>." lede="PowerShell, mostly." />
       <div class="post-list">
         {earlierWork.map((item, i) => (
           <article class="post-row" data-reveal style={`--d:${i}`}>
@@ -117,8 +115,6 @@ const featuredNames = new Intl.ListFormat('en', { type: 'conjunction' }).format(
 <style is:global>
   /* Global under the .pg-projects root (no data-astro-cid attributes). Hero matches /lab/'s .lhero. */
   .pg-projects .phero { padding-block: clamp(40px, 7vw, 104px) clamp(56px, 7vw, 96px); }
-  .pg-projects .phero__eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-  .pg-projects .phero__eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--gold-line); }
   .pg-projects .phero .display { max-width: 12ch; }
   .pg-projects .phero__lede { margin-top: 28px; }
   .pg-projects .phero__stats { margin-top: clamp(48px, 6vw, 80px); }

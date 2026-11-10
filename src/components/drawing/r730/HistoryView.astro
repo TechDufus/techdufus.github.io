@@ -1,9 +1,11 @@
 ---
 /*
-  HistoryView: Sheet 02's R720xd → R730 tab. The R720xd's front, simplified (24 carriers; the six
-  drives that moved, in the bays they left), joined by an elbow line each to the bay they sit in on
-  the R730 (clickable, numbered, as on the other tabs), and the four Intel SSDs that are new to
-  the lab, in bays 0–3. The move table below is the owner's record of 2026-10-01 (it is not the
+  HistoryView: Sheet 02A's R720xd → R730 tab. The R720xd's front, simplified (24 carriers; the
+  drives that moved over and are still here, in the bays they left), joined by an elbow line each
+  to the bay they sit in on the R730 (clickable, numbered, as on the other tabs), and the four
+  Intel SSDs that are new to the lab, in bays 0–3. Two more 500 GB SSDs moved over too and have
+  since gone on to the R430: a note under the table says so. The move table below is the owner's
+  record of 2026-10-01 (it is not the
   frozen 2026-09-28 snapshot: that one still shows a Gigastone in bay 0); the R720xd's outline is
   the only thing read from the snapshot. Needs <R730Defs id={dwg} /> in the same SVG and
   <R730Cards /> on the page.
@@ -33,8 +35,6 @@ const MOVES: Move[] = [
   { to: 'gigastone', from: { bay: 1 }, was: 'rpool' },
   { to: 'st300mp0004', from: { bay: 24, rear: true }, was: 'rpool' },
   { to: 'mx500-1tb', from: { bay: 4 }, was: 'bulk' },
-  { to: 'mx500-500-1', from: { bay: 2 }, was: 'fast' },
-  { to: 'mx500-500-2', from: { bay: 3 }, was: 'fast' },
 ];
 const drive = (id: DriveId) => frontDrives.find((d) => d.id === id)!;
 const fresh = frontDrives.filter((d) => !MOVES.some((m) => m.to === d.id));
@@ -59,7 +59,7 @@ const newTop = NEW_Y + S * BAY_Y0;
 const newBottom = NEW_Y + S * (BAY_Y0 + BAY_H);
 
 // elbow levels: shallow → deep, so the lines cross as little as the order allows
-const LEVEL: Record<string, number> = { 'st300mp0004': 342, 'mx500-1tb': 355, 'mx500-500-2': 368, 'mx500-500-1': 381, 'gigastone': 394, 'p210': 407 };
+const LEVEL: Record<string, number> = { 'st300mp0004': 342, 'mx500-1tb': 355, 'gigastone': 368, 'p210': 381 };
 const links = MOVES.map((m) => {
   const d = drive(m.to);
   const x1 = m.from.rear ? rearBay.x + rearBay.w / 2 : oldMid(m.from.bay);
@@ -83,6 +83,7 @@ const rows = MOVES.map((m) => {
   };
 });
 const COL = 858;
+const TY = 222; // the table's first row: clear of the sheet's revision block above it
 ---
 
 <View dwg={dwg} name="history" active={active} x={39} y={39} w={1182} h={813}>
@@ -133,9 +134,9 @@ const COL = 858;
 
   <!-- ================= the table ================= -->
   <g>
-    <text class="txt-label" x={COL} y="176">MOVED OVER</text>
+    <text class="txt-label" x={COL} y={TY - 28}>MOVED OVER</text>
     {rows.map((r, i) => {
-      const y = 204 + i * 40;
+      const y = TY + i * 40;
       return (
         <g class={r.cls}>
           <text class="txt-label sv-row" x={COL} y={y}>{r.head}</text>
@@ -143,10 +144,11 @@ const COL = 858;
         </g>
       );
     })}
+    <text class="txt-note" x={COL} y={TY + rows.length * 40}>2 × MX500 500 GB · SINCE MOVED TO THE R430</text>
     <g class="sem-new">
-      <text class="txt-label" x={COL} y={204 + rows.length * 40 + 14}>NEW TO THE LAB</text>
+      <text class="txt-label" x={COL} y={TY + rows.length * 40 + 36}>NEW TO THE LAB</text>
       {fresh.map((d, i) => (
-        <text class="txt-note" x={COL} y={204 + rows.length * 40 + 34 + i * 14}>BAY {d.bay} · {driveShort(d)} · {upper(d.pool ?? 'no pool')}{spareKind(d) === 'hot' ? ', HOT SPARE' : ''}</text>
+        <text class="txt-note" x={COL} y={TY + rows.length * 40 + 56 + i * 14}>BAY {d.bay} · {driveShort(d)} · {upper(d.pool ?? 'no pool')}{spareKind(d) === 'hot' ? ', HOT SPARE' : ''}</text>
       ))}
     </g>
   </g>

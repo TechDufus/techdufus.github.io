@@ -1,7 +1,7 @@
 ---
 /*
   Sheet 01 · REAR tab: REAR ELEVATION at 1:5 as seen from behind, broken like the isometric
-  (U1–15, then U40–42), with the documented links and packets running along them. The gateway's
+  (U1–15, then the last three units), with the documented links and packets running along them. The gateway's
   ports, the Pi's and the injector's are on their front faces, so they're drawn hidden; the routes
   are schematic, up and down a cable way beside the rails (the photo's cables run down that side).
   Two links leave the sheet: the fiber to the ISP, and the injector's PoE run to the U7 Pro.
@@ -48,7 +48,7 @@ const brk = (R: Ortho, yb: number): string => {
 
 /* anchor points (paper) */
 const udm = slotOf$('udm-pro'), pi = slotOf$('rpi-4b'), ont = slotOf$('ont'), inj = slotOf$('poe-injector');
-const r7 = slotOf$('r730'), unas = slotOf$('unas-pro-8');
+const r7 = slotOf$('r730'), r4 = slotOf$('r430'), unas = slotOf$('unas-pro-8'), mini = slotOf$('mini');
 /** A front-face zone seen from behind (so hidden): its outline and centre. */
 const hidden = (sl: Slot, id: string, sub?: { i: number; of: number }): { rect: string; c: Pt } => {
   const z = sl.dev.panels!.front!.zones.find((q) => q.id === id)!;
@@ -64,6 +64,8 @@ const rearAt = (sl: Slot, id: string): Pt => {
 };
 const p2 = hidden(udm, 'lan-bottom', { i: 0, of: 4 });
 const p3 = hidden(udm, 'lan-top', { i: 1, of: 4 });
+const p6 = hidden(udm, 'lan-bottom', { i: 2, of: 4 });
+const p7 = hidden(udm, 'lan-top', { i: 3, of: 4 });
 const p9 = hidden(udm, 'wan-9');
 const p11 = hidden(udm, 'sfp-11');
 // the injector's feed: which gateway port isn't recorded, so it leaves the gateway's end, unlabelled
@@ -72,6 +74,10 @@ const piEth = hidden(pi, 'eth');
 const injLan = hidden(inj, 'lan');
 const injPoe = hidden(inj, 'poe');
 const nic1 = rearAt(r7, 'nic-1');
+const nic1b = rearAt(r4, 'nic-1');
+// the Mac mini's port isn't drawn: its run comes along under the shelf's tray and up into the middle of its back
+const miniIn: Pt = hi.pt(mirror(mini.body.x + mini.body.w / 2), mini.body.y + 8);
+const [, trayY] = hi.pt(0, mini.body.y - 6);
 const [s2, s3] = [rearAt(unas, 'sfp-2'), rearAt(unas, 'sfp-3')];
 const sfp: Pt = [(s2[0] + s3[0]) / 2, s2[1]];
 // the ONT's Ethernet is on its end facing the cable way (from behind, its left end)
@@ -83,26 +89,36 @@ const [wayX] = hi.pt(-10, 0);
 const lane = (i: number): number => wayX - i * 9;
 const route = (from: Pt, to: Pt, i: number): string => `M${from[0]} ${from[1]}H${lane(i)}V${to[1]}H${to[0]}`;
 const ISP_Y = 140, POE_Y = 168;
+// The two runs down to the servers take the inner lanes (the R430, nearer, innermost), so nothing
+// crosses. Ports 3 and 7 share a row: the R430's run leaves from the jack's lower edge. The runs
+// up take the next lanes in the order of how high they end, lowest innermost.
 const r = {
-  server: route(p3.c, nic1, 0),
-  nas: route(p11.c, sfp, 1),
-  pi: route(p2.c, piEth.c, 2),
-  ont: route(p9.c, ontEth, 3),
+  r430: route([p7.c[0], p7.c[1] + 1.3], nic1b, 0),
+  server: route(p3.c, nic1, 1),
+  nas: route(p11.c, sfp, 2),
+  mini: `M${p6.c[0]} ${p6.c[1]}H${lane(3)}V${trayY}H${miniIn[0]}V${miniIn[1]}`,
   inj: route(udmEnd, injLan.c, 4),
-  poe: `M${injPoe.c[0]} ${injPoe.c[1]}H${lane(5)}V${POE_Y}H${OFF.x + 100}V${OFF.y + OFF.h + 9}`,
-  isp: `M${ontEth[0]} ${ontEth[1] - 5}H${lane(6)}V${ISP_Y}`,
+  pi: route(p2.c, piEth.c, 5),
+  ont: route(p9.c, ontEth, 6),
+  poe: `M${injPoe.c[0]} ${injPoe.c[1]}H${lane(7)}V${POE_Y}H${OFF.x + 100}V${OFF.y + OFF.h + 9}`,
+  isp: `M${ontEth[0]} ${ontEth[1] - 5}H${lane(8)}V${ISP_Y}`,
 };
-const flag = `M${lane(6) - 26} ${ISP_Y}h52v-22l-26-13l-26 13Z`;
+const flag = `M${lane(8) - 26} ${ISP_Y}h52v-22l-26-13l-26 13Z`;
 const sp = (id: string): string => links.find((l) => l.id === id)?.speed ?? '';
 // link labels: a column of leaders left of the cable way, each from the middle of its lane
 const LX = 214;
 const label = (i: number, y0: number, y1: number, y: number, text: string[], cls?: string) => ({ from: [lane(i), (y0 + y1) / 2] as Pt, to: [LX, y] as Pt, text, cls });
+// outermost lane, topmost label: the leaders fan out without crossing
 const labels = [
-  label(2, p2.c[1], piEth.c[1], 300, ['PORT 2 → PI', sp('gw-pi')]),
-  label(3, p9.c[1], ontEth[1], 350, ['PORT 9 · WAN', `→ ONT · ${sp('gw-ont')}`]),
-  label(1, p11.c[1], sfp[1], 430, ['SFP+ PORT 11', `→ NAS · ${sp('gw-nas')}`], 'net-10g'),
-  label(0, p3.c[1], nic1[1], 560, ['PORT 3 → NIC 1', sp('gw-server')]),
+  label(6, p9.c[1], ontEth[1], 296, ['PORT 9 · WAN', `→ ONT · ${sp('gw-ont')}`]),
+  label(5, p2.c[1], piEth.c[1], 344, ['PORT 2 → PI', sp('gw-pi')]),
+  label(3, p6.c[1], trayY, 392, ['PORT 6 → MAC MINI', sp('gw-mini')]),
+  label(2, p11.c[1], sfp[1], 440, ['SFP+ PORT 11', `→ NAS · ${sp('gw-nas')}`], 'net-10g'),
+  label(0, p7.c[1], nic1b[1], 508, ['PORT 7 → R430', sp('gw-r430')]),
+  label(1, p3.c[1], nic1[1], 560, ['PORT 3 → R730', sp('gw-server')]),
 ];
+// from behind, a thing tucked at the back of a shelf is in front of its neighbours: it goes on last
+const rearOrder = [...slots].sort((a, b) => a.y0 - b.y0 || a.body.z - b.body.z);
 
 /* balloons: the top shelf and its things in a row above the rails, leaders straight down; the
    racked boxes in a column right of the rails; the bottom run left of them (the cable way stops
@@ -139,7 +155,7 @@ const balloons = slots
       <path class="ln-ctr" d={join(hi.poly([[241.3, cutHi - 10], [241.3, CAB.railTop + 16]]), lo.poly([[241.3, -16], [241.3, cutLo + 10]]))} style="--p:4" />
     </g>
     <g>
-      {slots.map((sl) => {
+      {rearOrder.map((sl) => {
         const R = of(sl);
         return (
           <Part id={sl.dev.id} label={sl.dev.short} p={2}>
@@ -149,19 +165,21 @@ const balloons = slots
         );
       })}
     </g>
-    <path class="ln-hid" d={join(p2.rect, p3.rect, p9.rect, p11.rect, piEth.rect, injLan.rect, injPoe.rect)} style="--p:4" />
+    <path class="ln-hid" d={join(p2.rect, p3.rect, p6.rect, p7.rect, p9.rect, p11.rect, piEth.rect, injLan.rect, injPoe.rect)} style="--p:4" />
 
     <g class="net-1g">
-      {[r.pi, r.server, r.ont, r.inj].map((d) => <path class="ln-net" d={d} pathLength="1" style="--p:3" />)}
-      <Particles d={r.pi} kind="net1" n={2} dur={3.4} guide={false} />
-      <Particles d={r.server} kind="net1" n={2} dur={3.8} guide={false} />
+      {[r.pi, r.server, r.r430, r.mini, r.ont, r.inj].map((d) => <path class="ln-net" d={d} pathLength="1" style="--p:3" />)}
+      <Particles d={r.pi} kind="net1" n={1} dur={3.4} guide={false} />
+      <Particles d={r.mini} kind="net1" n={1} dur={3.6} guide={false} />
+      <Particles d={r.server} kind="net1" n={1} dur={3.8} guide={false} />
+      <Particles d={r.r430} kind="net1" n={1} dur={3.2} guide={false} />
       <Particles d={r.ont} kind="net1" n={2} dur={3} guide={false} />
       <Particles d={r.inj} kind="net1" n={1} dur={3.6} guide={false} />
       <path class="ln-net" d={r.isp} pathLength="1" style="--p:3" />
       <Particles d={r.isp} kind="net1" n={1} dur={2.4} guide={false} />
       <path class="ln-med" d={flag} />
-      <text class="txt-label" x={lane(6)} y={ISP_Y - 9} text-anchor="middle">ISP</text>
-      <text class="txt-note" x={lane(6) + 34} y={ISP_Y - 9}>FIBER · OFF SHEET</text>
+      <text class="txt-label" x={lane(8)} y={ISP_Y - 9} text-anchor="middle">ISP</text>
+      <text class="txt-note" x={lane(8) + 34} y={ISP_Y - 9}>FIBER · OFF SHEET</text>
     </g>
     <g class="net-10g">
       <path class="ln-net" d={r.nas} pathLength="1" style="--p:3" />

@@ -79,11 +79,14 @@ export type ShelfId = 'top-shelf' | 'bottom-shelf';
 
 export type DeviceId =
   | ShelfId
+  | 'mini'
+  | 't540'
   | 'rpi-4b'
   | 'ont'
   | 'poe-injector'
   | 'unas-pro-8'
   | 'udm-pro'
+  | 'r430'
   | 'r730'
   | 'u7-pro'
   | 'spare-drive'
@@ -93,8 +96,12 @@ export type DeviceId =
 export type Placement =
   /** On the rails. */
   | { kind: 'rack'; u: URange }
-  /** Standing on a shelf; `x` is mm from the shelf's left edge to the item's left side, seen from the front. */
-  | { kind: 'shelf'; shelf: ShelfId; x: number }
+  /**
+   * Standing on a shelf; `x` is mm from the shelf's left edge to the item's left side, seen from the
+   * front. `atop`: it stands on that item instead of on the tray. `back`: mm further back than the
+   * rest (tucked behind its neighbours).
+   */
+  | { kind: 'shelf'; shelf: ShelfId; x: number; atop?: DeviceId; back?: number }
   /** Outside the cabinet, off the sheet. */
   | { kind: 'elsewhere'; where: string };
 
@@ -157,9 +164,11 @@ export type Cabinet = {
   numbering: 'top-down';
   /** Nominal outer size. */
   outer: Mm;
+  /** False when `outer.h` is drawn but not measured: the sheets then leave its dimension off. */
+  outerHeightMeasured: boolean;
   /** Front-to-rear rail distance, mm. */
   railSpan: number;
-  /** Floor to the bottom of the rails (the bottom of U42), mm. */
+  /** Floor to the bottom of the rails (the bottom of the last U), mm. */
   railFloorMm: number;
   front: Door;
   rear: RearPanel;
@@ -170,7 +179,7 @@ export type Cabinet = {
 export type USpan = { u: URange; device?: DeviceId };
 
 /* ---------------------------------------------------------------------------------------------
- * Sheet 02 · The server, as built
+ * Sheet 02A · The R730, as built
  * ------------------------------------------------------------------------------------------ */
 
 export type PoolId = 'rpool' | 'fast' | 'bulk';
@@ -183,9 +192,7 @@ export type DriveId =
   | 'p210'
   | 'gigastone'
   | 'st300mp0004'
-  | 'mx500-1tb'
-  | 'mx500-500-1'
-  | 'mx500-500-2';
+  | 'mx500-1tb';
 
 export type Cpu = {
   socket: 'CPU1' | 'CPU2';
@@ -315,6 +322,8 @@ export type StackItem = {
   count?: number;
   /** For VMs: the size of each one. */
   vm?: VmSize;
+  /** For a VM that isn't on the R730: the host it runs on. */
+  on?: 'r430';
   card: Card;
 };
 

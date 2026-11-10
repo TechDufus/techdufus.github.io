@@ -33,10 +33,6 @@ const dotfilesHref = 'https://github.com/TechDufus/dotfiles';
   <article class="doc" aria-labelledby="doc-title">
     <header class="post-head">
       <div class="wrap post-grid">
-        <div class="col-rail post-head__rail" data-reveal>
-          <span class="sec-head__index">Docs · 01</span>
-          <span class="eyebrow">Reference</span>
-        </div>
         <div class="col-main">
           <nav class="crumbs meta" aria-label="Breadcrumb" data-reveal>
             <a href="/docs/"><span class="arrow" aria-hidden="true">→</span> All docs</a>
@@ -191,8 +187,6 @@ const dotfilesHref = 'https://github.com/TechDufus/dotfiles';
   .post-grid > .col-rail { grid-column: 1; min-width: 0; }
 
   .post-head { padding-block: clamp(40px, 6vw, 88px) clamp(40px, 5vw, 64px); }
-  .post-head__rail { display: grid; align-content: start; gap: 6px; padding-top: 14px; }
-  .post-head__rail .sec-head__index { font-size: var(--fs-xs); }
   .crumbs { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; color: var(--faint); }
   .crumbs a { color: var(--muted); transition: color var(--t-1) ease; }
   .crumbs a:hover { color: var(--ink); }
@@ -251,7 +245,6 @@ const dotfilesHref = 'https://github.com/TechDufus/dotfiles';
     .post-grid { grid-template-columns: minmax(0, 1fr); max-width: calc(720px + var(--gutter) * 2); }
     .post-grid > .col-main, .post-grid > .col-rail { grid-column: 1; }
     .post-body .col-rail { display: none; }
-    .post-head__rail { display: flex; align-items: center; gap: 12px; padding-top: 0; margin-bottom: 20px; }
     .crumbs { margin-bottom: 20px; }
     :global(html) { scroll-padding-top: calc(var(--nav-h) + 72px); }
 

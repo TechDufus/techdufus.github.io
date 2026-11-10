@@ -1,6 +1,6 @@
 ---
 /*
-  Sheet 01 · SIDE tab: SECTION A–A through the middle of the cabinet at 1:10, looking from the
+  Sheet 01 · SIDE tab: SECTION A–A through the middle of the cabinet at 1:8, looking from the
   left with the front to the left: every box's depth against the rails and the enclosure, and
   airflow only for the boxes that pull it front to back. PLAN B–B at 1:15 shows the door swing.
 */
@@ -17,9 +17,9 @@ interface Props {
 }
 const { dwg } = Astro.props;
 
-/* ---------- SECTION A–A, 1:10: model (z, y) → paper ---------- */
-const FLOOR_Y = 766;
-const S = ortho({ x: 156 - CAB.z0 * atScale(1, 10), y: FLOOR_Y + CAB.y0 * atScale(1, 10), scale: atScale(1, 10), flipY: true });
+/* ---------- SECTION A–A, 1:8: model (z, y) → paper ---------- */
+const FLOOR_Y = 676;
+const S = ortho({ x: 110 - CAB.z0 * atScale(1, 8), y: FLOOR_Y + CAB.y0 * atScale(1, 8), scale: atScale(1, 8), flipY: true });
 const skin = CAB.skin;
 const zDoorIn = CAB.z0 + skin, zRearIn = CAB.z1 - skin;
 // the cut: door, rear panel, roof and plinth are sectioned (hatched); the far side panel is behind
@@ -54,12 +54,13 @@ const flow = FRONT_TO_BACK.map((id) => {
   const sl = slotOf$(id);
   const my = sl.body.y + sl.body.h / 2;
   const back = sl.dev.id === 'r730' ? HANDLES_Z + 8 : sl.body.z + sl.body.d + 6;
-  return { cold: S.poly([[zDoorIn + 8, my], [sl.faceZ - 4, my]]), hot: S.poly([[back, my], [zRearIn - 8, my]]) };
+  // a 1U box moves less air: one particle each way
+  return { n: sl.hU > 50 ? 2 : 1, cold: S.poly([[zDoorIn + 8, my], [sl.faceZ - 4, my]]), hot: S.poly([[back, my], [zRearIn - 8, my]]) };
 });
 
 /* depth labels on the boxes wide enough to hold one; balloons in a column behind the cabinet */
 const tagged = ['r730', 'unas-pro-8'] as const;
-const BX = 512;
+const BX = 548;
 let lastY = -Infinity;
 const balloons = slots
   .map((sl) => ({ sl, to: (sl.dev.id === 'patch-cables' ? S.pt(sl.body.z + sl.body.d, sl.body.y + 10) : S.pt(sl.body.z + sl.body.d * (sl.on ? 0.3 + sl.body.x / 800 : 1) - 4, sl.body.y + sl.body.h * (sl.on ? 0.7 : 0.5))) as Pt }))
@@ -84,7 +85,7 @@ const swing = (() => {
 ---
 
 <View dwg={dwg} name="side" x={39} y={39} w={798} h={813}>
-  <View x={46} y={110} w={500} h={740} title="SECTION A–A" scale={S.scale} note="LOOKING FROM THE LEFT" labelAt={[302, 800]}>
+  <View x={46} y={110} w={500} h={740} title="SECTION A–A" scale={S.scale} note="LOOKING FROM THE LEFT" labelAt={[310, 736]}>
     <g style="--p:1">
       <path class="face" d={S.rect(CAB.z0, CAB.y0 + 40, CAB.d, CAB.h - 40)} />
       <path class="hatch" d={cut} />
@@ -118,8 +119,8 @@ const swing = (() => {
 
     {flow.map((f) => (
       <>
-        <Particles d={f.cold} kind="cold" n={2} dur={2.8} />
-        <Particles d={f.hot} kind="hot" n={2} dur={2.8} />
+        <Particles d={f.cold} kind="cold" n={f.n} dur={2.8} />
+        <Particles d={f.hot} kind="hot" n={f.n} dur={2.8} />
       </>
     ))}
 
@@ -128,7 +129,7 @@ const swing = (() => {
 
     <Dim a={S.pt(CAB.z0, CAB.y1)} b={S.pt(CAB.z1, CAB.y1)} offset={-44} mm={CAB.d} />
     <Dim a={S.pt(0, CAB.y1)} b={S.pt(CAB.railSpan, CAB.y1)} offset={-14} mm={CAB.railSpan} sub="RAIL SPAN" ext="none" />
-    <Dim a={S.pt(CAB.z0, CAB.y0)} b={S.pt(CAB.z0, CAB.y1)} offset={-30} mm={CAB.h} />
+    {CAB.hMeasured && <Dim a={S.pt(CAB.z0, CAB.y0)} b={S.pt(CAB.z0, CAB.y1)} offset={-30} mm={CAB.h} />}
     <Dim a={S.pt(-32, r7.body.y)} b={S.pt(HANDLES_Z, r7.body.y)} offset={30} mm={HANDLES_Z + 32} sub="R730, BEZEL TO HANDLES" />
 
     {balloons.map(({ sl, to, y }) => <Balloon at={[BX, y]} n={sl.n} to={to} end="dot" part={sl.dev.id} />)}

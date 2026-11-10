@@ -1,7 +1,8 @@
 ---
 /*
-  /lab/: the lab is the drawings. The hero's numbers come from src/data/lab/ (the same data the
-  sheets draw); the words around them, the changelog and the desk from labSpec (src/data/site.ts).
+  /lab/: the lab is the drawings. The hero's numbers are the whole lab's, added up from
+  src/data/lab/ (the same data the sheets draw: `totals` in servers.ts, the Talos nodes, the
+  cabinet); the words around them, the changelog and the desk from labSpec (src/data/site.ts).
     01 the cabinet   Sheet 01's excerpt (CabinetExcerpt: drawing + devices by role)
     02 the stack     Sheet 03's excerpt (StackExcerpt)
     03 drawn to spec the three sheets and the posts that use them
@@ -14,10 +15,11 @@ import CabinetExcerpt from '../components/drawing/rack/CabinetExcerpt.astro';
 import StackExcerpt from '../components/drawing/stack/StackExcerpt.astro';
 import SheetThumb from '../components/drawing/rack/SheetThumb.astro';
 import Stat from '../components/ui/Stat.astro';
+import SectionHead from '../components/ui/SectionHead.astro';
 import { fmtDate, linkProps } from '../components/ui/format';
 import { labSpec, siteMetadata } from '../data/site';
 import { cabinet, derived as rack } from '../data/lab/rack';
-import { server } from '../data/lab/server';
+import { totals } from '../data/lab/servers';
 import { stackItems } from '../data/lab/stack';
 import { getPostMetas } from '../lib/content';
 import { getFeaturedRepos } from '../lib/github';
@@ -28,8 +30,9 @@ const dotfilesHref = repos.find((repo) => repo.name === 'dotfiles')?.url ?? 'htt
 const ws = labSpec.workstation;
 const { drawings } = labSpec;
 
-/* ---------- Hero: counted from the drawings' data ---------- */
+/* ---------- Hero: the whole lab, added up from the drawings' data ---------- */
 const talos = stackItems().find((item) => item.id === 'talos-nodes');
+const machineCount = ['no', 'one', 'two', 'three', 'four', 'five', 'six'][totals.machines] ?? String(totals.machines);
 const sheetOf = (thumb: string) => drawings.sheets.find((s) => s.thumb === thumb);
 const cabSheet = sheetOf('cabinet');
 const stackSheet = sheetOf('stack');
@@ -57,7 +60,7 @@ const [photoLead, photoRest] = (photo.caption ?? '').split(' · ');
 
 <BaseLayout
   title="The lab"
-  description={`The homelab as engineering drawings: the cabinet, the R730 and the stack on top of it (Proxmox, Talos Kubernetes, Flux), plus a terminal-first desk. Last revised ${labSpec.lastRevised}.`}
+  description={`The homelab as engineering drawings: the cabinet, the servers and the stack on top of them (Proxmox, Talos Kubernetes, Flux), plus a terminal-first desk. Last revised ${labSpec.lastRevised}.`}
   ogImage={siteMetadata.media.labSocialImage}
   ogImageAlt={siteMetadata.media.labSocialImageAlt}
 >
@@ -65,7 +68,6 @@ const [photoLead, photoRest] = (photo.caption ?? '').split(' · ');
   <!-- ============ HERO ============ -->
   <section id="top" class="lhero" aria-labelledby="lab-title">
     <div class="wrap">
-      <p class="eyebrow lhero__eyebrow" data-reveal>Homelab + workstation</p>
       <h1 class="display" id="lab-title" data-reveal style="--d:1" set:html={labSpec.headline} />
       <p class="lede lhero__lede" data-reveal style="--d:2">{labSpec.lede}</p>
       <p class="lhero__note" data-reveal style="--d:3">
@@ -73,59 +75,50 @@ const [photoLead, photoRest] = (photo.caption ?? '').split(' · ');
       </p>
 
       <dl class="stats lhero__stats" data-reveal style="--d:3">
-        <Stat value={server.threads} term="Threads" label="threads, two Xeons, one R730" />
-        <Stat value={server.memory.gb} accent="GB" term="Memory" label="of RAM in the same box" />
-        <Stat value={server.pools.length} term="ZFS pools" label={`ZFS pools: ${server.pools.map((p) => p.id).join(', ')}`} />
+        <Stat value={totals.cores} term="Cores" label={`cores, ${totals.threads} threads, in ${machineCount} machines`} />
+        <Stat value={totals.memoryGB} accent="GB" term="Memory" label="of RAM between them" />
+        <Stat value={Math.round(totals.storageGB / 1000)} accent="TB" term="Storage" label="of raw disk, the NAS included" />
         {talos?.count && <Stat value={talos.count} term="Cluster" label={`Talos ${talos.version} nodes on Proxmox`} />}
         <Stat value={rack.uUsed} accent="U" term="Cabinet" label={`of ${cabinet.heightU}U in the cabinet`} />
       </dl>
     </div>
   </section>
 
-  <!-- ============ 01 · THE CABINET ============ -->
+  <!-- ============ THE CABINET ============ -->
   <section id="cabinet" class="section" aria-labelledby="cab-title">
     <div class="wrap">
-      <div class="sec-head sec-head--split">
-        <div class="sec-head__bar" data-reveal>
-          <span class="sec-head__index">01</span>
-          <span class="eyebrow">Hardware</span>
-          {cabSheet && <span class="sec-head__aside"><span class="meta">{cabSheet.no} · {cabSheet.state}</span></span>}
-        </div>
-        <h2 class="h2 sec-head__title" id="cab-title" data-reveal>The <em>cabinet</em>.</h2>
-        <p class="lede" data-reveal style="--d:1">{rack.uUsed}U of {cabinet.heightU}U in use. The rest is air, for now.</p>
-      </div>
-      <CabinetExcerpt id="lab-cab" />
+      <SectionHead
+        titleId="cab-title"
+        title="The <em>cabinet</em>."
+        lede={`${rack.uUsed}U of ${cabinet.heightU}U in use. The rest is air, for now.`}
+        aside={cabSheet ? `${cabSheet.no} · ${cabSheet.state}` : undefined}
+      />
+      <CabinetExcerpt id="cab" />
     </div>
   </section>
 
-  <!-- ============ 02 · THE STACK ============ -->
+  <!-- ============ THE STACK ============ -->
   <section id="stack" class="section" aria-labelledby="stack-title">
     <div class="wrap">
-      <div class="sec-head sec-head--split">
-        <div class="sec-head__bar" data-reveal>
-          <span class="sec-head__index">02</span>
-          <span class="eyebrow">Software</span>
-          {stackSheet && <span class="sec-head__aside"><span class="meta">{stackSheet.no} · {stackSheet.state}</span></span>}
-        </div>
-        <h2 class="h2 sec-head__title" id="stack-title" data-reveal>The <em>stack</em>.</h2>
-        <p class="lede" data-reveal style="--d:1">Metal at the bottom, Kubernetes on top. The top floor is still going up.</p>
-      </div>
-      <div class="lstack"><StackExcerpt id="lab-stack" /></div>
+      <SectionHead
+        titleId="stack-title"
+        title="The <em>stack</em>."
+        lede="Metal at the bottom, Kubernetes on top. The top floor is finished, for now."
+        aside={stackSheet ? `${stackSheet.no} · ${stackSheet.state}` : undefined}
+      />
+      <div class="lstack"><StackExcerpt /></div>
     </div>
   </section>
 
-  <!-- ============ 03 · DRAWN TO SPEC ============ -->
+  <!-- ============ DRAWN TO SPEC ============ -->
   <section id="drawings" class="section" aria-labelledby="dts-title">
     <div class="wrap">
-      <div class="sec-head sec-head--split">
-        <div class="sec-head__bar" data-reveal>
-          <span class="sec-head__index">03</span>
-          <span class="eyebrow">Drawn to spec</span>
-          <span class="sec-head__aside"><span class="meta">{count(drawings.sheets.length, 'sheet')} · {count(posts.length, 'post')}</span></span>
-        </div>
-        <h2 class="h2 sec-head__title" id="dts-title" data-reveal>Drawn to <em>spec</em>.</h2>
-        <p class="lede" data-reveal style="--d:1">{drawings.lede}</p>
-      </div>
+      <SectionHead
+        titleId="dts-title"
+        title="Drawn to <em>spec</em>."
+        lede={drawings.lede}
+        aside={`${count(drawings.sheets.length, 'sheet')} · ${count(posts.length, 'post')}`}
+      />
       <ul class="dts" role="list" data-reveal style="--d:1">
         {drawings.sheets.map((d) => (
           <li>
@@ -160,19 +153,13 @@ const [photoLead, photoRest] = (photo.caption ?? '').split(' · ');
     </div>
   </section>
 
-  <!-- ============ 04 · CHANGELOG ============ -->
+  <!-- ============ CHANGELOG ============ -->
   <section id="changelog" class="section" aria-labelledby="log-title">
     <div class="wrap">
-      <div class="sec-head">
-        <div class="sec-head__bar" data-reveal>
-          <span class="sec-head__index">04</span>
-          <span class="eyebrow">Changelog</span>
-          <span class="sec-head__aside"><span class="badge badge--live"><i class="dot" aria-hidden="true"></i>{labSpec.status}</span></span>
-        </div>
-      </div>
       <div class="log">
         <div class="log__intro" data-reveal>
           <h2 class="h2" id="log-title">Changelog.</h2>
+          <span class="badge badge--live"><i class="dot" aria-hidden="true"></i>{labSpec.status}</span>
         </div>
         <ol class="timeline" data-reveal style="--d:1">
           {changelog.map((item) => (
@@ -199,17 +186,12 @@ const [photoLead, photoRest] = (photo.caption ?? '').split(' · ');
     </div>
   </section>
 
-  <!-- ============ 05 · DESK ============ -->
+  <!-- ============ DESK ============ -->
   <section id="workstation" class="section" aria-labelledby="ws-title">
     <div class="wrap">
-      <div class="sec-head sec-head--split">
-        <div class="sec-head__bar" data-reveal>
-          <span class="sec-head__index">05</span>
-          <span class="eyebrow">Workstation</span>
-          <span class="sec-head__aside"><a class="meta link link--quiet" {...linkProps(dotfilesHref)}>TechDufus/dotfiles ↗</a></span>
-        </div>
-        <h2 class="h2 sec-head__title" id="ws-title" data-reveal>The <em>desk</em>.</h2>
-      </div>
+      <SectionHead titleId="ws-title" title="The <em>desk</em>.">
+        <a slot="aside" class="meta link link--quiet" {...linkProps(dotfilesHref)}>TechDufus/dotfiles ↗</a>
+      </SectionHead>
 
       <div class="ws">
         <figure class="photo" data-reveal>

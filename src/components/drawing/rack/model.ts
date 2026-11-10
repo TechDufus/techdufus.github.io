@@ -36,6 +36,8 @@ const setBack = (outer.d - railSpan) / 2;
 export const CAB = {
   w: outer.w,
   h: outer.h,
+  /** whether the outer height is a measurement (the sheets dimension it only then) */
+  hMeasured: cabinet.outerHeightMeasured,
   d: outer.d,
   x0: -(outer.w - RACK_19_MM) / 2,
   x1: RACK_19_MM + (outer.w - RACK_19_MM) / 2,
@@ -57,8 +59,15 @@ export const CAB = {
 export const RAIL_W = 15.875;
 export const HOLES = [(RACK_19_MM - 465.1) / 2, (RACK_19_MM + 465.1) / 2];
 
-/** Devices that pull air front to back (both have fans behind front intakes); airflow is drawn for these only. */
-export const FRONT_TO_BACK: DeviceId[] = ['unas-pro-8', 'r730'];
+/** Devices that pull air front to back (all have fans behind front intakes); airflow is drawn for these only. */
+export const FRONT_TO_BACK: DeviceId[] = ['unas-pro-8', 'r430', 'r730'];
+
+/** Dell servers: the ears and drive carriers stand `proud` mm in front of the rack flange (Dell's
+ *  Za, without bezel) and the body sits behind, `gap` mm above the bottom of its slot. */
+const DELL: Partial<Record<DeviceId, { proud: number; gap: number }>> = {
+  r730: { proud: 18, gap: 0.8 },
+  r430: { proud: 20.1, gap: 0.8 },
+};
 
 /* ------------------------------------------------------------------ devices */
 
@@ -86,6 +95,10 @@ export type Slot = {
   lift?: number;
   /** the shelf a thing stands on */
   on?: DeviceId;
+  /** the thing on that shelf it stands on top of, if any */
+  atop?: DeviceId;
+  /** tucked behind its neighbours on the shelf */
+  back?: boolean;
 };
 
 /** Balloon numbers: the /lab list order (Compute, Network, Storage, Edge), then the shelves and spares. */
@@ -102,25 +115,30 @@ function slotOf(d: Device): Slot {
   const n = balloonOf(d.id);
   const b = d.body;
   if (d.placement.kind === 'shelf') {
-    const sh = slotOf(device(d.placement.shelf));
-    const y = sh.body.y + sh.body.h;
+    const p = d.placement;
+    const sh = slotOf(device(p.shelf));
+    // on the tray, or on top of another thing that is; `back` tucks it behind its neighbours
+    const base = p.atop ? slotOf(device(p.atop)).body : sh.body;
+    const y = base.y + base.h;
+    const z = ON_SHELF_Z + (p.back ?? 0);
     return {
-      dev: d, n, y0: y, hU: b.h, on: sh.dev.id,
-      body: { x: d.placement.x, y, z: ON_SHELF_Z, w: b.w, h: b.h, d: b.d },
-      faceZ: ON_SHELF_Z, faceTop: y + b.h, faceX: d.placement.x, faceW: b.w, faceH: b.h, travel: 0, lift: 40,
+      dev: d, n, y0: y, hU: b.h, on: sh.dev.id, atop: p.atop, back: !!p.back,
+      body: { x: p.x, y, z, w: b.w, h: b.h, d: b.d },
+      faceZ: z, faceTop: y + b.h, faceX: p.x, faceW: b.w, faceH: b.h, travel: 0, lift: 40,
     };
   }
   if (d.placement.kind !== 'rack') throw new Error(`rack model: ${d.id} is not in the cabinet`);
   const [y0, y1] = ySpan(d.placement.u);
   const hU = y1 - y0;
   const cx = (RACK_19_MM - b.w) / 2;
-  if (d.id === 'r730') {
-    // Ears + drive carriers stand 18 mm proud of the rack flange (Dell Za); the body sits behind.
+  const dell = DELL[d.id];
+  if (dell) {
+    const w = d.earsWidth ?? 482.4;
     return {
       dev: d, n, y0, hU,
-      body: { x: cx, y: y0 + 0.8, z: 0, w: b.w, h: b.h, d: b.d },
-      plate: { x: 0.1, w: d.earsWidth ?? 482.4, z: -18, t: 18, h: b.h },
-      faceZ: -18, faceTop: y0 + 0.8 + b.h, faceX: 0.1, faceW: d.earsWidth ?? 482.4, faceH: b.h, travel: 320,
+      body: { x: cx, y: y0 + dell.gap, z: 0, w: b.w, h: b.h, d: b.d },
+      plate: { x: 0.1, w, z: -dell.proud, t: dell.proud, h: b.h },
+      faceZ: -dell.proud, faceTop: y0 + dell.gap + b.h, faceX: 0.1, faceW: w, faceH: b.h, travel: 320,
     };
   }
   if (d.role === 'shelf') {
@@ -148,7 +166,11 @@ function slotOf(d: Device): Slot {
 export const slots: Slot[] = devices
   .filter((d) => d.placement.kind !== 'elsewhere')
   .map(slotOf)
-  .sort((a, b) => a.y0 - b.y0 || a.body.x - b.body.x);
+  .sort((a, b) => a.y0 - b.y0 || b.body.z - a.body.z || a.body.x - b.body.x);
+/** Things with something standing on them: their tops are hidden, so a balloon points at their front instead. */
+export const covered = new Set(slots.map((s) => s.atop).filter((id): id is DeviceId => !!id));
+/** Where a balloon's leader meets a shelf thing's face, across its width: the middle, or the end that shows when it's tucked behind. */
+export const showsAt = (s: Slot): number => s.faceX + s.faceW * (s.back ? 0.9 : 0.5);
 export const slotOf$ = (id: DeviceId): Slot => {
   const s = slots.find((x) => x.dev.id === id);
   if (!s) throw new Error(`rack model: ${id} is not in the cabinet`);
@@ -217,7 +239,8 @@ function coilSide(x: number, w: number, h: number): string {
 }
 
 /** Draw zones laid out as fractions of a face `w` × `h` placed at (ox, 0) in the frame. `lite` drops
- *  the finest texture (carrier detail, perforations, vent lines; frontPanel: ear slots) for small, byte-tight drawings. */
+ *  the finest texture (carrier detail, perforations, vent lines, buttons, lights and labels;
+ *  frontPanel: ear slots) for small, byte-tight drawings. */
 function zonesPanel(d: Device, face: 'front' | 'rear', ox: number, w: number, h: number, lite = false): Panel {
   const obj: string[] = [], med: string[] = [], thin: string[] = [];
   for (const z of d.panels?.[face]?.zones ?? []) {
@@ -248,13 +271,14 @@ function drawZone(id: string, z: PanelZone, x: number, y: number, w: number, h: 
     return;
   }
   if (key === 'ont:leds') {
-    // the row of status lights along the top
-    for (let i = 0; i < 5; i++) thin.push(ci(x + (w * (i + 0.5)) / 5, y + h / 2, 1.2));
+    // the row of status lights along the top (lite: one stroke)
+    if (lite) thin.push(`M${r1(x)} ${r1(y + h / 2)}h${r1(w)}`);
+    else for (let i = 0; i < 5; i++) thin.push(ci(x + (w * (i + 0.5)) / 5, y + h / 2, 1.2));
     return;
   }
   if (key === 'ont:vents') {
     // staggered rows of short slots, as in the photo
-    const rows = lite ? 3 : 6, cols = lite ? 10 : 14, sw = w / cols;
+    const rows = lite ? 2 : 6, cols = lite ? 8 : 14, sw = w / cols;
     for (let j = 0; j < rows; j++) {
       const off = j % 2 ? sw / 2 : 0;
       const n = j % 2 ? cols - 1 : cols;
@@ -308,12 +332,13 @@ function drawZone(id: string, z: PanelZone, x: number, y: number, w: number, h: 
       med.push(rr(x, y, w, h));
       for (let k = 1; k < 6; k++) thin.push(`M${r1(x + (w * k) / 6)} ${r1(y + h * 0.25)}v${r1(h * 0.5)}`);
       return;
+    // buttons, lights and labels are a few px across: the lite panels leave them out
     case 'button':
-      thin.push(ci(x + w / 2, y + h / 2, Math.max(w, h) / 2));
+      if (!lite) thin.push(ci(x + w / 2, y + h / 2, Math.max(w, h) / 2));
       return;
     case 'led':
     case 'label':
-      thin.push(rr(x, y, w, h));
+      if (!lite) thin.push(rr(x, y, w, h));
       return;
     case 'ear':
       med.push(rr(x, y, w, h));
@@ -340,6 +365,7 @@ export function frontPanel(s: Slot, lite = false): Panel {
   const d = s.dev;
   const units = Math.round(s.hU / U_MM);
   switch (d.id) {
+    case 'r430':
     case 'r730': {
       const p = zonesPanel(d, 'front', s.faceX, s.faceW, s.faceH, lite);
       return { ...p, obj: rr(s.faceX, 0, s.faceW, s.faceH) + p.obj };
@@ -357,6 +383,8 @@ export function frontPanel(s: Slot, lite = false): Panel {
     }
     case 'patch-cables':
       return { obj: '', med: coilSide(s.faceX, s.faceW, s.faceH), thin: '' };
+    case 'mini':
+    case 't540':
     case 'rpi-4b':
     case 'ont':
     case 'poe-injector': {

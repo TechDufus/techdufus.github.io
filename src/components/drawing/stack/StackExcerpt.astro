@@ -1,22 +1,23 @@
 ---
 /*
   StackExcerpt: Sheet 03 in small, for the /lab page. The three layers as storeys of a section,
-  bottom up, each thing a numbered chip (same numbers and cards as the full sheet), what builds
+  bottom up, each thing a numbered chip (same numbers and cards as the full sheet; the number is
+  lettered inside the chip, not a balloon, which keeps /lab inside its HTML budget), what builds
   the layer lettered beside it, planned things dashed. A link to the full sheet sits under it.
   Everything comes from src/data/lab/stack.ts through ./model.ts; it's a kit Figure, so it lays
   itself out twice (680 wide, 360 on a phone) and works on its own on any page.
 
   <StackExcerpt />
-  <StackExcerpt id="lab-stack" caption="What runs on the metal. Dashed is next." />
+  <StackExcerpt id="lab-stack" caption="What runs on the metal." />
 
     id       unique on the page (default "sx"); prefixes the part ids, so it never clashes
              with the full sheet or another excerpt
-    caption  the line under it (default "Solid is running. Dashed is next.")
+    caption  the line under it (default "Solid is running. Dashed is next."; just "Solid is running."
+             when nothing is planned)
     href     the full sheet (default "/lab/stack/")
 */
 import Figure from '../figure/Figure.astro';
 import Part from '../Part.astro';
-import Balloon from '../Balloon.astro';
 import PartCard from '../PartCard.astro';
 import { at, f, rc, type P } from '../../../lib/drawing/figure';
 import { allThings, kindOf, planned, tagOf, toolText, type Thing } from './model';
@@ -27,7 +28,8 @@ interface Props {
   caption?: string;
   href?: string;
 }
-const { id = 'sx', caption = 'Solid is running. Dashed is next.', href = '/lab/stack/' } = Astro.props;
+const anyPlanned = allThings().some(planned);
+const { id = 'sx', caption = anyPlanned ? 'Solid is running. Dashed is next.' : 'Solid is running.', href = '/lab/stack/' } = Astro.props;
 
 const W = 680, NW = 360;
 const CH = 26, GX = 12, GY = 16, SLAB = 5, CHAR = 6.95;
@@ -57,7 +59,7 @@ const NAX = 18, NAW = NW - 2 * NAX;
 let y = 14, ny = 12;
 const floors = [...stack].reverse().map((l) => {
   const things = allThings().filter((t) => t.layer === l);
-  const chips = things.map((t) => ({ t, text: label(t).toUpperCase(), w: Math.min(AW, Math.round(label(t).length * CHAR + 22)) }));
+  const chips = things.map((t) => ({ t, text: label(t).toUpperCase(), w: Math.min(AW, Math.round((label(t).length + String(t.n).length + 1) * CHAR + 22)) }));
   const wf = flow(chips.map((c) => c.w), AW);
   const nf = flow(chips.map((c) => c.w), NAW);
   const h = Math.max(70, 18 + wf.h + 16);
@@ -113,9 +115,8 @@ const pid = (t: Thing) => `${id}-${t.id}`;
             <g {...at(c.wp, c.np, planned(c.t) ? 'fg-planned' : '')}>
               <Part id={pid(c.t)} label={tagOf(c.t)}>
                 <path class:list={['face', planned(c.t) ? 'ln-phantom' : 'ln-obj']} d={rc(0, 0, c.w, CH)} />
-                <text class="stx-chip" x="10" y="17">{c.text}</text>
+                <text class="stx-chip" x="10" y="17"><tspan class="stx-no">{c.t.n}</tspan>{' '}{c.text}</text>
               </Part>
-              <Balloon at={[c.w, 0]} n={c.t.n} part={pid(c.t)} r={8} />
             </g>
           ))}
         </g>
@@ -133,6 +134,7 @@ const pid = (t: Thing) => `${id}-${t.id}`;
   .stx .fg-planned .stx-chip { fill: var(--muted); }
   .stx .fg-planned .ln-phantom { stroke-dasharray: 5 3; opacity: .75; }
   .stx .part.is-lit .stx-chip, .stx .part:focus-visible .stx-chip, .stx .part[aria-pressed="true"] .stx-chip { fill: var(--gold-pale); }
+  .stx .stx-no { fill: var(--gold); font-weight: 500; }
   .stx .stx-idx { font: 500 15px var(--font-mono); letter-spacing: .04em; fill: var(--gold); }
   .stx .fg-n .stx-idx { font-size: 12px; }
   .stx .stx-earth { fill: var(--dwg-hatch-x); opacity: .5; }

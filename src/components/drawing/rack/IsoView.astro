@@ -1,6 +1,6 @@
 ---
 /*
-  Sheet 01 · ISOMETRIC tab: a key plan of the whole 42U cabinet (1:25, door open, right side
+  Sheet 01 · ISOMETRIC tab: a key plan of the whole cabinet (1:25, door open, right side
   panel ghosted) and DETAIL A, the boxes at 1:7 as a broken view (./IsoStack.astro): the top of
   the cabinet, U1 to U15, and the bottom shelf, with the empty units between broken out.
 */
@@ -11,7 +11,7 @@ import URuler from '../URuler.astro';
 import IsoStack from './IsoStack.astro';
 import { atScale, isometric, join } from '../../../lib/drawing/projection';
 import { CAB, HOLES, RAIL_W, slotOf$, slots, yBot, zoneCentre } from './model';
-import { isoStack } from './iso';
+import { BREAK, isoStack } from './iso';
 import { OFF_SHEET as OFF } from './dwg';
 
 interface Props {
@@ -21,8 +21,8 @@ interface Props {
 const { dwg, active = false } = Astro.props;
 const f = (v: number): string => String(Math.round(v * 100) / 100);
 
-/* ---------- key plan, 1:30 ---------- */
-const K = isometric({ x: 112, y: 334, scale: atScale(1, 30) });
+/* ---------- key plan, 1:25 ---------- */
+const K = isometric({ x: 118, y: 326, scale: atScale(1, 25) });
 const kc = K.box({ x: CAB.x0, y: CAB.y0, z: CAB.z0, w: CAB.w, h: CAB.h, d: CAB.d });
 // Interior faces seen through the ghosted right side and the open door
 const kRear = K.poly([[CAB.x0, CAB.y0, CAB.z1], [CAB.x1, CAB.y0, CAB.z1], [CAB.x1, CAB.y1, CAB.z1], [CAB.x0, CAB.y1, CAB.z1]], true);
@@ -53,7 +53,7 @@ const kDev = {
 };
 // Detail A's boundary: around the top of the cabinet, where the boxes are
 const aC = K.pt(241.3, (yBot(14) + CAB.railTop) / 2, 300);
-const aR = 34;
+const aR = 42;
 
 /* ---------- DETAIL A, 1:7 ---------- */
 const k = atScale(1, 7);
@@ -68,7 +68,7 @@ const [bl, br] = [lo.pt(0, 0, -3), lo.pt(482.6, 0, -3)];
 /** The PoE run climbs from the injector's port to this height, then heads for the callout. */
 const POE_Y = 172;
 /** …clear of the injector's balloon, which sits right above it. */
-const POE_X = poe[0] + 26;
+const POE_X = poe[0] + 50;
 ---
 
 <View dwg={dwg} name="iso" active={active} x={39} y={39} w={798} h={813}>
@@ -104,10 +104,10 @@ const POE_X = poe[0] + 26;
   </View>
 
   <!-- ======== DETAIL A, 1:7 ======== -->
-  <View x={170} y={200} w={667} h={652} title="DETAIL A · THE BOXES" scale={k} note="U16–39 EMPTY · BROKEN OUT" labelAt={[704, 812]}>
+  <View x={170} y={200} w={667} h={652} title="DETAIL A · THE BOXES" scale={k} note={`U${BREAK.upper + 1}–${BREAK.lower - 1} EMPTY · BROKEN OUT`} labelAt={[704, 812]}>
     <IsoStack dwg={dwg} x={SX} y={SY} k={k} bx={236} by={[372, 770]} ty={236} />
 
-    <g transform={hi.faceMatrix('right', [482.6, CAB.railTop + 50, 0])}>
+    <g transform={hi.faceMatrix('right', [482.6, CAB.railTop + 185, 0])}>
       <Dim a={[0, 0]} b={[CAB.railSpan, 0]} offset={-6} mm={CAB.railSpan} sub="RAIL SPAN" k={k} ext="none" />
     </g>
     <Dim a={bl} b={br} offset={-34} mm={482.6} sub="[19.00]" dir="aligned" />

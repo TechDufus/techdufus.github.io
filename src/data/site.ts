@@ -218,7 +218,6 @@ export const business: {
 /** Section copy around the business data (mockup `index.html#services`, `app.html#pricing`/`#faq`). Only rendered when `business.enabled`. */
 export const businessCopy = {
   services: {
-    eyebrow: 'Services',
     title: 'The work I already do, <em>for your team</em>.',
     lede: `Paid services are launching under ${ph(businessCompanyName)}. These three slots are drafts: scope and pricing aren't final, so treat them as a conversation starter.`,
     stepsTitle: 'How engagements work',
@@ -685,16 +684,16 @@ type LabSpecRow = { k: string; v: string; href?: string; note?: string };
 type LabPhoto = { src: string; alt: string; width: number; height: number; caption?: string };
 
 /** A drawing card on /lab/: `thumb` picks the SheetThumb. */
-type LabDrawing = { no: string; title: string; href: string; note: string; thumb: 'cabinet' | 'server' | 'stack'; state: 'As built' | 'In progress' };
+type LabDrawing = { no: string; title: string; href: string; note: string; thumb: 'cabinet' | 'servers' | 'stack'; state: 'As built' | 'In progress' };
 
 /**
  * The /lab/ page copy. The hardware and the stack themselves live in src/data/lab/ (the drawings'
  * data); this is the words around them, the changelog and the desk.
  */
 export const labSpec: {
-  lastRevised: 'Oct 2026';
-  lastRevisedIso: '2026-10';
-  status: 'Rebuild in progress';
+  lastRevised: 'Nov 2026';
+  lastRevisedIso: '2026-11';
+  status: 'Rebuilt';
   headline: string;
   lede: string;
   setupHref: string;
@@ -715,38 +714,38 @@ export const labSpec: {
     photo: LabPhoto;
   };
 } = {
-  lastRevised: 'Oct 2026',
-  lastRevisedIso: '2026-10',
-  status: 'Rebuild in progress',
+  lastRevised: 'Nov 2026',
+  lastRevisedIso: '2026-11',
+  status: 'Rebuilt',
   headline: 'The <em>lab</em>.',
-  lede: 'What runs at home, drawn to spec. It’s mid-rebuild, so anything dashed is next.',
+  lede: 'What runs at home, drawn to spec. The rebuild is done, for now.',
   setupHref: '/docs/setup/',
   drawings: {
-    lede: 'The lab as engineering drawings, all generated from one set of data. Two are as built. The stack is still going up.',
+    lede: 'The lab as engineering drawings, all generated from one set of data. All three are as built.',
     sheets: [
       {
         no: 'TD-LAB-01',
         title: 'The cabinet',
         href: '/lab/rack/',
-        note: 'The 42U, top to bottom: a shelf of small stuff, the NAS, the gateway, the server, the spares.',
+        note: 'The 24U, top to bottom: a shelf of small stuff, the NAS, the gateway, the two servers, the spares.',
         thumb: 'cabinet',
         state: 'As built'
       },
       {
         no: 'TD-LAB-02',
-        title: 'The server',
-        href: '/lab/r730/',
-        note: 'The R730 inside and out: sixteen bays, ten drives, three pools.',
-        thumb: 'server',
+        title: 'The servers',
+        href: '/lab/servers/',
+        note: 'The four machines that do the work, at one scale, and what each one runs.',
+        thumb: 'servers',
         state: 'As built'
       },
       {
         no: 'TD-LAB-03',
         title: 'The stack',
         href: '/lab/stack/',
-        note: 'What runs on the metal, in three layers. A few dashed lines left.',
+        note: 'What runs on the metal, in three layers. Nothing dashed.',
         thumb: 'stack',
-        state: 'In progress'
+        state: 'As built'
       }
     ],
     posts: [
@@ -765,6 +764,48 @@ export const labSpec: {
     ]
   },
   changelog: [
+    {
+      date: '2026-11-09',
+      title: 'robomp',
+      href: '/lab/stack/',
+      note: 'The oh-my-pi bot is up. It triages issues on my personal projects and opens fix PRs, from a VM of its own on the new server.',
+      cta: 'See the stack'
+    },
+    {
+      date: '2026-11-08',
+      title: 'One Proxmox host → two',
+      href: '/lab/rack/',
+      note: 'A Dell R430 joined the R730 in one Proxmox cluster, and the Pi breaks ties between them. It took the R730’s two spare SSDs for its boot pool.',
+      cta: 'See the cabinet'
+    },
+    {
+      date: '2026-11-08',
+      title: 'Plex, Seerr, Radarr, Sonarr',
+      href: '/lab/stack/',
+      note: 'Movies and TV off the NAS, a place to ask for more, and two apps that go and fetch it.',
+      cta: 'See the stack'
+    },
+    {
+      date: '2026-10-30',
+      title: 'Dash',
+      href: '/lab/stack/',
+      note: 'My homelab mission control runs in the cluster now: one screen over Proxmox, Kubernetes and Flux.',
+      cta: 'See the stack'
+    },
+    {
+      date: '2026-10-21',
+      title: 'omp-cloud',
+      href: '/lab/stack/',
+      note: 'omp-cloud got a VM of its own, so its cloud agents have somewhere to live.',
+      cta: 'See the stack'
+    },
+    {
+      date: '2026-10-08',
+      title: 'NFS CSI',
+      href: '/lab/stack/',
+      note: 'The cluster can carve volumes out of the UNAS over NFS now. Big or shared files go there; everything else stays on fast.',
+      cta: 'See the stack'
+    },
     {
       date: '2026-10-03',
       title: 'CloudNativePG, RustFS',

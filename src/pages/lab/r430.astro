@@ -1,0 +1,80 @@
+---
+/*
+  /lab/r430/: Sheet 02B · The R430 (TD-LAB-02B), the Dell PowerEdge R430 that joined the R730 in
+  one Proxmox cluster on 2026-11-08. Every number comes from src/data/lab/r430.ts; the drawing is
+  src/components/drawing/r430/R430Sheet.astro. Below the sheet: the machine at a glance and its
+  pool (the text equivalent of the drives and the pool on the drawing). Sheet 02 · The servers
+  (/lab/servers/) shows it beside the other three machines and links here.
+*/
+import '../../styles/server-page.css';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteMetadata } from '../../data/site';
+import R430Sheet from '../../components/drawing/r430/R430Sheet.astro';
+import { r430, r430Derived, r430DriveAt } from '../../data/lab/r430';
+import { machines } from '../../data/lab/servers';
+
+const cpu = r430.cpus[0];
+const runs = machines.find((m) => m.id === 'r430')?.runs ?? [];
+const glance = [
+  { k: 'CPUs', v: `2 × ${cpu.model.replace('Intel Xeon ', '').replace('-', '\u2011').replace(' ', '\u00a0')}` },
+  { k: 'Threads', v: String(r430.threads) },
+  { k: 'Memory', v: `${r430.memory.gb} GB` },
+  { k: 'Storage', v: `${r430Derived.drives} drives in one ZFS pool` },
+  { k: 'Controller', v: `${r430.controller.name.replace('Dell ', '')}, ${r430.controller.mode}` },
+  ...(runs.length ? [{ k: 'Runs', v: runs.join(', ') }] : []),
+];
+const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
+const cap = (w: string) => w[0].toUpperCase() + w.slice(1);
+const quip = `${cap(words[r430Derived.drives])} drives, one pool, ${words[r430Derived.baysFree]} empty bays. It runs on the R730’s hand-me-downs.`;
+const p = r430.pool;
+---
+
+<BaseLayout
+  title="The R430 · Sheet 02B"
+  description="Sheet 02B of my homelab drawings: the Dell PowerEdge R430 as built, the second Proxmox host. Eight front bays, two SSDs in one ZFS mirror behind a PERC H730 Mini in HBA mode, two Xeons and 48 GB of RAM. Top, front and rear views, and the bays by number."
+  ogImage={siteMetadata.media.labSocialImage}
+  ogImageAlt={siteMetadata.media.labSocialImageAlt}
+>
+  <div class="pg-server">
+    <section class="wrap srv-hero" aria-labelledby="srv-title">
+      <h1 class="h1" id="srv-title">The <em>R430</em>.</h1>
+      <p class="lede srv-hero__lede">A Dell R430, one unit tall, right above the R730. It runs Proxmox too, clustered with the big one, on two SSDs that used to be the R730’s spares.</p>
+      <p class="srv-hero__links">
+        <a class="link link--quiet" href="/lab/servers/"><span aria-hidden="true">←</span> Sheet 02 · The servers</a>
+        <a class="link link--quiet" href="/lab/r730/">Sheet 02A · The R730</a>
+        <a class="link link--quiet" href="/lab/rack/">Sheet 01 · The cabinet</a>
+        <a class="link link--quiet" href="/lab/stack/">Sheet 03 · The stack <span class="arrow" aria-hidden="true">→</span></a>
+      </p>
+    </section>
+
+    <div class="srv-wide">
+      <R430Sheet />
+    </div>
+
+    <section class="wrap srv-sec" aria-labelledby="srv-glance">
+      <h2 class="srv-h" id="srv-glance">At a glance</h2>
+      <dl class="srv-glance">
+        {glance.map((g) => <div><dt>{g.k}</dt><dd>{g.v}</dd></div>)}
+      </dl>
+      <p class="srv-quip">{quip}</p>
+
+      <h2 class="srv-h srv-h--pools" id="srv-pools">The pool</h2>
+      <ul class="srv-pools srv-pools--one" aria-labelledby="srv-pools">
+        <li data-pool={p.id}>
+          <p class="srv-pool__n">{p.id}</p>
+          <p class="srv-pool__m">{p.copies}-way mirror</p>
+          <p class="srv-pool__h">{p.holds}</p>
+          <ul class="srv-pool__d">
+            {p.bays.map((b) => <li><span>Bay {b}</span> {r430DriveAt(b)?.card.title}</li>)}
+          </ul>
+        </li>
+      </ul>
+
+      <nav class="srv-next" aria-label="More drawings">
+        <a class="link link--quiet" href="/lab/servers/"><span aria-hidden="true">←</span> Sheet 02 · The servers</a>
+        <a class="link link--quiet" href="/lab/r730/">Sheet 02A · The R730</a>
+        <a class="link link--quiet" href="/lab/stack/">Sheet 03 · The stack <span class="arrow" aria-hidden="true">→</span></a>
+      </nav>
+    </section>
+  </div>
+</BaseLayout>
