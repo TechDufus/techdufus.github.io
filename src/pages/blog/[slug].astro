@@ -1,9 +1,10 @@
 ---
 /*
-  /blog/<slug>/ — one post (mockup design/pro-studio/post.html): header with meta and the
-  "Ask about this post" chip, a sticky contents rail with scroll-spy (a compact bar on narrow
-  screens), reading progress, the markdown in .prose with copy-able code blocks, author card,
-  and previous/next.
+  /blog/<slug>/ — one post. The left margin holds the reading aids end to end: the way back, the
+  date and reading time beside the title, then the sticky contents with scroll-spy (a compact bar
+  on narrow screens). Also: reading progress, the markdown in .prose with copy-able code blocks
+  (a block too long for the measure takes the right margin), author card, and previous/next.
+  The title comes from frontmatter; a body `# heading` is handled by src/lib/remark-post.mjs.
 */
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
@@ -12,7 +13,7 @@ import '../../styles/prose.css';
 import Portrait from '../../components/ui/Portrait.astro';
 import { adjacentPosts, getPostMetas, postMeta } from '../../lib/content';
 import { homeCopy, siteMetadata, socialLinks } from '../../data/site';
-import { fmtDate, fmtNum, isoDate, pad2, visibleTags } from '../../components/ui/format';
+import { fmtDate, isoDate, pad2, visibleTags } from '../../components/ui/format';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -36,10 +37,6 @@ const number = total - metas.findIndex((m) => m.slug === post.slug); // oldest p
 const tags = visibleTags(meta.tags);
 const date = isoDate(meta.date);
 const updated = post.data.updatedDate;
-const category = post.data.category
-  ? ({ devops: 'DevOps' } as Record<string, string>)[post.data.category] ??
-    post.data.category.charAt(0).toUpperCase() + post.data.category.slice(1)
-  : null;
 const github = socialLinks.find((link) => link.label === 'GitHub');
 
 /* "prefix: rest" titles (e.g. "oh-my-claude: Batteries-Included …") get the mockup's small
@@ -87,16 +84,15 @@ const question = `Tell me about "${meta.title}".`;
     {/* Header */}
     <header class="post-head">
       <div class="wrap post-grid">
-        <div class="col-rail post-head__rail" data-reveal>
-          <span class="sec-head__index">No. {pad2(number)}</span>
-          <span class="eyebrow">{category ? `Writing · ${category}` : 'Writing'}</span>
+        <div class="col-rail post-head__rail meta" data-reveal>
+          <a class="post-head__back" href="/blog/"><span class="arrow" aria-hidden="true">→</span> All writing</a>
+          <p class="post-facts">
+            <time datetime={date} itemprop="datePublished">{fmtDate(meta.date)}</time>
+            <span>{meta.minutes} min read</span>
+            {updated && <span>Updated <time datetime={isoDate(updated)} itemprop="dateModified">{fmtDate(updated)}</time></span>}
+          </p>
         </div>
         <div class="col-main">
-          <nav class="crumbs meta" aria-label="Breadcrumb" data-reveal>
-            <a href="/blog/"><span class="arrow" aria-hidden="true">→</span> All writing</a>
-            <span class="crumbs__sep" aria-hidden="true"></span>
-            <a href={`/blog/#y${meta.date.getUTCFullYear()}`}>{meta.date.getUTCFullYear()}</a>
-          </nav>
           <h1 class="post-title" id="post-title" itemprop="headline" data-reveal style="--d:1">
             {
               title ? (
@@ -109,24 +105,7 @@ const question = `Tell me about "${meta.title}".`;
               )
             }
           </h1>
-          <dl class="post-meta" data-reveal style="--d:2">
-            <div><dt>Published</dt><dd><time datetime={date} itemprop="datePublished">{fmtDate(meta.date)}</time></dd></div>
-            <div><dt>Reading</dt><dd>{meta.minutes} min</dd></div>
-            <div><dt>Length</dt><dd>{fmtNum(meta.words)} <span class="muted">words</span></dd></div>
-            {
-              tags.length > 0 && (
-                <div>
-                  <dt>Filed under</dt>
-                  <dd>
-                    <div class="chips">
-                      {tags.map((tag) => <a class="chip" href={`/blog/?tag=${encodeURIComponent(tag)}`}>{tag}</a>)}
-                    </div>
-                  </dd>
-                </div>
-              )
-            }
-          </dl>
-          <div class="post-head__foot" data-reveal style="--d:3">
+          <div class="post-head__foot" data-reveal style="--d:2">
             <button type="button" class="chip chip--accent ask-chip" data-guide-open={question}>
               <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
                 <path
@@ -138,13 +117,6 @@ const question = `Tell me about "${meta.title}".`;
               </svg>
               Ask about this post <span class="arrow" aria-hidden="true">→</span>
             </button>
-            {
-              updated && (
-                <span class="meta">
-                  Updated <time datetime={isoDate(updated)} itemprop="dateModified">{fmtDate(updated)}</time>
-                </span>
-              )
-            }
           </div>
         </div>
       </div>
@@ -250,7 +222,6 @@ const question = `Tell me about "${meta.title}".`;
             <section class="author" aria-labelledby="author-name" data-reveal>
               <Portrait size="avatar" px={88} alt="Matthew DeGarmo, known online as TechDufus" />
               <div>
-                <span class="eyebrow">Written by</span>
                 <h2 class="author__name" id="author-name">Matthew, a.k.a. <em class="foil">TechDufus</em></h2>
                 <p class="author__bio">{siteMetadata.role}. {homeCopy.headline}</p>
                 <div class="author__actions">
@@ -331,6 +302,19 @@ const question = `Tell me about "${meta.title}".`;
       block.append(pre);
     });
     if (prose) enhance(prose);
+
+    /* ---------- long code and tables: take the right margin, then scroll with an edge fade ---------- */
+    const MEASURE = 680; // the reading column (.post-grid)
+    const scrollers = [...(prose?.querySelectorAll<HTMLElement>('.code-block pre, table') ?? [])];
+    const cue = (el: HTMLElement) => el.classList.toggle('has-more', el.scrollWidth - el.clientWidth - el.scrollLeft > 2);
+    const fit = () =>
+      scrollers.forEach((el) => {
+        (el.closest<HTMLElement>('.code-block') ?? el).classList.toggle('is-wide', el.scrollWidth > MEASURE);
+        cue(el);
+      });
+    scrollers.forEach((el) => el.addEventListener('scroll', () => cue(el), { passive: true }));
+    window.addEventListener('resize', () => scrollers.forEach(cue));
+    doc.fonts.ready.then(fit);
 
     /* ---------- progress, minutes left, contents ---------- */
     const minutes = Number(page?.dataset.minutes) || 1;
@@ -417,21 +401,21 @@ const question = `Tell me about "${meta.title}".`;
   /* Page styles, scoped by the .pg-post root (no per-element Astro cid attributes). */
   html { scroll-padding-top: calc(var(--nav-h) + 36px); }
 
-  /* ---------- Page grid: rail · reading column · breathing room ---------- */
+  /* ---------- Page grid: reading aids · reading column · margin (wide code, tables, figures) ---------- */
   .pg-post .post-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 680px) minmax(0, 1fr); column-gap: clamp(32px, 4vw, 64px); }
   .pg-post .post-grid > .col-main { grid-column: 2; min-width: 0; }
   .pg-post .post-grid > .col-rail { grid-column: 1; grid-row: 1; min-width: 0; }
 
   /* ---------- Header ---------- */
-  .pg-post .post-head { padding-block: clamp(40px, 6vw, 88px) clamp(40px, 5vw, 64px); }
-  .pg-post .post-head__rail { display: grid; align-content: start; gap: 6px; padding-top: 14px; }
-  .pg-post .post-head__rail .sec-head__index { font-size: var(--fs-xs); }
-  .pg-post .crumbs { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; color: var(--faint); }
-  .pg-post .crumbs a { color: var(--muted); transition: color var(--t-1) ease; }
-  .pg-post .crumbs a:hover { color: var(--ink); }
-  .pg-post .crumbs .arrow { transform: scaleX(-1); }
-  .pg-post .crumbs a:hover .arrow { transform: scaleX(-1) translateX(3px); }
-  .pg-post .crumbs__sep { width: 18px; height: 1px; background: var(--line-3); }
+  .pg-post .post-head { padding-block: clamp(40px, 6vw, 88px) clamp(36px, 4.5vw, 56px); }
+  .pg-post .post-head .col-main { grid-column: 2 / -1; }
+  .pg-post .post-head__rail { display: grid; align-content: start; gap: 22px; padding-top: 12px; }
+  .pg-post .post-head__back { justify-self: start; color: var(--muted); transition: color var(--t-1) ease; }
+  .pg-post .post-head__back:hover { color: var(--ink); }
+  .pg-post .post-head__back .arrow { transform: scaleX(-1); }
+  .pg-post .post-head__back:hover .arrow { transform: scaleX(-1) translateX(3px); }
+  .pg-post .post-facts { display: grid; gap: 4px; font-variant-numeric: tabular-nums; }
+  .pg-post .post-facts > time { color: var(--ink-2); }
   .pg-post .post-title {
     font-family: var(--font-display); font-weight: 400;
     font-size: clamp(2.5rem, 1.35rem + 3.5vw, 4.25rem); line-height: 1.02; letter-spacing: -0.02em;
@@ -441,15 +425,9 @@ const question = `Tell me about "${meta.title}".`;
   .pg-post .post-title .pkg { display: block; font-size: 0.5em; line-height: 1.1; letter-spacing: -0.01em; color: var(--muted); margin-bottom: 0.3em; }
   .pg-post .post-title .pkg i { color: var(--faint); font-style: normal; }
 
-  .pg-post .post-meta { display: grid; grid-template-columns: repeat(3, auto) minmax(0, 1fr); margin-top: clamp(32px, 4vw, 44px); border-block: 1px solid var(--line); }
-  .pg-post .post-meta > div { display: grid; gap: 4px; align-content: start; padding: 14px 24px 16px 0; }
-  .pg-post .post-meta > div + div { padding-left: 24px; border-left: 1px solid var(--line); }
-  .pg-post .post-meta dt, .pg-post .toc-bar__label { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
-  .pg-post .post-meta dd { color: var(--ink); font-size: 0.975rem; font-variant-numeric: tabular-nums; }
-  .pg-post .post-meta dd .muted { font-size: 0.9rem; }
-  .pg-post .post-meta .chips { margin-top: 1px; }
+  .pg-post .toc-bar__label { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
 
-  .pg-post .post-head__foot { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; margin-top: 20px; }
+  .pg-post .post-head__foot { margin-top: clamp(24px, 3vw, 32px); }
   .pg-post .ask-chip { height: 32px; padding: 0 14px 0 10px; gap: 8px; font-size: 0.8125rem; }
   .pg-post .ask-chip svg { width: 15px; height: 15px; }
   .pg-post .ask-chip:hover { color: var(--ink) !important; background: var(--accent-tint); border-color: var(--accent) !important; }
@@ -478,11 +456,9 @@ const question = `Tell me about "${meta.title}".`;
   /* ---------- Prose: markdown from the content collection ---------- */
   .pg-post .prose { max-width: none; }
   .pg-post .prose :is(p, li) { hanging-punctuation: first; }
-  .pg-post .prose h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.875rem, 1.5rem + 1.2vw, 2.375rem); line-height: 1.12; letter-spacing: -0.012em; color: var(--ink); margin-top: 2.2em; text-wrap: balance; }
   .pg-post .prose > :first-child { margin-top: 0; }
-  .pg-post .prose :is(h1, h2) { clear: both; }
+  .pg-post .prose h2 { clear: both; }
   .pg-post .prose :is(h5, h6) { font-weight: 600; color: var(--ink); margin-top: 1.4em; }
-  .pg-post .prose h1 + * { margin-top: 0.6em; }
   .pg-post .prose li > :is(ul, ol) { margin-top: 0.45em; }
   .pg-post .prose li > p + p, .pg-post .prose blockquote > * + * { margin-top: 0.75em; }
   .pg-post .prose .code-block { margin-block: 1.6em; }
@@ -490,6 +466,12 @@ const question = `Tell me about "${meta.title}".`;
   .pg-post .prose .code-block__lang::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--gold-bead); opacity: 0.9; }
   .pg-post .prose .code-copy svg { width: 14px; height: 14px; }
   .pg-post .prose .code-block pre code { font: inherit; background: none; border: 0; padding: 0; }
+  .pg-post .prose :is(pre, table) { scrollbar-width: thin; scrollbar-color: var(--line-3) transparent; }
+  .pg-post .prose :is(pre, table).has-more { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 64px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 64px), transparent); }
+  /* same reach as a breakout figure (.fg--b in figure.css): the column plus the right margin */
+  @media (min-width: 1120px) {
+    .pg-post .prose :is(.code-block, table).is-wide { width: min(920px, calc(50vw + 340px - var(--gutter))); }
+  }
 
   /* ---------- After the post ---------- */
   .pg-post .post-after { display: grid; gap: clamp(40px, 5vw, 56px); margin-top: clamp(48px, 6vw, 72px); padding-top: clamp(32px, 4vw, 48px); border-top: 1px solid var(--line); }
@@ -499,7 +481,7 @@ const question = `Tell me about "${meta.title}".`;
 
   .pg-post .author { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 24px; align-items: start; padding: clamp(24px, 3vw, 32px); border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); }
   .pg-post .author .portrait { width: 88px; height: 88px; }
-  .pg-post .author__name { font-family: var(--font-display); font-size: 1.75rem; line-height: 1.1; color: var(--ink); margin-top: 6px; }
+  .pg-post .author__name { font-family: var(--font-display); font-size: 1.75rem; line-height: 1.1; color: var(--ink); }
   .pg-post .author__name em { color: var(--accent); }
   .pg-post .author__bio { color: var(--muted); margin-top: 8px; max-width: 46ch; font-size: 1rem; line-height: 1.55; }
   .pg-post .author__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 20px; }
@@ -526,8 +508,8 @@ const question = `Tell me about "${meta.title}".`;
     .pg-post .post-grid { grid-template-columns: minmax(0, 1fr); max-width: calc(720px + var(--gutter) * 2); }
     .pg-post .post-grid > .col-main, .pg-post .post-grid > .col-rail { grid-column: 1; grid-row: auto; }
     .pg-post .post-body .col-rail { display: none; }
-    .pg-post .post-head__rail { display: flex; align-items: center; gap: 12px; padding-top: 0; margin-bottom: 20px; }
-    .pg-post .crumbs { margin-bottom: 20px; }
+    .pg-post .post-head__rail { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 20px; padding-top: 0; margin-bottom: 24px; }
+    .pg-post .post-facts { display: flex; flex-wrap: wrap; gap: 4px 16px; }
     html { scroll-padding-top: calc(var(--nav-h) + 72px); }
 
     .pg-post .toc-bar {
@@ -555,10 +537,6 @@ const question = `Tell me about "${meta.title}".`;
   }
   @media (max-width: 640px) {
     .pg-post .post-title .pkg { font-size: 0.56em; }
-    .pg-post .post-meta { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .pg-post .post-meta > div { padding: 12px 12px 14px 0; }
-    .pg-post .post-meta > div + div { padding-left: 14px; }
-    .pg-post .post-meta > div:nth-child(4) { grid-column: 1 / -1; padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
     .pg-post .prose { font-size: 1.0625rem; }
     .pg-post .author { grid-template-columns: minmax(0, 1fr); gap: 16px; }
     .pg-post .author .portrait { width: 72px; height: 72px; }

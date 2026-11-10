@@ -1,11 +1,14 @@
 /**
- * /blog/ filters (mockup design/pro-studio/blog.html). The page server-renders every post row,
- * so without JS it is the full archive. This script filters those rows in place:
+ * /blog/ filters. The page server-renders every post row, so without JS it is the full archive.
+ * This script filters those rows in place:
  *   search   every word must appear in the title, description or tags; matches get <mark>
- *   tags     one tag at a time via the chips (filter bar or a row's own tag chips)
+ *   tags     one tag at a time, from the topic chips or a row's own tags
  *   URL      ?q=&tag= round-trips (typing replaces history, tag clicks push; Back restores)
+ *   chart    the posts-per-year columns redraw to the matches; a year with none stops being a link
  *   empty    "Nothing matches" with suggestions and an "Ask the site guide" button
- * Counts are announced through a polite live region. "/" focuses the search box.
+ * While a filter is on, the page carries .is-filtering and every match is a full row (the page's
+ * weight-by-age styles step aside). Counts are announced through a polite live region. "/" focuses
+ * the search box.
  */
 
 const doc = document;
@@ -17,7 +20,7 @@ const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 type Paint = { el: HTMLElement; text: string };
 type Row = { el: HTMLElement; tags: string[]; hay: string; paint: Paint[]; chips: HTMLElement[] };
-type Year = { el: HTMLElement; total: number; rows: Row[]; count: HTMLElement | null; gap: HTMLElement | null; link: HTMLElement | null };
+type Year = { el: HTMLElement; year: string; total: number; rows: Row[]; count: HTMLElement | null; gap: HTMLElement | null; col: HTMLElement | null };
 
 const page = $('.pg-writing');
 if (page) init(page);
@@ -26,11 +29,8 @@ function init(page: HTMLElement): void {
   const input = $<HTMLInputElement>('#q', page);
   const searchBox = $('.search', page);
   const tagsEl = $('.tags', page);
-  const rest = $('.tags__rest', page);
-  const more = $('.tags__more', page);
-  const summary = $('.summary__text', page);
+  const summary = $('.summary', page);
   const live = $('[aria-live]', page);
-  const latest = $('.latest', page);
   const empty = $('.empty', page);
   const ask = empty && $('[data-guide-open]', empty);
   const top = $('#archive-top', page);
@@ -51,20 +51,22 @@ function init(page: HTMLElement): void {
       const hay = `${paint[0]?.text ?? ''} ${paint[1]?.text ?? ''} ${tags.join(' ')}`.toLowerCase();
       return { el: row, tags, hay, paint, chips };
     });
+    const year = el.id.slice(1);
     return {
       el,
+      year,
       total: rows.length,
       rows,
       count: $('.year__count', el),
       gap: $('.year__gap', el),
-      link: $(`.summary__years a[href="#${el.id}"]`, page)
+      col: $(`.cadence [data-year="${year}"]`, page)
     };
   });
   const total = years.reduce((n, y) => n + y.total, 0);
+  const maxPerYear = Math.max(1, ...years.map((y) => y.total));
 
   /* ---------- state + URL ---------- */
   const state = { q: '', tag: '' };
-  let showRest = false;
 
   function readURL(): void {
     const u = new URLSearchParams(location.search);
@@ -114,13 +116,7 @@ function init(page: HTMLElement): void {
   /* ---------- tag chips ---------- */
   function renderTags(): void {
     const active = state.tag;
-    if (active && rest?.querySelector(`[data-tag="${CSS.escape(active)}"]`)) showRest = true;
     topChips.forEach((c) => c.setAttribute('aria-pressed', String((c.dataset.tag || '') === active)));
-    if (rest) rest.hidden = !showRest;
-    if (more) {
-      more.setAttribute('aria-expanded', String(showRest));
-      more.textContent = showRest ? 'Fewer tags' : `+${rest?.children.length ?? 0} more`;
-    }
     // keep the active chip visible inside the horizontally scrolling rail (mobile)
     const on = active ? tagsEl!.querySelector<HTMLElement>('[aria-pressed="true"]') : null;
     if (on && tagsEl!.scrollWidth > tagsEl!.clientWidth) {
@@ -133,7 +129,6 @@ function init(page: HTMLElement): void {
     const ts = state.q.toLowerCase().split(/\s+/).filter(Boolean);
     const filtering = !!(state.q || state.tag);
     let n = 0;
-    let groupsShown = 0;
 
     for (const y of years) {
       let shown = 0;
@@ -151,27 +146,37 @@ function init(page: HTMLElement): void {
       }
       if (last && filtering) last.el.setAttribute('data-last', '');
       n += shown;
-      if (shown) groupsShown++;
       y.el.hidden = !shown;
-      if (y.link) y.link.hidden = !shown;
       if (y.gap) y.gap.hidden = filtering;
       if (y.count) y.count.innerHTML = filtering ? `<b>${shown}</b> of ${y.total}` : `<b>${y.total}</b> ${y.total === 1 ? 'post' : 'posts'}`;
+      if (y.col) {
+        $('.cadence__n', y.col)!.textContent = String(shown);
+        $('.cadence__bar', y.col)!.style.setProperty('--v', (shown / maxPerYear).toFixed(3));
+        y.col.classList.toggle('is-empty', !shown);
+        // a year with no matches stays in the chart but stops being a link
+        if (shown) {
+          y.col.removeAttribute('aria-disabled');
+          y.col.removeAttribute('tabindex');
+        } else {
+          y.col.setAttribute('aria-disabled', 'true');
+          y.col.tabIndex = -1;
+        }
+        const posts = `post${y.total === 1 ? '' : 's'}`;
+        y.col.setAttribute('aria-label', filtering ? `${y.year}: ${shown} of ${y.total} ${posts} shown` : `${y.year}: ${y.total} ${posts}`);
+      }
     }
 
-    if (latest) latest.hidden = filtering;
+    page.classList.toggle('is-filtering', filtering);
     empty!.hidden = n > 0;
     if (!n) renderEmpty();
 
-    if (!filtering) {
-      summary!.innerHTML = `Showing all <strong>${total}</strong> posts, newest first.`;
-    } else {
+    summary!.hidden = !filtering;
+    if (filtering) {
       const bits: string[] = [];
       if (state.tag) bits.push(`tagged <em>${esc(state.tag)}</em>`);
       if (state.q) bits.push(`matching <em>“${esc(state.q)}”</em>`);
       summary!.innerHTML = `<strong>${n}</strong> of ${total} posts ${bits.join(' and ')}.<button class="summary__clear" type="button" data-clear-all>Clear</button>`;
     }
-    const yearsNav = $('.summary__years', page);
-    if (yearsNav) yearsNav.hidden = groupsShown < 2;
 
     const shownLabel = `${n} post${n === 1 ? '' : 's'}`;
     doc.title = filtering ? `${shownLabel} · ${baseTitle}` : baseTitle;
@@ -273,11 +278,6 @@ function init(page: HTMLElement): void {
       }
       return;
     }
-    if (target.closest('.tags__more')) {
-      showRest = !showRest;
-      renderTags();
-      return;
-    }
     const tryBtn = target.closest<HTMLElement>('[data-try]');
     if (tryBtn) {
       state.q = '';
@@ -308,7 +308,7 @@ function init(page: HTMLElement): void {
     render(true);
   });
 
-  /* ---------- cadence chart: grow the bars once visible ---------- */
+  /* ---------- posts-per-year chart: grow the bars once visible ---------- */
   const cadence = $('.cadence', page);
   if (cadence) {
     if ('IntersectionObserver' in window && !motion.matches) {

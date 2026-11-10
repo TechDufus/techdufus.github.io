@@ -27,6 +27,8 @@
 
 ## Content locations
 - Blog posts: `src/content/blog/*.md` and `*.mdx`
+  - The post page prints the title from frontmatter. `src/lib/remark-post.mjs` (wired in `astro.config.mjs`) keeps a body from adding a second `<h1>`: a leading `# heading` that repeats the title is dropped, any other leading `# heading` becomes the standfirst, and later ones become `<h2>`. It also turns an image followed by a bold `Figure N - caption` line into a `<figure>` with a caption
+- Writing archive: `src/pages/blog/index.astro` + `src/scripts/writing.ts`. One list weighted by age (the newest post leads, the two newest years are full rows, older years are one line a post); a search or tag filter shows every match as a full row and redraws the posts-per-year chart, which is also the year navigator
 - Setup docs: `src/content/docs/setup.md`
 - Site-wide metadata/copy/nav: `src/data/site.ts`
   - `business`: `enabled` flag plus services, pricing, FAQ and legal data

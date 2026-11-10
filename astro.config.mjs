@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import tailwind from '@astrojs/tailwind';
+import { remarkBodyTitle, remarkFigures } from './src/lib/remark-post.mjs';
 
 // Code blocks use the Studio mockup's code palette (the --tok-* tokens in src/styles/global.css):
 // plain text --ink-2 on --bg-deep, commands/keywords --accent-hi, strings --tok-s, numbers and
@@ -72,6 +73,7 @@ export default defineConfig({
     inlineStylesheets: 'never'
   },
   markdown: {
+    remarkPlugins: [remarkBodyTitle, remarkFigures],
     syntaxHighlight: 'shiki',
     shikiConfig: {
       theme: studioCodeTheme,

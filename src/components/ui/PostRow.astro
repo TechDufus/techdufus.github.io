@@ -2,8 +2,8 @@
 /*
   Mockup Pro.render.postRow() → <article class="post-row">. Must sit inside a .post-list.
   variant 'list' (home/related): long date, tag chips + minutes in __meta.
-  variant 'archive' (blog year groups): day date, filter tag buttons (.post-row__tags > button.chip[data-tag])
-  under the description, minutes only in __meta. The blog page wires the buttons.
+  variant 'archive' (blog year groups): day date, filter tag buttons (.post-row__tags > button.post-row__tag[data-tag])
+  under the description, minutes only in __meta. The blog page styles and wires the buttons.
 */
 import type { PostMeta } from '../../lib/content';
 import Chips from './Chips.astro';
@@ -34,7 +34,7 @@ const tags = visibleTags(post.tags, tagCount);
       archive && tags.length > 0 && (
         <div class="post-row__tags">
           {tags.map((tag) => (
-            <button class="chip" type="button" data-tag={tag} aria-pressed="false" aria-label={`Show posts tagged ${tag}`}>{tag}</button>
+            <button class="post-row__tag" type="button" data-tag={tag} aria-pressed="false" aria-label={`Show posts tagged ${tag}`}>{tag}</button>
           ))}
         </div>
       )

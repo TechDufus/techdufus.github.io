@@ -1,11 +1,13 @@
 /* TechDufus · Studio (Midnight) — long-form reading styles, split out of global.css so only the
    pages that render Markdown load them: blog/[slug].astro, docs/setup.astro.
-   .prose (post body: headings, lists, quotes, tables, figures, code)  .toc (+ a.is-active)
+   .prose (post body: standfirst, headings, lists, quotes, tables, figures, code)  .toc (+ a.is-active)
    .progress (reading progress bar). The .code-block chrome and .tok-* colours stay in global.css
-   (the lab page uses them too). */
+   (the lab page uses them too). p.standfirst and figure > figcaption .fig-no come from
+   src/lib/remark-post.mjs. */
 
 .prose { font-size: 1.125rem; line-height: 1.75; color: var(--ink-2); max-width: 68ch; }
 .prose > * + * { margin-top: 1.25em; }
+.prose .standfirst { font-family: var(--font-display); font-size: clamp(1.5rem, 1.3rem + 0.7vw, 1.8125rem); line-height: 1.24; letter-spacing: -0.008em; color: var(--ink); text-wrap: pretty; }
 .prose h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.875rem, 1.5rem + 1.2vw, 2.375rem); line-height: 1.12; letter-spacing: -0.012em; color: var(--ink); margin-top: 2.2em; text-wrap: balance; }
 .prose h3 { font-family: var(--font-sans); font-weight: 600; font-size: 1.25rem; line-height: 1.3; color: var(--ink); margin-top: 1.9em; letter-spacing: -0.01em; }
 .prose h4 { font-weight: 600; font-size: 1.0625rem; color: var(--ink); margin-top: 1.6em; }
@@ -21,10 +23,12 @@
 .prose ol { list-style: decimal; }
 .prose ol > li::marker { font-family: var(--font-mono); font-size: 0.85em; color: var(--accent); }
 .prose li + li { margin-top: 0.45em; }
-.prose blockquote { border-left: 2px solid var(--accent); padding: 4px 0 4px 22px; color: var(--ink); font-family: var(--font-display); font-size: 1.375rem; line-height: 1.45; font-style: italic; }
+.prose blockquote { border-left: 1px solid var(--accent); padding: 4px 0 4px 22px; color: var(--ink); font-family: var(--font-display); font-size: 1.375rem; line-height: 1.45; font-style: italic; }
 .prose hr { margin-block: 3em; border-top-color: var(--line-2); }
 .prose img { border-radius: var(--r); border: 1px solid var(--line); }
-.prose figure figcaption { margin-top: 10px; font-family: var(--font-mono); font-size: 0.8125rem; color: var(--faint); }
+.prose figure:not(.fg) { margin-block: 1.9em; }
+.prose figure figcaption { margin-top: 10px; font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; color: var(--muted); }
+.prose figcaption .fig-no { margin-right: 14px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; }
 .prose table { width: 100%; border-collapse: collapse; font-size: 0.95rem; display: block; overflow-x: auto; }
 .prose th, .prose td { text-align: left; padding: 10px 14px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
 .prose th { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-weight: 500; }
