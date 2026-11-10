@@ -1,6 +1,6 @@
 // Build-time data for the scripted site guide (src/scripts/guide.ts fetches it on first open).
 // Every answer is written from real site content. Mini-markup: [label](href) links, blank line = paragraph.
-import { business, dash, featuredReposAsOf, labSpec, ompCloud, siteMetadata, yahwai } from '../data/site';
+import { business, dash, featuredReposAsOf, labSpec, ompCloud, ompcraft, siteMetadata, yahwai } from '../data/site';
 import { server } from '../data/lab/server';
 import { stackItems } from '../data/lab/stack';
 import { getPostMetas, postStats } from '../lib/content';
@@ -71,6 +71,7 @@ export async function GET() {
       text:
         `[${yahwai.name}](${yahwai.href}) first. It's an AI Bible-study tool, and it's live. It answers in plain words and shows you the passages, so you can read them for yourself. The study tools and a prayer list are free; asking it questions takes a [plan](${yahwai.more.href}).\n\n` +
         `Then [${ompCloud.name}](${ompCloud.href}): cloud agents for omp, on your own hardware. Each task runs in its own microVM and comes back as a branch.\n\n` +
+        `[${ompcraft.name}](${ompcraft.href}) puts those omp agents in World of Warcraft: a quest-style tracker, achievement pop-ups when one finishes or needs you, and every reply on parchment.\n\n` +
         `And [${dash.name}](${dash.href}): homelab mission control. One Go binary, a live screen over Proxmox, Kubernetes, Flux, hardware, storage and alerts.\n\n` +
         `The rest is open source: ${featured.map((r) => `[${r.name}](${r.url})`).join(', ')}. Everything, plus the old PowerShell, is on the [projects page](/projects/).`,
       cards: []

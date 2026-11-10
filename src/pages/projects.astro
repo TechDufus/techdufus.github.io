@@ -1,6 +1,6 @@
 ---
 /*
-  /projects/: featuredProjects (YahwAI, omp-cloud, dash), the featured repos with live GitHub metadata, and earlierWork.
+  /projects/: featuredProjects (YahwAI, omp-cloud, ompcraft, dash), the featured repos with live GitHub metadata, and earlierWork.
   Every line of copy comes from src/data/site.ts, the projects' own sites, or the repos themselves.
 */
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -9,7 +9,7 @@ import RepoCard from '../components/ui/RepoCard.astro';
 import SectionHead from '../components/ui/SectionHead.astro';
 import Stat from '../components/ui/Stat.astro';
 import { hostOf, linkProps } from '../components/ui/format';
-import { dash, earlierWork, featuredProjects, ompCloud, siteMetadata, yahwai } from '../data/site';
+import { dash, earlierWork, featuredProjects, ompCloud, ompcraft, siteMetadata, yahwai } from '../data/site';
 import { featuredReposNote, getFeaturedRepos } from '../lib/github';
 
 const repos = await getFeaturedRepos();
@@ -19,7 +19,7 @@ const featuredNames = new Intl.ListFormat('en', { type: 'conjunction' }).format(
 
 <BaseLayout
   title="Projects"
-  description={`${yahwai.name}, an AI Bible-study tool, ${ompCloud.name}, self-hosted cloud agents for omp, and ${dash.name}, homelab mission control, plus the open-source tools I maintain (${repos.map((repo) => repo.name).join(', ')}) and the PowerShell modules where it started.`}
+  description={`${yahwai.name}, an AI Bible-study tool, ${ompCloud.name}, self-hosted cloud agents for omp, ${ompcraft.name}, omp agents in World of Warcraft's quest log, and ${dash.name}, homelab mission control, plus the open-source tools I maintain (${repos.map((repo) => repo.name).join(', ')}) and the PowerShell modules where it started.`}
 >
   <div class="pg-projects">
   <!-- ============ HERO ============ -->

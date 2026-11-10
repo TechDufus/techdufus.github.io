@@ -502,6 +502,28 @@ export const ompCloud: FeaturedProject = {
   more: { label: 'View on GitHub', href: 'https://github.com/TechDufus/omp-cloud' }
 };
 
+/** ompcraft, on /projects/. Copy and image come from ompcraft.techdufus.com (hero, og:image, "Is it safe?"). */
+export const ompcraft: FeaturedProject = {
+  name: 'ompcraft',
+  href: 'https://ompcraft.techdufus.com/',
+  status: 'Open source',
+  tagline: 'Your AI coding agents, in your quest log.',
+  description:
+    'Watch your omp agents work without leaving World of Warcraft: Forever. A native objective tracker, achievement pop-ups when one finishes or needs you, and every reply on parchment, one click away.',
+  image: {
+    src: '/img/projects/ompcraft.webp',
+    alt: 'The ompcraft share card: the words "Your AI coding agents, in your quest log" over a Mulgore landscape, beside an in-game agent tracker and a "Finished" achievement pop-up.',
+    width: 1200,
+    height: 630
+  },
+  facts: [
+    { k: 'Shows', v: 'Agent state, todo progress and replies, in game' },
+    { k: 'Never', v: 'Touches game memory, captures your screen or sends input' },
+    { k: 'License', v: 'MIT. Unofficial fan project.' }
+  ],
+  more: { label: 'View on GitHub', href: 'https://github.com/TechDufus/ompcraft' }
+};
+
 /** dash, on /projects/. Copy and image come from dash.techdufus.com (hero, og:image) and the repo README. */
 export const dash: FeaturedProject = {
   name: 'dash',
@@ -525,7 +547,7 @@ export const dash: FeaturedProject = {
 };
 
 /** The Featured section of /projects/, in order. */
-export const featuredProjects: FeaturedProject[] = [yahwai, ompCloud, dash];
+export const featuredProjects: FeaturedProject[] = [yahwai, ompCloud, ompcraft, dash];
 
 export type EarlierWork = {
   name: string;
