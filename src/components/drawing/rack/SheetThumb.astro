@@ -2,10 +2,10 @@
 /*
   Tiny gold-ink thumbnails for the /lab "Drawn to spec" cards, generated from the same data as
   the sheets but with a fraction of the line work (no kit CSS needed, so the styles live here).
-    kind="cabinet"  Sheet 01: the cabinet's front faces from U1 to U14 between two rails, the
+    kind="cabinet"  Sheet 01: the cabinet's front faces from U1 to U16 between two rails, the
                     empty U3–7 broken out
     kind="servers"  Sheet 02: the four machines' fronts at one scale: the R730 (16 carriers, the left
-                    control cluster, both ears), the R430 under it, then the Mac mini and the Pi
+                    control cluster, both ears), the R730-2 under it (8 bays and a blank), then the Mac mini and the Pi
     kind="stack"    Sheet 03: the three layers as storeys, one box per thing, planned ones dashed
     kind="path"     the post: disks → PERC → virtual disks → Proxmox (red, dashed: gone) over
                     disks → HBA330 → ZFS pools → Proxmox (green: what went in)
@@ -33,7 +33,7 @@ const cells = (x: number, y: number, w: number, h: number, n: number): string =>
 };
 
 /** A device's front-face zones (fractions) placed on a face at (x, y), `w` × `h`: the bays as carrier cells (a run) or one outline each, and the rest as rectangles. */
-const frontZones = (id: 'r730' | 'r430', x: number, y: number, w: number, h: number, only?: string[]): { cells: string; boxes: string } => {
+const frontZones = (id: 'r730' | 'r730-2', x: number, y: number, w: number, h: number, only?: string[]): { cells: string; boxes: string } => {
   let c = '', b = '';
   for (const z of device(id).panels?.front?.zones ?? []) {
     const [zx, zy, zw, zh] = [x + z.x0 * w, y + z.y0 * h, (z.x1 - z.x0) * w, (z.y1 - z.y0) * h];
@@ -48,7 +48,7 @@ if (kind === 'cabinet') {
   // U1–2 (the top shelf) and U8–14, with U3–7 broken out: everything above the break drops by
   // the empty run less a short gap. Model y is up; the strip's top is paper y 0.
   const cut = yBot(2), resume = yTop(8), GAP = 26;
-  const drop = cut - resume - GAP, top = yTop(1) - drop, lo = yBot(14);
+  const drop = cut - resume - GAP, top = yTop(1) - drop, lo = yBot(16);
   const Y = (y: number): number => top - (y >= cut ? y - drop : y);
   const H = top - lo;
   vb = `-24 -6 530.6 ${r1(H + 12)}`;
@@ -59,7 +59,7 @@ if (kind === 'cabinet') {
     thin += `M${r1(x - 14)} ${r1(brk)}h8l3 -6l4 12l3 -6h8`;
   }
   // (the PoE injector is tucked behind the thin client: at this size it's left out)
-  for (const id of ['top-shelf', 'mini', 't540', 'rpi-4b', 'ont', 'unas-pro-8', 'udm-pro', 'r430', 'r730'] as const) {
+  for (const id of ['top-shelf', 'mini', 't540', 'rpi-4b', 'ont', 'unas-pro-8', 'udm-pro', 'r730', 'r730-2'] as const) {
     const s = slotOf$(id);
     if (id === 'top-shelf') {
       // the tray, and the two brackets
@@ -71,7 +71,7 @@ if (kind === 'cabinet') {
     const x = s.plate ? s.plate.x : s.faceX;
     const w = s.plate ? s.plate.w : s.faceW;
     obj += rr(x, t, w, s.faceH);
-    if (id === 'r730' || id === 'r430') med += frontZones(id, x, t, w, s.faceH).cells;
+    if (id === 'r730' || id === 'r730-2') med += frontZones(id, x, t, w, s.faceH).cells;
     if (id === 'unas-pro-8') med += cells(x + 5, t + 10, w - 10, s.faceH * 0.34, 4) + cells(x + 5, t + s.faceH * 0.54, w - 10, s.faceH * 0.34, 4);
     if (id === 'udm-pro') med += rr(x + 6, t + 10, 20, 24) + rr(x + 186, t + 8, 107, 29) + cells(x + 308, t + 9, 64, 26, 4) + rr(x + 386, t + 20, 20, 15);
     if (id === 'ont') med += `M${r1(x + w * 0.42)} ${r1(t + 5)}h${r1(w * 0.26)}`;
@@ -85,14 +85,14 @@ if (kind === 'cabinet') {
 } else if (kind === 'servers') {
   const GAP = 16;
   let y = 0, w = 0;
-  for (const id of ['r730', 'r430'] as const) {
+  for (const id of ['r730', 'r730-2'] as const) {
     const s = slotOf$(id);
     const h = s.faceH;
     w = s.faceW;
     const zs = device(id).panels!.front!.zones;
     const earL = zs.find((z) => z.id === 'ear-l')!.x1 * w, earR = zs.find((z) => z.id === 'ear-r')!.x0 * w;
-    // the R730 keeps its control cluster; the R430's is too fine for this size
-    const fz = frontZones(id, 0, y, w, h, id === 'r730' ? ['power', 'sysid', 'vga', 'lcd', 'usb-1', 'usb-2', 'optical'] : []);
+    // both keep their control cluster; the second one's drive bay blank is a plain box
+    const fz = frontZones(id, 0, y, w, h, ['power', 'sysid', 'vga', 'lcd', 'usb-1', 'usb-2', 'optical', 'blank']);
     obj += rr(0, y, w, h) + `M${r1(earL)} ${r1(y)}v${r1(h)}M${r1(earR)} ${r1(y)}v${r1(h)}`;
     med += fz.cells;
     thin += fz.boxes;

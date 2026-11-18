@@ -2,7 +2,7 @@
 /*
   Sheet 01 · ISOMETRIC tab: a key plan of the whole cabinet (1:25, door open, right side
   panel ghosted) and DETAIL A, the boxes at 1:7 as a broken view (./IsoStack.astro): the top of
-  the cabinet, U1 to U15, and the bottom shelf, with the empty units between broken out.
+  the cabinet, U1 to U16, and the bottom shelf, with the empty units between broken out.
 */
 import View from '../View.astro';
 import Dim from '../Dim.astro';
@@ -52,7 +52,7 @@ const kDev = {
   edges: join(...kBoxes.map((b) => b.edges)),
 };
 // Detail A's boundary: around the top of the cabinet, where the boxes are
-const aC = K.pt(241.3, (yBot(14) + CAB.railTop) / 2, 300);
+const aC = K.pt(241.3, (yBot(16) + CAB.railTop) / 2, 300);
 const aR = 42;
 
 /* ---------- DETAIL A, 1:7 ---------- */

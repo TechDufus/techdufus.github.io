@@ -1,0 +1,389 @@
+---
+/*
+  TD-LAB-02B · The R730-2, as built. One orthographic sheet: the TOP VIEW with the cover off above
+  the FRONT, the REAR beside it, DETAIL B (the eight bays with their chassis numbers and the four
+  drives), and the two ZFS pools, the controller and the memory as lettered blocks. Every number
+  comes from src/data/lab/r730-2.ts; the faces are the cabinet's panel line work and the inside
+  is schematic (./geom.ts, built on Sheet 02A's board). The page (src/pages/lab/r730-2.astro)
+  wraps it in the page shell and the text equivalent.
+
+  A part keeps its number in every view (NUM in ./geom.ts) and its card comes from the data.
+*/
+import '../../../styles/server-sheet.css';
+import Sheet from '../Sheet.astro';
+import View from '../View.astro';
+import Part from '../Part.astro';
+import Balloon from '../Balloon.astro';
+import Dim from '../Dim.astro';
+import Particles from '../Particles.astro';
+import PartCard from '../PartCard.astro';
+import Key from '../r730/Key.astro';
+import { atScale, join } from '../../../lib/drawing/projection';
+import { P, R, n, place, planAt } from '../r730/geom';
+import { D, EAR, EAR_D, FRONT, H, NUM, REAR, REAR_OX, STAMP, W, WE, bayRect, bays, dimmBanks, drives, driveShort, part, planPaths, pools, psuBoxes, rz } from './geom';
+import { r7302, r7302DriveAt } from '../../../data/lab/r730-2';
+import type { Card } from '../../../data/lab/types';
+
+const DWG = 'lab02b';
+const title = (id: string): string => (/^cpu\d$/.test(id) ? `CPU ${id.slice(3)}` : (r7302.internal.find((q) => q.id === id)?.card.title ?? id));
+
+/* ---------- top, front and rear at 1:4 ---------- */
+const s = atScale(1, 4);
+const X0 = 74, YF = 622, YT = 668, XR = X0 + s * WE + 30 + s * EAR;
+const top = planAt(X0, YF, s);
+const pl = top.pt;
+/** front face (u, v) → paper */
+const fr = (u: number, v: number): [number, number] => [X0 + s * u, YT + s * v];
+/** rear face (u from the body's left seen from behind, v) → paper */
+const rr = (u: number, v: number): [number, number] => [XR + s * u, YT + s * v];
+const plan = planPaths();
+
+const bp = part('backplane'), fans = part('fans'), perc = part('perc'), ndc = part('ndc'), gpu = part('gpu');
+const cpus = [part('cpu1'), part('cpu2')];
+const risers = [part('riser-1'), part('riser-2')];
+const bank = part('dimms');
+const mid = (b: { x: number; z: number; w: number; d: number }) => ({ x: b.x + b.w / 2, z: b.z + b.d / 2 });
+
+// balloons: the left wall's parts down the left; the CPUs and the sockets on an aisle in front of
+// them; the rear row's from above the rear wall; the card from the right
+const LX = 58, RX = X0 + s * WE + 36;
+const edge = (b: { x: number; z: number; w: number; d: number }, dx = 6): [number, number] => pl(b.x + dx, b.z + b.d / 2);
+const aisleY = pl(0, 215)[1];
+const rearY = 90;
+const left = [
+  { id: 'backplane', y: pl(0, bp.z)[1], to: edge(bp, 8) },
+  { id: 'fans', y: pl(0, fans.z + fans.d / 2)[1], to: edge(fans) },
+  { id: 'perc', y: pl(0, perc.z + perc.d / 2)[1], to: edge(perc, 3) },
+  { id: 'psus', y: pl(0, psuBoxes[1].z + psuBoxes[1].d / 2)[1], to: edge(psuBoxes[1]) },
+];
+const sock = dimmBanks[2]; // the bank to the left of CPU 2: the aisle balloon points at its front end
+const aisle = [
+  { id: 'cpu1', x: pl(mid(cpus[0]).x, 0)[0], to: pl(mid(cpus[0]).x, cpus[0].z + 6) },
+  { id: 'dimms', x: pl(mid(sock).x, 0)[0], to: pl(mid(sock).x, sock.z + 12) },
+  { id: 'cpu2', x: pl(mid(cpus[1]).x, 0)[0], to: pl(mid(cpus[1]).x, cpus[1].z + 6) },
+];
+const ndcX = ndc.x + 15.5; // the strip of the NDC that riser 2 doesn't cover
+const rear = [
+  { id: 'ndc', x: pl(ndcX, 0)[0], to: pl(ndcX, ndc.z + 30) },
+  { id: 'riser-2', x: pl(mid(risers[1]).x, 0)[0], to: pl(mid(risers[1]).x, risers[1].z + risers[1].d - 8) },
+  { id: 'riser-1', x: pl(mid(risers[0]).x, 0)[0], to: pl(mid(risers[0]).x, risers[0].z + risers[0].d - 8) },
+];
+const fw = fans.w / r7302.fans.count;
+const cold = P([pl(fans.x + 2.5 * fw, -30), pl(fans.x + 2.5 * fw, 140)]);
+const hotX = EAR + W * 0.79; // the gap between riser 2 and riser 1
+const hot = P([pl(hotX, 412), pl(hotX, 735)]);
+
+const labels: { t: string; at: [number, number]; sm?: boolean }[] = [
+  { t: 'CPU 1', at: top.mid(cpus[0]) },
+  { t: 'CPU 2', at: top.mid(cpus[1]) },
+  { t: 'PERC MINI', at: pl(perc.x + (perc.w - 8) / 2, perc.z + perc.d / 2), sm: true },
+  { t: 'BACKPLANE', at: pl(bp.x + bp.w * 0.74, bp.z - 14), sm: true },
+  { t: `${r7302.memory.sockets} DIMM SOCKETS · ${r7302.memory.dimms} FITTED`, at: pl(bank.x + bank.w / 2, bank.z + bank.d + 13), sm: true },
+  { t: 'SHROUD', at: pl(410, 200), sm: true },
+  { t: 'RISER 1', at: top.mid(risers[0]), sm: true },
+  { t: 'RISER 2', at: pl(mid(risers[1]).x, risers[1].z + risers[1].d * 0.6), sm: true },
+  { t: 'RTX 3060', at: top.mid(gpu), sm: true },
+  { t: 'PSU 2', at: top.mid(psuBoxes[1]) },
+  { t: 'PSU 1', at: top.mid(psuBoxes[0]) },
+  { t: 'NDC', at: pl(ndc.x + 8, ndc.z + 14), sm: true },
+];
+
+/* front: the four drives in their bays */
+const bayOnFront = (bay: number): string => {
+  const q = bayRect(bay);
+  return R(...fr(q.x + 0.6, q.y), s * (q.w - 1.2), s * q.h);
+};
+
+/* rear: the risers, the NICs and the PSUs */
+const nicIds = ['nic-1', 'nic-2', 'nic-3', 'nic-4'];
+const n1 = rz('nic-1'), n4 = rz('nic-4');
+const nicBox = R(...rr(n1.x - 5, n1.y - 3), s * (n4.x + n4.w - n1.x + 10), s * (n1.h + 6));
+const nicOut = rr(n1.x + n1.w / 2, n1.y + n1.h);
+const psu1 = rz('psu-1'), psu2 = rz('psu-2');
+const psuHit = R(...rr(psu1.x, psu1.y), s * (psu2.x + psu2.w - psu1.x), s * psu1.h);
+const psuLines = R(psu1.x, psu1.y, psu1.w, psu1.h) + R(psu2.x, psu2.y, psu2.w, psu2.h);
+const slot = (id: string) => rz(id);
+const riser1 = ['slot-1', 'slot-2', 'slot-3'].map(slot);
+const r1 = { x0: Math.min(...riser1.map((q) => q.x)), x1: Math.max(...riser1.map((q) => q.x + q.w)), y0: riser1[0].y, y1: riser1[2].y + riser1[2].h };
+const gz = rz('gpu'), blank2 = rz('blank-2'), handle = rz('handle');
+const riser2 = { x0: gz.x, x1: gz.x + gz.w, y0: gz.y, y1: handle.y + handle.h };
+const box = (r: { x0: number; x1: number; y0: number; y1: number }, pad = 2) => R(...rr(r.x0 - pad, r.y0 - pad), s * (r.x1 - r.x0 + 2 * pad), s * (r.y1 - r.y0 + 2 * pad));
+const riser3 = rz('riser-3');
+const up = r7302.nics.uplink;
+
+/* ---------- Detail B: the cluster and the eight bays at 1:1.5, under the sheet's revision block ---------- */
+const SB = atScale(1, 1.5);
+const B = { x: 500, y: 206 };
+const lastBay = bayRect(bays.length - 1);
+const u1 = lastBay.x + lastBay.w + 1.5;
+const bu = (u: number): number => B.x + SB * u;
+const bTop = B.y + SB * bayRect(0).y, bH = SB * bayRect(0).h;
+const bcx = (bay: number): number => bu(bayRect(bay).x + bayRect(bay).w / 2);
+const carriers = bays.map((b) => {
+  const q = bayRect(b.n);
+  const d = r7302DriveAt(b.n);
+  return { n: b.n, d, x: bu(q.x + 0.5), w: SB * (q.w - 1), cx: bcx(b.n) };
+});
+const bracketY = B.y + SB * H + 10;
+const brackets = pools.map((p) => {
+  const q0 = bayRect(Math.min(...p.bays)), q1 = bayRect(Math.max(...p.bays));
+  return { p, a: bu(q0.x + 1.5), b: bu(q1.x + q1.w - 1.5) };
+});
+const clip = `${DWG}-bays`;
+
+/* ---------- the pools, the controller and the memory, lettered ---------- */
+const T = { x: 490, y: 484, row: 18 };
+const rows0 = T.y + 50;
+const rowText = (bay: number): string => `BAY ${bay} · ${driveShort(r7302DriveAt(bay)!)}`;
+// pool columns are as wide as their longest row (10.5-unit lettering advances 6.9 units a glyph)
+let colX = T.x;
+const cols = pools.map((p) => {
+  const chars = Math.max(...p.bays.map((b) => rowText(b).length), 14);
+  const w = 34 + chars * 6.9 + 8;
+  const c = { p, x: colX, w, last: rows0 + (p.bays.length - 1) * T.row };
+  colX += w;
+  return c;
+});
+/** A note wrapped to its column (6.9 units a glyph), words kept whole. */
+const wrap = (text: string, w: number): string[] => {
+  const max = Math.floor((w - 28) / 6.9);
+  const lines: string[] = [];
+  for (const word of text.split(' ')) {
+    const last = lines[lines.length - 1];
+    if (last !== undefined && last.length + 1 + word.length <= max) lines[lines.length - 1] = `${last} ${word}`;
+    else lines.push(word);
+  }
+  return lines;
+};
+const sticks = r7302.memory.sticks.map((k) => `${k.count} × ${k.gb} GB`).join(' + ');
+const blocks = [
+  { id: 'perc', x: colX + 16, head: r7302.controller.name.replace('Dell ', ''), lines: [r7302.controller.mode.toUpperCase(), 'EVERY DISK GOES', 'STRAIGHT TO ZFS'], w: 170 },
+  { id: 'dimms', x: colX + 190, head: `${r7302.memory.gb} GB RAM`, lines: [sticks, `SOCKETS ${r7302.memory.fitted.join(' ')}`, `${r7302.memory.sockets - r7302.memory.dimms} OF ${r7302.memory.sockets} EMPTY`], w: 190 },
+];
+
+const cards: [string, Card][] = [
+  ...r7302.drives.map((d): [string, Card] => [d.id, d.card]),
+  ...pools.map((p): [string, Card] => [p.id, p.card]),
+  ['server', r7302.identity.card],
+  ...r7302.internal.map((p): [string, Card] => [p.id, p.card]),
+];
+
+const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
+const desc =
+  `Dell PowerEdge R730-2 as built, the R730's chassis with eight front bays. Top view with the cover off: the eight-bay drive cage and backplane, a row of ${words[r7302.fans.count]} fans, two CPUs with ${r7302.memory.sockets} DIMM sockets (${r7302.memory.dimms} fitted), the PERC mini, riser 1, riser 2 with an RTX 3060 in slot ${r7302.gpu.slot}, and two power supplies at the rear; riser 3 is out. ` +
+  `Front and rear elevations. Detail B: the eight front bays with their numbers, ${r7302.drives.map((d) => `a ${d.card.title} in bay ${d.bay}`).join(', ')}, bays ${r7302.drives.length} to ${r7302.bays.front - 1} empty. ` +
+  `${words[pools.length][0].toUpperCase()}${words[pools.length].slice(1)} ZFS pools, each a mirror of ${words[pools[0].copies]} drives: ${pools.map((p) => `${p.id} on bays ${p.bays.join(' and ')}`).join(', ')}, behind a ${r7302.controller.name} in ${r7302.controller.mode}. Each numbered part opens a card.`;
+---
+
+<Sheet
+  id={DWG}
+  dwgNo="TD-LAB-02B"
+  title="The R730-2"
+  desc={desc}
+  sheet={[2, 3]}
+  rev="B"
+  date="2026-11-18"
+  checked="TD"
+  revisions={[
+    { rev: 'A', date: '2026-11-10', desc: 'First issue (the R430)' },
+    { rev: 'B', date: '2026-11-18', desc: 'Redrawn for the R730-2' },
+  ]}
+  stamp={{ ...STAMP, x: 1046, y: 650 }}
+  interactive
+  hint
+>
+  <defs>
+    <g id={`${DWG}-front`}>
+      <path class="ln-obj" d={FRONT.obj} />
+      <path class="ln-med" d={FRONT.med} />
+      <path class="ln-thin" d={FRONT.thin} />
+    </g>
+    <g id={`${DWG}-rear`}>
+      <path class="ln-obj" d={REAR.obj} />
+      <path class="ln-med" d={REAR.med} />
+      <path class="ln-thin" d={REAR.thin} />
+    </g>
+    <g id={`${DWG}-plan`}>
+      <path class="ln-obj" d={join(plan.shell, plan.cpus)} />
+      <path class="ln-med" d={join(plan.board, plan.fans, plan.psus)} />
+      <path class="ln-thin" d={join(plan.cage, plan.fins, plan.sockets)} />
+      <path class="face-top" d={plan.riserFill} />
+      <path class="ln-hid" d={plan.hidden} />
+      <path class="ln-med" d={plan.risers} />
+      <path class="face-top" d={plan.gpu} />
+      <path class="ln-med" d={plan.gpu} />
+      <path class="ln-phantom" d={plan.shroud} />
+      <path class="ln-ctr" d={plan.ctr} />
+    </g>
+    <clipPath id={clip}><path d={R(B.x - 2, B.y - 2, SB * u1 + 2, SB * H + 4)} /></clipPath>
+  </defs>
+
+  <!-- ================= DETAIL B: the bays ================= -->
+  <View x={500} y={150} w={700} h={290} title="DETAIL B · THE BAYS" scale={SB} labelAt={[B.x + (SB * u1) / 2, 446]}>
+    <path class="face-front" d={R(B.x, B.y, SB * u1, SB * H)} />
+    <g clip-path={`url(#${clip})`}><use href={`#${DWG}-front`} transform={place(SB, B.x, B.y)} /></g>
+    <path class="ln-thin" d={`M${n(bu(u1))} ${n(B.y - 4)}l-3 ${n(SB * H * 0.3)}l6 ${n(SB * H * 0.3)}l-6 ${n(SB * H * 0.4 + 8)}`} />
+    {carriers.map((c) => c.d ? (
+      <Part id={c.d.id} label={c.d.card.title} class={`pool-${c.d.pool}`}>
+        <path class="sv-drv" d={R(c.x, bTop, c.w, bH)} />
+        <text class="sv-lt sv-ko" transform={`translate(${n(c.x + c.w / 2 + 3.2)} ${n(bTop + bH - 10)}) rotate(-90)`}>{driveShort(c.d)}</text>
+      </Part>
+    ) : null)}
+    <text class="sv-s" x={carriers.map((c) => n(c.cx)).join(' ')} y={n(bTop + SB * 12)}>{carriers.map((c) => c.n).join('')}</text>
+    {carriers.map((c) => c.d ? <Balloon at={[c.cx, B.y - 24]} n={NUM[c.d.id]} to={[c.cx, bTop + 6]} part={c.d.id} /> : null)}
+    {brackets.map((g) => (
+      <g class={`pool-${g.p.id}`}>
+        <path class="ln-obj" d={`M${n(g.a)} ${n(bracketY)}v6H${n(g.b)}v-6`} />
+        <text class="txt-label" x={n((g.a + g.b) / 2)} y={n(bracketY + 22)} text-anchor="middle">{g.p.id.toUpperCase()}</text>
+      </g>
+    ))}
+  </View>
+
+  <!-- ================= ZFS POOLS, controller, memory ================= -->
+  {/* the label stays right of x 850: the rear view's balloons sit left of that, at its height */}
+  <View x={480} y={462} w={740} h={200} title="ZFS POOLS" labelAt={[Math.max(850, T.x + (colX - T.x) / 2 - 20), 650]}>
+    {cols.map((c) => (
+      <g class={`pool-${c.p.id}`}>
+        <Part id={c.p.id} label={c.p.id}>
+          <path class="dwg-hit" d={R(c.x - 12, T.y - 12, c.w - 14, 40)} />
+          <text class="txt-label" x={c.x + 22} y={T.y + 4}>{c.p.id.toUpperCase()}</text>
+          <text class="txt-note" x={c.x + 22} y={T.y + 17}>{c.p.copies}-WAY MIRROR</text>
+        </Part>
+        <Balloon at={[c.x, T.y]} n={NUM[c.p.id]} part={c.p.id} />
+        <path class="ln-med" d={`M${c.x} ${T.y + 30}V${c.last}` + c.p.bays.map((_, j) => `M${c.x} ${rows0 + j * T.row}h14`).join('')} />
+        {c.p.bays.map((bay, j) => {
+          const d = r7302DriveAt(bay)!;
+          const ry = rows0 + j * T.row;
+          return (
+            <Part id={d.id} label={d.card.title}>
+              <path class="dwg-hit" d={R(c.x + 16, ry - 9, c.w - 20, 18)} />
+              <path class="sv-drv" d={R(c.x + 18, ry - 4.5, 12, 9)} />
+              <text class="txt-note sv-row" x={c.x + 34} y={ry + 3.8}>{rowText(bay)}</text>
+            </Part>
+          );
+        })}
+        {wrap(c.p.holds.toUpperCase(), c.w).map((line, k) => <text class="txt-note" x={c.x + 22} y={c.last + 24 + k * 13}>{line}</text>)}
+      </g>
+    ))}
+    {blocks.map((b) => (
+      <>
+        <Part id={b.id} label={title(b.id)}>
+          <path class="dwg-hit" d={R(b.x - 12, T.y - 12, b.w, 20 + b.lines.length * 13 + 10)} />
+          <text class="txt-label" x={b.x + 22} y={T.y + 4}>{b.head}</text>
+          {b.lines.map((l, i) => <text class="txt-note" x={b.x + 22} y={T.y + 17 + i * 13}>{l}</text>)}
+        </Part>
+        <Balloon at={[b.x, T.y]} n={NUM[b.id]} part={b.id} />
+      </>
+    ))}
+  </View>
+
+  <!-- ================= TOP VIEW (cover off) ================= -->
+  <View x={39} y={48} w={440} h={600} title="TOP VIEW · COVER OFF" scale={s} labelAt={[340, 58]}>
+    <text class="txt-note" x={X0 + (s * WE) / 2} y={YF + 25} text-anchor="middle">INSIDE IS SCHEMATIC</text>
+    <path class="face-top" d={top.box({ x: EAR, z: 0, w: W, d: D })} />
+    <use href={`#${DWG}-plan`} transform={top.m} />
+    {[
+      { id: 'backplane', d: top.box(bp) },
+      { id: 'fans', d: top.box(fans) },
+      { id: 'perc', d: top.box(perc) },
+      { id: 'ndc', d: top.box(ndc) },
+      { id: 'psus', d: psuBoxes.map(top.box).join('') },
+      { id: 'cpu1', d: top.box(cpus[0]) },
+      { id: 'cpu2', d: top.box(cpus[1]) },
+      { id: 'dimms', d: dimmBanks.map(top.box).join('') },
+      { id: 'riser-1', d: top.box(risers[0]) },
+      { id: 'riser-2', d: top.box(risers[1]) },
+      { id: 'gpu', d: top.box(gpu) },
+    ].map((p) => (
+      <Part id={p.id} label={title(p.id)}>
+        <path class="tint" d={p.d} />
+        <path class="ln-obj" d={p.d} pathLength="1" />
+      </Part>
+    ))}
+    {labels.map((l) => <text class:list={[l.sm ? 'sv-s' : 'sv-t', 'sv-ko']} x={n(l.at[0])} y={n(l.at[1] + 3.5)}>{l.t}</text>)}
+    <Particles d={cold} kind="cold" n={3} dur={3} />
+    <Particles d={hot} kind="hot" n={3} dur={3} />
+    {left.map((b) => <Balloon at={[LX, b.y]} n={NUM[b.id]} to={b.to} part={b.id} />)}
+    {aisle.map((b) => <Balloon at={[b.x, aisleY]} n={NUM[b.id]} to={b.to} part={b.id} />)}
+    {rear.map((b) => <Balloon at={[b.x, rearY]} n={NUM[b.id]} to={b.to} part={b.id} />)}
+    <Balloon at={[RX, pl(0, gpu.z + gpu.d / 2)[1]]} n={NUM.gpu} to={pl(gpu.x + gpu.w - 8, gpu.z + gpu.d / 2)} part="gpu" />
+    <Dim a={pl(EAR + W, 0)} b={pl(EAR + W, D)} offset={24} mm={D} />
+  </View>
+
+  <!-- ================= FRONT ================= -->
+  <View x={39} y={654} w={420} h={198} title="FRONT" scale={s} labelAt={[X0 + (s * WE) / 2, 806]}>
+    <path class="ln-cons" d={join(P([pl(0, -EAR_D), fr(0, -14)]), P([pl(WE, -EAR_D), fr(WE, -14)]))} />
+    <Part id="server" label={r7302.identity.name}>
+      <path class="face-front" d={R(X0, YT, s * WE, s * H)} />
+      <use href={`#${DWG}-front`} transform={place(s, X0, YT)} />
+    </Part>
+    {drives.map((d) => (
+      <Part id={d.id} label={d.card.title} class={`pool-${d.pool}`}>
+        <path class="sv-drv" d={bayOnFront(d.bay)} />
+      </Part>
+    ))}
+    <path class="ln-thin" d={R(...fr(-3, -14), s * (u1 + 3), s * (H + 17))} style="--p:4" />
+    <text class="txt-label" x={X0 - 12} y={YT - 1}>B</text>
+    <Balloon at={[X0 + s * WE + 22, YT - 16]} n={NUM.server} to={fr(WE - 8, 6)} part="server" />
+    <Dim a={fr(0, H)} b={fr(WE, H)} offset={22} mm={WE} />
+    <Dim a={fr(0, 0)} b={fr(0, H)} offset={-18} mm={H} sub="2U" />
+  </View>
+
+  <!-- ================= REAR ================= -->
+  <View x={470} y={640} w={367} h={212} title="REAR" scale={s} labelAt={[XR + (s * W) / 2, 806]}>
+    <path class="face-front" d={R(XR, YT, s * W, s * H)} />
+    <path class="ln-thin" d={join(R(XR - s * EAR, YT, s * EAR, s * H), R(XR + s * W, YT, s * EAR, s * H))} />
+    <use href={`#${DWG}-rear`} transform={place(s, XR - s * REAR_OX, YT)} />
+    <Part id="riser-1" label={title('riser-1')}>
+      <path class="dwg-hit" d={box(r1)} />
+      <path class="ln-med" d={riser1.map((q) => R(q.x, q.y, q.w, q.h)).join('')} transform={place(s, XR, YT)} />
+    </Part>
+    <Part id="riser-2" label={title('riser-2')}>
+      <path class="dwg-hit" d={box(riser2)} />
+      <path class="ln-med" d={[blank2, handle].map((q) => R(q.x, q.y, q.w, q.h)).join('')} transform={place(s, XR, YT)} />
+    </Part>
+    <Part id="gpu" label={title('gpu')}>
+      <path class="dwg-hit" d={R(...rr(gz.x, gz.y), s * gz.w, s * gz.h)} />
+      <path class="ln-obj" d={R(gz.x, gz.y, gz.w, gz.h)} transform={place(s, XR, YT)} />
+    </Part>
+    <Part id="psus" label={title('psus')}>
+      <path class="dwg-hit" d={psuHit} />
+      <path class="ln-obj" d={psuLines} transform={place(s, XR, YT)} />
+    </Part>
+    <Part id="ndc" label={title('ndc')}>
+      <path class="dwg-hit" d={nicBox} />
+      <path class="ln-med" d={nicIds.map(rz).map((q) => R(q.x, q.y, q.w, q.h)).join('')} transform={place(s, XR, YT)} />
+    </Part>
+    <text class="sv-s sv-ko" x={n(rr(gz.x + gz.w / 2, 0)[0])} y={n(rr(0, gz.y + gz.h / 2)[1] + 3)}>RTX 3060</text>
+    <text class="sv-s sv-ko" x={n(rr(riser3.x + riser3.w / 2, 0)[0])} y={n(rr(0, riser3.y + riser3.h / 2)[1] - 1)}>RISER 3</text>
+    <text class="sv-s sv-ko" x={n(rr(riser3.x + riser3.w / 2, 0)[0])} y={n(rr(0, riser3.y + riser3.h / 2)[1] + 10)}>OUT</text>
+    <g class="net-1g">
+      <path class="ln-net" d={P([nicOut, [nicOut[0], 776]])} pathLength="1" />
+      <text class="txt-note" x={nicOut[0] - 6} y={772} text-anchor="end">{up.nic} → GATEWAY {up.port} · {up.speed}</text>
+    </g>
+    <Balloon at={[rr((r1.x0 + r1.x1) / 2, 0)[0], 640]} n={NUM['riser-1']} to={rr((r1.x0 + r1.x1) / 2, r1.y0 + 3)} part="riser-1" />
+    <Balloon at={[rr(gz.x + gz.w * 0.22, 0)[0], 640]} n={NUM['riser-2']} to={rr(gz.x + gz.w * 0.22, gz.y + 3)} part="riser-2" />
+    <Balloon at={[rr(gz.x + gz.w * 0.78, 0)[0], 640]} n={NUM.gpu} to={rr(gz.x + gz.w * 0.78, gz.y + 3)} part="gpu" />
+    <g class="sv-s">
+      <text x={n(rr(psu1.x + psu1.w / 2, 0)[0])} y={YT + s * H + 12}>PSU 1</text>
+      <text x={n(rr(psu2.x + psu2.w / 2, 0)[0])} y={YT + s * H + 12}>PSU 2</text>
+    </g>
+    <Balloon at={[rr(n4.x + n4.w, 0)[0] + 22, 752]} n={NUM.ndc} to={rr(n4.x + n4.w / 2, n4.y + n4.h)} part="ndc" />
+    <Balloon at={[rr((psu1.x + psu1.w + psu2.x) / 2, 0)[0], 764]} n={NUM.psus} to={rr((psu1.x + psu1.w + psu2.x) / 2, psu1.y + psu1.h - 4)} part="psus" />
+  </View>
+
+  <Fragment slot="cards">
+    {cards.map(([id, c]) => <PartCard id={id} title={c.title} kind={c.kind} lines={c.lines} />)}
+  </Fragment>
+
+  <Fragment slot="legend">
+    <Key items={[
+      { line: 'obj', label: 'Object' },
+      { line: 'pool-rpool', label: 'rpool' },
+      { line: 'pool-data', label: 'data' },
+      { line: 'net-1g', label: '1 GbE' },
+      { line: 'air-cold', label: 'Cold air' },
+      { line: 'air-hot', label: 'Hot air' },
+    ]} />
+  </Fragment>
+</Sheet>

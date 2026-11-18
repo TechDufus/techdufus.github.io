@@ -26,10 +26,10 @@ const plan = [
   id={DWG}
   dwgNo="TD-LAB-03"
   title="The stack"
-  desc="The software on the lab, drawn as a building. Section A–A: the R730 below grade on three ZFS pools, Proxmox at ground level, the NAS, the gateway and the control node stacked beside it, and the second host, an R430, as a small building of its own; a floor of virtual machines with three Talos nodes and three standalone VMs, one of them on the R430; the Kubernetes cluster as a tower on those nodes, with Cilium as its floor, the platform as fixtures and an apps storey of running apps on top. Plan: the three nodes inside the Proxmox host, one API endpoint, one network, and their disks on the fast pool. Solid is running."
+  desc="The software on the lab, drawn as a building. Section A–A: the R730 below grade on three ZFS pools, Proxmox at ground level, the NAS, the gateway and the control node stacked beside it, and the second host, the R730-2, as a small building of its own; a floor of virtual machines with three Talos nodes and four standalone VMs, two of them on the R730-2; the Kubernetes cluster as a tower on those nodes, with Cilium as its floor, the platform as fixtures and an apps storey of running apps on top. Plan: the three nodes inside the Proxmox host, one API endpoint, one network, and their disks on the fast pool. Solid is running."
   sheet={[3, 3]}
-  rev="E"
-  date="2026-11-10"
+  rev="F"
+  date="2026-11-18"
   checked="TD"
   revisions={[
     { rev: 'A', date: '2026-09-29', desc: 'First issue' },
@@ -37,8 +37,9 @@ const plan = [
     { rev: 'C', date: '2026-09-29', desc: 'Metrics, logs, Grafana' },
     { rev: 'D', date: '2026-10-03', desc: 'R730, CloudNativePG, RustFS, three apps, GitHub runner' },
     { rev: 'E', date: '2026-11-10', desc: 'R430, robomp, omp-cloud, NFS CSI, Dash, media apps' },
+    { rev: 'F', date: '2026-11-18', desc: 'R730-2 for the R430, Omarchy desktop' },
   ]}
-  stamp={{ text: 'AS BUILT', tone: 'ok', x: 1086, y: 262 }}
+  stamp={{ text: 'AS BUILT', tone: 'ok', x: 1086, y: 276 }}
   interactive
   hint
 >

@@ -3,9 +3,9 @@
   HistoryView: Sheet 02A's R720xd → R730 tab. The R720xd's front, simplified (24 carriers; the
   drives that moved over and are still here, in the bays they left), joined by an elbow line each
   to the bay they sit in on the R730 (clickable, numbered, as on the other tabs), and the four
-  Intel SSDs that are new to the lab, in bays 0–3. Two more 500 GB SSDs moved over too and have
-  since gone on to the R430: a note under the table says so. The move table below is the owner's
-  record of 2026-10-01 (it is not the
+  Intel SSDs that are new to the lab, in bays 0–3. Two more 500 GB SSDs moved over too, went on to
+  the R430 and are in the R730-2 now: a note under the table says so. The move table below is the
+  owner's record of 2026-10-01 (it is not the
   frozen 2026-09-28 snapshot: that one still shows a Gigastone in bay 0); the R720xd's outline is
   the only thing read from the snapshot. Needs <R730Defs id={dwg} /> in the same SVG and
   <R730Cards /> on the page.
@@ -144,7 +144,7 @@ const TY = 222; // the table's first row: clear of the sheet's revision block ab
         </g>
       );
     })}
-    <text class="txt-note" x={COL} y={TY + rows.length * 40}>2 × MX500 500 GB · SINCE MOVED TO THE R430</text>
+    <text class="txt-note" x={COL} y={TY + rows.length * 40}>2 × MX500 500 GB · NOW IN THE R730-2</text>
     <g class="sem-new">
       <text class="txt-label" x={COL} y={TY + rows.length * 40 + 36}>NEW TO THE LAB</text>
       {fresh.map((d, i) => (

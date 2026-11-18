@@ -1,10 +1,10 @@
 ---
 /*
   /lab/servers/: Sheet 02 · The servers (TD-LAB-02): the four machines that run things (the R730,
-  the R430, the Mac mini and the Raspberry Pi), each one's front at the same scale. The drawing is
-  src/components/drawing/servers/ServersSheet.astro; under it the same four as a table (the text
+  the R730-2, the Mac mini and the Raspberry Pi), each one's front at the same scale. The drawing
+  is src/components/drawing/servers/ServersSheet.astro; under it the same four as a table (the text
   equivalent), all from src/data/lab/servers.ts. The two Dells have sheets of their own:
-  /lab/r730/ (TD-LAB-02A) and /lab/r430/ (TD-LAB-02B).
+  /lab/r730/ (TD-LAB-02A) and /lab/r730-2/ (TD-LAB-02B).
 */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { siteMetadata } from '../../data/site';
@@ -14,14 +14,14 @@ import { cpuCount, machines } from '../../data/lab/servers';
 
 <BaseLayout
   title="Sheet 02 · The servers"
-  description="The four machines that run my homelab, drawn from the front at one scale: a Dell R730 and a Dell R430 on Proxmox, a Mac mini for macOS CI, and a Raspberry Pi as the control node. What is in each, and what runs on it."
+  description="The four machines that run my homelab, drawn from the front at one scale: a Dell R730 and a Dell R730-2 on Proxmox, a Mac mini for macOS CI, and a Raspberry Pi as the control node. What is in each, and what runs on it."
   ogImage={siteMetadata.media.labSocialImage}
   ogImageAlt={siteMetadata.media.labSocialImageAlt}
 >
   <div class="pg-servers">
     <section class="wrap sv-hero" aria-labelledby="sv-title">
       <h1 class="h1" id="sv-title">The <em>servers</em>.</h1>
-      <p class="lede sv-hero__lede">Four machines do the work. Two Dells run Proxmox, a Mac mini runs macOS CI, and a Raspberry Pi is the control node.</p>
+      <p class="lede sv-hero__lede">Four machines do the work. Two Dells run Proxmox, the R730 and the R730-2, a Mac mini runs macOS CI, and a Raspberry Pi is the control node.</p>
       <p class="sv-hero__links">
         <a class="link link--quiet" href="/lab/"><span aria-hidden="true">←</span> The lab</a>
         <a class="link link--quiet" href="/lab/rack/">Sheet 01 · The cabinet</a>
@@ -32,7 +32,7 @@ import { cpuCount, machines } from '../../data/lab/servers';
 
     <div class="sv-sheet">
       <ServersSheet />
-      <p class="sv-colophon">All four at the same scale. The Pi really is that small.</p>
+      <p class="sv-colophon">All four at the same scale. The two Dells are the same chassis. The Pi really is that small.</p>
     </div>
 
     <section class="wrap sv-more" aria-label="The servers in words">

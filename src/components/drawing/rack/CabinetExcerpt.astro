@@ -1,7 +1,7 @@
 ---
 /*
   CabinetExcerpt: Sheet 01 in small, for /lab (or a post). The front elevation of the part of the
-  cabinet that's used: U1 to U14 with the rails counting down from the top, a break, then the
+  cabinet that's used: U1 to U16 with the rails counting down from the top, a break, then the
   bottom shelf in the last two units. The gear is numbered with the full sheet's balloon numbers and opens
   the same cards; the U7 Pro is an off-sheet callout fed by the injector. The device list
   (Compute / Network / Storage / Edge) sits beside the drawing when there's room, under it when
@@ -36,14 +36,14 @@ interface Props {
 }
 const {
   id = 'lab-cab',
-  caption = 'Everything lives in the top 14U, except a shelf of spares at the bottom.',
+  caption = 'Everything lives in the top 16U, except a shelf of spares at the bottom.',
   href = '/lab/rack/',
 } = Astro.props;
 const pid = (dev: string): string => `${id}-${dev}`;
 const f = (v: number): string => String(Math.round(v * 10) / 10);
 
 /* ---------- layout (paper units) ---------- */
-const W = 440, S = 0.54, RX = 62, TOP = 96, GAP = 30, LAST = 14;
+const W = 440, S = 0.54, RX = 62, TOP = 96, GAP = 30, LAST = 16;
 const hi = ortho({ x: RX, y: TOP + CAB.railTop * S, scale: S, flipY: true });
 const hiBot = hi.pt(0, yBot(LAST))[1];
 const lo = ortho({ x: RX, y: hiBot + GAP + yTop(CAB.units - 1) * S, scale: S, flipY: true });
@@ -83,8 +83,8 @@ const POE_X = 350;
 const poeRun = `M${f(poe[0])} ${f(poe[1])}H${POE_X}V${OFF.y + OFF.h + 8}`;
 
 const desc =
-  `The front of the ${CAB.units}U cabinet, rails numbered from the top. A shelf at U1 to 2 holds a Mac mini, a spare HP thin client with a Raspberry Pi 4 and the fiber ONT on it, and a PoE injector; U3 to 7 are empty; a UniFi UNAS Pro 8 sits at U8 to 9, a UniFi Dream Machine Pro at U10, U11 is empty, a Dell PowerEdge R430 is at U12 and a Dell PowerEdge R730 at U13 to 14. ` +
-  `U15 to ${CAB.units - 2} are empty and broken out; a shelf at U${CAB.units - 1} to ${CAB.units} holds a spare drive and patch cables. The U7 Pro access point is off the sheet, powered by the injector. Each numbered part opens a card.`;
+  `The front of the ${CAB.units}U cabinet, rails numbered from the top. A shelf at U1 to 2 holds a Mac mini, a spare HP thin client with a Raspberry Pi 4 and the fiber ONT on it, and a PoE injector; U3 to 7 are empty; a UniFi UNAS Pro 8 sits at U8 to 9, a UniFi Dream Machine Pro at U10, U11 to 12 are empty, a Dell PowerEdge R730 is at U13 to 14 and a second one, the R730-2, at U15 to 16. ` +
+  `U17 to ${CAB.units - 2} are empty and broken out; a shelf at U${CAB.units - 1} to ${CAB.units} holds a spare drive and patch cables. The U7 Pro access point is off the sheet, powered by the injector. Each numbered part opens a card.`;
 ---
 
 <div class="rkx">

@@ -86,8 +86,8 @@ export type DeviceId =
   | 'poe-injector'
   | 'unas-pro-8'
   | 'udm-pro'
-  | 'r430'
   | 'r730'
+  | 'r730-2'
   | 'u7-pro'
   | 'spare-drive'
   | 'patch-cables';
@@ -323,7 +323,7 @@ export type StackItem = {
   /** For VMs: the size of each one. */
   vm?: VmSize;
   /** For a VM that isn't on the R730: the host it runs on. */
-  on?: 'r430';
+  on?: 'r730-2';
   card: Card;
 };
 

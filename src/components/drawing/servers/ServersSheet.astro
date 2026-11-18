@@ -2,9 +2,8 @@
 /*
   TD-LAB-02 · Sheet 2 of 3 · The servers: the four machines that run things, each one's front at
   the same scale, so a 2U server and a Raspberry Pi can be compared by eye. Under each front: what
-  is in it and what runs on it. In the right column: the schedule (threads and memory, with the
   total), then the cards. The two Dells' cards link their own sheets, /lab/r730/ (TD-LAB-02A) and
-  /lab/r430/ (TD-LAB-02B).
+  /lab/r730-2/ (TD-LAB-02B).
 
   The fronts are the cabinet's panel line work (../rack/model.ts, from src/data/lab/rack.ts); every
   word and number comes from src/data/lab/servers.ts. The page (src/pages/lab/servers.astro) wraps
@@ -25,19 +24,19 @@ import { cpuCount, machineCard, machines, totals, type MachineId } from '../../.
 
 const DWG = 'labsv';
 
-/* ---------- layout (paper units): three rows, the two rack servers above the two on the shelf ---------- */
+/* ---------- layout (paper units): the two rack servers, then the two on the shelf ---------- */
 const k = atScale(1, 2.5);
 const X0 = 148;
 /** Each front's left edge, and the paper y its bottom edge stands on; `cw` is the room its lettering has. */
 const PLACE: Record<MachineId, { x: number; foot: number; cw: number }> = {
   r730: { x: X0, foot: 245, cw: 579 },
-  r430: { x: X0, foot: 455, cw: 579 },
-  mini: { x: X0, foot: 627, cw: 314 },
-  'rpi-4b': { x: X0 + 330, foot: 627, cw: 249 },
+  'r730-2': { x: X0, foot: 501, cw: 579 },
+  mini: { x: X0, foot: 671, cw: 314 },
+  'rpi-4b': { x: X0 + 330, foot: 671, cw: 249 },
 };
 /** Header baselines per row, so the two on the shelf line up although one is shorter. */
-const HEAD: Record<MachineId, number> = { r730: 110, r430: 374, mini: 554, 'rpi-4b': 554 };
-/** Whose width is dimensioned (the R430 is as wide as the R730: one dimension covers both). */
+const HEAD: Record<MachineId, number> = { r730: 110, 'r730-2': 366, mini: 598, 'rpi-4b': 598 };
+/** Whose width is dimensioned (the R730-2 is as wide as the R730: one dimension covers both). */
 const WIDTH_DIM: MachineId[] = ['r730', 'mini', 'rpi-4b'];
 /** A .txt-note character's advance (10.5 px mono, tracked .06 em), and the pitch of its lines. */
 const CHAR = 10.5 * (0.6 + 0.06), LINE = 15;
@@ -79,10 +78,13 @@ const desc =
   title="The servers"
   desc={desc}
   sheet={[2, 3]}
-  rev="A"
-  date="2026-11-10"
+  rev="B"
+  date="2026-11-18"
   checked="TD"
-  revisions={[{ rev: 'A', date: '2026-11-10', desc: 'First issue: four machines' }]}
+  revisions={[
+    { rev: 'A', date: '2026-11-10', desc: 'First issue: four machines' },
+    { rev: 'B', date: '2026-11-18', desc: 'R730-2 for the R430' },
+  ]}
   stamp={{ text: 'AS BUILT', tone: 'ok', x: 1036, y: 520 }}
   interactive
   hint
@@ -100,7 +102,7 @@ const desc =
     })}
   </defs>
 
-  <View x={39} y={39} w={798} h={813} title="FRONT ELEVATIONS" scale={k} note="ALL FOUR AT ONE SCALE" labelAt={[438, 782]}>
+  <View x={39} y={39} w={798} h={813} title="FRONT ELEVATIONS" scale={k} note="ALL FOUR AT ONE SCALE" labelAt={[438, 806]}>
     {rows.map((r) => (
       <>
         <Part id={r.m.id} label={r.m.short} p={2}>

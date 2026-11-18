@@ -765,6 +765,13 @@ export const labSpec: {
   },
   changelog: [
     {
+      date: '2026-11-12',
+      title: 'R430 → R730-2',
+      href: '/lab/r730-2/',
+      note: 'A second R730 took the R430’s place, RAM and SSDs. My desktop lives in a VM on it now, so the PC on my desk can sleep.',
+      cta: 'See the sheet'
+    },
+    {
       date: '2026-11-09',
       title: 'robomp',
       href: '/lab/stack/',

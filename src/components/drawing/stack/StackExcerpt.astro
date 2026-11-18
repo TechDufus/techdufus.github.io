@@ -111,14 +111,17 @@ const pid = (t: Thing) => `${id}-${t.id}`;
           <text class="txt-note fg-e" x={NW - NAX} y={f(fl.ny + 24)}>{toolText(fl.l.tool).toUpperCase()}</text>
         </g>
         <g style="--p:4">
-          {fl.chips.map((c) => (
-            <g {...at(c.wp, c.np, planned(c.t) ? 'fg-planned' : '')}>
-              <Part id={pid(c.t)} label={tagOf(c.t)}>
-                <path class:list={['face', planned(c.t) ? 'ln-phantom' : 'ln-obj']} d={rc(0, 0, c.w, CH)} />
-                <text class="stx-chip" x="10" y="17"><tspan class="stx-no">{c.t.n}</tspan>{' '}{c.text}</text>
-              </Part>
-            </g>
-          ))}
+          {fl.chips.map((c) => {
+            const g = at(c.wp, c.np, planned(c.t) ? 'fg-planned' : '');
+            return (
+              <g transform={g.transform} style={g.style} class={g.class}>
+                <Part id={pid(c.t)} label={tagOf(c.t)}>
+                  <path class:list={['face', planned(c.t) ? 'ln-phantom' : 'ln-obj']} d={rc(0, 0, c.w, CH)} />
+                  <text class="stx-chip" x="10" y="17"><tspan class="stx-no">{c.t.n}</tspan>{' '}{c.text}</text>
+                </Part>
+              </g>
+            );
+          })}
         </g>
       </Fragment>
     ))}

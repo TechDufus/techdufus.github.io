@@ -17,7 +17,7 @@ export async function GET() {
     '/lab/rack/',
     '/lab/servers/',
     '/lab/r730/',
-    '/lab/r430/',
+    '/lab/r730-2/',
     '/lab/r720xd/',
     '/lab/stack/',
     ...(business.enabled ? [business.appHref] : []),

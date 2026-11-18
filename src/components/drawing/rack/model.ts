@@ -60,13 +60,13 @@ export const RAIL_W = 15.875;
 export const HOLES = [(RACK_19_MM - 465.1) / 2, (RACK_19_MM + 465.1) / 2];
 
 /** Devices that pull air front to back (all have fans behind front intakes); airflow is drawn for these only. */
-export const FRONT_TO_BACK: DeviceId[] = ['unas-pro-8', 'r430', 'r730'];
+export const FRONT_TO_BACK: DeviceId[] = ['unas-pro-8', 'r730', 'r730-2'];
 
 /** Dell servers: the ears and drive carriers stand `proud` mm in front of the rack flange (Dell's
  *  Za, without bezel) and the body sits behind, `gap` mm above the bottom of its slot. */
 const DELL: Partial<Record<DeviceId, { proud: number; gap: number }>> = {
   r730: { proud: 18, gap: 0.8 },
-  r430: { proud: 20.1, gap: 0.8 },
+  'r730-2': { proud: 18, gap: 0.8 },
 };
 
 /* ------------------------------------------------------------------ devices */
@@ -365,8 +365,8 @@ export function frontPanel(s: Slot, lite = false): Panel {
   const d = s.dev;
   const units = Math.round(s.hU / U_MM);
   switch (d.id) {
-    case 'r430':
-    case 'r730': {
+    case 'r730':
+    case 'r730-2': {
       const p = zonesPanel(d, 'front', s.faceX, s.faceW, s.faceH, lite);
       return { ...p, obj: rr(s.faceX, 0, s.faceW, s.faceH) + p.obj };
     }

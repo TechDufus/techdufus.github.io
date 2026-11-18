@@ -1,9 +1,9 @@
-// Synced from homelab @ a2557c0 (2026-11-10)
+// Synced from homelab @ a136d25 (2026-11-14)
 /**
  * Sheet 03 · The stack: what runs where, in three layers. Bootstrap turns the metal into a
  * hypervisor, OpenTofu puts VMs on it, and the cluster runs the rest.
  *
- * `status` is as of 2026-11-10: running means it's in the repo and up; planned means it's in the
+ * `status` is as of 2026-11-14: running means it's in the repo and up; planned means it's in the
  * plan but not built yet. Versions are major.minor.
  */
 import type { StackGroup, StackItem, StackLayer, Status } from './types';
@@ -43,19 +43,19 @@ export const stack: StackLayer[] = [
                 'rpool: boot, a 3-way mirror.',
                 'fast: VM disks, a 3-way mirror with a hot spare.',
                 'bulk: scratch, one disk.',
-                'On the R730. The R430 has one pool of its own, a 2-way mirror.'
+                'The R730-2 has its own: rpool and data, 2-way mirrors.'
               ]
             }
           },
           {
-            id: 'r430',
-            name: 'Dell R430',
-            what: 'The second server: 24 threads, 48 GB',
+            id: 'r730-2',
+            name: 'Dell R730-2',
+            what: 'The second server: 48 threads, 48 GB',
             status: 'running',
             card: {
-              title: 'Dell PowerEdge R430',
+              title: 'Dell PowerEdge R730-2',
               kind: 'Metal',
-              lines: ['24 threads, 48 GB RAM, two drives in one ZFS mirror.', 'The second Proxmox host, clustered with the R730.']
+              lines: ['48 threads, 48 GB RAM, four drives in two ZFS mirrors.', 'Clustered with the R730. An RTX 3060 is in it, for testing.']
             }
           }
         ]
@@ -76,7 +76,7 @@ export const stack: StackLayer[] = [
               lines: [
                 'Installed by hand, on ZFS.',
                 'Ansible configures it after that.',
-                'Two hosts now, the R730 and an R430, in one cluster.',
+                'Two hosts, the R730 and the R730-2, in one cluster.',
                 'The Pi is the tie-breaker between them.'
               ]
             }
@@ -211,15 +211,27 @@ export const stack: StackLayer[] = [
             name: 'robomp',
             what: 'The oh-my-pi GitHub bot',
             status: 'running',
-            on: 'r430',
+            on: 'r730-2',
             card: {
               title: 'robomp',
               kind: 'Standalone VM',
               lines: [
                 'The oh-my-pi GitHub bot, in its own VM.',
                 'It triages issues on my personal projects and opens fix PRs.',
-                '8 vCPU, 16 GiB RAM, 100 GB, on the R430.'
+                '8 vCPU, 8 GiB RAM, 100 GB, on the R730-2.'
               ]
+            }
+          },
+          {
+            id: 'desktop',
+            name: 'Omarchy desktop',
+            what: 'My remote desktop',
+            status: 'running',
+            on: 'r730-2',
+            card: {
+              title: 'Omarchy desktop',
+              kind: 'Standalone VM',
+              lines: ['My Omarchy desktop, in a VM: my omp and Tern sessions live here.', '32 vCPU, 28 GiB RAM, 200 GB, on the R730-2.']
             }
           }
         ]
@@ -423,9 +435,9 @@ export const stack: StackLayer[] = [
             name: 'Dash',
             what: 'Mission control for the lab',
             status: 'running',
-            version: '0.15',
+            version: '0.17',
             card: {
-              title: 'Dash 0.15',
+              title: 'Dash 0.17',
               kind: 'Mission control',
               lines: ['Mission control for the lab, on one screen.', 'My own open-source project, running here.']
             }

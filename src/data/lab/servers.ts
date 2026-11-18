@@ -1,20 +1,20 @@
 /**
  * Sheet 02 · The servers: the four machines in the cabinet that run things, side by side. The
- * R730 and the R430 are the two Proxmox hosts, the Mac mini does macOS CI, and the Raspberry Pi
+ * R730 and the R730-2 are the two Proxmox hosts, the Mac mini does macOS CI, and the Raspberry Pi
  * is the control node.
  *
  * Almost nothing is stated here for the first time. Where each box sits comes from ./rack.ts, the
- * R730's insides from ./server.ts, the R430's from ./r430.ts, and what runs on the two hosts from
- * ./stack.ts (a VM is on the R730 unless it says `on: 'r430'`). Only the facts no other file
- * holds are written out below. The two Dells have sheets of their own (`sheet`).
+ * R730's insides from ./server.ts, the R730-2's from ./r730-2.ts, and what runs on the two hosts
+ * from ./stack.ts (a VM is on the R730 unless it says `on: 'r730-2'`). Only the facts no other
+ * file holds are written out below. The two Dells have sheets of their own (`sheet`).
  */
 import { device, nas, uLabel } from './rack';
-import { r430 } from './r430';
+import { r7302, r7302Derived } from './r730-2';
 import { derived, server } from './server';
 import { stack } from './stack';
 import type { Card, CardLines, DeviceId } from './types';
 
-export type MachineId = Extract<DeviceId, 'r730' | 'r430' | 'mini' | 'rpi-4b'>;
+export type MachineId = Extract<DeviceId, 'r730' | 'r730-2' | 'mini' | 'rpi-4b'>;
 
 export type Machine = {
   /** The cabinet device it is (./rack.ts). */
@@ -59,7 +59,7 @@ const item = (id: string) => {
 const proxmox = `${item('proxmox').name} ${item('proxmox').version}`;
 
 /** The running VMs on a Proxmox host, as the stack lists them ("3 Talos nodes", "GitHub runner"). */
-const vmsOn = (host: 'r730' | 'r430'): string[] =>
+const vmsOn = (host: 'r730' | 'r730-2'): string[] =>
   (stack.find((l) => l.id === 'vms')?.groups ?? [])
     .flatMap((g) => g.items)
     .filter((i) => i.status === 'running' && (i.on ?? 'r730') === host)
@@ -88,18 +88,18 @@ export const machines: Machine[] = [
     sheet: { no: '02A', href: '/lab/r730/' }
   },
   {
-    ...base('r430'),
+    ...base('r730-2'),
     job: 'The second Proxmox host',
-    cpu: `${r430.cpus.length} × ${r430.cpus[0].model.replace('Intel ', '')}`,
-    cores: r430.cores,
-    threads: r430.threads,
-    memoryGB: r430.memory.gb,
-    storage: `${words[r430.drives.length][0].toUpperCase()}${words[r430.drives.length].slice(1)} ${r430.drives[0].sizeGB} GB SSDs in one ZFS mirror`,
-    storageGB: r430.drives.reduce((sum, d) => sum + d.sizeGB, 0),
+    cpu: `${r7302.cpus.length} × ${r7302.cpus[0].model.replace('Intel ', '')}`,
+    cores: r7302.cores,
+    threads: r7302.threads,
+    memoryGB: r7302.memory.gb,
+    storage: `${words[r7302Derived.drives][0].toUpperCase()}${words[r7302Derived.drives].slice(1)} SSDs in ${words[r7302.pools.length]} ZFS mirrors`,
+    storageGB: r7302Derived.rawGB,
     os: proxmox,
-    runs: vmsOn('r430'),
+    runs: vmsOn('r730-2'),
     notes: ['Clustered with the R730.'],
-    sheet: { no: '02B', href: '/lab/r430/' }
+    sheet: { no: '02B', href: '/lab/r730-2/' }
   },
   {
     ...base('mini'),

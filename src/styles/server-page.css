@@ -1,5 +1,5 @@
 /*
-  The page shell the live server sheets share (/lab/r730/, /lab/r430/): the hero, the wide sheet
+  The page shell the live server sheets share (/lab/r730/, /lab/r730-2/): the hero, the wide sheet
   wrapper, and what sits below the sheet (at a glance, the pools, the links). Imported by those
   two pages; the frozen /lab/r720xd/ page keeps its own copy.
 */
@@ -21,7 +21,7 @@
 .pg-server [data-pool] { --pc: var(--line-3); }
 .pg-server [data-pool="rpool"] { --pc: var(--gold); }
 .pg-server [data-pool="fast"] { --pc: var(--ink); }
-.pg-server [data-pool="bulk"] { --pc: #8fa3c7; }
+.pg-server [data-pool="bulk"], .pg-server [data-pool="data"] { --pc: #8fa3c7; }
 .pg-server [data-pool="none"] { --pc: var(--faint); }
 .pg-server .srv-pools { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none; background: var(--line); border: 1px solid var(--line); }
 .pg-server .srv-pools > li { padding: 20px 22px 18px; background: var(--bg); box-shadow: inset 0 2px 0 var(--pc); }
@@ -31,8 +31,6 @@
 .pg-server .srv-pool__h { margin-top: 12px !important; font: italic 1.2rem/1.25 var(--font-display); color: var(--ink); }
 .pg-server .srv-pool__d { display: grid; gap: 4px; margin: 14px 0 0; padding: 12px 0 0; list-style: none; border-top: 1px solid var(--line); font-size: var(--fs-sm); color: var(--ink-2); }
 .pg-server .srv-pool__d span { display: inline-block; min-width: 4.5em; font: .75rem var(--font-mono); color: var(--faint); }
-/* a server with a single pool: one card, not a full-width band */
-.pg-server .srv-pools--one { max-width: 420px; }
 .pg-server .srv-next { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 32px; margin: 48px 0 0; padding-top: 24px; border-top: 1px solid var(--line-2); }
 @media (max-width: 760px) {
   .pg-server .srv-pools { grid-template-columns: minmax(0, 1fr); }

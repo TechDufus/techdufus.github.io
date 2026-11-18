@@ -1,8 +1,8 @@
 /*
-  What the live server sheets share (Sheet 02A, the R730; Sheet 02B, the R430): small lettering,
+  What the live server sheets share (Sheet 02A, the R730; Sheet 02B, the R730-2): small lettering,
   drives in their pool's colour (.pool-* sets --flow), spares, perforations, DIMM sticks.
   drawing.css belongs to the whole kit and the frozen archive sheets, so these live here.
-  Imported by r730/R730Defs.astro and r430/R430Sheet.astro.
+  Imported by r730/R730Defs.astro and r730-2/R7302Sheet.astro.
 */
 .sv-t, .sv-s { text-anchor: middle; letter-spacing: .06em; fill: var(--muted); pointer-events: none; }
 .sv-t { font-size: 10.5px; }
@@ -12,7 +12,9 @@
 .sv-lt { font-size: 9px; letter-spacing: .06em; fill: var(--flow); }
 .sv-row { fill: var(--dwg-text); }
 .sv-nc { text-transform: none; }
-.pool-rpool .txt-label, .pool-none .txt-label { fill: var(--flow); }
+.pool-rpool .txt-label, .pool-data .txt-label, .pool-none .txt-label { fill: var(--flow); }
+/* the R730-2's second pool: the steel of the kit's `bulk` pool (which only the R730 sheet draws); not in drawing.css, which the frozen post shares */
+.pool-data { --dwg-obj: var(--dwg-steel); --flow: var(--dwg-steel); }
 .sv-empty { fill: none; stroke: var(--dwg-obj); stroke-width: .8px; stroke-dasharray: 3 3; opacity: .6; vector-effect: non-scaling-stroke; }
 /* a text link inside a drawing (the archived sheet) */
 .sv-a { cursor: pointer; }

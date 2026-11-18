@@ -37,9 +37,9 @@ homelab; never write to it.
 |---|---|---|
 | `src/data/lab/stack.ts` | Sheet 03: three layers → groups → items, each `running` or `planned`, with a `card`. Line 1 is the sync marker. | Sheet 03 (`src/components/drawing/stack/*` via `model.ts`) on `/lab/stack/`; the stack excerpt on `/lab/`; the `/lab/` hero (Talos count and version); the `/lab/stack/` "Layer by layer" list and counts; the home lab stack line and hardware notes (`src/pages/index.astro`); the guide's `homelab` answer (`src/pages/guide.json.ts`); the stack thumb on `/lab/` (`rack/SheetThumb.astro`) |
 | `src/data/lab/rack.ts` | Sheet 01: the cabinet, devices (top-down U), shelves, links, the `/lab/` role list | Sheet 01 on `/lab/rack/` and its lazy views `/lab/rack/views/`; the cabinet excerpt and `derived.uUsed` on `/lab/`; the home "Hardware readout" (`devicesByRole`, branded devices only); the cabinet thumb; the fronts, names and positions on Sheet 02 |
-| `src/data/lab/servers.ts` | Sheet 02: the four machines that run things (`r730`, `r430`, `mini`, `rpi-4b`): job, CPU, cores, threads, memory, storage, OS, what runs on it. The R730's numbers come from `server.ts`, the R430's from `r430.ts`, the Proxmox version and the VMs on each host from `stack.ts` (a VM is on the R730 unless it has `on: 'r430'`), names and positions from `rack.ts`; the Mac mini's and the Pi's numbers are written here | Sheet 02 on `/lab/servers/` (drawing, schedule, cards, the table under it); the servers thumb reads `rack.ts` |
+| `src/data/lab/servers.ts` | Sheet 02: the four machines that run things (`r730`, `r730-2`, `mini`, `rpi-4b`): job, CPU, cores, threads, memory, storage, OS, what runs on it. The R730's numbers come from `server.ts`, the R730-2's from `r730-2.ts`, the Proxmox version and the VMs on each host from `stack.ts` (a VM is on the R730 unless it has `on: 'r730-2'`), names and positions from `rack.ts`; the Mac mini's and the Pi's numbers are written here | Sheet 02 on `/lab/servers/` (drawing, schedule, cards, the table under it); the servers thumb reads `rack.ts` |
 | `src/data/lab/server.ts` | Sheet 02A: the R730 as built (16 front bays, drives, pools, the PERC H730P Mini in HBA mode, risers, NICs, internal parts) | Sheet 02A on `/lab/r730/` and its lazy views `/lab/r730/views/`; the R730's row on Sheet 02; the kit excerpt `r730/R730Excerpt.astro` (not placed on any page; `/lab/` is at its HTML budget); pools, threads, memory, controller and drive count on Sheet 03; the `/lab/` hero; the home readout; the guide |
-| `src/data/lab/r430.ts` | Sheet 02B: the R430 as built (8 front bays by chassis number, two drives, one pool, the PERC H730 Mini in HBA mode, CPUs, the DIMMs and their sockets, NICs and the uplink from `rack.ts` `links`, PSUs, internal parts) | Sheet 02B on `/lab/r430/` (drawing, cards, at a glance, the pool); the R430's CPU, threads, memory and storage on Sheet 02 |
+| `src/data/lab/r730-2.ts` | Sheet 02B: the second R730 as built, "R730-2" on the site (8 front bays numbered 0–7 left to right in the `bays-0-7` zone, four drives, two pools, the PERC H730 Mini in HBA mode, CPUs, the DIMMs and their sockets, the GPU, NICs and the uplink from `rack.ts` `links`, PSUs, internal parts) | Sheet 02B on `/lab/r730-2/` (drawing, cards, at a glance, the pools); the R730-2's CPU, threads, memory and storage on Sheet 02 |
 | `src/data/lab/snapshots/` | The R720xd as built on 2026-09-28, **frozen** (its own `server-…` and `types-…`) | Nothing live: only the post `src/content/blog/from-hardware-raid-to-zfs.mdx` (its figures in `src/components/drawing/post/{fig.ts,BayMap,Pools,TwoCables,SheetLink}.astro`, the MDX's own `import { server }`, the post's `path` thumb) and the archive `/lab/r720xd/` (+ `/lab/r720xd/views/`, `src/components/drawing/r720xd/`). Never edit it |
 | `src/data/lab/types.ts` | Unions and shapes (`DeviceId`, `DriveId`, `PoolId`, `CardLines`, `Status`) | type-checks all of the above |
 | `labSpec` in `src/data/site.ts` | `lastRevised`/`lastRevisedIso`, `status`, `lede`, `drawings` (sheet cards, notes, `state`), `changelog` | `/lab/` (hero badge, Drawn to spec, changelog); home lab section (`labSpec.changelog[0]`, status); guide (`lastRevised`, status); `/docs/` and `/docs/setup/` ("Revised …") |
@@ -59,7 +59,7 @@ no longer true:
   `nas` in `rack.ts`; the NAS's cache drives and the spare on the bottom shelf aren't counted).
 - `src/pages/lab/stack.astro`: hero lede ("Nothing dashed.") and page `description`.
 - `src/pages/lab/r730.astro`: the page `description`.
-- `src/pages/lab/r430.astro`: the hero lede, the quip's second sentence and the page `description`.
+- `src/pages/lab/r730-2.astro`: the hero lede, the quip and the page `description`.
 - `src/pages/lab/servers.astro`: the hero lede ("Four machines do the work. Two Dells run
   Proxmox, …"), the colophon and the page `description`.
 - `src/pages/guide.json.ts`: the `rack` answer (what is on the top shelf, what each sheet shows).
@@ -71,13 +71,13 @@ no longer true:
   `rack/CabinetExcerpt.astro` (both list every device and U), Sheet 02A in
   `src/pages/lab/r730.astro` (its drive and pool counts), Sheet 03 in
   `src/components/drawing/stack/StackSheet.astro` (the Talos node and standalone VM counts, which
-  VM is on the R430, "an apps storey of running apps"). Sheet 02's is built from `servers.ts`.
+  VMs are on the R730-2, "an apps storey of running apps"). Sheet 02's is built from `servers.ts`.
 - `server.ts` cards that mention the stack: `memory.card` ("three Talos nodes at 24 GiB each"),
   the `fast` drives' cards ("the Talos nodes included").
-- Cards that name the second host: `stack.ts` `zfs`, `proxmox`, `rpi`, `r430` and `robomp`;
-  `rack.ts` `r430` and `udm-pro` (which gateway port goes where).
-- The numbers written out in `servers.ts` for the Mac mini and the Pi, and in `r430.ts` for the
-  R430 (they repeat what `rack.ts` and `stack.ts` cards say: change them together).
+- Cards that name the second host: `stack.ts` `zfs`, `proxmox`, `rpi`, `r730-2`, `robomp` and
+  `desktop`; `rack.ts` `r730-2` and `udm-pro` (which gateway port goes where).
+- The numbers written out in `servers.ts` for the Mac mini and the Pi, and in `r730-2.ts` for the
+  R730-2 (they repeat what `rack.ts` and `stack.ts` cards say: change them together).
 - The `stack.ts` header comment ("`status` is as of YYYY-MM-DD").
 
 ## Source map: which homelab file answers which site field
@@ -91,8 +91,8 @@ no longer true:
 | `kubernetes/flux/*.yaml` Kustomizations with `path: ./kubernetes/apps/<app>` + `kubernetes/apps/<app>/` | the `apps` group |
 | `hosts/proxmox/playbook.yml` task names | the `host-config` card (snapshots, SMART, ZFS events, ntfy, node exporter) and any new plant-room item in the `host` group |
 | the Pi's playbook (`hosts/*/playbook.yml`, the folder named after the Pi) | the `rpi` item: "the control node", configured by Ansible. Nothing more about what the Pi runs |
-| `inventory/hardware/*.yml` | `server.ts` (the R730) and `r430.ts` (the R430): drives (maker, model, size, bay, pool), pools (layout, bays), controller name; `nas` in `rack.ts` (the NAS: how many data disks, their size, the RAID level). Never serials, WWNs, device paths, PCI addresses, firmware, host names, share names or export paths, and nothing about a drive's wear or test results |
-| `docs/architecture.md`, the second host's parts table | `r430.ts`: CPUs, the DIMMs and their sockets, the NICs' make and count. Not there, so from the owner: which physical bays the chassis numbers 0–7, and the PSU wattage. Not recorded anywhere, so left off: the number of fans |
+| `inventory/hardware/*.yml` | `server.ts` (the R730, `r730.yml`) and `r730-2.ts` (the R730-2, `r730-2.yml`): drives (maker, model, size, bay, pool), pools (layout, bays), controller name; `nas` in `rack.ts` (the NAS: how many data disks, their size, the RAID level). Never serials, WWNs, device paths, PCI addresses, firmware, host names, share names or export paths, and nothing about a drive's wear or test results |
+| `docs/architecture.md`, the second host's parts table | `r730-2.ts`: CPUs, the DIMMs and their sockets, the NICs' make and count, the GPU and the risers. Not there, so from the owner: that the 8-bay front puts its bays next to the control panel (a blank on the right) with an optical drive fitted. Not recorded, so left off: the PSU wattage. The fan count (six) is the R730 chassis's, from Dell's manual |
 | `docs/architecture.md`, "the system as built": Hardware, Proxmox host, Cluster (its versions table and component list), rpi-control | what runs (cross-check with the wiring above) and the versions |
 | `docs/architecture.md` "Not built" (open work, one GitHub issue each) | the planned items |
 | `docs/adr/*.md` (indexed in `docs/adr/README.md`) | why something is in or out; an ADR that replaces a choice makes the old item gone |
@@ -101,7 +101,7 @@ no longer true:
 | `mise.toml` | cross-check only: `talosctl`/`kubectl` should match the tofu `talos_version`/`kubernetes_version`. The site prints no CLI versions |
 | `git -C ../homelab log` | changelog dates and what changed |
 | `docs/architecture.md` Proxmox host ("Proxmox VE 9.2"), the inventory header | `proxmox.version` |
-| `inventory/devices.yaml` (`model`, `os`) | `servers.ts` and the `rack.ts` cards: the R430's, the Mac mini's and the Pi's model, memory, storage and OS family. Never its addresses, host names, VM ids, firmware or licence levels; nothing about what the Pi runs beyond "control node" and "tie-breaker", or whose jobs the Mac runs. Device ids on the site are not the homelab's host names (the Mac mini is `mini`) |
+| `inventory/devices.yaml` (`model`, `os`) | `servers.ts` and the `rack.ts` cards: the R730-2's, the Mac mini's and the Pi's model, memory, storage and OS family. Never its addresses, host names, VM ids, firmware or licence levels; nothing about what the Pi runs beyond "control node" and "tie-breaker", or whose jobs the Mac runs. Device ids and names on the site are not the homelab's host names (the Mac mini is `mini`, the second R730 is `r730-2` / "R730-2", the desktop VM is `desktop` / "Omarchy desktop"). The R430 is a powered-off spare off the cabinet: it isn't drawn |
 
 One site item per thing a reader would recognise. A Kustomization that only supports another one
 folds into that item's card; a new capability that isn't part of an existing item gets its own.
@@ -252,9 +252,9 @@ Running needs its tofu resource and `docs/architecture.md` describing it; sizes 
 resource, never an estimate. The pavilion letters the name over lines of 9 characters and `what`
 over lines of 12, and holds two lines of each at most: keep both short (`ci-runner` and
 `omp-cloud` are the examples). It draws as a pavilion beside the cluster on the VM floor; see the
-capacity limit below. A VM that runs on the R430 takes `on: 'r430'` and no `vm` (`VmSize.pool`
-names the R730's pools only; its size goes in the card): it draws on the R430's building instead
-(`robomp` today), which holds one.
+capacity limit below. A VM that runs on the R730-2 takes `on: 'r730-2'` and no `vm` (`VmSize.pool`
+names the R730's pools only; its size goes in the card): it draws on the R730-2's building instead
+(`robomp` and `desktop` today), which holds four, stacked.
 
 ### Change the Talos node count or size (`talos-nodes`)
 
@@ -275,7 +275,7 @@ coordinates.
   has front bays only and no rear ones; card `kind` like `Bay 5 · SATA SSD`). `pool` is the pool
   it belongs to and is omitted for a spare in no pool; `role: 'spare'` marks a spare: with a
   `pool` it is that pool's hot spare (the `fast` spare in bay 0), without one it just sits in the
-  server (none today: the two that did went to the R430; card `kind` ends in ` · spare`, and
+  server (none today: the two that did went to the R430, and are now the R730-2's `data` pool; card `kind` ends in ` · spare`, and
   Sheet 02's legend, glance row and pools tree show such spares only when there are some). Bays are derived
   (`bays.front` is 16; the empty ones draw as empty carriers). `server.ts` throws at load when a
   drive is outside 0–15 or two share a bay, when a drive has neither a `pool` nor `role: 'spare'`,
@@ -327,24 +327,24 @@ Live data (`server.ts`, `types.ts`, `rack.ts`) can't reach it, but shared code c
 **Sheet 03** (`src/components/drawing/stack/`):
 
 - Layer 1 is drawn by hand from fixed ids: `r730`, `zfs`, `proxmox`, `rpi`, `udm-pro`, `unas`,
-  `r430` (`SectionView.astro`). Renaming one breaks the build (`thing()` throws); another new item
+  `r730-2` (`SectionView.astro`). Renaming one breaks the build (`thing()` throws); another new item
   in the `metal`, `control` or `network` groups gets a number and a card but no drawing. Only the
   `host` group grows: each item other than `proxmox` is a 112-wide plant room at the right of the
   Proxmox storey (two-line names of 11 characters).
 - **The site, right of the R730's building** (x 932 to 1205) is full: the gateway, the NAS on it
-  and the control node's hut on top (stacked as in the cabinet), then the R430's building (x 1084
-  to 1196: basement, a Proxmox storey lettered HOST 2, and one pavilion on top). The R430's
-  basement letters `r430.item.what` after its colon ("24 threads, 48 GB"), wrapped at 13
-  characters. It has no footing: the footings are the R730's pools, drawn to size. A third host,
-  or a second VM on the R430, needs a redraw.
+  and the control node's hut on top (stacked as in the cabinet), then the R730-2's building (x 1084
+  to 1196: basement, a Proxmox storey lettered HOST 2, and its VM pavilions stacked one above the
+  other on top, robomp lowest). The R730-2's basement letters `r730-2.item.what` after its colon
+  ("48 threads, 48 GB"), wrapped at 13 characters. It has no footing: the footings are the R730's
+  pools, drawn to size. A third host, or a fifth VM on the R730-2, needs a redraw.
 - `ClusterView.astro` and `StackSheet.astro` also draw `proxmox`, `cilium`, `zfs` and
   `proxmox-csi` by id, and the group ids `cluster`, `standalone`, `platform`, `apps` are fixed.
   The cluster group's first item is the Talos item and must have `count` and `vm`.
 - **The VM floor** runs from x 268 to 932: the tower takes `count × 136`, then each standalone VM
   on the R730 is a 112-wide pavilion with an 8 gap (`PW`, `PG` in `SectionView.astro`). With 3
   nodes it holds **two** (the GitHub runner and omp-cloud today); a third throws "too many
-  standalone VMs for the VM floor". 2 nodes → 3 VMs, 4 nodes → none. The R430 holds **one**
-  (`on: 'r430'`; a second throws).
+  standalone VMs for the VM floor". 2 nodes → 3 VMs, 4 nodes → none. The R730-2 holds **four**,
+  stacked (`on: 'r730-2'`; a fifth throws).
 - **The cluster plan** fits **3 nodes** (200-wide rooms, 50 apart, inside an 800-wide host). A
   fourth overflows the host outline: redraw `ClusterView.astro` first. VM disks are drawn to
   scale on `fast`; above about 110 GB per disk they crowd out the CSI volumes drawn between
@@ -365,38 +365,41 @@ Live data (`server.ts`, `types.ts`, `rack.ts`) can't reach it, but shared code c
 
 - `model.ts` draws faces by id: `frontPanel`/`rearPanel` switch on the device id; the default
   branch assumes a UDM/UNAS-style body with separate rack brackets. The Dell servers (`r730`,
-  `r430`) are special-cased through the `DELL` map: `slotOf` stands their ears and drive carriers
-  (the `plate`) proud of the rack flange by Dell's Za (18 and 20.1 mm) with the body behind and a
+  `r730-2`) are special-cased through the `DELL` map: `slotOf` stands their ears and drive
+  carriers (the `plate`) proud of the rack flange by Dell's Za (18 mm) with the body behind and a
   320 mm slide for the exploded views; `frontPanel` draws them from their front `zones` (a
   `kind: 'bay'` zone with `cells` draws as a run of carriers, without as one bay; `server.ts`
-  throws unless the R730's add up to 16). The R430's zones are traced from the figures in Dell's
-  owner's manual (8 × 2.5″ chassis, redundant PSUs); parts the manual calls optional are left off.
-  `FRONT_TO_BACK` lists `unas-pro-8`, `r430` and `r730`, the devices with airflow drawn (a 1U box
-  gets one particle each way, so the side and isometric views stay at 10). The R430 sits at U12
-  and the R730 at U13–14, where the R720xd was; the R720xd is a powered-off spare off the
-  cabinet, so it isn't drawn. Balloons follow the `/lab/` list order, then shelves.
+  throws unless the R730's add up to 16, `r730-2.ts` unless `bays-0-7` has 8). The R730-2 is the
+  R730's chassis: the same zones, except its front (8-bay backplane, the bays next to the
+  controls, a blank on the right, an optical drive fitted, from the owner) and its rear (the GPU
+  over riser 2's two slots, riser 3's opening empty). `FRONT_TO_BACK` lists `unas-pro-8`,
+  `r730` and `r730-2`, the devices with airflow drawn. The R730 sits at U13–14, where the
+  R720xd was, and the R730-2 right under it at U15–16; the R720xd and the R430 are powered-off
+  spares off the cabinet, so they aren't drawn. Balloons follow the `/lab/` list order, then shelves.
 - The top shelf, left to right: the Mac mini, a spare HP thin client lying flat with the Pi and
   the ONT on it, and the PoE injector tucked in at the right end. A thing with something on it
   (`covered` in `model.ts`) gets its isometric balloon in the left column, pointing at its front;
   a tucked-back thing's leader lands on the end that shows (`showsAt`).
 - The rear view has 12 particles, the limit: a new link takes one from another. Its two runs
-  down to the servers use the inner cable lanes (lane 0 the R430, lane 1 the R730); the runs up
+  down to the servers use the inner cable lanes (lane 0 the R730-2 from gateway port 8, lane 1
+  the R730 from port 3; the R730's run crosses the R730-2's lane once, unavoidably); the runs up
   take the next lanes in the order of how high they end (NAS, Mac mini, injector, Pi, ONT), then
   PoE and the ISP. The link labels go outermost lane first, top to bottom, so their leaders
-  don't cross. The front view's Detail B calls out gateway ports 3, 7, 9, 11, 6 and 2.
-- The cabinet is **24U** (`cabinet.heightU` in `rack.ts`): the bottom shelf is U23–24 and U15–22
+  don't cross. The front view's Detail B (U1–16) calls out gateway ports 3, 8, 9, 11, 6 and 2.
+- The cabinet is **24U** (`cabinet.heightU` in `rack.ts`): the bottom shelf is U23–24 and U17–22
   are free. Its outer height is not measured (`outerHeightMeasured: false`; `outer.h` is the rails
   plus the plinth and roof as drawn), so the front and side views leave that dimension off: set
   the flag and the number together once it is measured. Those two views are drawn at 1:8 and the
-  key plan at 1:25, sized for 24U; the isometric and rear views break out U16–21.
-- A lone free unit (U11 today) is hatched but not lettered on the front elevation. The
+  key plan at 1:25, sized for 24U; the isometric and rear views and the `/lab/` excerpt break out
+  U17–22.
+- The free runs (U3–7, U11–12) are hatched and lettered on the front and side elevations. The
   schedule in the right column has 14 rows in tight rows (`.rk-list--tight` in
   `src/styles/schedule.css`) and the stamp sits just under it (`y: 668`): another device needs
   the stamp moved, and there is no room left for a 15th row without shrinking the lettering.
-- `SheetThumb.astro` draws the cabinet thumb from a fixed id list (it draws `r730` and `r430`
-  from their front zones, and the servers thumb too: the R730, the R430, the Mac mini and the
+- `SheetThumb.astro` draws the cabinet thumb from a fixed id list (it draws `r730` and `r730-2`
+  from their front zones, and the servers thumb too: the R730, the R730-2, the Mac mini and the
   Pi); `FrontView`, `RearView`, `SideView`, `IsoView`, `IsoStack` and `CabinetExcerpt` use ids
-  like `poe-injector`, `patch-cables`, `spare-drive`, `r730`, `r430`, `mini`. A new device
+  like `poe-injector`, `patch-cables`, `spare-drive`, `r730`, `r730-2`, `mini`. A new device
   usually needs a look at each.
 - The `/lab/` excerpt draws `lite` panels: no carrier detail, perforations, buttons, lights or
   labels, and fewer vent lines. That is what keeps `/lab/` inside its budget.
@@ -417,24 +420,25 @@ Live data (`server.ts`, `types.ts`, `rack.ts`) can't reach it, but shared code c
   and can run into the row below. Look at the sheet after changing `runs` or `storage`.
 - The two Dells' cards link their own sheets (`sheet` in `servers.ts`: 02A and 02B).
 
-**Sheet 02B · the R430** (`src/components/drawing/r430/`, data `r430.ts`; page
-`src/pages/lab/r430.astro`; no lazy views, no tabs):
+**Sheet 02B · the R730-2** (`src/components/drawing/r730-2/`, data `r730-2.ts`; page
+`src/pages/lab/r730-2.astro`; no lazy views, no tabs):
 
-- `R430Sheet.astro` is the whole sheet: top view, front, rear, Detail B (the bays) and the
-  lettered blocks (pool, controller, memory). `geom.ts` holds the geometry, the balloon order
-  (`NUM`) and the `STAMP`.
+- `R7302Sheet.astro` is the whole sheet: top view, front, rear, Detail B (the bays) and the
+  lettered blocks (the two pools, controller, memory). `geom.ts` holds the geometry, the balloon
+  order (`NUM`) and the `STAMP`.
 - The faces are the cabinet's panel line work (`frontPanel`/`rearPanel` in `rack/model.ts`), so
-  a zone changed in `rack.ts` changes this sheet too. The inside is schematic: footprints traced
-  as fractions from the "inside the system" figure in Dell's owner's manual. Not drawn, because
-  nothing records them for this machine: the number of fans (one band), the optional riser, and
-  where the controller sits on the board.
-- Bay numbers are the chassis's (`BAY_ZONES` in `r430.ts`, from the owner: 0 and 1 on the left,
-  then 2 4 6 over 3 5 7). A drive's `bay` picks the carrier that is tinted on the front and in
-  Detail B. `r430.ts` throws when a drive is out of range or shares a bay, when the pool's bays
-  aren't its drives', or when the fitted sockets and the stick count differ; `geom.ts` throws
-  when the plan's sockets and sticks don't match the data.
-- A third drive or a second pool needs the lettered blocks and Detail B's bracket looked at:
-  they are laid out for one pool of two.
+  a zone changed in `rack.ts` changes this sheet too. The plan reuses Sheet 02A's R730 board from
+  `r730/geom.ts` (it throws if the two chassis' sizes or fan counts ever differ), with eight cage
+  walls, riser 3 absent and a schematic GPU footprint on riser 2 (not dimensioned). Which
+  physical sockets hold the four sticks isn't drawn: all 24 are outlined and the memory block
+  letters A1 A2 B1 B2.
+- Bays are 0–7 left to right, the cells of zone `bays-0-7`. A drive's `bay` picks the carrier
+  tinted in its pool's colour on the front and in Detail B (`.pool-data` lives in
+  `src/styles/server-sheet.css`, not `drawing.css`, which the frozen post shares). `r730-2.ts`
+  throws when a drive is out of range or shares a bay, when a pool's bays aren't its drives', or
+  when the fitted sockets and the stick count differ.
+- A fifth drive or a third pool needs the pool block and Detail B's brackets looked at: they are
+  laid out for two pools of two.
 
 **Sheet 02A · the R730** (`src/components/drawing/r730/`, data `server.ts`; page
 `src/pages/lab/r730.astro`, lazy views `src/pages/lab/r730/views.astro`):
@@ -462,12 +466,14 @@ Live data (`server.ts`, `types.ts`, `rack.ts`) can't reach it, but shared code c
   `ServerCards.astro` on the page.
 
 **Budgets** (`npm run check:perf`, after a build; CI runs it and a miss blocks the deploy):
-drawing pages (`/lab/`, `/lab/rack/`, `/lab/servers/`, `/lab/r730/`, `/lab/r430/`, `/lab/r720xd/`,
+drawing pages (`/lab/`, `/lab/rack/`, `/lab/servers/`, `/lab/r730/`, `/lab/r730-2/`, `/lab/r720xd/`,
 `/lab/stack/`, the R720xd post) HTML ≤ 80 KB raw / 20 KB gzip; lazy partials (`/lab/rack/views/`,
 `/lab/r730/views/`, `/lab/r720xd/views/`) ≤ 96 / 18; every page CSS ≤ 90 / 24, JS ≤ 64 / 24. More
-fixtures, apps, cabinet devices and changelog entries grow `/lab/`, which sits at 79.2 KB raw: a
-stack item costs it about 0.7 KB (a chip and a card), a changelog entry about 0.55 KB and a listed
-cabinet device about 0.9 KB.
+fixtures, apps, cabinet devices and changelog entries grow `/lab/`, which sits at 79.99 KB raw,
+right at the limit: a stack item costs it about 0.7 KB (a chip and a card), a changelog entry
+about 0.5 KB and a listed cabinet device about 0.9 KB. Anything new there needs a saving first. A
+spread (`<g {...at(…)}>`) makes Astro add a scope class to every element it renders, so the
+excerpts set attributes one by one.
 
 ## Revisions and stamps
 
@@ -476,7 +482,7 @@ cabinet device about 0.9 KB.
 | 01 · The cabinet | `src/components/drawing/rack/CabinetSheet.astro` (`rev`, `date`, `revisions`) | same file: `AS BUILT`, tone `ok` |
 | 02 · The servers | `src/components/drawing/servers/ServersSheet.astro` (`rev`, `date`, `revisions`) | same file: `AS BUILT`, tone `ok` |
 | 02A · The R730 | `src/pages/lab/r730.astro` (`rev`, `date`, `revisions`: A and B are the R720xd's history, C is "Redrawn for the R730"). Each REV adds a row to the block at the top right; Detail B and the history tab's table sit just under it (`B.y` in `OrthoViews.astro`, `TY` in `HistoryView.astro`) | `STAMP` in `src/components/drawing/r730/geom.ts`: `AS BUILT`, sub "R730 · 2026-10-02", tone `ok` |
-| 02B · The R430 | `src/components/drawing/r430/R430Sheet.astro` (`rev`, `date`, `revisions`) | `STAMP` in `src/components/drawing/r430/geom.ts`: `AS BUILT`, sub "R430 · 2026-11-08", tone `ok` |
+| 02B · The R730-2 | `src/components/drawing/r730-2/R7302Sheet.astro` (`rev`, `date`, `revisions`: A is the R430's first issue, B is "Redrawn for the R730-2") | `STAMP` in `src/components/drawing/r730-2/geom.ts`: `AS BUILT`, sub "R730-2 · 2026-11-12", tone `ok` |
 | 02 · The server (R720xd archive, frozen) | `src/pages/lab/r720xd.astro` (stays REV B) | `STAMP` in `src/components/drawing/r720xd/geom.ts`: `SUPERSEDED`, sub "2026-10-02 · BY THE R730", tone `warn` |
 | 03 · The stack | `src/components/drawing/stack/StackSheet.astro` (`rev`, `date`, `revisions`; the stamp sits under the revision block, so a longer block needs its `y` moved) | same file: `AS BUILT`, tone `ok` |
 
@@ -587,7 +593,7 @@ npm run check:images
 ```
 
 Then serve the build (`npx astro preview --host 127.0.0.1 --port <free port>`) and open `/`,
-`/lab/`, `/lab/stack/`, `/lab/rack/`, `/lab/servers/`, `/lab/r730/` and `/lab/r430/` at 1440 and 390 wide:
+`/lab/`, `/lab/stack/`, `/lab/rack/`, `/lab/servers/`, `/lab/r730/` and `/lab/r730-2/` at 1440 and 390 wide:
 
 - Every changed part is there, solid or dashed as intended, with the right balloon.
 - Click (and Enter on) a numbered part on each sheet and on the `/lab/` excerpts: the card

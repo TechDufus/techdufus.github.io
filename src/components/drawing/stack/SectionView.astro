@@ -3,9 +3,9 @@
   Sheet 03 · SECTION A–A: the stack drawn as a building section. Layer 1 is the foundation (the
   R730 below grade on its ZFS footings, Proxmox at ground level, the host config as a plant
   room), with the NAS, the gateway and the control node stacked beside it as they are in the
-  cabinet, and the second host (the R430) as a small building of its own at the right. Layer 2 is
-  the floor of VMs: one room per Talos node, standalone VMs as pavilions (the one that runs on the
-  R430 stands on the R430). Layer 3 is the cluster: a tower on the Talos rooms, Cilium as its
+  cabinet, and the second host (the R730-2) as a small building of its own at the right. Layer 2 is
+  the floor of VMs: one room per Talos node, standalone VMs as pavilions (the ones that run on the
+  R730-2 stand on the R730-2, one above another). Layer 3 is the cluster: a tower on the Talos rooms, Cilium as its
   floor, the platform as fixtures, the apps storey on top. Grade moves down a row for every row of
   fixtures or apps past four, so the roof stays on the sheet. What builds each layer is lettered
   at the side as a construction note. Solid = running, phantom = planned, straight from
@@ -43,7 +43,7 @@ const pve = thing('proxmox');
 const hostItems = groupThings('host').filter((t) => t.id !== 'proxmox');
 const pi = thing('rpi');
 const udm = thing('udm-pro');
-const r430 = thing('r430');
+const host2 = thing('r730-2');
 const unas = thing('unas');
 // layer 2 · virtual machines
 const nodes = thing(talos.id);
@@ -93,21 +93,29 @@ const feet = pools.map((p) => {
 });
 
 // standalone VMs: pavilions on the VM floor beside the tower (two fit beside three Talos rooms);
-// a VM that runs on the R430 stands on the R430's building instead (one fits)
+// the ones that run on the R730-2 stand on the R730-2's building instead, stacked one above another
+// (the building is as narrow as one pavilion; how many fit is how high the sheet has room for)
 const PW = 112, PG = 8;
-const AX = 1084, AW = PW; // the R430's building, right of the site services
-const r430Spec = (r430.item?.what ?? '').replace(/^[^:]*:\s*/, ''); // "24 threads, 48 GB"
-const letter = (t: Thing, x: number) => ({
+const AX = 1084, AW = PW; // the R730-2's building, right of the site services
+const PAV_T = VM_T + 12, PAV_H = PX_T - SLAB - PAV_T; // the lowest pavilion's top, and every pavilion's height
+const PAV_TOP_MIN = 62; // the highest pavilion's top, so its balloon stays inside the view
+const host2Cap = Math.floor((PAV_T - PAV_TOP_MIN) / (PAV_H + SLAB)) + 1;
+const host2Spec = (host2.item?.what ?? '').replace(/^[^:]*:\s*/, ''); // "48 threads, 48 GB"
+const letter = (t: Thing, x: number, top: number) => ({
   t,
   x,
+  top,
   title: wrap((t.item?.name ?? t.name).toUpperCase(), 9),
   lines: wrap(t.item?.what ?? '', 12),
 });
 const onR730 = solos.filter((t) => !t.item?.on);
-const onR430 = solos.filter((t) => t.item?.on === 'r430');
-const pav = [...onR730.map((t, i) => letter(t, TX1 + 12 + i * (PW + PG))), ...onR430.map((t) => letter(t, AX))];
+const onHost2 = solos.filter((t) => t.item?.on === 'r730-2');
+const pav = [
+  ...onR730.map((t, i) => letter(t, TX1 + 12 + i * (PW + PG), PAV_T)),
+  ...onHost2.map((t, i) => letter(t, AX, PAV_T - i * (PAV_H + SLAB))),
+];
 if (onR730.length && TX1 + 12 + (onR730.length - 1) * (PW + PG) + PW > XR - SLAB - 4) throw new Error('stack section: too many standalone VMs for the VM floor');
-if (onR430.length > 1) throw new Error('stack section: the R430 holds one standalone VM');
+if (onHost2.length > host2Cap) throw new Error(`stack section: the R730-2's building holds ${host2Cap} standalone VMs, not ${onHost2.length}`);
 const PLANT = 112; // host config plant room(s), right end of the Proxmox storey
 const plants = hostItems.map((t, i) => ({ t, x: XR - (hostItems.length - i) * PLANT }));
 const pveR = plants.length ? plants[0].x : XR;
@@ -179,13 +187,13 @@ const up = (s: string) => s.toUpperCase();
   <Balloon at={[XR - 22, G + 20]} n={r730.n} part={r730.id} r={9} />
 
   <!-- the second host: a small building of its own -->
-  <Part id={r430.id} label={tagOf(r430)} p={2}>
+  <Part id={host2.id} label={tagOf(host2)} p={2}>
     <path class="hatch ln-med" d={rc(AX, G, SLAB, B_B - G + SLAB) + rc(AX + AW - SLAB, G, SLAB, B_B - G + SLAB) + rc(AX, B_B, AW, SLAB)} />
     <rect class="face-side ln-obj" x={AX + SLAB} y={G} width={AW - 2 * SLAB} height={B_B - G} pathLength="1" />
-    <text class="txt-label" x={AX + 14} y={G + 26}>{up(r430.item?.name ?? r430.name)}</text>
-    {wrap(r430Spec, 13).map((l, i) => <text class="txt-note" x={AX + 14} y={G + 44 + i * 14}>{up(l)}</text>)}
+    <text class="txt-label" x={AX + 14} y={G + 26}>{up(host2.item?.name ?? host2.name)}</text>
+    {wrap(host2Spec, 13).map((l, i) => <text class="txt-note" x={AX + 14} y={G + 44 + i * 14}>{up(l)}</text>)}
   </Part>
-  <Balloon at={[AX + AW - 20, B_B - 15]} n={r430.n} part={r430.id} r={9} />
+  <Balloon at={[AX + AW - 20, B_B - 15]} n={host2.n} part={host2.id} r={9} />
 
   <Part id={zfs.id} label={tagOf(zfs)} p={2}>
     {feet.map((ft) => (
@@ -271,15 +279,17 @@ const up = (s: string) => s.toUpperCase();
     })}
   </Part>
   {Array.from({ length: n }, (_, i) => <Balloon at={[X0 + (i + 1) * RW - 16, VM_T + 18]} n={nodes.n} part={nodes.id} r={9} />)}
-  {pav.map(({ t, x, title, lines }) => (
+  <!-- the floors between the pavilions stacked on the second host -->
+  {onHost2.length > 1 && <path class="hatch ln-med" d={onHost2.slice(1).map((_, i) => rc(AX, PAV_T - i * (PAV_H + SLAB) - SLAB, AW, SLAB)).join('')} style="--p:3" />}
+  {pav.map(({ t, x, top, title, lines }) => (
     <Fragment>
       <Part id={t.id} label={tagOf(t)} p={3} class={planned(t) ? 'stk-pl' : undefined}>
-        <rect class={room(t)} x={x} y={VM_T + 12} width={PW} height={PX_T - SLAB - VM_T - 12} pathLength={planned(t) ? undefined : '1'} />
-        <rect class="dwg-hit" x={x} y={VM_T + 12} width={PW} height={PX_T - SLAB - VM_T - 12} />
-        {title.map((l, i) => <text class="txt-label" x={x + 12} y={VM_T + 36 + i * 14}>{l}</text>)}
-        {lines.map((l, i) => <text class="txt-note" x={x + 12} y={VM_T + 56 + (title.length - 1) * 14 + i * 14}>{up(l)}</text>)}
+        <rect class={room(t)} x={x} y={top} width={PW} height={PAV_H} pathLength={planned(t) ? undefined : '1'} />
+        <rect class="dwg-hit" x={x} y={top} width={PW} height={PAV_H} />
+        {title.map((l, i) => <text class="txt-label" x={x + 12} y={top + 24 + i * 14}>{l}</text>)}
+        {lines.map((l, i) => <text class="txt-note" x={x + 12} y={top + 44 + (title.length - 1) * 14 + i * 14}>{up(l)}</text>)}
       </Part>
-      <Balloon at={[x + PW - 16, VM_T + 28]} n={t.n} part={t.id} r={9} />
+      <Balloon at={[x + PW - 16, top + 16]} n={t.n} part={t.id} r={9} />
     </Fragment>
   ))}
 

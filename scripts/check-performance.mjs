@@ -37,7 +37,7 @@ const PAGES = [
   { page: 'lab/rack/index.html', html: DRAWING_HTML },
   { page: 'lab/servers/index.html', html: DRAWING_HTML },
   { page: 'lab/r730/index.html', html: DRAWING_HTML },
-  { page: 'lab/r430/index.html', html: DRAWING_HTML },
+  { page: 'lab/r730-2/index.html', html: DRAWING_HTML },
   { page: 'lab/r720xd/index.html', html: DRAWING_HTML },
   { page: 'lab/stack/index.html', html: DRAWING_HTML },
   { page: 'blog/from-hardware-raid-to-zfs/index.html', html: DRAWING_HTML },

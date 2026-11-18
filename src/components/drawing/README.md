@@ -317,9 +317,9 @@ drawing), `Stamp`, `LineKey`, `ScaleBar`, `URuler`, `DrawingDefs`, `Monogram`, `
 | Sheet | Page | Data | Excerpt (for `/lab` or a post) |
 | --- | --- | --- | --- |
 | TD-LAB-01 · The cabinet | `/lab/rack/` | `src/data/lab/rack.ts` | `rack/CabinetExcerpt.astro`: `id?` (`'lab-cab'`), `caption?`, `href?` |
-| TD-LAB-02 · The servers | `/lab/servers/` | `src/data/lab/servers.ts` (the four machines, gathered from `rack.ts`, `server.ts`, `r430.ts` and `stack.ts`) | none: `servers/ServersSheet.astro` is the whole sheet |
+| TD-LAB-02 · The servers | `/lab/servers/` | `src/data/lab/servers.ts` (the four machines, gathered from `rack.ts`, `server.ts`, `r730-2.ts` and `stack.ts`) | none: `servers/ServersSheet.astro` is the whole sheet |
 | TD-LAB-02A · The R730 | `/lab/r730/` | `src/data/lab/server.ts` | `r730/R730Excerpt.astro`: `id?` (`'r730-bays'`), `caption?`, `fig?`, `breakout?` (not placed on any page now) |
-| TD-LAB-02B · The R430 | `/lab/r430/` | `src/data/lab/r430.ts` | none: `r430/R430Sheet.astro` is the whole sheet |
+| TD-LAB-02B · The R730-2 | `/lab/r730-2/` | `src/data/lab/r730-2.ts` | none: `r730-2/R7302Sheet.astro` is the whole sheet |
 | TD-LAB-02 · The server (archived R720xd, frozen) | `/lab/r720xd/` | `src/data/lab/snapshots/server-2026-09-28.ts` | `r720xd/ServerExcerpt.astro`: `id?` (`'r720-bays'`), `caption?`, `fig?`, `breakout?` (not placed on any page now) |
 | TD-LAB-03 · The stack | `/lab/stack/` | `src/data/lab/stack.ts` | `stack/StackExcerpt.astro`: `id?` (`'sx'`), `caption?`, `href?` |
 
@@ -337,8 +337,8 @@ drawing), `Stamp`, `LineKey`, `ScaleBar`, `URuler`, `DrawingDefs`, `Monogram`, `
   `rack/model.ts`), so a panel traced in `rack.ts` shows on both sheets.
 - The two server sheets share `src/styles/server-sheet.css` (lettering, drives in their pool's
   colour, DIMM sticks) and their pages share `src/styles/server-page.css` (hero, at a glance,
-  pools). Sheet 02B reuses the path helpers and `Key.astro` from `r730/`; its faces come from
-  `rack/model.ts` and its plan from `r430/geom.ts`.
+  pools). Sheet 02B reuses the path helpers, the R730 board geometry and `Key.astro` from `r730/`;
+  its faces come from `rack/model.ts` and its plan from `r730-2/geom.ts`.
 - The R720xd sheet is a frozen archive (stamped SUPERSEDED, off the `/lab` sheet index): the
   snapshots, `r720xd/`, `post/` and `src/pages/lab/r720xd*` never change. The live R730 sheet
   (Sheet 02A) is `src/pages/lab/r730.astro` with its components in `r730/`.

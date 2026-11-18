@@ -2,7 +2,7 @@
 /*
   Sheet 01 · FRONT tab: FRONT ELEVATION of the whole cabinet at 1:8 (door removed) with the
   U ruler counting down from the top, every box as a Part, the free units hatched and the floor
-  line; DETAIL B, the faces from U1 to U14 at 1:5, with the gateway ports that carry the
+  line; DETAIL B, the faces from U1 to U16 at 1:5, with the gateway ports that carry the
   documented links called out.
 */
 import View from '../View.astro';
@@ -43,7 +43,7 @@ const eBalloons = eTo
 /* ---------- DETAIL B, faces U1–14 at 1:5 ---------- */
 const TOP_Y = 250;
 const Bv = ortho({ x: 398, y: TOP_Y + CAB.railTop * atScale(1, 5), scale: atScale(1, 5), flipY: true });
-const lo = yBot(14);
+const lo = yBot(16);
 const upper = slots.filter((sl) => sl.y0 >= lo);
 const bFree = free.filter((r) => r.y0 >= lo);
 const udm = slotOf$('udm-pro'), pi = slotOf$('rpi-4b'), inj = slotOf$('poe-injector');
@@ -59,7 +59,7 @@ const lanPort = (zone: string, i: number): Pt => {
 const KX = 704;
 const call = [
   { from: lanPort('lan-top', 1), y: 438, text: ['PORT 3', 'TO THE R730'] },
-  { from: lanPort('lan-top', 3), y: 474, text: ['PORT 7', 'TO THE R430'] },
+  { from: lanPort('lan-bottom', 3), y: 474, text: ['PORT 8', 'TO THE R730-2'] },
   { from: at(udm, 'wan-9'), y: 510, text: ['PORT 9 · WAN', 'TO THE ONT'] },
   { from: at(udm, 'sfp-11'), y: 546, text: ['SFP+ PORT 11', `${links.find((l) => l.id === 'gw-nas')?.speed} · NAS`], cls: 'net-10g' },
   { from: lanPort('lan-bottom', 2), y: 582, text: ['PORT 6', 'TO THE MAC MINI'] },
@@ -78,7 +78,7 @@ const call = [
       <path class="hatch" d={join(...free.map((r) => E.rect(0, r.y0, 482.6, r.y1 - r.y0)))} />
       <path class="ln-phantom" d={join(...free.map((r) => E.rect(0, r.y0, 482.6, r.y1 - r.y0)))} />
     </g>
-    {/* a lone free unit is 4.4 paper units tall at 1:10: hatched, but too thin to letter */}
+    {/* a lone free unit would be 5.6 paper units tall at 1:8: hatched, but too thin to letter */}
     {free.filter((r) => r.n > 1).map((r) => {
       const [cx, cy] = E.pt(241.3, (r.y0 + r.y1) / 2);
       return (
@@ -118,7 +118,7 @@ const call = [
   </View>
 
   <!-- ======== DETAIL B ======== -->
-  <View x={390} y={200} w={447} h={520} title="DETAIL B · U1–14" scale={Bv.scale} note="WHERE THE CABLES START" labelAt={[540, 700]}>
+  <View x={390} y={200} w={447} h={573} title="DETAIL B · U1–16" scale={Bv.scale} note="WHERE THE CABLES START" labelAt={[540, 753]}>
     <g class="rk-free" style="--p:4">
       <path class="hatch" d={join(...bFree.map((r) => Bv.rect(0, r.y0, 482.6, r.y1 - r.y0)))} />
     </g>

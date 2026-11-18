@@ -1,0 +1,82 @@
+---
+/*
+  /lab/r730-2/: Sheet 02B · The R730-2 (TD-LAB-02B), the second Dell PowerEdge R730, which took
+  the R430's place in the Proxmox cluster on 2026-11-12. Every number comes from
+  src/data/lab/r730-2.ts; the drawing is src/components/drawing/r730-2/R7302Sheet.astro. Below the
+  sheet: the machine at a glance and its pools (the text equivalent of the drives and the pools on
+  the drawing). Sheet 02 · The servers (/lab/servers/) shows it beside the other three machines
+  and links here.
+*/
+import '../../styles/server-page.css';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteMetadata } from '../../data/site';
+import R7302Sheet from '../../components/drawing/r730-2/R7302Sheet.astro';
+import { r7302, r7302Derived, r7302DriveAt } from '../../data/lab/r730-2';
+import { machines } from '../../data/lab/servers';
+
+const cpu = r7302.cpus[0];
+const runs = machines.find((m) => m.id === 'r730-2')?.runs ?? [];
+const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
+const cap = (w: string) => w[0].toUpperCase() + w.slice(1);
+const glance = [
+  { k: 'CPUs', v: `2 × ${cpu.model.replace('Intel Xeon ', '').replace('-', '\u2011').replace(' ', '\u00a0')}` },
+  { k: 'Threads', v: String(r7302.threads) },
+  { k: 'Memory', v: `${r7302.memory.gb} GB` },
+  { k: 'Storage', v: `${cap(words[r7302Derived.drives])} SSDs in ${words[r7302.pools.length]} ZFS mirrors` },
+  { k: 'GPU', v: r7302.gpu.card.title.replace('Gigabyte ', '') },
+  ...(runs.length ? [{ k: 'Runs', v: runs.join(', ') }] : []),
+];
+const quip = `${cap(words[r7302Derived.drives])} SSDs, ${words[r7302.pools.length]} mirrors, ${words[r7302Derived.baysFree]} empty bays. The GPU is on trial, and riser 3 was evicted to make room.`;
+---
+
+<BaseLayout
+  title="The R730-2 · Sheet 02B"
+  description="Sheet 02B of my homelab drawings: the Dell PowerEdge R730-2 as built, the second Proxmox host. Eight front bays, four SSDs in two ZFS mirrors behind a PERC H730 Mini in HBA mode, two Xeons, 48 GB of RAM and an RTX 3060 on trial. Top, front and rear views, and the bays by number."
+  ogImage={siteMetadata.media.labSocialImage}
+  ogImageAlt={siteMetadata.media.labSocialImageAlt}
+>
+  <div class="pg-server">
+    <section class="wrap srv-hero" aria-labelledby="srv-title">
+      <h1 class="h1" id="srv-title">The <em>R730-2</em>.</h1>
+      <p class="lede srv-hero__lede">The same chassis as the big R730, racked right under it. It took over from the R430 and kept its RAM and its SSDs. There’s a graphics card in it on trial.</p>
+      <p class="srv-hero__links">
+        <a class="link link--quiet" href="/lab/servers/"><span aria-hidden="true">←</span> Sheet 02 · The servers</a>
+        <a class="link link--quiet" href="/lab/r730/">Sheet 02A · The R730</a>
+        <a class="link link--quiet" href="/lab/rack/">Sheet 01 · The cabinet</a>
+        <a class="link link--quiet" href="/lab/stack/">Sheet 03 · The stack <span class="arrow" aria-hidden="true">→</span></a>
+      </p>
+    </section>
+
+    <div class="srv-wide">
+      <R7302Sheet />
+    </div>
+
+    <section class="wrap srv-sec" aria-labelledby="srv-glance">
+      <h2 class="srv-h" id="srv-glance">At a glance</h2>
+      <dl class="srv-glance">
+        {glance.map((g) => <div><dt>{g.k}</dt><dd>{g.v}</dd></div>)}
+      </dl>
+      <p class="srv-quip">{quip}</p>
+
+      <h2 class="srv-h srv-h--pools" id="srv-pools">The pools</h2>
+      <ul class="srv-pools" aria-labelledby="srv-pools">
+        {r7302.pools.map((p) => (
+          <li data-pool={p.id}>
+            <p class="srv-pool__n">{p.id}</p>
+            <p class="srv-pool__m">{p.copies}-way mirror</p>
+            <p class="srv-pool__h">{p.holds}</p>
+            <ul class="srv-pool__d">
+              {p.bays.map((b) => <li><span>Bay {b}</span> {r7302DriveAt(b)?.card.title}</li>)}
+            </ul>
+          </li>
+        ))}
+      </ul>
+
+      <nav class="srv-next" aria-label="More drawings">
+        <a class="link link--quiet" href="/lab/servers/"><span aria-hidden="true">←</span> Sheet 02 · The servers</a>
+        <a class="link link--quiet" href="/lab/r730/">Sheet 02A · The R730</a>
+        <a class="link link--quiet" href="/lab/stack/">Sheet 03 · The stack <span class="arrow" aria-hidden="true">→</span></a>
+      </nav>
+    </section>
+  </div>
+</BaseLayout>

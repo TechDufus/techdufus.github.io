@@ -305,90 +305,10 @@ export const devices: Device[] = [
       lines: [
         'Router and firewall. Everything else hangs off it.',
         'WAN on port 9, to the ONT.',
-        'Ports 2, 3, 6 and 7: the Pi, the R730, the Mac mini, the R430.',
+        'Ports 2, 3, 6 and 8: the Pi, the R730, the Mac mini, the R730-2.',
         'SFP+ port 11: the NAS, at 10 GbE.'
       ]
     }
-  },
-  {
-    id: 'r430',
-    name: 'Dell PowerEdge R430',
-    short: 'R430',
-    maker: 'Dell',
-    model: 'PowerEdge R430 (8 × 2.5″)',
-    role: 'compute',
-    placement: at(12),
-    // Dell's chassis dimensions: Xa × Y × Zb, and X across the ears.
-    body: { w: 434.0, h: 42.8, d: 642.3 },
-    earsWidth: 482.4,
-    ports: [
-      { group: 'VGA (front)', count: 1, kind: 'DB-15 VGA', face: 'front' },
-      { group: 'USB (front)', count: 2, kind: 'USB-A', speed: 'USB 2.0', face: 'front' },
-      { group: 'NIC ports 1–4', count: 4, kind: 'RJ45', speed: '1 GbE', face: 'rear' },
-      { group: 'Serial', count: 1, kind: 'DB-9', face: 'rear' },
-      { group: 'VGA (rear)', count: 1, kind: 'DB-15 VGA', face: 'rear' },
-      { group: 'USB (rear)', count: 2, kind: 'USB-A', face: 'rear' },
-      { group: 'PSU inlets', count: 2, kind: 'AC inlet', face: 'rear' }
-    ],
-    panels: {
-      front: {
-        frame: 'Overall face 482.4 mm including rack ears, height 42.8 mm. Controls and two bays on the left, six bays in three columns on the right.',
-        zones: [
-          { id: 'ear-l', label: 'Left rack ear', kind: 'ear', x0: 0, x1: 0.05, y0: 0, y1: 1 },
-          { id: 'power', label: 'Power button', kind: 'button', x0: 0.079, x1: 0.093, y0: 0.05, y1: 0.2 },
-          { id: 'nmi', label: 'NMI button', kind: 'button', x0: 0.1, x1: 0.108, y0: 0.09, y1: 0.17 },
-          { id: 'sysid', label: 'System ID button', kind: 'button', x0: 0.116, x1: 0.13, y0: 0.05, y1: 0.2 },
-          { id: 'usb-mgmt', label: 'USB 2.0 (iDRAC Direct)', kind: 'port', x0: 0.136, x1: 0.167, y0: 0.07, y1: 0.2 },
-          { id: 'usb-1', label: 'USB 2.0', kind: 'port', x0: 0.175, x1: 0.207, y0: 0.07, y1: 0.2 },
-          { id: 'lcd-prev', label: 'LCD menu button', kind: 'button', x0: 0.278, x1: 0.29, y0: 0.07, y1: 0.17 },
-          { id: 'lcd-ok', label: 'LCD menu button', kind: 'button', x0: 0.292, x1: 0.304, y0: 0.07, y1: 0.17 },
-          { id: 'lcd-next', label: 'LCD menu button', kind: 'button', x0: 0.306, x1: 0.318, y0: 0.07, y1: 0.17 },
-          { id: 'lcd', label: 'LCD panel', kind: 'display', x0: 0.327, x1: 0.392, y0: 0.04, y1: 0.3 },
-          { id: 'optical', label: 'Optical drive bay', kind: 'vent', x0: 0.05, x1: 0.303, y0: 0.3, y1: 0.5 },
-          { id: 'tag', label: 'Information tag', kind: 'label', x0: 0.307, x1: 0.39, y0: 0.38, y1: 0.48 },
-          { id: 'vga', label: 'VGA', kind: 'port', x0: 0.4, x1: 0.414, y0: 0.5, y1: 0.82 },
-          { id: 'bay-a', label: '2.5″ drive bay', kind: 'bay', x0: 0.05, x1: 0.216, y0: 0.55, y1: 0.96 },
-          { id: 'bay-b', label: '2.5″ drive bay', kind: 'bay', x0: 0.226, x1: 0.392, y0: 0.55, y1: 0.96 },
-          { id: 'bay-c', label: '2.5″ drive bay', kind: 'bay', x0: 0.422, x1: 0.588, y0: 0.06, y1: 0.47 },
-          { id: 'bay-d', label: '2.5″ drive bay', kind: 'bay', x0: 0.599, x1: 0.762, y0: 0.06, y1: 0.47 },
-          { id: 'bay-e', label: '2.5″ drive bay', kind: 'bay', x0: 0.774, x1: 0.94, y0: 0.06, y1: 0.47 },
-          { id: 'bay-f', label: '2.5″ drive bay', kind: 'bay', x0: 0.422, x1: 0.588, y0: 0.55, y1: 0.96 },
-          { id: 'bay-g', label: '2.5″ drive bay', kind: 'bay', x0: 0.599, x1: 0.762, y0: 0.55, y1: 0.96 },
-          { id: 'bay-h', label: '2.5″ drive bay', kind: 'bay', x0: 0.774, x1: 0.94, y0: 0.55, y1: 0.96 },
-          { id: 'ear-r', label: 'Right rack ear', kind: 'ear', x0: 0.95, x1: 1, y0: 0, y1: 1 }
-        ]
-      },
-      rear: {
-        frame: 'Rear face as seen from behind, body width 434.0 mm, height 42.8 mm.',
-        zones: [
-          { id: 'serial', label: 'Serial', kind: 'port', x0: 0.076, x1: 0.12, y0: 0.17, y1: 0.43 },
-          { id: 'vga', label: 'VGA', kind: 'port', x0: 0.076, x1: 0.12, y0: 0.58, y1: 0.86 },
-          { id: 'nic-1', label: 'NIC 1', kind: 'port', x0: 0.14, x1: 0.179, y0: 0.17, y1: 0.43 },
-          { id: 'nic-2', label: 'NIC 2', kind: 'port', x0: 0.14, x1: 0.179, y0: 0.58, y1: 0.86 },
-          { id: 'usb-1', label: 'USB', kind: 'port', x0: 0.198, x1: 0.218, y0: 0.61, y1: 0.81 },
-          { id: 'usb-2', label: 'USB', kind: 'port', x0: 0.231, x1: 0.257, y0: 0.61, y1: 0.81 },
-          { id: 'sysid', label: 'System ID button', kind: 'button', x0: 0.273, x1: 0.281, y0: 0.68, y1: 0.77 },
-          { id: 'sysid-conn', label: 'System ID connector', kind: 'port', x0: 0.293, x1: 0.307, y0: 0.65, y1: 0.8 },
-          { id: 'slot-1', label: 'PCIe slot', kind: 'slot', x0: 0.378, x1: 0.514, y0: 0.17, y1: 0.46 },
-          { id: 'slot-2', label: 'PCIe slot', kind: 'slot', x0: 0.557, x1: 0.694, y0: 0.17, y1: 0.46 },
-          { id: 'nic-3', label: 'NIC 3', kind: 'port', x0: 0.374, x1: 0.413, y0: 0.58, y1: 0.86 },
-          { id: 'nic-4', label: 'NIC 4', kind: 'port', x0: 0.417, x1: 0.456, y0: 0.58, y1: 0.86 },
-          { id: 'psu-1', label: 'PSU 1', kind: 'psu', x0: 0.733, x1: 0.83, y0: 0.07, y1: 0.9 },
-          { id: 'psu-2', label: 'PSU 2', kind: 'psu', x0: 0.84, x1: 0.939, y0: 0.07, y1: 0.9 }
-        ]
-      }
-    },
-    card: {
-      title: 'Dell PowerEdge R430',
-      kind: 'Server · U12',
-      lines: [
-        '2 × Xeon E5-2620 v3: 24 threads, 48 GB RAM.',
-        'Proxmox VE 9.2 on a ZFS mirror of two SSDs.',
-        'The second Proxmox node, clustered with the R730.',
-        'The Pi breaks ties.'
-      ]
-    },
-    sheetHref: '/lab/servers/'
   },
   {
     id: 'r730',
@@ -467,6 +387,89 @@ export const devices: Device[] = [
         '2 × Xeon E5-2683 v4: 64 threads, 512 GB RAM.',
         'Proxmox VE 9.2 on ZFS, eight drives in 16 bays.',
         'The RAID card does HBA mode itself: no surgery needed.'
+      ]
+    },
+    sheetHref: '/lab/servers/'
+  },
+  {
+    id: 'r730-2',
+    name: 'Dell PowerEdge R730-2',
+    short: 'R730-2',
+    maker: 'Dell',
+    model: 'PowerEdge R730 (8 × 2.5″)',
+    role: 'compute',
+    placement: at(15, 16),
+    // The R730's chassis: Dell's dimensions are the same for the 8- and 16-bay fronts.
+    body: { w: 444.0, h: 87.3, d: 684.0 },
+    earsWidth: 482.4,
+    ports: [
+      { group: 'VGA (front)', count: 1, kind: 'DB-15 VGA', face: 'front' },
+      { group: 'USB (front)', count: 2, kind: 'USB-A', speed: 'USB 2.0', face: 'front' },
+      { group: 'NIC ports 1–4', count: 4, kind: 'RJ45', speed: '1 GbE', face: 'rear' },
+      { group: 'iDRAC port', count: 1, kind: 'RJ45', face: 'rear' },
+      { group: 'Serial', count: 1, kind: 'DB-9', face: 'rear' },
+      { group: 'VGA (rear)', count: 1, kind: 'DB-15 VGA', face: 'rear' },
+      { group: 'USB (rear)', count: 2, kind: 'USB-A', speed: 'USB 3.0', face: 'rear' },
+      { group: 'PSU inlets', count: 2, kind: 'AC inlet', face: 'rear' }
+    ],
+    panels: {
+      // The R730's faces. The 8-bay backplane puts its bays where the 16-bay one has bays 0–7,
+      // and a blank covers the rest (from the owner); an optical drive is fitted.
+      front: {
+        frame: 'Overall face 482.4 mm including rack ears, height 87.3 mm. Left cluster with the optical drive, bays 0–7, a blank, right ear.',
+        zones: [
+          { id: 'ear-l', label: 'Left rack ear', kind: 'ear', x0: 0, x1: 0.065, y0: 0, y1: 1 },
+          { id: 'power', label: 'Power button', kind: 'button', x0: 0.075, x1: 0.092, y0: 0.14, y1: 0.23 },
+          { id: 'sysid', label: 'System ID button', kind: 'button', x0: 0.1, x1: 0.117, y0: 0.14, y1: 0.23 },
+          { id: 'vga', label: 'VGA', kind: 'port', x0: 0.13, x1: 0.17, y0: 0.12, y1: 0.32 },
+          { id: 'lcd-prev', label: 'LCD menu button', kind: 'button', x0: 0.19, x1: 0.198, y0: 0.17, y1: 0.22 },
+          { id: 'lcd-ok', label: 'LCD menu button', kind: 'button', x0: 0.201, x1: 0.209, y0: 0.17, y1: 0.22 },
+          { id: 'lcd-next', label: 'LCD menu button', kind: 'button', x0: 0.212, x1: 0.22, y0: 0.17, y1: 0.22 },
+          { id: 'lcd', label: 'LCD panel', kind: 'display', x0: 0.24, x1: 0.3, y0: 0.12, y1: 0.32 },
+          { id: 'vflash', label: 'vFlash media card slot', kind: 'led', x0: 0.09, x1: 0.12, y0: 0.58, y1: 0.64 },
+          { id: 'usb-1', label: 'USB 2.0', kind: 'port', x0: 0.09, x1: 0.12, y0: 0.7, y1: 0.78 },
+          { id: 'usb-2', label: 'USB 2.0 (iDRAC Direct)', kind: 'port', x0: 0.09, x1: 0.12, y0: 0.82, y1: 0.9 },
+          { id: 'optical', label: 'Optical drive', kind: 'slot', x0: 0.13, x1: 0.335, y0: 0.55, y1: 0.94 },
+          { id: 'bays-0-7', label: 'Bays 0–7', kind: 'bay', x0: 0.335, x1: 0.634, y0: 0.04, y1: 0.96, cells: 8 },
+          { id: 'blank', label: 'Drive bay blank', kind: 'vent', x0: 0.639, x1: 0.941, y0: 0.04, y1: 0.96 },
+          { id: 'ear-r', label: 'Right rack ear', kind: 'ear', x0: 0.941, x1: 1, y0: 0, y1: 1 }
+        ]
+      },
+      // Riser 2 carries the GPU, two slots wide; riser 3 is out, because it won't fit beside it.
+      rear: {
+        frame: 'Rear face as seen from behind, body width 444.0 mm, height 87.3 mm.',
+        zones: [
+          { id: 'slot-1', label: 'Slot 1', kind: 'slot', x0: 0.03, x1: 0.18, y0: 0.09, y1: 0.25 },
+          { id: 'slot-2', label: 'Slot 2', kind: 'slot', x0: 0.03, x1: 0.18, y0: 0.31, y1: 0.47 },
+          { id: 'slot-3', label: 'Slot 3', kind: 'slot', x0: 0.03, x1: 0.18, y0: 0.53, y1: 0.69 },
+          { id: 'gpu', label: 'RTX 3060 · slot 4', kind: 'slot', x0: 0.24, x1: 0.46, y0: 0.09, y1: 0.47 },
+          { id: 'blank-2', label: 'Riser 2 blank', kind: 'vent', x0: 0.24, x1: 0.46, y0: 0.49, y1: 0.57 },
+          { id: 'handle', label: 'Handle', kind: 'vent', x0: 0.24, x1: 0.46, y0: 0.6, y1: 0.68 },
+          { id: 'riser-3', label: 'Riser 3 opening, empty', kind: 'vent', x0: 0.555, x1: 0.77, y0: 0.09, y1: 0.47 },
+          { id: 'blank-3', label: 'Vent blank', kind: 'vent', x0: 0.83, x1: 1, y0: 0.09, y1: 0.47 },
+          { id: 'psu-1', label: 'PSU 1', kind: 'psu', x0: 0.58, x1: 0.775, y0: 0.51, y1: 0.95 },
+          { id: 'psu-2', label: 'PSU 2', kind: 'psu', x0: 0.79, x1: 1, y0: 0.51, y1: 0.95 },
+          { id: 'sysid', label: 'System ID button', kind: 'button', x0: 0.02, x1: 0.04, y0: 0.76, y1: 0.87 },
+          { id: 'sysid-conn', label: 'System ID connector', kind: 'port', x0: 0.042, x1: 0.06, y0: 0.76, y1: 0.87 },
+          { id: 'idrac', label: 'iDRAC port', kind: 'port', x0: 0.065, x1: 0.1, y0: 0.74, y1: 0.9 },
+          { id: 'serial', label: 'Serial', kind: 'port', x0: 0.115, x1: 0.185, y0: 0.76, y1: 0.88 },
+          { id: 'vga', label: 'VGA', kind: 'port', x0: 0.195, x1: 0.265, y0: 0.76, y1: 0.88 },
+          { id: 'usb', label: 'USB 3.0 ×2', kind: 'port', x0: 0.28, x1: 0.31, y0: 0.74, y1: 0.97 },
+          { id: 'nic-1', label: 'NIC 1', kind: 'port', x0: 0.322, x1: 0.362, y0: 0.74, y1: 0.89 },
+          { id: 'nic-2', label: 'NIC 2', kind: 'port', x0: 0.3745, x1: 0.4145, y0: 0.74, y1: 0.89 },
+          { id: 'nic-3', label: 'NIC 3', kind: 'port', x0: 0.427, x1: 0.467, y0: 0.74, y1: 0.89 },
+          { id: 'nic-4', label: 'NIC 4', kind: 'port', x0: 0.4795, x1: 0.5195, y0: 0.74, y1: 0.89 }
+        ]
+      }
+    },
+    card: {
+      title: 'Dell PowerEdge R730-2',
+      kind: 'Server · U15–16',
+      lines: [
+        '2 × Xeon E5-2680 v3: 48 threads, 48 GB RAM.',
+        'Proxmox VE 9.2 on ZFS, four drives in eight bays.',
+        'The second Proxmox node, clustered with the R730.',
+        'An RTX 3060 is in it for testing.'
       ]
     },
     sheetHref: '/lab/servers/'
@@ -593,9 +596,9 @@ export const links: Link[] = [
     medium: 'copper'
   },
   {
-    id: 'gw-r430',
-    from: { device: 'udm-pro', port: 'Port 7' },
-    to: { device: 'r430', port: 'NIC 1' },
+    id: 'gw-r730-2',
+    from: { device: 'udm-pro', port: 'Port 8' },
+    to: { device: 'r730-2', port: 'NIC 1' },
     speed: '1 GbE',
     medium: 'copper'
   },
@@ -657,7 +660,7 @@ export const roleLabels: Record<Role, string> = {
 
 /** The /lab list: which devices each role shows, in order. Shelves and spares stay off it. */
 const listed: Record<ListedRole, DeviceId[]> = {
-  compute: ['r730', 'r430', 'mini'],
+  compute: ['r730', 'r730-2', 'mini'],
   network: ['udm-pro', 'u7-pro', 'ont', 'poe-injector'],
   storage: ['unas-pro-8'],
   edge: ['rpi-4b']
